@@ -16,6 +16,11 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\Event' => [
             'App\Listeners\EventListener',
         ],
+
+        //用户权限模块
+        'Illuminate\Auth\Events\Authenticated' => [
+            'App\Listeners\LogAuthenticated',
+        ],
     ];
 
     /**
