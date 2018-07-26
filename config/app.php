@@ -15,6 +15,9 @@ return [
 
     'name' => env('APP_NAME', '诗悦OA系统'),
 
+    // 英文简称
+    'nickname' => env('APP_NICKNAME', 'OA'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment

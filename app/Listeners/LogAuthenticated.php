@@ -2,9 +2,8 @@
 
 namespace App\Listeners;
 
+use App\User;
 use Illuminate\Auth\Events\Authenticated;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Contracts\Queue\ShouldQueue;
 
 class LogAuthenticated
 {

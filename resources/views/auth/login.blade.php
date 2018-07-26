@@ -1,69 +1,65 @@
-@extends('layouts.app')
+@extends('layouts.base')
 
-@section('content')
-<div class="container">
-    <div class="row">
-        <div class="col-md-8 col-md-offset-2">
-            <div class="panel panel-default">
-                <div class="panel-heading">Login</div>
+@section('title', trans('app.登录'))
+@section('body-class', 'gray-bg')
 
-                <div class="panel-body">
-                    <form class="form-horizontal" method="POST" action="{{ route('login') }}">
-                        {{ csrf_field() }}
+@section('base')
 
-                        <div class="form-group{{ $errors->has('email') ? ' has-error' : '' }}">
-                            <label for="email" class="col-md-4 control-label">E-Mail Address</label>
+    <div class="middle-box text-center loginscreen animated fadeInDown">
+        <div>
+            <div>
+                <h1 class="logo-name">{{ trans(config('app.nickname')) }}</h1>
+            </div>
+            <h3>{{ trans(config('app.name')) }}</h3>
 
-                            <div class="col-md-6">
-                                <input id="email" type="email" class="form-control" name="email" value="{{ old('email') }}" required autofocus>
+            @include('flash::message')
 
-                                @if ($errors->has('email'))
-                                    <span class="help-block">
-                                        <strong>{{ $errors->first('email') }}</strong>
-                                    </span>
-                                @endif
-                            </div>
-                        </div>
+            {!! Form::open(['url' => route('login'), 'class' => 'm-t']) !!}
 
-                        <div class="form-group{{ $errors->has('password') ? ' has-error' : '' }}">
-                            <label for="password" class="col-md-4 control-label">Password</label>
+            <div class="form-group">
+                {!! Form::text('username', old('username'), ['class' => 'form-control', 'placeholder' => trans('app.账号'), 'required' => true]) !!}
+            </div>
 
-                            <div class="col-md-6">
-                                <input id="password" type="password" class="form-control" name="password" required>
+            <div class="form-group">
+                {!! Form::password('password', ['class' => 'form-control', 'placeholder' => trans('app.密码'), 'required' => true]) !!}
+            </div>
 
-                                @if ($errors->has('password'))
-                                    <span class="help-block">
-                                        <strong>{{ $errors->first('password') }}</strong>
-                                    </span>
-                                @endif
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <div class="col-md-6 col-md-offset-4">
-                                <div class="checkbox">
-                                    <label>
-                                        <input type="checkbox" name="remember" {{ old('remember') ? 'checked' : '' }}> Remember Me
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <div class="col-md-8 col-md-offset-4">
-                                <button type="submit" class="btn btn-primary">
-                                    Login
-                                </button>
-
-                                <a class="btn btn-link" href="{{ route('password.request') }}">
-                                    Forgot Your Password?
-                                </a>
-                            </div>
-                        </div>
-                    </form>
+            <div class="form-group">
+                <div class="row">
+                    <div class="col-md-6">
+                        {!! Form::text('captcha', null, ['class' => 'form-control', 'placeholder' => trans('app.验证码')]) !!}
+                    </div>
+                    <div class="col-md-6">
+                        {!! captcha_img() !!}
+                    </div>
                 </div>
             </div>
+
+            <div class="form-group">
+                {!! Form::checkbox('remember') !!}
+                {{ trans('app.下次自动登录') }}
+            </div>
+
+            {!! Form::submit(trans('app.登录'), ['class' => 'btn btn-primary block full-width m-b']) !!}
+
+            {!! Form::close() !!}
+
+            <p class="m-t">
+                <small>{{ trans(config('app.nickname'))  . ' &copy; 2016-' . date('Y') }}</small>
+            </p>
         </div>
     </div>
-</div>
+
+@endsection
+
+@section('scripts-last')
+    <script>
+        $(function () {
+            $('img').click(function () {
+                $.getJSON('{{ route('captcha') }}', function (res) {
+                    $('img').prop('src', res.src);
+                });
+            });
+        });
+    </script>
 @endsection

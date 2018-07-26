@@ -47,8 +47,8 @@ return [
             'default'     => 'mobile_required',
             'staticRules' => [
                 'mobile_required'     => 'required|zh_mobile',
-                'check_mobile_unique' => 'required|zh_mobile|unique:users,mobile',
-                'check_mobile_exists' => 'required|zh_mobile|exists:users',
+                //'check_mobile_unique' => 'required|zh_mobile|unique:users,mobile',
+                //'check_mobile_exists' => 'required|zh_mobile|exists:users',
             ],
         ],
     ],
@@ -105,6 +105,7 @@ return [
     |
     */
     'templates' => [
+        'Alidayu' => ['SMS_69965569'],
     ],
 
     /*
@@ -171,7 +172,7 @@ return [
     | 运行'php artisan migrate'命令可以自动生成
     |
     */
-    'dbLogs' => false,
+    'dbLogs' => true,
 
     /*
     |--------------------------------------------------------------------------

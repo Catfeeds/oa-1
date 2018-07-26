@@ -22,7 +22,8 @@ return [
      *
      */
     'scheme' => [
-        'Log',
+        //'Log',
+        'Alidayu',
     ],
 
     /*
@@ -139,11 +140,11 @@ return [
             //请求地址
             'sendUrl'           => 'http://gw.api.taobao.com/router/rest',
             //淘宝开放平台中，对应阿里大鱼短信应用的App Key
-            'appKey'            => 'your_app_key',
+            'appKey'            => '23439214',
             //淘宝开放平台中，对应阿里大鱼短信应用的App Secret
-            'secretKey'         => 'your_secret_key',
+            'secretKey'         => 'df3f9a04e25d6ed333a3d357f8425e09',
             //短信签名，传入的短信签名必须是在阿里大鱼“管理中心-短信签名管理”中的可用签名
-            'smsFreeSignName'   => 'your_sms_free_sign_name',
+            'smsFreeSignName'   => '诗悦网络',
             //被叫号显(用于语音通知)，传入的显示号码必须是阿里大鱼“管理中心-号码管理”中申请或购买的号码
             'calledShowNum'     => null,
         ],
