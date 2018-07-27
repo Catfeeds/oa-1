@@ -37,6 +37,7 @@ class RolePermissions extends Seeder
                 'permission-all',
                 'version-all',
                 'stat-cron-all',
+                'profile.password',
             ],
         ];
     }
