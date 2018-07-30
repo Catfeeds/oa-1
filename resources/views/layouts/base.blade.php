@@ -13,7 +13,6 @@
 
     <link href="{{ asset('css/animate.css') }}" rel="stylesheet">
     <link href="{{ asset('css/style.css').'?v='.time()}}" rel="stylesheet">
-
     <link href="{{ asset('css/app.css') .'?v='.time()}}" rel="stylesheet">
 
     @stack('css')

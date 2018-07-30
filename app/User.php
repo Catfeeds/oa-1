@@ -58,6 +58,7 @@ class User extends Authenticatable
         'remember_token',
         'mobile',
         'is_mobile',
+        'desc',
     ];
 
     // 可用 $user->is_admin 来判断角色是否属于 admin
@@ -76,6 +77,7 @@ class User extends Authenticatable
         'creater_id',
         'mobile',
         'is_mobile',
+        'desc',
     ];
 
     /**

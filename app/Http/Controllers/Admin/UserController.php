@@ -1,14 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
-use App\Http\Components\Helpers\GmHelper;
-use App\Models\Channel;
-use App\Models\Platform;
+use App\Http\Controllers\Controller;
 use App\Models\Role;
-use App\Models\UserChannel;
-use App\Models\UserPlatform;
-use App\Models\UserProduct;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -17,7 +12,7 @@ use Illuminate\Mail\Message;
 
 class UserController extends Controller
 {
-    protected $redirectTo = '/user';
+    protected $redirectTo = '/admin/user';
 
     private $_validateRule = [
         'alias' => 'required|max:32|min:2',
@@ -42,9 +37,9 @@ class UserController extends Controller
             ->orderBy('updated_at', 'desc')
             ->paginate(50);
 
-        $role_ids = GmHelper::addEmptyToArray('全部角色', Role::getRoleTextList());
+        $role_ids = ['' => trans('app.全部角色')] + Role::getRoleTextList();
         $title = trans('app.账号列表');
-        return view('users.index', compact('title', 'data', 'form', 'role_ids'));
+        return view('admin.users.index', compact('title', 'data', 'form', 'role_ids'));
     }
 
     public function isMobile($id, Request $request)
@@ -62,7 +57,7 @@ class UserController extends Controller
     {
         $roleList = Role::getRoleTextList();
         $title = trans('app.添加账号');
-        return view('users.edit', compact('title', 'roleList'));
+        return view('admin.users.edit', compact('title', 'roleList'));
     }
 
     public function store(Request $request)
@@ -97,7 +92,7 @@ class UserController extends Controller
         $roleList = Role::getRoleTextList();
         $user = User::findOrFail($id);
         $title = trans('app.编辑账号');
-        return view('users.edit', compact('title', 'user', 'roleList'));
+        return view('admin.users.edit', compact('title', 'user', 'roleList'));
     }
 
     public function update(Request $request, $id)
@@ -106,14 +101,16 @@ class UserController extends Controller
         \Auth::user()->user_id == $id && abort(403, trans('app.不可以编辑自有账号'));
 
         $user = User::findOrFail($id);
-
-        $this->validate($request, array_merge($this->_validateRule, [
+        $validate = array_merge($this->_validateRule, [
             'email' => 'required|email|unique:users,email,' . $user->user_id . ',user_id|max:32',
-            'password' => 'min:8|alpha_num|confirmed',
-        ]));
+        ]);
+        if (empty($data['password'])) {
+           unset($validate['password'], $validate['password_confirmation']);
+        }
+
+        $this->validate($request, $validate);
 
         $data = $request->all();
-
         $pwd = $data['password'];
 
         if (empty($data['password'])) {
@@ -147,7 +144,7 @@ class UserController extends Controller
             }
         }
 
-        if(!empty($pwd)) {
+        if (!empty($pwd)) {
             $userRedsKey = sprintf('%d_%s', $id, $user->username);;
             $userRedsValue = base64_encode($pwd);
             Redis::set(md5($userRedsKey), $userRedsValue, 'EX', 36000);
@@ -155,72 +152,6 @@ class UserController extends Controller
 
         flash(trans('app.编辑成功', ['value' => trans('app.账号')]), 'success');
         return redirect($this->redirectTo);
-    }
-
-    public function platform($id)
-    {
-        $user = User::findOrFail($id);
-        $product = UserProduct::where(['user_id' => $id])->get(['product_id'])->toarray();
-        $product_ids = array_column($product, 'product_id');
-        $platforms = Platform::with('product')->whereIn('product_id', $product_ids ?? [])->get();
-        $enables = $user->platforms()->with('product')->get();
-        $disables = $platforms->diff($enables);
-
-        $title = '平台权限指派';
-        return view('users.platform', compact('user', 'enables', 'disables', 'title'));
-    }
-
-    public function platformUpdate($id, Request $request)
-    {
-        $user = User::findOrFail($id);
-
-        UserPlatform::where(['user_id' => $id])->delete();
-        $plf = $request->plf;
-        if (!empty($plf)) {
-            $platforms = Platform::with('product')->whereIn('platform_id', $plf)->get();
-            foreach ($platforms as $v) {
-                UserPlatform::create([
-                    'user_id' => $user->user_id,
-                    'platform_id' => $v->platform_id,
-                    'product_id' => $v->product_id,
-                ]);
-            }
-        }
-
-        return redirect()->route('user.platform', ['id' => $id]);
-    }
-
-    public function channel($id)
-    {
-        $user = User::findOrFail($id);
-        $product = UserProduct::where(['user_id' => $id])->get(['product_id'])->toarray();
-        $product_ids = array_column($product, 'product_id');
-        $data = Channel::with('product')->whereIn('product_id', $product_ids ?? [])->where([ 'show' => Channel::SHOW_ENABLE])->get();
-        $enables = $user->channels()->with('product')->get();
-        $disables = $data->diff($enables);
-
-        $title = '渠道权限指派';
-        return view('users.channel', compact('user', 'enables', 'disables', 'title'));
-    }
-
-    public function channelUpdate($id, Request $request)
-    {
-        $user = User::findOrFail($id);
-
-        UserChannel::where(['user_id' => $id])->delete();
-        $plf = $request->plf;
-        if (!empty($plf)) {
-            $channels = Channel::with('product')->whereIn('channel_id', $plf)->get();
-            foreach ($channels as $v) {
-                UserChannel::create([
-                    'user_id' => $user->user_id,
-                    'channel_id' => $v->channel_id,
-                    'product_id' => $v->product_id,
-                ]);
-            }
-        }
-
-        return redirect()->route('user.channel', ['id' => $id]);
     }
 
     /**
@@ -232,15 +163,15 @@ class UserController extends Controller
     {
         $where = [];
         $default = '1 = 1';
-        if ($form['alias']){
+        if ($form['alias']) {
             $where[] = sprintf('alias like \'%%%s%%\'', $form['alias']);
         }
 
-        if ($form['username']){
+        if ($form['username']) {
             $where[] = sprintf('username like \'%%%s%%\'', $form['username']);
         }
 
-        if ($form['role_id']){
+        if ($form['role_id']) {
             $where[] = sprintf('role_id = %d', $form['role_id']);
         }
 
@@ -251,13 +182,14 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
 
-        $content = '你的诗悦游戏后台密码是:' . base64_decode(Redis::get(md5($user->user_id . '_' . $user->username)));
+        $content = '你的诗悦OA系统密码是:' . base64_decode(Redis::get(md5($user->user_id . '_' . $user->username)));
         try {
-            \Mail::send('emails.user', ['content' =>  $content, 'user' => $user], function (Message $m) use ($user) {
-                $m->to($user->email)->subject('诗悦游戏后台-密码邮件');
+            \Mail::send('emails.user', ['content' => $content, 'user' => $user], function (Message $m) use ($user) {
+                $m->to($user->email)->subject('诗悦OA系统-密码邮件');
             });
         } catch (\Swift_TransportException $e) {
             flash(trans('app.发送密码邮件失败'), 'danger');
+            \Log::error('发送测试邮件失败:' . $e->getMessage());
             return redirect($this->redirectTo);
         }
 
