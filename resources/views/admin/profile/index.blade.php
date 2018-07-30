@@ -1,4 +1,4 @@
-@extends('profile.profile')
+@extends('admin.profile.profile')
 
 @section('content-profile')
 
@@ -6,7 +6,7 @@
     <p><i class="fa fa-tag"></i> {{ trans('app.名称') }} ：{{ $user->alias }}</p>
     <p>
         <i class="fa fa-envelope-o"></i> {{ trans('app.邮箱') . '： ' . $user->email }}
-        <a href="{{ url('profile/mail') }}">
+        <a href="{{ route('profile.mail') }}">
             <button type="button" class="btn btn-xs btn-primary"><i
                         class="fa fa-envelope"></i>{{ trans('app.发送', ['value' => trans('app.测试邮件')]) }}</button>
         </a>

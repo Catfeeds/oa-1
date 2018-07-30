@@ -264,6 +264,8 @@ return [
         'Form' => Collective\Html\FormFacade::class,
         'Html' => Collective\Html\HtmlFacade::class,
 
+        'BaseHtml' => App\Components\Helper\BaseHtml::class,
+
         //https://github.com/Zizaco/entrust
         'Entrust' => Zizaco\Entrust\EntrustFacade::class,
         //https://github.com/yajra/laravel-datatables
