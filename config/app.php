@@ -273,6 +273,8 @@ return [
         //https://github.com/Maatwebsite/Laravel-Excel
         'Excel' => Maatwebsite\Excel\Facades\Excel::class,
 
+        'BaseHtml' => App\Http\Components\Helpers\BaseHtml::class,
+
         //https://github.com/toplan/laravel-sms
         'PhpSms' => Toplan\PhpSms\Facades\Sms::class,
         'SmsManager' => Toplan\Sms\Facades\SmsManager::class,
