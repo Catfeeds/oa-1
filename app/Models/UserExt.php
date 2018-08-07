@@ -109,7 +109,8 @@ class UserExt extends Model
 
     public static function checkIsConfirm($userId)
     {
-        return self::where(['user_id' => $userId])->get(['is_confirm']);
+        $isConfirm = self::where(['user_id' => $userId])->first();
+        return $isConfirm['is_confirm'] ?? 0;
     }
 
 }

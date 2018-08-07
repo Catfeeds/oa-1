@@ -43,7 +43,7 @@
                     <ul class="nav navbar-nav navbar-right">
 
                         <li class="dropdown">
-                            @if(\App\Models\UserExt::checkIsConfirm(Auth::user()->user_id)[0]->is_confirm == 0)
+                            @if(\App\Models\UserExt::checkIsConfirm(Auth::user()->user_id))
                                 <a class="dropdown-toggle count-info"
                                    href="{{ route('profile.confirmEdit') }}">
                                     <i class="fa fa-warning"></i>
