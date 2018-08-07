@@ -22,18 +22,36 @@
 
                         @if(Entrust::can(['user-all', 'user']))
                         <li @if(Route::is('user*')) class="active" @endif>
-                            <a aria-expanded="false" role="button" href="{{ route('user') }}">{{ trans('app.账号列表') }}</a>
+                            <a aria-expanded="false" role="button" href="{{ route('user') }}">{{ trans('app.员工管理') }}</a>
                         </li>
                         @endif
 
                         @if(Entrust::can(['role-all', 'role']))
                         <li @if(Route::is('role*')) class="active" @endif>
-                            <a aria-expanded="false" role="button" href="{{ route('role') }}">{{ trans('app.角色列表') }}</a>
+                            <a aria-expanded="false" role="button" href="{{ route('role') }}">{{ trans('app.职务管理') }}</a>
                         </li>
                         @endif
+
+                        @if(Entrust::can(['attendance-all', 'job-all', 'job', 'dept-all', 'dept', 'school-all', 'school']))
+                            <li @if(Route::is(['job*', 'dept*', 'school*'])) class="active" @endif>
+                                <a aria-expanded="false" role="button" href="{{ route('dept') }}">{{ trans('app.系统配置') }}</a>
+                            </li>
+                        @endif
+
                     </ul>
 
                     <ul class="nav navbar-nav navbar-right">
+
+                        <li class="dropdown">
+                            @if(\App\Models\UserExt::checkIsConfirm(Auth::user()->user_id)[0]->is_confirm == 0)
+                                <a class="dropdown-toggle count-info"
+                                   href="{{ route('profile.confirmEdit') }}">
+                                    <i class="fa fa-warning"></i>
+                                        <span class="label red-bg label-warning">{{ trans('app.信息待完善') }}</span>
+                                </a>
+                            @endif
+                        </li>
+
                         <li class="dropdown">
                             <a aria-expanded="false" role="button" href="#" class="dropdown-toggle" data-toggle="dropdown">
                                 <i class="fa fa-user"></i> {{ Auth::user()->alias }}
@@ -42,7 +60,7 @@
                             <ul role="menu" class="dropdown-menu">
 
                                 <li>
-                                    <a href="{{ route('profile') }}"><i class="fa fa-user"></i> {{ trans('app.我的账号') }}</a>
+                                    <a href="{{ route('profile') }}"><i class="fa fa-user"></i> {{ trans('app.个人信息') }}</a>
                                 </li>
                                 <li>
                                     <a href="{{ route('logout') }}"

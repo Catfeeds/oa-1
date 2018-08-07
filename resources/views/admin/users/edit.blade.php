@@ -16,7 +16,7 @@
                             @if(Entrust::can(['user-all', 'user']))
                             <div class="ibox-tools">
                                 <a class="btn btn-xs btn-primary" href="{{ route('user') }}">
-                                    {{ trans('app.账号列表') }}
+                                    {{ trans('app.员工列表') }}
                                 </a>
                             </div>
                             @endif
@@ -100,16 +100,39 @@
                                 </div>
                             </div>
 
+                            <div class="form-group @if (!empty($errors->first('dept_id'))) has-error @endif">
+                                {!! Form::label('dept_id', trans('app.部门'), ['class' => 'col-sm-3 control-label']) !!}
+                                <div class="col-sm-6">
+                                    {!! Form::select('dept_id', $dept, isset($user->dept_id) ? $user->dept_id: old('dept_id'), [
+                                    'class' => 'form-control',
+                                    'placeholder' => trans('app.请选择', ['value' => trans('app.部门')]),
+                                    'required' => true,
+                                    ]) !!}
+                                    <span class="help-block m-b-none">{{ $errors->first('status') }}</span>
+                                </div>
+                            </div>
 
                             <div class="form-group @if (!empty($errors->first('role_id'))) has-error @endif">
-                                {!! Form::label('role_id', trans('app.角色'), ['class' => 'col-sm-3 control-label']) !!}
+                                {!! Form::label('role_id', trans('app.职务'), ['class' => 'col-sm-3 control-label']) !!}
                                 <div class="col-sm-6">
                                     {!! Form::select('role_id', $roleList, isset($user->role_id) ? $user->role_id : old('role_id'), [
                                     'class' => 'form-control',
-                                    'placeholder' => trans('app.请选择', ['value' => trans('app.角色')]),
+                                    'placeholder' => trans('app.请选择', ['value' => trans('app.职务')]),
                                     'required' => true,
                                     ]) !!}
                                     <span class="help-block m-b-none">{{ $errors->first('role_id') }}</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group @if (!empty($errors->first('job_id'))) has-error @endif">
+                                {!! Form::label('job_id', trans('app.岗位'), ['class' => 'col-sm-3 control-label']) !!}
+                                <div class="col-sm-6">
+                                    {!! Form::select('job_id', $job, isset($user->job_id) ? $user->job_id: old('job_id'), [
+                                    'class' => 'form-control',
+                                    'placeholder' => trans('app.请选择', ['value' => trans('app.岗位')]),
+                                    'required' => true,
+                                    ]) !!}
+                                    <span class="help-block m-b-none">{{ $errors->first('job_id') }}</span>
                                 </div>
                             </div>
 
@@ -183,6 +206,8 @@
         $('#role_id').select2();
         $('#status').select2();
         $('#is_mobile').select2();
+        $('#dept_id').select2();
+        $('#job_id').select2();
     });
 </script>
 @endsection

@@ -4,7 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Role;
+use App\Models\Sys\Dept;
+use App\Models\Sys\Job;
+use App\Models\Sys\School;
+use App\Models\UserExt;
 use App\User;
+use EasyWeChat\Kernel\Exceptions\Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Redis;
@@ -20,6 +25,26 @@ class UserController extends Controller
         'password_confirmation' => 'min:6',
         'status' => 'required|in:' . User::STATUS_DISABLE . ',' . User::STATUS_ENABLE,
         'role_id' => 'required|numeric|exists:roles,id',
+    ];
+
+    private $_validateRuleExt = [
+        'incumbent_num' => 'nullable|numeric',
+        'contract_years' => 'nullable|numeric',
+        'contract_num' => 'nullable|numeric',
+        'age' => 'nullable|numeric',
+        'birthplace' => 'max:20',
+        'census' => 'max:20',
+        'card_id' => 'max:20',
+        'card_address' => 'max:100',
+        'phone' => 'max:11',
+        'qq' => 'max:20',
+        'live_address' => 'max:100',
+        'urgent_name' => 'max:20',
+        'urgent_tel' => 'max:11',
+        'salary_card' => 'max:20',
+        'sex' => 'in:' . User::STATUS_DISABLE . ',' . User::STATUS_ENABLE,
+        'marital_status' => 'in:' . User::STATUS_DISABLE . ',' . User::STATUS_ENABLE,
+        'firm_call' => 'in:' . User::STATUS_DISABLE . ',' . User::STATUS_ENABLE,
     ];
 
     /**
@@ -38,8 +63,10 @@ class UserController extends Controller
             ->paginate(50);
 
         $role_ids = ['' => trans('app.全部角色')] + Role::getRoleTextList();
+        $job = Job::getJobList();
+        $dept = Dept::getDeptList();
         $title = trans('app.账号列表');
-        return view('admin.users.index', compact('title', 'data', 'form', 'role_ids'));
+        return view('admin.users.index', compact('title', 'data', 'form', 'role_ids', 'job', 'dept'));
     }
 
     public function isMobile($id, Request $request)
@@ -57,7 +84,9 @@ class UserController extends Controller
     {
         $roleList = Role::getRoleTextList();
         $title = trans('app.添加账号');
-        return view('admin.users.edit', compact('title', 'roleList'));
+        $job = Job::getJobList();
+        $dept = Dept::getDeptList();
+        return view('admin.users.edit', compact('title', 'roleList', 'job', 'dept'));
     }
 
     public function store(Request $request)
@@ -90,9 +119,53 @@ class UserController extends Controller
     public function edit($id)
     {
         $roleList = Role::getRoleTextList();
+        $user = User::with('userExt')->findOrFail($id);
+        $job = Job::getJobList();
+        $dept = Dept::getDeptList();
+
+
+        $title = trans('app.编辑员工');
+        return view('admin.users.edit', compact('title', 'user', 'roleList', 'job', 'dept'));
+    }
+
+    public function editExt($id)
+    {
+        $roleList = Role::getRoleTextList();
+        $user = User::with('userExt')->findOrFail($id);
+        $userExt = UserExt::where(['user_id' => $id])->first();
+        $job = Job::getJobList();
+        $dept = Dept::getDeptList();
+        $school = School::getSchoolList();
+        $title = trans('app.编辑员工');
+
+        return view('admin.users.edit-ext', compact('title', 'user', 'roleList', 'job', 'dept', 'userExt', 'school'));
+    }
+
+    public function updateExt(Request $request, $id)
+    {
+        \Auth::user()->user_id == $id && abort(403, trans('app.不可以编辑自有信息'));
+
+        $this->validate($request, array_merge($this->_validateRuleExt));
+
         $user = User::findOrFail($id);
-        $title = trans('app.编辑账号');
-        return view('admin.users.edit', compact('title', 'user', 'roleList'));
+
+        $data = $request->all();
+
+        try {
+            if (!empty($user->user_id)) {
+                $ext = UserExt::where(['user_id' => $user->user_id])->first()->toArray();
+                if(!empty($ext)) {
+                    $useExt = UserExt::findOrFail($ext['users_ext_id']);
+                    $useExt->update($data);
+                }
+            }
+        } catch (Exception $ex) {
+            flash(trans('app.编辑失败', ['value' => trans('app.员工管理')]), 'danger');
+            return redirect($this->redirectTo);
+        }
+
+        flash(trans('app.编辑成功', ['value' => trans('app.员工管理')]), 'success');
+        return redirect($this->redirectTo);
     }
 
     public function update(Request $request, $id)

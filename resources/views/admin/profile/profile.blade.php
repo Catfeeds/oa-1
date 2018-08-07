@@ -1,6 +1,6 @@
 @extends('layouts.top-nav')
 
-@section('title', trans('app.我的账号'))
+@section('title', trans('app.个人信息'))
 
 @section('content')
 
@@ -10,7 +10,7 @@
                 <div class="col-lg-12">
                     <div class="ibox float-e-margins">
                         <div class="ibox-title">
-                            <h5>{{ trans('app.我的账号') }}</h5>
+                            <h5>{{ trans('app.个人信息') }}</h5>
                         </div>
                         <div class="ibox-content">
 

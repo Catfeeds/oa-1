@@ -76,7 +76,7 @@
                             <ul role="menu" class="dropdown-menu">
 
                                 <li>
-                                    <a href="{{ route('profile') }}"><i class="fa fa-user"></i> {{ trans('app.我的账号') }}
+                                    <a href="{{ route('profile') }}"><i class="fa fa-user"></i> {{ trans('app.个人信息') }}
                                     </a>
                                 </li>
                                 <li>

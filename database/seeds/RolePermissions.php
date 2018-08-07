@@ -38,6 +38,10 @@ class RolePermissions extends Seeder
                 'version-all',
                 'stat-cron-all',
                 'profile.password',
+                'attendance-all',
+                'dept-all',
+                'job-all',
+                'school-all',
             ],
         ];
     }

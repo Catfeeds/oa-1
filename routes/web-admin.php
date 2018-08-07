@@ -8,6 +8,8 @@ Route::group([
     // 我的账号
     Route::get('profile', 'ProfileController@index')->name('profile');
     Route::get('profile/edit', 'ProfileController@edit')->name('profile.edit');
+    Route::get('profile/confirm-edit', 'ProfileController@confirmEdit')->name('profile.confirmEdit');
+    Route::post('profile/confirm-edit', 'ProfileController@confirmUpdate');
     Route::post('profile/edit', 'ProfileController@update');
 
     Route::get('profile/reset-password', [
@@ -17,7 +19,7 @@ Route::group([
     Route::post('profile/reset-password', 'ProfileController@resetPasswordUpdate');
     Route::get('profile/mail', 'ProfileController@mail')->name('profile.mail');
 
-    // 账号管理
+    // 员工管理
     Route::get('user', [
         'middleware' => ['permission:user-all|user'],
         'uses' => 'UserController@index'])->name('user');
@@ -40,7 +42,14 @@ Route::group([
         'middleware' => ['permission:user-all|user.edit'],
         'uses' => 'UserController@sendEmail'])->name('user.sendEmail');
 
-    // 角色管理
+    Route::get('user/ext/{id}', [
+        'middleware' => ['permission:user-all|user.edit'],
+        'uses' => 'UserController@editExt'])->name('user.editExt');
+    Route::post('user/ext/{id}', [
+        'middleware' => ['permission:user-all|user.edit'],
+        'uses' => 'UserController@updateExt']);
+
+    // 职务管理
     Route::get('role', [
         'middleware' => ['permission:role-all|role'],
         'uses' => 'RoleController@index'])->name('role');
@@ -68,4 +77,58 @@ Route::group([
             'uses' => 'RoleController@appointUpdate',
         ]);
     });
+
+    //部门管理
+    Route::get('sys/dept', [
+        'middleware' => ['permission:attendance-all|dept-all|dept'],
+        'uses' => 'Sys\DeptController@index'])->name('dept');
+    Route::get('sys/dept/create', [
+        'middleware' => ['permission:attendance-all|dept-all|dept.create'],
+        'uses' => 'Sys\DeptController@create'])->name('dept.create');
+    Route::post('sys/dept/create', [
+        'middleware' => ['permission:attendance-all|dept-all|dept.create'],
+        'uses' => 'Sys\DeptController@store']);
+    Route::get('sys/dept/edit/{id}', [
+        'middleware' => ['permission:attendance-all|dept-all|dept.edit'],
+        'uses' => 'Sys\DeptController@edit'])->name('dept.edit');
+    Route::post('sys/dept/edit/{id}', [
+        'middleware' => ['permission:attendance-all|dept-all|dept.edit'],
+        'uses' => 'Sys\DeptController@update']);
+
+    //岗位管理
+    Route::get('sys/job', [
+        'middleware' => ['permission:attendance-all|job-all|job'],
+        'uses' => 'Sys\JobController@index'])->name('job');
+    Route::get('sys/job/create', [
+        'middleware' => ['permission:attendance-all|job-all|job.create'],
+        'uses' => 'Sys\JobController@create'])->name('job.create');
+    Route::post('sys/job/create', [
+        'middleware' => ['permission:attendance-all|job-all|job.create'],
+        'uses' => 'Sys\JobController@store']);
+    Route::get('sys/job/edit/{id}', [
+        'middleware' => ['permission:attendance-all|job-all|job.edit'],
+        'uses' => 'Sys\JobController@edit'])->name('job.edit');
+    Route::post('sys/job/edit/{id}', [
+        'middleware' => ['permission:attendance-all|job-all|job.edit'],
+        'uses' => 'Sys\JobController@update']);
+
+    //学校管理
+    Route::get('sys/school', [
+        'middleware' => ['permission:attendance-all|school-all|school'],
+        'uses' => 'Sys\SchoolController@index'])->name('school');
+    Route::get('sys/school/create', [
+        'middleware' => ['permission:attendance-all|school-all|school.create'],
+        'uses' => 'Sys\SchoolController@create'])->name('school.create');
+    Route::post('sys/school/create', [
+        'middleware' => ['permission:attendance-all|school-all|school.create'],
+        'uses' => 'Sys\SchoolController@store']);
+    Route::get('sys/school/edit/{id}', [
+        'middleware' => ['permission:attendance-all|school-all|school.edit'],
+        'uses' => 'Sys\SchoolController@edit'])->name('school.edit');
+    Route::post('sys/school/edit/{id}', [
+        'middleware' => ['permission:attendance-all|school-all|school.edit'],
+        'uses' => 'Sys\SchoolController@update']);
+
+
+
 });

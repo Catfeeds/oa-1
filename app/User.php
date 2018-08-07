@@ -2,10 +2,9 @@
 
 namespace App;
 
-use App\Models\Channel;
-use App\Models\Platform;
-use App\Models\Product;
+
 use App\Models\Role;
+use App\Models\UserExt;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -24,8 +23,8 @@ class User extends Authenticatable
     const IS_MOBILE_TRUE = 1;
 
     public static $statusList = [
-        self::STATUS_ENABLE => '可用',
-        self::STATUS_DISABLE => '不可用',
+        self::STATUS_ENABLE => '在职',
+        self::STATUS_DISABLE => '离职',
     ];
 
     public static $statusClass = [
@@ -58,6 +57,8 @@ class User extends Authenticatable
         'remember_token',
         'mobile',
         'is_mobile',
+        'dept_id',
+        'job_id',
         'desc',
     ];
 
@@ -77,6 +78,8 @@ class User extends Authenticatable
         'creater_id',
         'mobile',
         'is_mobile',
+        'dept_id',
+        'job_id',
         'desc',
     ];
 
@@ -100,6 +103,10 @@ class User extends Authenticatable
         return $this->hasOne(Role::class, 'id', 'role_id');
     }
 
+    public function userExt()
+    {
+        return $this->hasOne(UserExt::class, 'user_id', 'user_id');
+    }
 
     public static function getStatusList()
     {

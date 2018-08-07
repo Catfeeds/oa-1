@@ -10,7 +10,7 @@
                     <div class="row">
                         <div class="col-lg-4">
                             <div class="contact-box">
-                                <a href="{{route('index')}}">
+                                <a href="{{route('attIndex')}}">
                                     <div class="col-sm-4">
                                         <div class="text-center">
                                             <img alt="image" class="img-circle m-t-xs img-responsive"

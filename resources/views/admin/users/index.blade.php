@@ -16,13 +16,13 @@
                             @if(Entrust::can(['user-all', 'user.create']))
                                 <div class="ibox-tools">
                                     <a class="btn btn-xs btn-primary" href="{{ route('user.create') }}">
-                                        {{ trans('app.添加账号') }}
+                                        {{ trans('app.添加员工') }}
                                     </a>
                                 </div>
                             @endif
 
                         </div>
-                        <div class="ibox-content  profile-content">
+                        <div class="ibox-content profile-content">
                             <div class="row">
                                 <div class="col-md-12">
                                     {!! Form::open([ 'class' => 'form-inline', 'method' => 'get' ]) !!}
@@ -47,11 +47,13 @@
                                     <thead>
                                     <tr>
                                         <th>{{ trans('app.账号') }}</th>
-                                        <th>{{ trans('app.名称') }}</th>
+                                        <th>{{ trans('app.姓名') }}</th>
                                         <th>{{ trans('app.邮箱') }}</th>
                                         <th>{{ trans('app.状态') }}</th>
                                         <th>验证登录</th>
-                                        <th>{{ trans('app.角色') }}</th>
+                                        <th>{{ trans('app.部门') }}</th>
+                                        <th>{{ trans('app.职务') }}</th>
+                                        <th>{{ trans('app.岗位') }}</th>
                                         <th>{{ trans('app.创建时间') }}</th>
                                         <th>{{ trans('app.更新时间') }}</th>
                                         <th>{{ trans('app.操作') }}</th>
@@ -66,12 +68,15 @@
                                             <td>{{ $v['email'] }}</td>
                                             <td>{!! \App\User::getStatusText($v['status']) !!}</td>
                                             <td>{!! \App\User::getIsMobileTest($v) !!}</td>
+                                            <td>{{ $dept[$v['dept_id']] ?? '' }}</td>
                                             <td>{{ \App\Models\Role::getRoleText($v['role_id']) }}</td>
+                                            <td>{{ $job[$v['job_id']] ?? '' }}</td>
                                             <td>{{ $v['created_at'] }}</td>
                                             <td>{{ $v['updated_at'] }}</td>
                                             <td>
                                                 @if(Auth::user()->user_id != $v['user_id'] && Entrust::can(['user-all', 'user.edit']))
                                                     {!! BaseHtml::tooltip(trans('app.设置'), route('user.edit', ['id' => $v['user_id']])) !!}
+                                                    {!! BaseHtml::tooltip(trans('app.员工详情'), route('user.editExt', ['id' => $v['user_id']])) !!}
                                                 @endif
 
                                                 @if(\Illuminate\Support\Facades\Redis::exists(md5($v['user_id'] .'_' . $v['username'])))
