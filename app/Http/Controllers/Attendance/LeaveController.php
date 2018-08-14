@@ -22,6 +22,7 @@ use Illuminate\Http\Request;
 class LeaveController extends Controller
 {
     private $_validateRule = [
+        'holiday_id' => 'required',
         'start_time' => 'required',
         'end_time' => 'required',
         'reason' => 'required',
@@ -84,7 +85,10 @@ class LeaveController extends Controller
                 $betDay = 3;
         }
         $step = ApprovalStep::whereIn('step_id', $stepId)->whereBetween('day', [$betDay, $day])->first();
-
+        if(empty($step->step)) {
+            flash('申请失败,未匹配到请假模版，请联系人事', 'danger');
+            return redirect()->route('leave.info');
+        }
         $leaveStep = json_decode($step->step, true);
         $leader = [];
         foreach ($leaveStep as $lk => $lv) {
