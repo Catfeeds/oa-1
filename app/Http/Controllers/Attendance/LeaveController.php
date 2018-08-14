@@ -10,13 +10,16 @@ namespace App\Http\Controllers\Attendance;
 
 use App\Components\Helper\DataHelper;
 use App\Components\Helper\FileHelper;
+use App\Http\Components\Helpers\OperateLogHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Attendance\Leave;
 use App\Models\RoleLeaveStep;
 use App\Models\Sys\ApprovalStep;
 use App\Models\Sys\Dept;
 use App\Models\Sys\HolidayConfig;
+use App\Models\Sys\OperateLog;
 use App\User;
+use EasyWeChat\Kernel\Exceptions\Exception;
 use Illuminate\Http\Request;
 
 class LeaveController extends Controller
@@ -42,14 +45,16 @@ class LeaveController extends Controller
     public function create()
     {
         $leave = (object)['holiday_id' => '', 'start_id' => '', 'end_id' => ''];
+        $reviewUserId = '';
         $holidayList = HolidayConfig::getHolidayList();
         $title = trans('att.请假申请');
-        return view('attendance.leave.edit', compact('title', 'holidayList', 'leave'));
+        return view('attendance.leave.edit', compact('title', 'holidayList', 'leave', 'reviewUserId'));
     }
 
     public function edit($id)
     {
-        Leave::findOrFail($id);
+        $leave = Leave::findOrFail($id);
+
         $holidayList = HolidayConfig::getHolidayList();
         $title = trans('att.请假申请');
         return view('attendance.leave.edit', compact('title', 'holidayList', 'leave'));
@@ -85,16 +90,30 @@ class LeaveController extends Controller
                 $betDay = 3;
         }
         $step = ApprovalStep::whereIn('step_id', $stepId)->whereBetween('day', [$betDay, $day])->first();
+
         if(empty($step->step)) {
             flash('申请失败,未匹配到请假模版，请联系人事', 'danger');
             return redirect()->route('leave.info');
         }
         $leaveStep = json_decode($step->step, true);
+
         $leader = [];
+
         foreach ($leaveStep as $lk => $lv) {
+
             $userLeader = User::where(['role_id' => $lv, 'is_leader' => 1])->first();
+
             if (empty($userLeader)) continue;
             $leader[$userLeader->user_id] = $userLeader->user_id;
+        }
+
+        $review_user_id = reset($leader);
+        unset($leader[$review_user_id]);
+
+        if(empty($leader)) {
+            $remain_user = '';
+        } else {
+            $remain_user = json_encode($leader);
         }
 
         $data = [
@@ -110,11 +129,20 @@ class LeaveController extends Controller
             'user_list' => $p['user_list'] ?? '',
             'status' => 0, //默认 0 待审批
             'annex' => $image_path ?? '',
-            'review_user_id' => reset($leader),
-            'remain_user' => json_encode(array_pop($leader)),
+            'review_user_id' => $review_user_id,
+            'remain_user' => $remain_user,
         ];
 
-        Leave::create($data);
+        try {
+            $leave = Leave::create($data);
+            if(!empty($leave->leave_id)) {
+                OperateLogHelper::createOperateLog(OperateLogHelper::LEAVE_TYPE_ID, $leave->leave_id, '提交申请');
+            }
+        } catch (Exception $ex) {
+            flash('申请失败,请重新提交申请!', 'danger');
+            return redirect()->route('leave.info');
+        }
+
         flash(trans('app.添加成功', ['value' => trans('app.假期申请')]), 'success');
 
         return redirect()->route('leave.info');
@@ -133,10 +161,65 @@ class LeaveController extends Controller
     public function optInfo($id)
     {
         $leave = Leave::findOrFail($id);
-        $holidayList = HolidayConfig::getHolidayList();
-        $dept = Dept::getDeptList();
-        $title = trans('att.假期详情');
-        return view('attendance.leave.info', compact('title', 'holidayList', 'leave', 'dept'));
+
+        if( in_array(\Auth::user()->user_id, [$leave->user_id, $leave->review_user_id]) && !empty($leave->leave_id) ) {
+            $reviewUserId = json_decode($leave->review_user_id, true);
+            $user = User::with(['role', 'dept'])->where(['user_id' => $reviewUserId])->first();
+            $logs = OperateLog::where(['type_id' => 1, 'info_id' => $leave->leave_id])->get();
+
+            $holidayList = HolidayConfig::getHolidayList();
+            $dept = Dept::getDeptList();
+            $title = trans('att.假期详情');
+            return view('attendance.leave.info', compact('title', 'holidayList', 'leave', 'dept', 'reviewUserId', 'user', 'logs'));
+        } else {
+            return redirect()->route('leave.info');
+        }
+
     }
 
+    public function optStatus(Request $request, $id)
+    {
+        $status = $request->get('status');
+
+        if(!in_array($status, [1, 2]) || empty($id))  return response()->json(['status' => -1, 'msg' => '错误的提交信息']);
+
+        $leave = Leave::findOrFail($id);
+        if(empty($leave->leave_id) || $leave->review_user_id != \Auth::user()->user_id) {
+            return redirect()->route('leave.info');
+        }
+        $msg = '';
+        try {
+            switch ($status) {
+                case 1 :
+                    $msg = '审核通过';
+                    if(empty($leave->remain_user)) {
+                        $leave->update(['status' => 3, 'review_user_id' => 0]);
+                    } else {
+                        $remain_user = json_decode($leave->remain_user, true);
+
+                        $review_user_id = reset($remain_user);
+                        unset($remain_user[$review_user_id]);
+                        if(empty($remain_user)) {
+                            $remain_user = '';
+                        } else {
+                            $remain_user = json_encode($remain_user);
+                        }
+
+                        $leave->update(['status' => 1, 'review_user_id' => $review_user_id, 'remain_user' => $remain_user]);
+                    }
+                    break;
+                case 2 :
+                    $msg = '拒绝通过';
+                    $leave->update(['status' => 2, 'review_user_id' => '']);
+                    break;
+            }
+
+            OperateLogHelper::createOperateLog(OperateLogHelper::LEAVE_TYPE_ID, $leave->leave_id, $msg);
+            return response()->json(['status' => 1, 'msg' => '操作成功']);
+
+        } catch (Exception $ex) {
+            return response()->json(['status' => -1, 'msg' => '操作失败']);
+        }
+
+    }
 }

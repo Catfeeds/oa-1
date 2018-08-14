@@ -9,8 +9,11 @@
 namespace App\Http\Components\Helpers;
 
 
+use App\Models\Sys\OperateLog;
+
 class OperateLogHelper
 {
+    const LEAVE_TYPE_ID = 1;
     /**
      * 操作日志
      * @param int $typeId 操作类型ID 1:请假模块
@@ -18,7 +21,7 @@ class OperateLogHelper
      * @param string $opt_name 操作内容
      * @param string $memo 备注
      */
-    public static function createWorkOptLog($typeId, $infoId, $opt_name, $memo = '')
+    public static function createOperateLog($typeId, $infoId, $opt_name, $memo = '')
     {
         $log = [
             'type_id' => $typeId,
@@ -28,7 +31,7 @@ class OperateLogHelper
             'memo' => $memo,
         ];
 
-        if($infoId > 0) WorkLog::create($log);
+        if($infoId > 0) OperateLog::create($log);
     }
 
 }
