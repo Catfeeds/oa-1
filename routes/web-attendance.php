@@ -18,23 +18,26 @@ Route::group([
         ])->name('attIndex');
         # 我的假期明细
         Route::get('leave', [
-            'middleware' => ['permission:attendance-all|leave-all|leave'],
+            'middleware' => ['permission:leave-all|leave'],
             'uses' => 'LeaveController@index'])->name('leave.info');
         Route::get('leave/create', [
-            'middleware' => ['permission:attendance-all|leave-all|leave.create'],
+            'middleware' => ['permission:leave-all|leave.create'],
             'uses' => 'LeaveController@create'])->name('leave.create');
         Route::post('leave/create', [
-            'middleware' => ['permission:attendance-all|leave-all|leave.create'],
+            'middleware' => ['permission:leave-all|leave.create'],
             'uses' => 'LeaveController@store']);
         Route::get('leave/edit', [
-            'middleware' => ['permission:attendance-all|leave-all|leave-edit'],
+            'middleware' => ['permission:leave-all|leave.edit'],
             'uses' => 'LeaveController@edit'])->name('leave.edit');
         Route::post('leave/edit', [
-            'middleware' => ['permission:attendance-all|leave-all|leave.edit'],
+            'middleware' => ['permission:leave-all|leave.edit'],
             'uses' => 'LeaveController@update']);
         Route::get('leave/optInfo/{id}', [
-            'middleware' => ['permission:attendance-all|leave-all|leave-edit|leave-create'],
+            'middleware' => ['permission:leave-all|leave.edit|leave.create'],
             'uses' => 'LeaveController@optInfo'])->name('leave.optInfo');
+        Route::get('leave/opt-status/{id}', [
+            'middleware' => ['permission:leave-all|leave.optStatus'],
+            'uses' => 'LeaveController@optStatus'])->name('leave.optStatus');
 
     });
 });

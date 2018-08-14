@@ -20,9 +20,11 @@ class OperateLog extends Model
     protected $primaryKey = 'id';
 
     protected $fillable = [
-        'holiday',
+        'type_id',
+        'info_id',
+        'opt_uid',
         'memo',
-        'num',
+        'opt_name',
     ];
 
 }

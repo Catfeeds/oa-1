@@ -19,9 +19,9 @@ class CreateOperateLogTable extends Migration
             $table->unsignedInteger('info_id')->comment = '对应操作信息ID';
             $table->unsignedInteger('opt_uid')->comment = '操作者用户ID';
             $table->string('opt_name', 200)->comment = '操作类型名称';
-            $table->text('memo')->comment = '备注信息';
+            $table->text('memo')->nullable()->comment = '备注信息';
 
-            $table->unique(['type_id', 'info_id', 'opt_uid'], 'operate_unique');
+            $table->unique(['id', 'type_id', 'info_id', 'opt_uid'], 'operate_unique');
             $table->index('type_id');
             $table->index('info_id');
 

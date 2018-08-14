@@ -13,7 +13,8 @@
                 <div class="ibox-content">
 
                     {!! Form::open(['class' => 'form-horizontal', 'enctype' => 'multipart/form-data']) !!}
-
+                    {{--分割线--}}
+                <div class="col-sm-6 b-r">
                     <div class="form-group">
                         {!! Form::label('user_id', trans('att.申请人'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-6">
@@ -89,11 +90,13 @@
                                  id="show_associate_image">
                         </div>
                     </div>
-
+                </div>
+                    {{--分割线--}}
+                <div class="col-sm-6">
                     <div class="hr-line-dashed"></div>
 
                     <div class="form-group">
-                        {!! Form::label('reason', trans('att.当前审核流程状态'), ['class' => 'col-sm-2 control-label']) !!}
+                        {!! Form::label('reason', trans('att.审核流程'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-6">
                             <span class="help-block m-b-none">
                                 {{ \App\Http\Components\Helpers\AttendanceHelper::showApprovalStep($leave->step_id) }}
@@ -104,8 +107,45 @@
                     <div class="hr-line-dashed"></div>
 
                     <div class="form-group">
+                        {!! Form::label('reason', trans('att.审核状态'), ['class' => 'col-sm-2 control-label']) !!}
+                        <div class="col-sm-6">
+                            <span class="help-block m-b-none">
+                                {{ empty($reviewUserId) ?  \App\Models\Attendance\Leave::$status[$leave->status]: '待'. $user->role->name . '审核' }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="hr-line-dashed"></div>
+
+                    <div style="height: 20em;" class="form-group">
+                        {!! Form::label('assign_uid', trans('att.处理详情'), ['class' => 'col-sm-2 control-label']) !!}
+                        <div class="col-sm-10">
+                            @foreach($logs as $lk => $lv)
+                                <span class="help-block m-b-none">
+                                    <a class="btn btn-xs btn-primary">{{ $lv->created_at }}</a>
+                                    <a class="btn btn-xs btn-rounded">{{ \App\User::getAliasList()[$lv->opt_uid]}}</a>
+                                    <a class="btn btn-xs btn-default btn-rounded btn-outline">{{ $lv->opt_name }} </a>
+                                    @if(!empty($lv->memo))
+                                        <span style="color: #039"> {!! $lv->memo !!}</span>
+                                    @endif
+                                </span>
+                            @endforeach
+                        </div>
+                    </div>
+
+                </div>
+
+                    <div class="hr-line-dashed"></div>
+
+                    <div class="form-group">
                         <div class="col-sm-4 col-sm-offset-5">
-                            {!! Form::submit(trans('app.提交'), ['class' => 'btn btn-primary']) !!}
+                            @if(in_array($leave->status, [0, 1]))
+                                @if($leave->review_user_id == Auth::user()->user_id )
+                                    <a id="edit_status" data-id=1 class="btn btn-success">{{ trans('att.审核通过') }}</a>
+                                    <a id="edit_status" data-id=2 class="btn btn-primary">{{ trans('att.拒绝通过') }}</a>
+                                @endif
+                            @endif
+
                             <a href="javascript:history.go(-1);"
                                class="btn btn-info">{{ trans('att.返回列表') }}</a>
                         </div>
@@ -119,6 +159,7 @@
     </div>
 
 @endsection
+@include('widget.bootbox')
 @include('widget.icheck')
 @include('widget.select2')
 @include('widget.datepicker')
@@ -146,6 +187,37 @@
             $("#select-mobile-header-file").change(function(){
                 readURL(this, '#show_mobile_header_image');
             });
+
+
+            $('#edit_status').click(function () {
+                var status = $(this).data('id');
+                switch (status) {
+                    case 1 :
+                        $msg = '是否审核通过!';
+                        break;
+                    case 2 :
+                        $msg = '是否拒绝通过!';
+                        break;
+                }
+
+                edit_status(status, $msg, $(this));
+            });
+
+            function edit_status(status, $msg, obj){
+                if(confirm($msg)==false) {
+                    return false;
+                }
+
+                $.get('{{ route('leave.optStatus',['id' => $leave->leave_id])}}', {status: status}, function ($data) {
+                    if ($data.status == 1) {
+                        bootbox.alert($data.msg);
+                        location.reload();
+                    } else {
+                        bootbox.alert($data.msg);
+                    }
+                })
+            }
+
         });
     </script>
 @endsection

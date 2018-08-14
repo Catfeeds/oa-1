@@ -27,8 +27,8 @@ class CreateUsersLeaveTable extends Migration
             $table->text('user_list')->nullable()->comment = '批量申请员工列表';
             $table->unsignedInteger('status')->defult(0)->comment = '审批状态 0:待审批 1:审批通过 2:审批未通过 具体查看配置';
             $table->string('annex', 50)->nullable()->comment = '附件地址';
-            $table->unsignedInteger('review_user_id')->comment = '当前审核人ID';
-            $table->text('remain_user')->comment = '剩下顺序审批人员信息';
+            $table->unsignedInteger('review_user_id')->nullable()->comment = '当前审核人ID';
+            $table->text('remain_user')->nullable()->comment = '剩下顺序审批人员信息';
 
             $table->index('user_id');
             $table->index('holiday_id');

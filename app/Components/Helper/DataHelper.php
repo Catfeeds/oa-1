@@ -142,6 +142,18 @@ class DataHelper
                 case $day > 3.1 && $day < 3.3 :
                     return 3.5;
                     break;
+                case $day > 4.1 && $day < 5 :
+                    return 4.5;
+                    break;
+                case $day > 5.1 && $day < 5.3 :
+                    return 5;
+                    break;
+                case $day > 6.1 && $day < 7 :
+                    return 6.5;
+                    break;
+                case $day > 7.1 && $day < 7.3 :
+                    return 7;
+                    break;
                 default :
                     return '';
             }

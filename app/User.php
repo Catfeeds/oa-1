@@ -4,6 +4,7 @@ namespace App;
 
 
 use App\Models\Role;
+use App\Models\Sys\Dept;
 use App\Models\UserExt;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -108,6 +109,11 @@ class User extends Authenticatable
     public function role()
     {
         return $this->hasOne(Role::class, 'id', 'role_id');
+    }
+
+    public function dept()
+    {
+        return $this->hasOne(Dept::class, 'dept_id', 'dept_id');
     }
 
     public function userExt()
