@@ -106,7 +106,6 @@
                                     {!! Form::select('dept_id', $dept, isset($user->dept_id) ? $user->dept_id: old('dept_id'), [
                                     'class' => 'form-control',
                                     'placeholder' => trans('app.请选择', ['value' => trans('app.部门')]),
-                                    'required' => true,
                                     ]) !!}
                                     <span class="help-block m-b-none">{{ $errors->first('status') }}</span>
                                 </div>
@@ -118,7 +117,6 @@
                                     {!! Form::select('role_id', $roleList, isset($user->role_id) ? $user->role_id : old('role_id'), [
                                     'class' => 'form-control',
                                     'placeholder' => trans('app.请选择', ['value' => trans('app.职务')]),
-                                    'required' => true,
                                     ]) !!}
                                     <span class="help-block m-b-none">{{ $errors->first('role_id') }}</span>
                                 </div>
@@ -130,7 +128,6 @@
                                     {!! Form::select('job_id', $job, isset($user->job_id) ? $user->job_id: old('job_id'), [
                                     'class' => 'form-control',
                                     'placeholder' => trans('app.请选择', ['value' => trans('app.岗位')]),
-                                    'required' => true,
                                     ]) !!}
                                     <span class="help-block m-b-none">{{ $errors->first('job_id') }}</span>
                                 </div>
