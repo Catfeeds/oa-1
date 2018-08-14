@@ -42,6 +42,8 @@ class RolePermissions extends Seeder
                 'dept-all',
                 'job-all',
                 'school-all',
+                'holiday-config-all',
+                'approval-step-all',
             ],
         ];
     }

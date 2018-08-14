@@ -76,59 +76,97 @@ Route::group([
         Route::post('role/appoint/{id}', [
             'uses' => 'RoleController@appointUpdate',
         ]);
+        Route::get('role/leave-step/edit/{id}', [
+            'middleware' => ['permission:role-all|role.step'],
+            'uses' => 'RoleController@editLeaveStep'])->name('role.step');
+        Route::post('role/leave-step/edit/{id}', [
+            'middleware' => ['permission:role-all|role.step'],
+            'uses' => 'RoleController@updateLeaveStep']);
     });
 
     //部门管理
     Route::get('sys/dept', [
-        'middleware' => ['permission:attendance-all|dept-all|dept'],
+        'middleware' => ['permission:dept-all|dept'],
         'uses' => 'Sys\DeptController@index'])->name('dept');
     Route::get('sys/dept/create', [
-        'middleware' => ['permission:attendance-all|dept-all|dept.create'],
+        'middleware' => ['permission:dept-all|dept.create'],
         'uses' => 'Sys\DeptController@create'])->name('dept.create');
     Route::post('sys/dept/create', [
-        'middleware' => ['permission:attendance-all|dept-all|dept.create'],
+        'middleware' => ['permission:dept-all|dept.create'],
         'uses' => 'Sys\DeptController@store']);
     Route::get('sys/dept/edit/{id}', [
-        'middleware' => ['permission:attendance-all|dept-all|dept.edit'],
+        'middleware' => ['permission:dept-all|dept.edit'],
         'uses' => 'Sys\DeptController@edit'])->name('dept.edit');
     Route::post('sys/dept/edit/{id}', [
-        'middleware' => ['permission:attendance-all|dept-all|dept.edit'],
+        'middleware' => ['permission:dept-all|dept.edit'],
         'uses' => 'Sys\DeptController@update']);
 
     //岗位管理
     Route::get('sys/job', [
-        'middleware' => ['permission:attendance-all|job-all|job'],
+        'middleware' => ['permission:job-all|job'],
         'uses' => 'Sys\JobController@index'])->name('job');
     Route::get('sys/job/create', [
-        'middleware' => ['permission:attendance-all|job-all|job.create'],
+        'middleware' => ['permission:job-all|job.create'],
         'uses' => 'Sys\JobController@create'])->name('job.create');
     Route::post('sys/job/create', [
-        'middleware' => ['permission:attendance-all|job-all|job.create'],
+        'middleware' => ['permission:job-all|job.create'],
         'uses' => 'Sys\JobController@store']);
     Route::get('sys/job/edit/{id}', [
-        'middleware' => ['permission:attendance-all|job-all|job.edit'],
+        'middleware' => ['permission:ajob-all|job.edit'],
         'uses' => 'Sys\JobController@edit'])->name('job.edit');
     Route::post('sys/job/edit/{id}', [
-        'middleware' => ['permission:attendance-all|job-all|job.edit'],
+        'middleware' => ['permission:job-all|job.edit'],
         'uses' => 'Sys\JobController@update']);
 
     //学校管理
     Route::get('sys/school', [
-        'middleware' => ['permission:attendance-all|school-all|school'],
+        'middleware' => ['permission:school-all|school'],
         'uses' => 'Sys\SchoolController@index'])->name('school');
     Route::get('sys/school/create', [
-        'middleware' => ['permission:attendance-all|school-all|school.create'],
+        'middleware' => ['permission:school-all|school.create'],
         'uses' => 'Sys\SchoolController@create'])->name('school.create');
     Route::post('sys/school/create', [
-        'middleware' => ['permission:attendance-all|school-all|school.create'],
+        'middleware' => ['permission:school-all|school.create'],
         'uses' => 'Sys\SchoolController@store']);
     Route::get('sys/school/edit/{id}', [
-        'middleware' => ['permission:attendance-all|school-all|school.edit'],
+        'middleware' => ['permission:school-all|school.edit'],
         'uses' => 'Sys\SchoolController@edit'])->name('school.edit');
     Route::post('sys/school/edit/{id}', [
-        'middleware' => ['permission:attendance-all|school-all|school.edit'],
+        'middleware' => ['permission:school-all|school.edit'],
         'uses' => 'Sys\SchoolController@update']);
 
+    //假期配置管理
+    Route::get('sys/holiday-config', [
+        'middleware' => ['permission:holiday-config-all|holiday-config'],
+        'uses' => 'Sys\HolidayConfigController@index'])->name('holiday-config');
+    Route::get('sys/holiday-config/create', [
+        'middleware' => ['permission:holiday-config-all|holiday-config.create'],
+        'uses' => 'Sys\HolidayConfigController@create'])->name('holiday-config.create');
+    Route::post('sys/holiday-config/create', [
+        'middleware' => ['permission:holiday-config-all|holiday-config.create'],
+        'uses' => 'Sys\HolidayConfigController@store']);
+    Route::get('sys/holiday-config/edit/{id}', [
+        'middleware' => ['permission:holiday-config-all|holiday-config.edit'],
+        'uses' => 'Sys\HolidayConfigController@edit'])->name('holiday-config.edit');
+    Route::post('sys/holiday-config/edit/{id}', [
+        'middleware' => ['permission:holiday-config-all|holiday-config.edit'],
+        'uses' => 'Sys\HolidayConfigController@update']);
 
+    //审核流程配置管理
+    Route::get('sys/approval-step', [
+        'middleware' => ['permission:approval-step-all|approval-step'],
+        'uses' => 'Sys\ApprovalStepController@index'])->name('approval-step');
+    Route::get('sys/approval-step/create', [
+        'middleware' => ['permission:approval-step-all|approval-step.create'],
+        'uses' => 'Sys\ApprovalStepController@create'])->name('approval-step.create');
+    Route::post('sys/approval-step/create', [
+        'middleware' => ['permission:approval-step-all|approval-step.create'],
+        'uses' => 'Sys\ApprovalStepController@store']);
+    Route::get('sys/approval-step/edit/{id}', [
+        'middleware' => ['permission:approval-step-all|approval-step.edit'],
+        'uses' => 'Sys\ApprovalStepController@edit'])->name('approval-step.edit');
+    Route::post('sys/approval-step/edit/{id}', [
+        'middleware' => ['permission:approval-step-all|approval-step.edit'],
+        'uses' => 'Sys\ApprovalStepController@update']);
 
 });

@@ -44,11 +44,12 @@ class Permissions extends Seeder
             'user' => '账号体系模块/账号/「列表」',
             'user.create' => '账号体系模块/账号/「添加」',
             'user.edit' => '账号体系模块/账号/「设置」',
-            'role-all' => '账号体系模块/角色/「所有」',
-            'role' => '账号体系模块/角色/「列表」',
-            'role.create' => '账号体系模块/角色/「添加」',
-            'role.edit' => '账号体系模块/角色/「设置」',
-            'role.appoint' => '账号体系模块/角色/「指派」',
+            'role-all' => '账号体系模块/职务/「所有」',
+            'role' => '账号体系模块/职务/「列表」',
+            'role.create' => '账号体系模块/职务/「添加」',
+            'role.edit' => '账号体系模块/职务/「设置」',
+            'role.appoint' => '账号体系模块/职务/「指派」',
+            'role.step' => '账号体系模块/职务/「审核步骤」',
             'profile.password' => '账号体系模块/「密码重置」',
 
             'version-all' => '账号体系模块/版本管理/「所有」',
@@ -76,6 +77,16 @@ class Permissions extends Seeder
             'school.create' => '系统配置/学校管理/「添加」',
             'school.edit' => '系统配置/学校管理/「设置」',
 
+            'holiday-config-all' => '系统配置/假期管理/「所有」',
+            'holiday-config' => '系统配置/假期管理/「列表」',
+            'holiday-config.create' => '系统配置/假期管理/「添加」',
+            'holiday-config.edit' => '系统配置/假期管理/「设置」',
+
+            'approval-step-all' => '系统配置/审核流程管理/「所有」',
+            'approval-step' => '系统配置/审核流程管理/「列表」',
+            'approval-step.create' => '系统配置/审核流程管理/「添加」',
+            'approval-step.edit' => '系统配置/审核流程管理/「设置」',
+
         ];
     }
 
@@ -83,7 +94,6 @@ class Permissions extends Seeder
     private function _attendance(): array
     {
         return [
-            'attendance-all' => '考勤功能/考勤管理/「所有」',
 
             'leave-all' => '考勤功能/考勤管理/我的假期 [所有] ',
             'leave' => '考勤功能/考勤管理/我的假期/ 「列表」',

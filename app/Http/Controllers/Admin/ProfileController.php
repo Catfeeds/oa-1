@@ -66,11 +66,11 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
         $userExt = UserExt::where(['user_id' => $user->user_id])->first();
+        if($userExt->is_confirm) return redirect($this->redirectTo);
         $job = Job::getJobList();
         $dept = Dept::getDeptList();
         $school = School::getSchoolList();
         return view('admin.profile.confirm-edit', compact('user', 'userExt', 'job', 'dept', 'school'));
-
     }
 
     public function confirmUpdate(Request $request)

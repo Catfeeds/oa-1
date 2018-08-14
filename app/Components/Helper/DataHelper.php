@@ -105,4 +105,48 @@ class DataHelper
 
         return in_array($code, [200, 301, 302]) ? true : false;
     }
+
+    /**
+     * 请假天数
+     * @param $startTime
+     * @param $endTime
+     * @return float|int|string
+     */
+    public static function diffTime($startTime, $endTime)
+    {
+        $startTime = strtotime($startTime);
+        $endTime = strtotime($endTime);
+
+        if ($startTime <= $endTime) {
+        $day = floor($endTime - $startTime)/86400;
+
+            switch ($day) {
+                case $day > 0.1 && $day < 0.3 :
+                    return 0.5;
+                    break;
+                case $day > 0.3 && $day < 1 :
+                    return 1;
+                    break;
+                case $day > 1.1 && $day < 1.3 :
+                    return 1.5;
+                    break;
+                case $day > 1.3 && $day < 2 :
+                    return 2;
+                    break;
+                case $day > 2.1 && $day < 2.3 :
+                    return 2.5;
+                    break;
+                case $day > 2.1 && $day < 3 :
+                    return 3;
+                    break;
+                case $day > 3.1 && $day < 3.3 :
+                    return 3.5;
+                    break;
+                default :
+                    return '';
+            }
+        }
+
+        return '';
+    }
 }

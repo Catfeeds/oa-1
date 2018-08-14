@@ -14,7 +14,6 @@ use Illuminate\Http\Request;
 
 class DeptController extends Controller
 {
-
     protected $redirectTo = '/admin/sys/dept';
 
     private $_validateRule = [

@@ -16,12 +16,12 @@ class CreateUsersExtTable extends Migration
         Schema::create('users_ext', function (Blueprint $table) {
             $table->increments('users_ext_id');
             $table->unsignedInteger('user_id')->comment = '用户唯一ID';
-            $table->integer('school_id')->nullable()->comment = '毕业学校';
-            $table->integer('education_id')->nullable()->comment = '学历';
+            $table->unsignedTinyInteger('school_id')->nullable()->comment = '毕业学校';
+            $table->unsignedTinyInteger('education_id')->nullable()->comment = '学历';
             $table->timestamp('graduation_time')->nullable()->comment = '毕业时间';
-            $table->integer('constellation_id')->nullable()->comment = '星座';
+            $table->unsignedTinyInteger('constellation_id')->nullable()->comment = '星座';
             $table->unsignedTinyInteger('blood_type')->nullable()->comment = '血型';
-            $table->integer('age')->nullable()->comment = '年龄';
+            $table->unsignedTinyInteger('age')->nullable()->comment = '年龄';
             $table->unsignedTinyInteger('sex')->default(0)->comment = '性别 0:男 1:女 2:未知';
             $table->timestamp('born')->nullable()->comment = '出生日期';
             $table->string('qq', 20)->nullable()->comment = 'QQ号码';

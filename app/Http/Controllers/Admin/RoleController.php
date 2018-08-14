@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Permission;
 use App\Models\Role;
+use App\Models\RoleLeaveStep;
+use App\Models\Sys\ApprovalStep;
 use Illuminate\Http\Request;
 
 class RoleController extends Controller
@@ -20,13 +22,13 @@ class RoleController extends Controller
     public function index()
     {
         $data = Role::paginate();
-        $title = trans('app.角色列表');
+        $title = trans('app.职务列表');
         return view('admin.roles.index', compact('title', 'data'));
     }
 
     public function create()
     {
-        $title = trans('app.添加', ['value' => trans('app.角色')]);
+        $title = trans('app.添加', ['value' => trans('app.职务')]);
         return view('admin.roles.edit', compact('title'));
     }
 
@@ -36,7 +38,7 @@ class RoleController extends Controller
 
         Role::create($request->all());
 
-        flash(trans('app.添加成功', ['value' => trans('app.角色')]), 'success');
+        flash(trans('app.添加成功', ['value' => trans('app.职务')]), 'success');
 
         return redirect($this->redirectTo);
     }
@@ -44,7 +46,7 @@ class RoleController extends Controller
     public function edit($id)
     {
         $role = Role::findOrFail($id);
-        $title = trans('app.编辑', ['value' => trans('app.角色')]);
+        $title = trans('app.编辑', ['value' => trans('app.职务')]);
         return view('admin.roles.edit', compact('title', 'role'));
     }
 
@@ -58,7 +60,7 @@ class RoleController extends Controller
 
         $role->update($request->all());
 
-        flash(trans('app.编辑成功', ['value' => trans('app.角色')]), 'success');
+        flash(trans('app.编辑成功', ['value' => trans('app.职务')]), 'success');
         return redirect($this->redirectTo);
     }
 
@@ -71,12 +73,7 @@ class RoleController extends Controller
         foreach ($permissions as $v) {
             $arr = explode('/', $v->display_name);
             $tmpGroup = array_shift($arr);
-            //特殊处理的模块
-            if (in_array($tmpGroup, ['游戏报表', 'GM功能']) && count($arr) > 1) {
-                $group = $tmpGroup . '/' . array_shift($arr);
-            } else {
-                $group = $tmpGroup;
-            }
+            $group = $tmpGroup;
             $permissionsGroup[$group][] = [
                 'id' => $v->id,
                 'name' => $v->name,
@@ -85,7 +82,7 @@ class RoleController extends Controller
             ];
         }
 
-        $title = trans('app.角色权限指派');
+        $title = trans('app.职务权限指派');
         return view('admin.roles.appoint', compact('role', 'permissionsGroup', 'enables', 'title'));
     }
 
@@ -110,4 +107,42 @@ class RoleController extends Controller
 
         return redirect()->back();
     }
+
+    public function editLeaveStep($id)
+    {
+        $steps = ApprovalStep::paginate();
+        $role = Role::with('leaveStep')->findOrFail($id);
+        $leaveStep = $role->leaveStep;
+        $stepList = [];
+
+        foreach ($leaveStep as $s) {
+            $stepList[] = $s->step_id;
+        }
+
+        $title = trans('app.考勤步骤关联');
+        return view('admin.roles.step', compact('role', 'steps', 'title', 'stepList'));
+    }
+
+    public function updateLeaveStep(Request $request, $id)
+    {
+        $role = Role::findOrFail($id);
+
+        $this->validate($request, [
+            'step_id' => 'required',
+        ]);
+
+        if(empty($role->id)) return redirect($this->redirectTo);
+        // 清掉之前的
+        RoleLeaveStep::where(['role_id' => $role->id])->delete();
+
+        $stepIds= $request->get('step_id');
+        foreach($stepIds as $sid) {
+            RoleLeaveStep::create(['role_id' => $role->id, 'step_id' => $sid]);
+        }
+
+        flash(trans('app.编辑成功', ['value' => trans('app.职务与审核步骤')]), 'success');
+
+        return redirect($this->redirectTo);
+    }
+
 }

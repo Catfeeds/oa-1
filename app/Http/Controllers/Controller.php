@@ -11,6 +11,8 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
+    protected $user;
+
     public function callAction($method, $parameters)
     {
         $this->init();
@@ -30,4 +32,5 @@ class Controller extends BaseController
         $this->user = \Auth::user();
         return $this->user;
     }
+
 }

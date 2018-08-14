@@ -18,8 +18,6 @@
         <p><i class="fa fa-tag"></i> {{ trans('app.毕业时间') }} ：{{ isset($userExt->userExt->graduation_time) ? $userExt->userExt->graduation_time : '' }}</p>
         <p><i class="fa fa-tag"></i> {{ trans('app.入职时间') }} ：{{ isset($userExt->userExt->entry_time) ? $userExt->userExt->entry_time : '' }}</p>
         <p><i class="fa fa-tag"></i> {{ trans('app.转正时间') }} ：{{ isset($userExt->userExt->turn_time) ? $userExt->userExt->turn_time : '' }}</p>
-
-
     </div>
     <div class="col-sm-6">
         <p><i class="fa fa-tag"></i> {{ trans('app.合同开始时间') }} ：{{ isset($userExt->userExt->contract_st) ? $userExt->userExt->contract_st : '' }}</p>
@@ -37,7 +35,5 @@
         <p><i class="fa fa-tag"></i> {{ trans('app.紧急联系人姓名') }} ：{{ isset($userExt->userExt->urgent_name) ? $userExt->userExt->urgent_name : '' }}</p>
         <p><i class="fa fa-tag"></i> {{ trans('app.紧急联系人电话') }} ：{{ isset($userExt->userExt->urgent_tel) ? $userExt->userExt->urgent_tel : '' }}</p>
         <p><i class="fa fa-tag"></i> {{ trans('app.工资卡') }} ：{{ isset($userExt->userExt->salary_card) ? $userExt->userExt->salary_card : '' }}</p>
-
     </div>
-
 @endsection

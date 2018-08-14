@@ -62,7 +62,7 @@ class UserController extends Controller
             ->orderBy('updated_at', 'desc')
             ->paginate(50);
 
-        $role_ids = ['' => trans('app.全部角色')] + Role::getRoleTextList();
+        $role_ids = ['' => trans('app.全部员工')] + Role::getRoleTextList();
         $job = Job::getJobList();
         $dept = Dept::getDeptList();
         $title = trans('app.账号列表');
@@ -101,6 +101,10 @@ class UserController extends Controller
             'password' => bcrypt($request->password),
         ]));
 
+        if(!empty($user->user_id)) {
+            UserExt::create(['user_id' => $user->user_id]);
+        }
+
         // 权限方面
         if (!empty($user->role_id)) {
             $permissionRole = Role::findOrFail($user->role_id);
@@ -122,7 +126,6 @@ class UserController extends Controller
         $user = User::with('userExt')->findOrFail($id);
         $job = Job::getJobList();
         $dept = Dept::getDeptList();
-
 
         $title = trans('app.编辑员工');
         return view('admin.users.edit', compact('title', 'user', 'roleList', 'job', 'dept'));

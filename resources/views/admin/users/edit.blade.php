@@ -136,6 +136,18 @@
                                 </div>
                             </div>
 
+                            <div class="form-group @if (!empty($errors->first('is_leader'))) has-error @endif">
+                                {!! Form::label('is_leader', trans('app.是否上级'), ['class' => 'col-sm-3 control-label']) !!}
+                                <div class="col-sm-6">
+                                    {!! Form::select('is_leader', \App\User::$isLeader, isset($user->is_leader) ? $user->is_leader: old('is_leader'), [
+                                    'class' => 'form-control',
+                                    'placeholder' => trans('app.请选择', ['value' => trans('app.是否上级')]),
+                                    'required' => true,
+                                    ]) !!}
+                                    <span class="help-block m-b-none">{{ $errors->first('is_leader') }}</span>
+                                </div>
+                            </div>
+
                             <div class="form-group @if (!empty($errors->first('status'))) has-error @endif">
                                 {!! Form::label('status', trans('app.状态'), ['class' => 'col-sm-3 control-label']) !!}
                                 <div class="col-sm-6">
@@ -208,6 +220,8 @@
         $('#is_mobile').select2();
         $('#dept_id').select2();
         $('#job_id').select2();
+        $('#is_leader').select2();
+
     });
 </script>
 @endsection
