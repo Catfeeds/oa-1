@@ -34,12 +34,9 @@ class ReconciliationAuditController extends Controller
                     $job[$v['product_id']][1] = 1;
                     break;
                 case in_array($v['job_id'], [3, 4]):
-                    $job[$v['product_id']][1] = 1;
                     $job[$v['product_id']][2] = 2;
                     break;
                 case in_array($v['job_id'], [5, 6]):
-                    $job[$v['product_id']][1] = 1;
-                    $job[$v['product_id']][2] = 2;
                     $job[$v['product_id']][3] = 3;
                     $job[$v['product_id']][4] = 4;
                     break;
@@ -47,7 +44,6 @@ class ReconciliationAuditController extends Controller
         }
         $products = Product::getList($limitProduct);
         $pid = \Request::get('product_id', key($products));
-
         if (!in_array($pid, array_keys($products))) {
             return redirect()->back()->withInput();
         }
