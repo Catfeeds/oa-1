@@ -78,6 +78,7 @@ class UserExt extends Model
     ];
 
     protected $fillable = [
+        'user_id',
         'school_id',
         'education_id',
         'graduation_time',
@@ -110,7 +111,7 @@ class UserExt extends Model
     public static function checkIsConfirm($userId)
     {
         $isConfirm = self::where(['user_id' => $userId])->first();
-        return $isConfirm['is_confirm'] ?? 0;
+        return isset($isConfirm['is_confirm']) ? $isConfirm['is_confirm'] : 0;
     }
 
 }

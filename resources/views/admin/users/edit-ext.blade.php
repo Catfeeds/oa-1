@@ -416,18 +416,14 @@
                                         <span class="help-block m-b-none">{{ $errors->first('salary_card') }}</span>
                                     </div>
                                 </div>
-
-
                             </div>
-
                             <div class="form-group">
-                                <div class="col-sm-6 col-sm-offset-6">
+                                <div class="col-sm-4 col-sm-offset-5">
                                     {!! Form::submit(trans('app.提交'), ['class' => 'btn btn-primary']) !!}
                                 </div>
                             </div>
 
                             {!! Form::close() !!}
-
                         </div>
                     </div>
                 </div>
@@ -440,7 +436,6 @@
 @include('widget.icheck')
 @include('widget.select2')
 @include('widget.datepicker')
-
 
 @section('scripts-last')
     <script>

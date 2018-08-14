@@ -4,6 +4,7 @@
  * User: weiming Email: 329403630@qq.com
  * Date: 2018/8/1
  * Time: 16:30
+ * 学校配置表数据库
  */
 namespace App\Models\Sys;
 

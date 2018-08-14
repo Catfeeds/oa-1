@@ -298,8 +298,8 @@
     </div>
 
     <div class="form-group">
-        <div class="col-sm-6 col-sm-offset-3">
-            {!! Form::submit(trans('app.提交'), ['class' => 'btn btn-primary']) !!}
+        <div class="col-sm-4 col-sm-offset-5">
+            {!! Form::submit(trans('app.确认提交'), ['class' => 'btn btn-primary']) !!}
         </div>
     </div>
 

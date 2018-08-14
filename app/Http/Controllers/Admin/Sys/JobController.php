@@ -26,7 +26,6 @@ class JobController extends Controller
         $data = Job::paginate();
         $title = trans('app.岗位列表');
         return view('admin.sys.job', compact('title', 'data'));
-
     }
 
     public function create()

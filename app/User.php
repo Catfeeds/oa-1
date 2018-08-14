@@ -37,6 +37,11 @@ class User extends Authenticatable
         self::IS_MOBILE_TRUE => '是',
     ];
 
+    public static $isLeader = [
+        self::STATUS_DISABLE => '否',
+        self::STATUS_ENABLE => '是',
+    ];
+
     protected $primaryKey = 'user_id';
 
     protected $table = 'users';
@@ -59,6 +64,7 @@ class User extends Authenticatable
         'is_mobile',
         'dept_id',
         'job_id',
+        'is_leader',
         'desc',
     ];
 
@@ -80,6 +86,7 @@ class User extends Authenticatable
         'is_mobile',
         'dept_id',
         'job_id',
+        'is_leader',
         'desc',
     ];
 
@@ -135,5 +142,10 @@ class User extends Authenticatable
             self::IS_MOBILE_FALSE => 'warning',
         ];
         return sprintf('<a href="%s"><span class="label label-%s">%s</span></a>', route('user.isMobile', ['id' => $user->user_id, 'is_mobile' => $value == self::IS_MOBILE_FALSE ? self::IS_MOBILE_TRUE : self::IS_MOBILE_FALSE]), $list[$value], self::$isMobileList[$value]);
+    }
+
+    public static function getUserAliasToId($userId)
+    {
+        return self::where(['user_id' => $userId])->first();
     }
 }

@@ -4,10 +4,10 @@
  * User: weiming Email: 329403630@qq.com
  * Date: 2018/8/1
  * Time: 16:31
+ *  学校管理配置控制
  */
 
 namespace App\Http\Controllers\Admin\Sys;
-
 
 use App\Http\Controllers\Controller;
 use App\Models\Sys\School;
@@ -21,27 +21,24 @@ class SchoolController extends Controller
         'school' => 'required|unique:users_school,school|max:50',
     ];
 
-
     public function index()
     {
         $data = School::paginate();
         $title = trans('app.学校列表');
         return view('admin.sys.school', compact('title', 'data'));
-
     }
 
     public function create()
     {
         $title = trans('app.添加学校');
         return view('admin.sys.school-edit', compact('title'));
-
     }
 
     public function edit($id)
     {
         $school = School::findOrFail($id);
         $title = trans('app.编辑', ['value' => trans('app.学校')]);
-        return view('admin.sys.job-edit', compact('title', 'school'));
+        return view('admin.sys.school-edit', compact('title', 'school'));
     }
 
     public function store(Request $request)

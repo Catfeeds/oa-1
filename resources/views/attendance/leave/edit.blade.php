@@ -14,55 +14,88 @@
 
                     {!! Form::open(['class' => 'form-horizontal', 'enctype' => 'multipart/form-data']) !!}
 
-                    <div class="form-group">
-                        {!! Form::label('opening_time', trans('att.请假时间'), ['class' => 'col-sm-2 control-label']) !!}
-                        <div class="col-sm-5">
-                            <div class="input-group">
-                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                                {!! Form::text('opening_time', !empty($articles[0]->opening_time) ? $articles[0]->opening_time : (old('opening_time') ?? '') , [
-                                'class' => 'form-control date',
-                                ]) !!}
-                                <span class="help-block m-b-none">{{ $errors->first('opening_time') }}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="hr-line-dashed"></div>
-
-                    <div class="form-group">
-                        {!! Form::label('opening_time', trans('att.请假时间'), ['class' => 'col-sm-2 control-label']) !!}
-                        <div class="col-sm-5">
-                            <div class="input-group">
-                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                                {!! Form::text('opening_time', !empty($articles[0]->opening_time) ? $articles[0]->opening_time : (old('opening_time') ?? '') , [
-                                'class' => 'form-control date',
-                                ]) !!}
-                                <span class="help-block m-b-none">{{ $errors->first('opening_time') }}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="hr-line-dashed"></div>
-
-                    <div class="form-group">
-                        {!! Form::label('associate_image', trans('att.附件图片'), ['class' => 'col-sm-2 control-label']) !!}
+                    <div class="form-group @if (!empty($errors->first('holiday_id'))) has-error @endif">
+                        {!! Form::label('holiday_id', trans('att.请假类型'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-2">
-                            <img height="100px" width="100px" src="{{ !empty($articles[0]->associate_image) ?  asset($articles[0]->associate_image) : asset('img/blank.png') }}"
+                            <select class="js-select2-single form-control" name="holiday_id" >
+                                @foreach($holidayList as $k => $v)
+                                    <option value="{{ $k }}" @if($k === $leave->holiday_id) selected="selected" @endif>{{ $v }}</option>
+                                @endforeach
+                            </select>
+                            <span class="help-block m-b-none">{{ $errors->first('holiday_id') }}</span>
+                        </div>
+                    </div>
+
+                    <div class="hr-line-dashed"></div>
+
+                    <div class="form-group @if (!empty($errors->first('start_time'))) has-error @endif">
+                        {!! Form::label('start_time', trans('att.请假开始时间'), ['class' => 'col-sm-2 control-label']) !!}
+                        <div class="col-sm-3">
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                {!! Form::text('start_time', !empty($leave->start_time) ? $leave->start_time : (old('start_time') ?? '') , [
+                                'class' => 'form-control date',
+                                'required' => true,
+                                ]) !!}
+                                <span class="help-block m-b-none">{{ $errors->first('start_time') }}</span>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <select class="js-select2-single form-control" name="start_id" >
+                                @foreach(\App\Models\Attendance\Leave::$startId as $k => $v)
+                                    <option value="{{ $k }}" @if($k === $leave->start_id) selected="selected" @endif>{{ $v }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="hr-line-dashed"></div>
+
+                    <div class="form-group @if (!empty($errors->first('end_time'))) has-error @endif">
+                        {!! Form::label('end_time', trans('att.请假结束时间'), ['class' => 'col-sm-2 control-label']) !!}
+                        <div class="col-sm-3">
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                {!! Form::text('end_time', !empty($leave->end_time) ? $leave->end_time : (old('end_time') ?? '') , [
+                                'class' => 'form-control date',
+                                'required' => true,
+                                ]) !!}
+                                <span class="help-block m-b-none">{{ $errors->first('end_time') }}</span>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <select class="js-select2-single form-control" name="end_id" >
+                                @foreach(\App\Models\Attendance\Leave::$endId as $k => $v)
+                                    <option value="{{ $k }}" @if($k === $leave->start_id) selected="selected" @endif>{{ $v }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="hr-line-dashed"></div>
+
+                    <div class="form-group @if (!empty($errors->first('annex'))) has-error @endif">
+                        {!! Form::label('annex', trans('att.附件图片'), ['class' => 'col-sm-2 control-label']) !!}
+                        <div class="col-sm-2">
+                            <img height="100px" width="100px" src="{{ !empty($leave->annex) ?  asset($leave->annex) : asset('img/blank.png') }}"
                                  id="show_associate_image">
-                            <input name="associate_image" type="file" accept="image/*" id="select-associate-file"/>
-                        </div></div>
+                            <input name="annex" type="file" accept="image/*" id="select-associate-file"/>
+                        </div>
+
+                    </div>
 
                     <div class="hr-line-dashed"></div>
 
 
 
-                    <div class="form-group">
-                        {!! Form::label('content', trans('att.请假理由'), ['class' => 'col-sm-2 control-label']) !!}
+                    <div class="form-group @if (!empty($errors->first('reason'))) has-error @endif">
+                        {!! Form::label('reason', trans('att.请假理由'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-8">
-                            {!! Form::textarea('content', $articles[0]->content ?? old('content'), [
-                                'id' => 'editor'
+                            {!! Form::textarea('reason', $leave->reason ?? old('reason'), [
+                            'required' => true,
                             ]) !!}
                         </div>
+                        <span class="help-block m-b-none">{{ $errors->first('reason') }}</span>
                     </div>
 
                     <div class="hr-line-dashed"></div>
@@ -85,6 +118,7 @@
 @endsection
 @include('widget.icheck')
 @include('widget.select2')
+@include('widget.datepicker')
 @section('scripts-last')
     <script>
         $(function() {

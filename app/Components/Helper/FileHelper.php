@@ -2,6 +2,8 @@
 
 namespace App\Components\Helper;
 
+use Illuminate\Http\UploadedFile;
+
 class FileHelper
 {
     public static function files($directory, $prefix = null)
@@ -24,5 +26,13 @@ class FileHelper
         });
 
         return $files;
+    }
+
+    public static function uploadImage(UploadedFile $file, $name, $uploadPath = '')
+    {
+        $uploadPath = $uploadPath ? public_path($uploadPath) : public_path('img/uploads/');
+        $fileName = $name . '.' . $file->getClientOriginalExtension();
+        $file->move($uploadPath, $fileName);
+        return $fileName;
     }
 }

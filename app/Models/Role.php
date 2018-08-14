@@ -43,4 +43,10 @@ class Role extends EntrustRole
         $list = self::getRoleTextList();
         return isset($list[$id]) ? $list[$id] : '';
     }
+
+    public function leaveStep()
+    {
+        return $this->hasMany(RoleLeaveStep::class, 'role_id', 'id');
+    }
+
 }

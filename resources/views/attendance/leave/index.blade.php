@@ -30,30 +30,36 @@
                             <thead>
                             <tr>
                                 <th>{{ trans('att.请假类型') }}</th>
-                                <th>{{ trans('att.开始日期') }}</th>
                                 <th>{{ trans('att.开始时间') }}</th>
-                                <th>{{ trans('att.结束日期') }}</th>
                                 <th>{{ trans('att.结束时间') }}</th>
                                 <th>{{ trans('att.假期时长') }}</th>
                                 <th>{{ trans('att.事由') }}</th>
+                                <th>{{ trans('att.申请时间') }}</th>
+                                <th>{{ trans('att.申请状态') }}</th>
                                 <th>{{ trans('att.操作') }}</th>
-                                <th>{{ trans('att.对假期有疑问') }}</th>
+                                {{--<th>{{ trans('att.对假期有疑问') }}</th>--}}
                             </tr>
                             </thead>
                             <tbody>
                             @foreach($data as $v)
                                 <tr>
-                                    <td>{{ $v['name'] }}</td>
-                                    <td>{{ $v['name'] }}</td>
-                                    <td>{{ $v['name'] }}</td>
-                                    <td>{{ $v['sort'] }}</td>
+                                    <td>{{ $holidayList[$v['holiday_id']] }}</td>
+                                    <td>{{ date('Y-m-d', strtotime($v['start_time'])) .' '. \App\Models\Attendance\Leave::$startId[$v['start_id']] ?? '' }}</td>
+                                    <td>{{ date('Y-m-d', strtotime($v['end_time'])) .' '. \App\Models\Attendance\Leave::$endId[$v['end_id']] ?? ''  }}</td>
+                                    <td>{{ App\Components\Helper\DataHelper::diffTime(date('Y-m-d', strtotime($v['start_time'])) . ' ' . \App\Models\Attendance\Leave::$startId[$v['start_id']], date('Y-m-d', strtotime($v['end_time'])) . ' ' . \App\Models\Attendance\Leave::$endId[$v['end_id']]) .'天'}}</td>
+                                    <td><pre style="height: 5em;width: 20em">{{ $v['reason'] }}</pre></td>
                                     <td>{{ $v['created_at'] }}</td>
-                                    <td>{{ $v['updated_at'] }}</td>
+                                    <td>{{ \App\Models\Attendance\Leave::$status[$v['status']] }}</td>
                                     <td>
-                                        @if(Entrust::can(['attendance-all', 'leave-all', 'leave.edit', 'leave.create']))
+                                        @if(Entrust::can(['leave-all', 'leave.edit']))
                                             {!! BaseHtml::tooltip(trans('app.设置'), route('leave.edit', ['id' => $v['leave_id']]), 'cog fa-lg') !!}
                                         @endif
+                                        @if($v['review_user_id'] == \Auth::user()->user_id && Entrust::can(['leave-all', 'leave.edit']))
+                                            {!! BaseHtml::tooltip(trans('att.请假详情'), route('leave.optInfo', ['id' => $v['leave_id']]), 'cog fa fa-newspaper-o') !!}
+                                        @endif
+
                                     </td>
+                                    {{--<td></td>--}}
                                 </tr>
                             @endforeach
                             </tbody>
@@ -63,5 +69,4 @@
             </div>
         </div>
     </div>
-
 @endsection

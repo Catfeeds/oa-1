@@ -32,8 +32,9 @@
                         </li>
                         @endif
 
-                        @if(Entrust::can(['attendance-all', 'job-all', 'job', 'dept-all', 'dept', 'school-all', 'school']))
-                            <li @if(Route::is(['job*', 'dept*', 'school*'])) class="active" @endif>
+                        @if(Entrust::can(['attendance-all', 'job-all', 'job', 'dept-all', 'dept', 'school-all', 'school',
+                        'holiday-config-all', 'holiday-config','approval-step-all', 'approval-step']))
+                            <li @if(Route::is(['job*', 'dept*', 'school*', 'holiday-config' ,'approval-step*'])) class="active" @endif>
                                 <a aria-expanded="false" role="button" href="{{ route('dept') }}">{{ trans('app.系统配置') }}</a>
                             </li>
                         @endif
@@ -43,7 +44,7 @@
                     <ul class="nav navbar-nav navbar-right">
 
                         <li class="dropdown">
-                            @if(\App\Models\UserExt::checkIsConfirm(Auth::user()->user_id))
+                            @if(!\App\Models\UserExt::checkIsConfirm(Auth::user()->user_id))
                                 <a class="dropdown-toggle count-info"
                                    href="{{ route('profile.confirmEdit') }}">
                                     <i class="fa fa-warning"></i>

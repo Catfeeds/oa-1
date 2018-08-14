@@ -32,6 +32,9 @@ Route::group([
         Route::post('leave/edit', [
             'middleware' => ['permission:attendance-all|leave-all|leave.edit'],
             'uses' => 'LeaveController@update']);
+        Route::get('leave/optInfo/{id}', [
+            'middleware' => ['permission:attendance-all|leave-all|leave-edit|leave-create'],
+            'uses' => 'LeaveController@optInfo'])->name('leave.optInfo');
 
     });
 });
