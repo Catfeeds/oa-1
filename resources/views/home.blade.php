@@ -61,7 +61,7 @@
 
                         <div class="col-lg-4">
                             <div class="contact-box">
-                                <a href="#">
+                                <a href="{{route('CrmIndex')}}">
                                     <div class="col-sm-4">
                                         <div class="text-center">
                                             <img alt="image" class="img-circle m-t-xs img-responsive"

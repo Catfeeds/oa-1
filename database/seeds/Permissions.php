@@ -13,6 +13,7 @@ class Permissions extends Seeder
     public $model = [
         '_base',
         '_attendance',
+        '_crm',
     ];
 
     public function run()
@@ -85,11 +86,39 @@ class Permissions extends Seeder
         return [
             'attendance-all' => '考勤功能/考勤管理/「所有」',
 
-            'leave-all' => '考勤功能/考勤管理/我的假期 [所有] ',
+            'leave-all' => '考勤功能/考勤管理/我的假期「所有」',
             'leave' => '考勤功能/考勤管理/我的假期/ 「列表」',
             'leave.create' => '考勤功能/考勤管理/我的假期/「添加」',
             'leave.edit' => '考勤功能/考勤管理/我的假期/「编辑」',
 
+        ];
+    }
+
+    // 对账功能
+    private function _crm(): array
+    {
+        return [
+            'crm-all' => 'CRM功能/「所有」',
+
+            'reconciliation-all' => 'CRM功能/对账功能/「所有」',
+            'reconciliation-reconciliationAudit' => 'CRM功能/对账功能/对账审核/「所有」',
+            'reconciliation-reconciliationAudit.edit' => 'CRM功能/对账功能/对账审核/「编辑」',
+            'reconciliation-reconciliationAudit.review' => 'CRM功能/对账功能/对账审核/「审核」',
+            'reconciliation-reconciliationAudit.download' => 'CRM功能/对账功能/对账审核/「导出」',
+
+            'reconciliation-reconciliationProduct' => 'CRM功能/对账功能/游戏列表/「所有」',
+            'reconciliation-reconciliationProduct.create' => 'CRM功能/对账功能/游戏列表/「添加」',
+            'reconciliation-reconciliationProduct.edit' => 'CRM功能/对账功能/游戏列表/「编辑」',
+
+            'reconciliation-reconciliationPrincipal' => 'CRM功能/对账功能/负责人管理/「所有」',
+            'reconciliation-reconciliationPrincipal.edit' => 'CRM功能/对账功能/负责人管理/「编辑」',
+
+            'reconciliation-reconciliationDifferenceType' => 'CRM功能/对账功能/对账差异类管理/「所有」',
+            'reconciliation-reconciliationDifferenceType.create' => 'CRM功能/对账功能/对账差异类管理/「添加」',
+            'reconciliation-reconciliationDifferenceType.edit' => 'CRM功能/对账功能/对账差异类管理/「编辑」',
+
+            'reconciliation-reconciliationProportion' => 'CRM功能/对账功能/分成比例管理/「所有」',
+            'reconciliation-reconciliationProportion.edit' => 'CRM功能/对账功能/分成比例管理/「编辑」',
         ];
     }
 
