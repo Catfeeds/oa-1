@@ -25,20 +25,18 @@ class ReconciliationAuditController extends Controller
         $scope->block = 'crm.reconciliation-audit.scope';
         $post = Principal::where(['principal_id' => \Auth::user()->user_id])->get(['product_id', 'job_id'])->toArray();
         $limitProduct = [0];
-        $job = [];
+        $limitPost = $job = [];
         foreach ($post as $v) {
             $limitProduct[] = $v['product_id'];
+            $limitPost[] = $v['job_id'];
             switch (true) {
                 case in_array($v['job_id'], [1, 2]):
                     $job[$v['product_id']][1] = 1;
                     break;
                 case in_array($v['job_id'], [3, 4]):
-                    $job[$v['product_id']][1] = 1;
                     $job[$v['product_id']][2] = 2;
                     break;
                 case in_array($v['job_id'], [5, 6]):
-                    $job[$v['product_id']][1] = 1;
-                    $job[$v['product_id']][2] = 2;
                     $job[$v['product_id']][3] = 3;
                     $job[$v['product_id']][4] = 4;
                     break;
@@ -46,7 +44,6 @@ class ReconciliationAuditController extends Controller
         }
         $products = Product::getList($limitProduct);
         $pid = \Request::get('product_id', key($products));
-
         if (!in_array($pid, array_keys($products))) {
             return redirect()->back()->withInput();
         }
@@ -97,7 +94,7 @@ class ReconciliationAuditController extends Controller
         }
         $title = trans('crm.对账审核');
 
-        return view('crm.reconciliation-audit.index', compact('title', 'scope', 'review', 'source', 'products', 'pid', 'header', 'data', 'status'));
+        return view('crm.reconciliation-audit.index', compact('title', 'scope', 'review', 'source', 'products', 'pid', 'header', 'data', 'status', 'limitPost'));
     }
 
     public function edit($id, $source)
