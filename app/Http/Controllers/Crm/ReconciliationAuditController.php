@@ -25,9 +25,10 @@ class ReconciliationAuditController extends Controller
         $scope->block = 'crm.reconciliation-audit.scope';
         $post = Principal::where(['principal_id' => \Auth::user()->user_id])->get(['product_id', 'job_id'])->toArray();
         $limitProduct = [0];
-        $job = [];
+        $limitPost = $job = [];
         foreach ($post as $v) {
             $limitProduct[] = $v['product_id'];
+            $limitPost[] = $v['job_id'];
             switch (true) {
                 case in_array($v['job_id'], [1, 2]):
                     $job[$v['product_id']][1] = 1;
@@ -97,7 +98,7 @@ class ReconciliationAuditController extends Controller
         }
         $title = trans('crm.对账审核');
 
-        return view('crm.reconciliation-audit.index', compact('title', 'scope', 'review', 'source', 'products', 'pid', 'header', 'data', 'status'));
+        return view('crm.reconciliation-audit.index', compact('title', 'scope', 'review', 'source', 'products', 'pid', 'header', 'data', 'status', 'limitPost'));
     }
 
     public function edit($id, $source)

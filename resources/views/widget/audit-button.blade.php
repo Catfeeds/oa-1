@@ -1,4 +1,4 @@
-@if($status == $first)
+@if($status == $first && in_array($first, $limitPost))
     @if(Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationAudit.submitReview']))
         <div class="col-sm-1 m-b-xs" style="width: 75px;">
             <a href="{!! route('reconciliationAudit.review', array_merge(Request::all(), ['status' => 1, 'pid' => $pid, 'source' => $source])) !!}">
@@ -23,7 +23,7 @@
             </div>
         @endif
     @endif
-@elseif($status == $second)
+@elseif($status == $second && in_array($second, $limitPost))
     @if(Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationAudit.review']))
         <div class="col-sm-1 m-b-xs" style="width: 55px;">
             <a href="{!! route('reconciliationAudit.review', array_merge(Request::all(), ['status' => 2, 'pid' => $pid, 'source' => $source])) !!}">
