@@ -47,6 +47,9 @@ Route::group([
         Route::get('leave/review/{id}', [
             'middleware' => ['permission:leave-all|leave.review.optStatus'],
             'uses' => 'LeaveController@reviewOptStatus'])->name('leave.review.optStatus');
+        Route::get('leave/review-batch/{id}', [
+            'middleware' => ['permission:leave-all|leave.review.optStatus'],
+            'uses' => 'LeaveController@reviewBatchOptStatus'])->name('leave.review.batchOptStatus');
 
     });
 });

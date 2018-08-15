@@ -4,13 +4,6 @@
 
 @section('page-head')
     @parent
-    <div class="col-sm-8">
-        <div class="title-action">
-            @if(Entrust::can(['leave.all', 'leave.edit', 'leave.create']))
-                <a href="{{ route('leave.create') }}" class="btn btn-primary btn-sm">{{ trans('请假申请') }}</a>
-            @endif
-        </div>
-    </div>
 
 @endsection
 
@@ -47,7 +40,7 @@
                             @foreach($data as $v)
                                 <tr>
                                     <td>
-                                        @if($v['status'] ==1 && $v['review_user_id'] == Auth::user()->user_id)
+                                        @if(in_array($v['status'], [0, 1]) && $v['review_user_id'] == Auth::user()->user_id)
                                              <input id="text_box" type="checkbox" class="i-checks" name="leaveIds[]" value="{{ $v['leave_id'] }}">
                                         @else
                                             -
@@ -84,14 +77,14 @@
     $(function () {
 
         $('#review-btn-ok').batch({
-            url: '{{ route('leave.review.optStatus', ['status' => 1]) }}',
+            url: '{{ route('leave.review.batchOptStatus', ['status' => 1]) }}',
             selector: '.i-checks:checked',
             type: '0',
             alert_confirm: '确定要批量通过审核吗？'
         });
 
         $('#review-btn-no').batch({
-            url: '{{ route('leave.review.optStatus', ['status' => 2]) }}',
+            url: '{{ route('leave.review.batchOptStatus', ['status' => 2]) }}',
             selector: '.i-checks:checked',
             type: '0',
             alert_confirm: '确定要批量拒绝审核吗？'

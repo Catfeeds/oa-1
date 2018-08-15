@@ -178,7 +178,7 @@ class LeaveController extends Controller
     {
         $ids = OperateLogHelper::getLogInfoIdToUid(\Auth::user()->user_id);
 
-        $data = Leave::whereIn('leave_id', $ids)->orderBy('created_at', 'desc')
+        $data = Leave::whereIn('leave_id', $ids)->orWhereRaw('review_user_id = '.\Auth::user()->user_id )->orderBy('created_at', 'desc')
             ->paginate(30);
 
         $title = trans('att.申请单管理');
@@ -213,7 +213,6 @@ class LeaveController extends Controller
         flash(trans('app.审核成功', ['value' => trans('app.假期申请')]), 'success');
 
         return redirect()->route('leave.review.info');
-
     }
 
     public function OptStatus($leaveId, $status)
