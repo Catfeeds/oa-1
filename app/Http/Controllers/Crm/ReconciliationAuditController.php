@@ -170,15 +170,6 @@ class ReconciliationAuditController extends Controller
 
     public function review($status)
     {
-        switch ($status) {
-            case 1:
-            case 2:
-                $type = 1;
-                break;
-            case 3:
-                $type = -1;
-                break;
-        }
         $scope = $this->scope;
         $pid = \Request::get('pid');
         $source = \Request::get('source');
@@ -186,14 +177,10 @@ class ReconciliationAuditController extends Controller
             ->whereBetween('billing_cycle_start', [$scope->startTimestamp, $scope->endTimestamp])
             ->get();
         foreach ($data as $v) {
-            $review = $v['review_type'] + $type;
-            if ($review < 0) {
-                $review = $v['review_type'];
-            }
-            $v->update(['review_type' => $review]);
+            $v->update(['review_type' => $status]);
 
         }
-        $this->push($pid, $source, $review);
+        $this->push($pid, $source, $status);
         flash(trans('app.审核', ['value' => trans('crm.对账审核')]), 'success');
         return redirect()->route('reconciliationAudit', ['source' => $source, 'product_id' => $pid, 'scope[startDate]' => $scope->startTimestamp, 'scope[endDate]' => $scope->endTimestamp]);
     }
