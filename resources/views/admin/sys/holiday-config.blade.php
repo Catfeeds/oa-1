@@ -37,6 +37,7 @@
                                                     <thead>
                                                     <tr>
                                                         <th>{{ trans('app.假期ID') }}</th>
+                                                        <th>{{ trans('app.假期类型') }}</th>
                                                         <th>{{ trans('app.假期名称') }}</th>
                                                         <th>{{ trans('app.假期天数') }}</th>
                                                         <th>{{ trans('app.假期描述') }}</th>
@@ -48,6 +49,7 @@
                                                     @foreach($data as $v)
                                                         <tr>
                                                             <td>{{ $v['holiday_id'] }}</td>
+                                                            <td>{{ \App\Models\Sys\HolidayConfig::$applyType[$v['apply_type_id']] ?? '' }}</td>
                                                             <td>{{ $v['holiday'] }}</td>
                                                             <td>{{ $v['num'] }}</td>
                                                             <td><pre style="width: 15em; height: 10em" >{{ $v['memo'] }}</pre></td>

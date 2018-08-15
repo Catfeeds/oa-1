@@ -41,7 +41,18 @@
                         {!! Form::label('holiday_id', trans('att.请假类型'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-6">
                             <span class="help-block m-b-none">
-                                {{$holidayList[$leave->holiday_id] ?? ''}}
+                                {{ \App\Models\Sys\HolidayConfig::$applyType[\App\Models\Sys\HolidayConfig::getHolidayApplyList()[$leave->holiday_id]] ?? ''}}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="hr-line-dashed"></div>
+
+                    <div class="form-group">
+                        {!! Form::label('holiday_id', trans('att.假期类型'), ['class' => 'col-sm-2 control-label']) !!}
+                        <div class="col-sm-6">
+                            <span class="help-block m-b-none">
+                                {{ \App\Models\Sys\HolidayConfig::getHolidayList()[$leave->holiday_id] ?? ''}}
                             </span>
                         </div>
                     </div>
@@ -93,7 +104,6 @@
                 </div>
                     {{--分割线--}}
                 <div class="col-sm-6">
-                    <div class="hr-line-dashed"></div>
 
                     <div class="form-group">
                         {!! Form::label('reason', trans('att.审核流程'), ['class' => 'col-sm-2 control-label']) !!}
@@ -208,7 +218,7 @@
                     return false;
                 }
 
-                $.get('{{ route('leave.optStatus',['id' => $leave->leave_id])}}', {status: status}, function ($data) {
+                $.get('{{ route('leave.review.optStatus',['id' => $leave->leave_id])}}', {status: status}, function ($data) {
                     if ($data.status == 1) {
                         bootbox.alert($data.msg);
                         location.reload();

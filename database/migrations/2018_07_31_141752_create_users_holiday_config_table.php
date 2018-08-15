@@ -15,7 +15,8 @@ class CreateUsersHolidayConfigTable extends Migration
     {
         Schema::create('users_holiday_config', function (Blueprint $table) {
             $table->increments('holiday_id');
-            $table->string('holiday', 20)->comment = '假期类型名称';
+            $table->unsignedInteger('apply_type_id')->comment = '申请类型';
+            $table->string('holiday', 20)->comment = '假期明细类型名称';
             $table->text('memo')->nullable()->comment = '假期描述';
             $table->unsignedInteger('num')->defult(0)->comment = '假期天数';
             $table->timestamps();

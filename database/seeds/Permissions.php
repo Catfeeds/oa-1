@@ -96,12 +96,11 @@ class Permissions extends Seeder
     {
         return [
 
-            'leave-all' => '考勤功能/考勤管理/我的假期「所有」',
+            'leave-all' => '考勤功能/考勤管理/「所有」',
             'leave' => '考勤功能/考勤管理/我的假期/ 「列表」',
             'leave.create' => '考勤功能/考勤管理/我的假期/「添加」',
             'leave.edit' => '考勤功能/考勤管理/我的假期/「编辑」',
-            'leave.optStatus' => '考勤功能/考勤管理/我的假期/「审核」',
-
+            'leave.optStatus' => '考勤功能/考勤管理/假期审核/「审核」',
         ];
     }
 

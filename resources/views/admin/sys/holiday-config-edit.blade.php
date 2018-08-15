@@ -29,6 +29,19 @@
                                         <div class="ibox-content profile-content">
                                             {!! Form::open(['class' => 'form-horizontal']) !!}
 
+                                            <div class="form-group">
+                                                {!! Form::label('apply_type_id', '申请类型', ['class' => 'col-sm-3 control-label']) !!}
+                                                <div class="col-sm-6">
+                                                    @foreach(\App\Models\Sys\HolidayConfig::$applyType as $k => $v)
+                                                        <label class="radio-inline i-checks">
+                                                            {!! Form::radio('apply_type_id', $k, $k === ($holiday->apply_type_id ?? old('apply_type_id') ?? 1), [
+                                                            'required' => true,
+                                                        ]) !!} {{ $v }}
+                                                        </label>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+
                                             <div class="form-group @if (!empty($errors->first('holiday'))) has-error @endif">
                                                 {!! Form::label('holiday', trans('app.假期名称'), ['class' => 'col-sm-3 control-label']) !!}
                                                 <div class="col-sm-6">
@@ -83,3 +96,4 @@
     </div>
 
 @endsection
+@include('widget.icheck')
