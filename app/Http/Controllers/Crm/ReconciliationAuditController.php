@@ -110,7 +110,7 @@ class ReconciliationAuditController extends Controller
             'backstage_channel' => $data['backstage_channel'], 'product_id' => $data['product_id']]));
 
         flash(trans('app.编辑成功', ['value' => trans('crm.对账审核')]), 'success');
-        return redirect()->route('reconciliationAudit', ['source' => $source, 'product_id' => $data['product_id']]);
+        return redirect()->route('reconciliationAudit', ['source' => $source, 'product_id' => $data['product_id'], 'scope[startDate]' => $data['billing_cycle_start'], 'scope[endDate]' => $data['billing_cycle_end']]);
     }
 
     public function transformName($source, $data, $request, $time)
@@ -195,7 +195,7 @@ class ReconciliationAuditController extends Controller
         }
         $this->push($pid, $source, $review);
         flash(trans('app.审核', ['value' => trans('crm.对账审核')]), 'success');
-        return redirect()->route('reconciliationAudit', ['source' => $source, 'product_id' => $pid]);
+        return redirect()->route('reconciliationAudit', ['source' => $source, 'product_id' => $pid, 'scope[startDate]' => $scope->startTimestamp, 'scope[endDate]' => $scope->endTimestamp]);
     }
 
     public function push($pid, $source, $review)

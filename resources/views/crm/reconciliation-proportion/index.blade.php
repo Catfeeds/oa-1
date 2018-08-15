@@ -9,6 +9,7 @@
 @endsection
 
 @section('content')
+    @include('widget.scope-month')
     @include('flash::message')
     <div class="row">
         <div class="col-lg-12">
