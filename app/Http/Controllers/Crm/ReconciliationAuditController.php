@@ -51,38 +51,18 @@ class ReconciliationAuditController extends Controller
         $review = array_intersect_key(Reconciliation::REVIEW, $job[$pid]);
         $source = \Request::get('source', key($review));
 
+        $header = $this->header($source);
+
         if (!in_array($source, array_keys($review))) {
             return redirect()->back()->withInput();
         }
-        switch (true) {
-            case $source == Reconciliation::OPERATION:
-                $header = ['结算周期开始', '结算周期结束', '收入类型', '我方', '客户', '游戏', '上线名称', '业务线',
-                    '地区', '对账币', '系统', '分成类型', '诗悦后台渠道', '统一渠道名称', '后台流水（对账币）', '后台流水（人民币）',
-                    '渠道费率', '一级分成比例', '二级分成比例', '二级分成条件', '运营调整', '运营调整类型', '运营调整备注', '运营调整人', '调整时间', '运营流水（对账币）', '运营流水（人民币）', '运营流水（对账币-费率分成）', '运营流水（人民币-费率分成）', '操作'];
-                break;
-            case $source == Reconciliation::ACCRUAL:
-                $header = ['结算周期开始', '结算周期结束', '收入类型', '我方', '客户', '游戏', '上线名称', '业务线',
-                    '地区', '对账币', '系统', '分成类型', '诗悦后台渠道', '统一渠道名称', '运营流水（对账币）', '运营流水（人民币）',
-                    '渠道费率', '一级分成比例', '二级分成比例', '二级分成条件', '对账调整', '对账调整类型', '对账调整备注', '对账调整人', '调整时间', '对账流水（对账币）', '对账流水（人民币）', '运营流水（对账币-费率分成）', '运营流水（人民币-费率分成）', '操作'];
-                break;
-            case $source == Reconciliation::RECONCILIATION:
-                $header = ['结算周期开始', '结算周期结束', '收入类型', '我方', '客户', '游戏', '上线名称', '业务线',
-                    '地区', '对账币', '系统', '一级分成类型', '诗悦后台渠道', '统一渠道名称', '对账流水（对账币）', '对账流水（人民币）',
-                    '渠道费率', '一级分成比例', '二级分成比例', '二级分成条件', '计提调整', '计提调整类型', '计提调整备注', '计提调整人', '调整时间', '计提流水（对账币）', '计提流水（人民币）', '运营流水（对账币-费率分成）', '运营流水（人民币-费率分成）', '操作'];
-                break;
-            default:
-                $header = ['结算周期开始', '结算周期结束', '收入类型', '我方', '客户', '游戏', '上线名称', '业务线',
-                    '地区', '对账币', '系统', '分成类型', '诗悦后台渠道', '统一渠道名称', '渠道费率', '一级分成比例', '二级分成比例', '二级分成条件', '后台流水（对账币）', '后台流水（人民币）',
-                    '后台流水（对账币-费率分成）', '后台流水（人民币-费率分成）', '运营调整', '运营调整类型', '运营调整备注', '运营调整人', '调整时间',
-                    '运营流水（对账币）', '运营流水（人民币）', '运营流水（对账币-费率分成）', '运营流水（人民币-费率分成）', '对账调整', '对账调整类型', '对账调整备注', '对账调整人', '调整时间',
-                    '对账流水（对账币）', '对账流水（人民币）', '计提流水（对账币-费率分成）', '计提流水（人民币-费率分成）', '计提调整', '计提调整类型', '计提调整备注', '计提调整人', '调整时间',
-                    '计提流水（对账币）', '计提流水（人民币）', '计提流水（对账币-费率分成）', '计提流水（人民币-费率分成）'];
-        }
+
 
         $data = Reconciliation::where(['product_id' => $pid])
             ->whereBetween('billing_cycle_start', [$scope->startTimestamp, $scope->endTimestamp])
             ->orderBy('id', 'desc')
             ->get()->toArray();
+        $diff = Difference::getList($pid);
         $status = 1;
         foreach ($data as $k => $v) {
             $proportion = Proportion::where(['product_id' => $pid, 'client' => $v['client'], 'backstage_channel' => $v['backstage_channel'], 'billing_cycle' => $v['billing_cycle_end']])->first();
@@ -90,11 +70,24 @@ class ReconciliationAuditController extends Controller
             $data[$k]['first_division'] = $proportion->first_division ? $proportion->first_division : 0;
             $data[$k]['second_division'] = $proportion->second_division ? $proportion->second_division : 0;
             $data[$k]['second_division_condition'] = $proportion->second_division_condition ? $proportion->second_division_condition : 0;
+
+            $data[$k]['accrual_divide_other'] = CrmHelper::dividedInto($data[$k]['channel_rate'], $data[$k]['first_division'], $data[$k]['second_division'], $data[$k]['second_division_condition'], $v['accrual_water_other']);
+            $data[$k]['accrual_divide_rmb'] = CrmHelper::dividedInto($data[$k]['channel_rate'], $data[$k]['first_division'], $data[$k]['second_division'], $data[$k]['second_division_condition'], $v['accrual_water_rmb']);
+
+            $data[$k]['reconciliation_divide_other'] = CrmHelper::dividedInto($data[$k]['channel_rate'], $data[$k]['first_division'], $data[$k]['second_division'], $data[$k]['second_division_condition'], $v['reconciliation_water_other']);
+            $data[$k]['reconciliation_divide_rmb'] = CrmHelper::dividedInto($data[$k]['channel_rate'], $data[$k]['first_division'], $data[$k]['second_division'], $data[$k]['second_division_condition'], $v['reconciliation_water_rmb']);
+
+            $data[$k]['backstage_divide_other'] = CrmHelper::dividedInto($data[$k]['channel_rate'], $data[$k]['first_division'], $data[$k]['second_division'], $data[$k]['second_division_condition'], $v['backstage_water_other']);
+            $data[$k]['backstage_divide_rmb'] = CrmHelper::dividedInto($data[$k]['channel_rate'], $data[$k]['first_division'], $data[$k]['second_division'], $data[$k]['second_division_condition'], $v['backstage_water_rmb']);
+
+            $data[$k]['operation_divide_other'] = CrmHelper::dividedInto($data[$k]['channel_rate'], $data[$k]['first_division'], $data[$k]['second_division'], $data[$k]['second_division_condition'], $v['operation_water_other']);
+            $data[$k]['operation_divide_rmb'] = CrmHelper::dividedInto($data[$k]['channel_rate'], $data[$k]['first_division'], $data[$k]['second_division'], $data[$k]['second_division_condition'], $v['operation_water_rmb']);
+
             $status = $data[$k]['review_type'];
         }
         $title = trans('crm.对账审核');
 
-        return view('crm.reconciliation-audit.index', compact('title', 'scope', 'review', 'source', 'products', 'pid', 'header', 'data', 'status', 'limitPost'));
+        return view('crm.reconciliation-audit.index', compact('title', 'scope', 'review', 'source', 'products', 'pid', 'header', 'data', 'status', 'limitPost', 'diff'));
     }
 
     public function edit($id, $source)
@@ -117,7 +110,7 @@ class ReconciliationAuditController extends Controller
             'backstage_channel' => $data['backstage_channel'], 'product_id' => $data['product_id']]));
 
         flash(trans('app.编辑成功', ['value' => trans('crm.对账审核')]), 'success');
-        return redirect()->route('reconciliationAudit', ['source' => $source, 'product_id' => $data['product_id']]);
+        return redirect()->route('reconciliationAudit', ['source' => $source, 'product_id' => $data['product_id'], 'scope[startDate]' => $data['billing_cycle_start'], 'scope[endDate]' => $data['billing_cycle_end']]);
     }
 
     public function transformName($source, $data, $request, $time)
@@ -202,7 +195,7 @@ class ReconciliationAuditController extends Controller
         }
         $this->push($pid, $source, $review);
         flash(trans('app.审核', ['value' => trans('crm.对账审核')]), 'success');
-        return redirect()->route('reconciliationAudit', ['source' => $source, 'product_id' => $pid]);
+        return redirect()->route('reconciliationAudit', ['source' => $source, 'product_id' => $pid, 'scope[startDate]' => $scope->startTimestamp, 'scope[endDate]' => $scope->endTimestamp]);
     }
 
     public function push($pid, $source, $review)
@@ -262,6 +255,18 @@ class ReconciliationAuditController extends Controller
                         $key = Principal::FSR;
                         $message = '提交审核';
                         break;
+                    case Reconciliation::FSR:
+                        $key = Principal::FSR;
+                        $message = '通过审核';
+                        break;
+                }
+                break;
+            case Reconciliation::ALL:
+                switch ($review) {
+                    case Reconciliation::FRC:
+                        $key = Principal::FSR;
+                        $message = '返结账';
+                        break;
                 }
                 break;
         }
@@ -275,12 +280,8 @@ class ReconciliationAuditController extends Controller
     {
         $scope = $this->scope;
         $pid = \Request::get('pid');
-        $header = ['结算周期开始', '结算周期结束', '收入类型', '我方', '客户', '游戏', '上线名称', '业务线',
-            '地区', '对账币', '系统', '分成类型', '诗悦后台渠道', '统一渠道名称', '渠道费率', '一级分成比例', '二级分成比例', '二级分成条件', '后台流水（对账币）', '后台流水（人民币）',
-            '后台流水（对账币-费率分成）', '后台流水（人民币-费率分成）', '运营调整', '运营调整类型', '运营调整备注', '运营调整人', '调整时间',
-            '运营流水（对账币）', '运营流水（人民币）', '运营流水（对账币-费率分成）', '运营流水（人民币-费率分成）', '对账调整', '对账调整类型', '对账调整备注', '对账调整人', '调整时间',
-            '对账流水（对账币）', '对账流水（人民币）', '计提流水（对账币-费率分成）', '计提流水（人民币-费率分成）', '计提调整', '计提调整类型', '计提调整备注', '计提调整人', '调整时间',
-            '计提流水（对账币）', '计提流水（人民币）', '计提流水（对账币-费率分成）', '计提流水（人民币-费率分成）'];
+        $source = \Request::get('source');
+        $header = $this->header($source);
         $file = storage_path(sprintf('data/export/%s.csv', date('YmdHis') . uniqid()));
         fopen($file, "w");
         $data = Reconciliation::where(['product_id' => $pid])
@@ -288,9 +289,10 @@ class ReconciliationAuditController extends Controller
             ->orderBy('id', 'desc')
             ->get()->toArray();
 
-        foreach ($data as $v){
+        foreach ($data as $k => $v) {
             $proportion = Proportion::where(['product_id' => $pid, 'client' => $v['client'], 'backstage_channel' => $v['backstage_channel'], 'billing_cycle' => $v['billing_cycle_end']])->first();
             $tmp = [
+                $k + 1,
                 $v['billing_cycle_start'],
                 $v['billing_cycle_end'],
                 $v['income_type'],
@@ -311,8 +313,8 @@ class ReconciliationAuditController extends Controller
                 $proportion->second_division_condition,
                 $v['backstage_water_other'],
                 $v['backstage_water_rmb'],
-                CrmHelper::dividedInto($proportion->channel_rate,$proportion->first_division,$proportion->second_division,$proportion->second_division_condition,$v['backstage_water_other']),
-                CrmHelper::dividedInto($proportion->channel_rate,$proportion->first_division,$proportion->second_division,$proportion->second_division_condition,$v['backstage_water_rmb']),
+                CrmHelper::dividedInto($proportion->channel_rate, $proportion->first_division, $proportion->second_division, $proportion->second_division_condition, $v['backstage_water_other']),
+                CrmHelper::dividedInto($proportion->channel_rate, $proportion->first_division, $proportion->second_division, $proportion->second_division_condition, $v['backstage_water_rmb']),
                 $v['operation_adjustment'],
                 $v['operation_type'],
                 $v['operation_remark'],
@@ -320,8 +322,8 @@ class ReconciliationAuditController extends Controller
                 $v['operation_time'],
                 $v['operation_water_other'],
                 $v['operation_water_rmb'],
-                CrmHelper::dividedInto($proportion->channel_rate,$proportion->first_division,$proportion->second_division,$proportion->second_division_condition,$v['operation_water_other']),
-                CrmHelper::dividedInto($proportion->channel_rate,$proportion->first_division,$proportion->second_division,$proportion->second_division_condition,$v['operation_water_rmb']),
+                CrmHelper::dividedInto($proportion->channel_rate, $proportion->first_division, $proportion->second_division, $proportion->second_division_condition, $v['operation_water_other']),
+                CrmHelper::dividedInto($proportion->channel_rate, $proportion->first_division, $proportion->second_division, $proportion->second_division_condition, $v['operation_water_rmb']),
                 $v['accrual_adjustment'],
                 $v['accrual_type'],
                 $v['accrual_remark'],
@@ -329,8 +331,8 @@ class ReconciliationAuditController extends Controller
                 $v['accrual_time'],
                 $v['accrual_water_other'],
                 $v['accrual_water_rmb'],
-                CrmHelper::dividedInto($proportion->channel_rate,$proportion->first_division,$proportion->second_division,$proportion->second_division_condition,$v['accrual_water_other']),
-                CrmHelper::dividedInto($proportion->channel_rate,$proportion->first_division,$proportion->second_division,$proportion->second_division_condition,$v['accrual_water_rmb']),
+                CrmHelper::dividedInto($proportion->channel_rate, $proportion->first_division, $proportion->second_division, $proportion->second_division_condition, $v['accrual_water_other']),
+                CrmHelper::dividedInto($proportion->channel_rate, $proportion->first_division, $proportion->second_division, $proportion->second_division_condition, $v['accrual_water_rmb']),
                 $v['reconciliation_adjustment'],
                 $v['reconciliation_type'],
                 $v['reconciliation_remark'],
@@ -338,8 +340,8 @@ class ReconciliationAuditController extends Controller
                 $v['reconciliation_time'],
                 $v['reconciliation_water_other'],
                 $v['reconciliation_water_rmb'],
-                CrmHelper::dividedInto($proportion->channel_rate,$proportion->first_division,$proportion->second_division,$proportion->second_division_condition,$v['reconciliation_water_other']),
-                CrmHelper::dividedInto($proportion->channel_rate,$proportion->first_division,$proportion->second_division,$proportion->second_division_condition,$v['reconciliation_water_rmb']),
+                CrmHelper::dividedInto($proportion->channel_rate, $proportion->first_division, $proportion->second_division, $proportion->second_division_condition, $v['reconciliation_water_other']),
+                CrmHelper::dividedInto($proportion->channel_rate, $proportion->first_division, $proportion->second_division, $proportion->second_division_condition, $v['reconciliation_water_rmb']),
             ];
             $this->file_prepend(implode("\t", $tmp), $file);
         }
@@ -352,5 +354,35 @@ class ReconciliationAuditController extends Controller
     {
         $fileContent = file_get_contents($filename);
         file_put_contents($filename, $string . "\n" . $fileContent);
+    }
+
+    public function header($source)
+    {
+        switch (true) {
+            case $source == Reconciliation::OPERATION:
+                $header = ['序号','结算周期开始', '结算周期结束', '收入类型', '我方', '客户', '游戏', '上线名称', '业务线',
+                    '地区', '对账币', '系统', '分成类型', '诗悦后台渠道', '统一渠道名称', '后台流水（对账币）', '后台流水（人民币）',
+                    '运营调整', '运营调整类型', '运营调整备注', '运营调整人', '调整时间', '运营流水（对账币）', '运营流水（人民币）', '操作'];
+                break;
+            case $source == Reconciliation::ACCRUAL:
+                $header = ['序号','结算周期开始', '结算周期结束', '收入类型', '我方', '客户', '游戏', '上线名称', '业务线',
+                    '地区', '对账币', '系统', '分成类型', '诗悦后台渠道', '统一渠道名称',  '渠道费率', '一级分成比例', '二级分成比例', '二级分成条件', '运营流水（对账币）', '运营流水（人民币）',
+                    '计提调整', '计提调整类型', '计提调整备注', '计提调整人', '调整时间', '计提流水（对账币）', '计提流水（人民币）', '计提流水（对账币-费率分成）', '计提流水（人民币-费率分成）','操作'];
+                break;
+            case $source == Reconciliation::RECONCILIATION:
+                $header = ['序号','结算周期开始', '结算周期结束', '收入类型', '我方', '客户', '游戏', '上线名称', '业务线',
+                    '地区', '对账币', '系统', '分成类型', '诗悦后台渠道', '统一渠道名称',  '渠道费率', '一级分成比例', '二级分成比例', '二级分成条件', '计提流水（对账币）', '计提流水（人民币）',
+                    '对账调整', '对账调整类型', '对账调整备注', '对账调整人', '调整时间', '对账流水（对账币）', '对账流水（人民币）', '对账流水（对账币-费率分成）', '对账流水（人民币-费率分成）', '操作'];
+                break;
+            default:
+                $header = ['序号','结算周期开始', '结算周期结束', '收入类型', '我方', '客户', '游戏', '上线名称', '业务线',
+                    '地区', '对账币', '系统', '分成类型', '诗悦后台渠道', '统一渠道名称', '渠道费率', '一级分成比例', '二级分成比例', '二级分成条件', '后台流水（对账币）', '后台流水（人民币）',
+                    '后台流水（对账币-费率分成）', '后台流水（人民币-费率分成）', '运营调整', '运营调整类型', '运营调整备注', '运营调整人', '调整时间',
+                    '运营流水（对账币）', '运营流水（人民币）', '运营流水（对账币-费率分成）', '运营流水（人民币-费率分成）', '计提调整', '计提调整类型', '计提调整备注', '计提调整人', '调整时间',
+                    '计提流水（对账币）', '计提流水（人民币）', '计提流水（对账币-费率分成）', '计提流水（人民币-费率分成）', '对账调整', '对账调整类型', '对账调整备注', '对账调整人', '调整时间',
+                    '对账流水（对账币）', '对账流水（人民币）', '对账流水（对账币-费率分成）', '对账流水（人民币-费率分成）'];
+        }
+
+        return $header;
     }
 }
