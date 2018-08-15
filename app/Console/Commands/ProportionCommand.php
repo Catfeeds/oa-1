@@ -35,7 +35,8 @@ class ProportionCommand extends BaseCommand
         foreach ($p as $k => $v) {
             $ret = Reconciliation::where(['product_id' => $k])->whereBetween('billing_cycle_start', [$start, $end])->get()->toArray();
             $ops = Principal::where(['product_id' => $k, 'job_id' => Principal::OPS])->first();
-            $user = User::findOrFail($ops->principal_id);
+            $principal_id = $ops['principal_id'] ? $ops['principal_id'] : 1;
+            $user = User::findOrFail($principal_id);
             foreach ($ret as $v) {
                 $proprotion = Proportion::where(['product_id' => $k, 'billing_cycle' => $billingCycle, 'client' => $v['client'], 'backstage_channel' => $v['backstage_channel']])->first();
                 if ($proprotion) {
