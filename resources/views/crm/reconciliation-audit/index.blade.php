@@ -108,7 +108,7 @@
                                             <td>{{ $v['operation_water_other'] }}</td>
                                             <td>{{ $v['operation_water_rmb'] }}</td>
                                             <td>
-                                                @if($v['review_type'] == 1 && Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationAudit.edit']))
+                                                @if($v['review_type'] == 1 && Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationAudit', 'reconciliation-reconciliationAudit.edit']))
                                                     {!! BaseHtml::tooltip(trans('crm.编辑'), route('reconciliationAudit.edit', ['id' => $v['id'], 'source' => $source]), 'cog fa-lg') !!}
                                                 @endif
                                             </td>
@@ -182,7 +182,7 @@
                                             <td>{{ $v['accrual_divide_other'] }}</td>
                                             <td>{{ $v['accrual_divide_rmb'] }}</td>
                                             <td>
-                                                @if($v['review_type'] == 3 && Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationAudit.edit']))
+                                                @if($v['review_type'] == 3 && Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationAudit', 'reconciliation-reconciliationAudit.edit']))
                                                     {!! BaseHtml::tooltip(trans('crm.编辑'), route('reconciliationAudit.edit', ['id' => $v['id'], 'source' => $source]), 'cog fa-lg') !!}
                                                 @endif
                                             </td>
@@ -256,7 +256,7 @@
                                             <td>{{ $v['reconciliation_divide_other'] }}</td>
                                             <td>{{ $v['reconciliation_divide_rmb'] }}</td>
                                             <td>
-                                                @if($v['review_type'] == 5 && Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationAudit.edit']))
+                                                @if($v['review_type'] == 5 && Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationAudit', 'reconciliation-reconciliationAudit.edit']))
                                                     {!! BaseHtml::tooltip(trans('crm.编辑'), route('reconciliationAudit.edit', ['id' => $v['id'], 'source' => $source]), 'cog fa-lg') !!}
                                                 @endif
                                             </td>
@@ -264,7 +264,7 @@
                                     @endforeach
                                 @else
 
-                                    @if($status == 7 && Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationAudit.review']))
+                                    @if($status == 7 && Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationAudit', 'reconciliation-reconciliationAudit.review']))
                                         <div class="col-sm-1 m-b-xs" style="width: 75px;">
                                             <a href="{!! route('reconciliationAudit.review', array_merge(Request::all(), ['status' => 3, 'pid' => $pid, 'source' => $source])) !!}">
                                                 <button class="btn btn-warning btn-sm"

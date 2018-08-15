@@ -7,7 +7,7 @@
     @parent
     <div class="col-sm-8">
         <div class="title-action">
-            @if(Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationProduct.create']))
+            @if(Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationProduct','reconciliation-reconciliationProduct.create']))
                 <a href="{{ route('reconciliationProduct.create') }}"
                    class="btn btn-primary btn-sm">{{ trans('app.添加', ['value' => $title]) }}</a>
             @endif
@@ -47,7 +47,7 @@
                                         <td>{{ $v['product_id'] }}</td>
                                         <td>{{ $v['name'] }}</td>
                                         <td>
-                                            @if(Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationProduct.edit']))
+                                            @if(Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationProduct','reconciliation-reconciliationProduct.edit']))
                                                 {!! BaseHtml::tooltip(trans('crm.编辑'), route('reconciliationProduct.edit', ['id' => $v['id']]), 'cog fa-lg') !!}
                                             @endif
                                         </td>

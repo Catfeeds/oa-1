@@ -72,7 +72,7 @@
                                         <td>{{ $v['second_division_condition'] }}</td>
                                         <td>{{ $v['user_name'] }}</td>
                                         <td>
-                                            @if(Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationProportion.edit']))
+                                            @if(Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationProportion', 'reconciliation-reconciliationProportion.edit']))
                                                 {!! BaseHtml::tooltip(trans('crm.编辑'), route('reconciliationProportion.edit', ['id' => $v['id'], 'pid' => $pid]), 'cog fa-lg') !!}
                                             @endif
                                         </td>
