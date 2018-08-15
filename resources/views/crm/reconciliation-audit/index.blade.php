@@ -266,7 +266,7 @@
 
                                     @if($status == 7 && Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationAudit', 'reconciliation-reconciliationAudit.review']))
                                         <div class="col-sm-1 m-b-xs" style="width: 75px;">
-                                            <a href="{!! route('reconciliationAudit.review', array_merge(Request::all(), ['status' => 3, 'pid' => $pid, 'source' => $source])) !!}">
+                                            <a href="{!! route('reconciliationAudit.review', array_merge(Request::all(), ['status' => $status - 1, 'pid' => $pid, 'source' => $source])) !!}">
                                                 <button class="btn btn-warning btn-sm"
                                                         data-toggle="tooltip"
                                                         title="返结账"
@@ -412,10 +412,12 @@
 @push('scripts')
     <script>
         $('#button').click(function () {
+            $("#warning_button").attr('disabled', true);
             $("#button").attr('disabled', true);
         });
         $('#warning_button').click(function () {
             $("#warning_button").attr('disabled', true);
+            $("#button").attr('disabled', true);
         });
     </script>
 @endpush

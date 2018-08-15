@@ -1,7 +1,7 @@
 @if($status == $first && in_array($first, $limitPost))
     @if(Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationAudit', 'reconciliation-reconciliationAudit.submitReview']))
         <div class="col-sm-1 m-b-xs" style="width: 75px;">
-            <a href="{!! route('reconciliationAudit.review', array_merge(Request::all(), ['status' => 1, 'pid' => $pid, 'source' => $source])) !!}">
+            <a href="{!! route('reconciliationAudit.review', array_merge(Request::all(), ['status' => $first + 1, 'pid' => $pid, 'source' => $source])) !!}">
                 <button class="btn btn-info btn-sm" id="button"
                         data-toggle="tooltip"
                         title="提交审核"
@@ -13,7 +13,7 @@
     @if($first > 1)
         @if(Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationAudit', 'reconciliation-reconciliationAudit.refuse']))
             <div class="col-sm-1 m-b-xs" style="width: 75px;">
-                <a href="{!! route('reconciliationAudit.review', array_merge(Request::all(), ['status' => 3, 'pid' => $pid, 'source' => $source])) !!}">
+                <a href="{!! route('reconciliationAudit.review', array_merge(Request::all(), ['status' => $first - 1, 'pid' => $pid, 'source' => $source])) !!}">
                     <button class="btn btn-warning btn-sm" id="warning_button"
                             data-toggle="tooltip"
                             title="拒绝"
@@ -26,7 +26,7 @@
 @elseif($status == $second && in_array($second, $limitPost))
     @if(Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationAudit', 'reconciliation-reconciliationAudit.review']))
         <div class="col-sm-1 m-b-xs" style="width: 55px;">
-            <a href="{!! route('reconciliationAudit.review', array_merge(Request::all(), ['status' => 2, 'pid' => $pid, 'source' => $source])) !!}">
+            <a href="{!! route('reconciliationAudit.review', array_merge(Request::all(), ['status' => $second + 1, 'pid' => $pid, 'source' => $source])) !!}">
                 <button class="btn btn-success btn-sm" id="button"
                         data-toggle="tooltip"
                         title="审核"
@@ -37,7 +37,7 @@
     @endif
     @if(Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationAudit', 'reconciliation-reconciliationAudit.refuse']))
         <div class="col-sm-1 m-b-xs" style="width: 75px;">
-            <a href="{!! route('reconciliationAudit.review', array_merge(Request::all(), ['status' => 3, 'pid' => $pid, 'source' => $source])) !!}">
+            <a href="{!! route('reconciliationAudit.review', array_merge(Request::all(), ['status' => $second - 1, 'pid' => $pid, 'source' => $source])) !!}">
                 <button class="btn btn-warning btn-sm" id="warning_button"
                         data-toggle="tooltip"
                         title="拒绝"
