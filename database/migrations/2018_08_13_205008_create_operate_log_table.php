@@ -22,6 +22,7 @@ class CreateOperateLogTable extends Migration
             $table->text('memo')->nullable()->comment = '备注信息';
 
             $table->unique(['id', 'type_id', 'info_id', 'opt_uid'], 'operate_unique');
+            $table->index(['opt_uid', 'opt_name'], 'opt_uid_name');
             $table->index('type_id');
             $table->index('info_id');
 

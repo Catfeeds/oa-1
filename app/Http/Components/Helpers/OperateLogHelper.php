@@ -34,4 +34,35 @@ class OperateLogHelper
         if($infoId > 0) OperateLog::create($log);
     }
 
+    /**
+     * 通过员工ID获取审核过的请假单
+     * @param $userId
+     * @return array
+     */
+    public static function getLogInfoIdToUid($userId)
+    {
+        $infoIds = OperateLog::where(['opt_uid' => $userId])
+            ->whereIn('opt_name', ['审核通过', '拒绝通过'])
+            ->get(['info_id'])
+            ->pluck('info_id')
+            ->toArray();
+
+        return array_unique($infoIds);
+    }
+
+    /**
+     * 通过信息ID获取员工ID
+     * @param $infoId
+     * @return array
+     */
+    public static function getLogUserIdToInId($infoId)
+    {
+        $userIds = OperateLog::where(['info_id' => $infoId])
+            ->get(['opt_uid'])
+            ->pluck('opt_uid')
+            ->toArray();
+        return $userIds;
+    }
+
+
 }

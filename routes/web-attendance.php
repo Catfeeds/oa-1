@@ -35,9 +35,18 @@ Route::group([
         Route::get('leave/optInfo/{id}', [
             'middleware' => ['permission:leave-all|leave.edit|leave.create'],
             'uses' => 'LeaveController@optInfo'])->name('leave.optInfo');
-        Route::get('leave/opt-status/{id}', [
-            'middleware' => ['permission:leave-all|leave.optStatus'],
-            'uses' => 'LeaveController@optStatus'])->name('leave.optStatus');
+        #申请单管理
+        Route::get('leave/review/', [
+            'middleware' => ['permission:leave-all|leave.review'],
+            'uses' => 'LeaveController@reviewIndex'])->name('leave.review.info');
+
+        Route::get('leave/review/optInfo/{id}', [
+            'middleware' => ['permission:leave-all|leave.review'],
+            'uses' => 'LeaveController@optInfo'])->name('leave.review.optInfo');
+
+        Route::get('leave/review/{id}', [
+            'middleware' => ['permission:leave-all|leave.review.optStatus'],
+            'uses' => 'LeaveController@reviewOptStatus'])->name('leave.review.optStatus');
 
     });
 });

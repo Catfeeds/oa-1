@@ -43,7 +43,6 @@ class Leave extends Model
 
     protected $fillable = [
         'user_id',
-        'apply_type_id',
         'step_id',
         'holiday_id',
         'start_time',

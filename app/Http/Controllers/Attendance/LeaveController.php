@@ -33,10 +33,9 @@ class LeaveController extends Controller
 
     public function index()
     {
-        $data = Leave::orderBy('created_at', 'desc')
+        $data = Leave::where(['user_id' => \Auth::user()->user_id])->orderBy('created_at', 'desc')
             ->paginate(30);
 
-        $holidayList = HolidayConfig::getHolidayList();
         $title = trans('att.我的假期详情');
         return view('attendance.leave.index', compact('title', 'data', 'scope', 'holidayList'));
 
@@ -46,7 +45,6 @@ class LeaveController extends Controller
     {
         $leave = (object)['holiday_id' => '', 'start_id' => '', 'end_id' => ''];
         $reviewUserId = '';
-        $holidayList = HolidayConfig::getHolidayList();
         $title = trans('att.请假申请');
         return view('attendance.leave.edit', compact('title', 'holidayList', 'leave', 'reviewUserId'));
     }
@@ -54,8 +52,6 @@ class LeaveController extends Controller
     public function edit($id)
     {
         $leave = Leave::findOrFail($id);
-
-        $holidayList = HolidayConfig::getHolidayList();
         $title = trans('att.请假申请');
         return view('attendance.leave.edit', compact('title', 'holidayList', 'leave'));
     }
@@ -117,7 +113,6 @@ class LeaveController extends Controller
         }
 
         $data = [
-            'apply_type_id' => 1,
             'user_id' => \Auth::user()->user_id,
             'holiday_id' => $p['holiday_id'],
             'step_id' => $step->step_id,
@@ -161,31 +156,72 @@ class LeaveController extends Controller
     public function optInfo($id)
     {
         $leave = Leave::findOrFail($id);
-
-        if( in_array(\Auth::user()->user_id, [$leave->user_id, $leave->review_user_id]) && !empty($leave->leave_id) ) {
+        $logUserIds = OperateLogHelper::getLogUserIdToInId($leave->leave_id);
+        $logUserIds[] = $leave->user_id;
+        $logUserIds[] = $leave->review_user_id;
+        if(in_array(\Auth::user()->user_id, $logUserIds) && !empty($leave->leave_id) ) {
             $reviewUserId = json_decode($leave->review_user_id, true);
             $user = User::with(['role', 'dept'])->where(['user_id' => $reviewUserId])->first();
             $logs = OperateLog::where(['type_id' => 1, 'info_id' => $leave->leave_id])->get();
-
-            $holidayList = HolidayConfig::getHolidayList();
             $dept = Dept::getDeptList();
             $title = trans('att.假期详情');
-            return view('attendance.leave.info', compact('title', 'holidayList', 'leave', 'dept', 'reviewUserId', 'user', 'logs'));
+            return view('attendance.leave.info', compact('title',  'leave', 'dept', 'reviewUserId', 'user', 'logs'));
         } else {
             return redirect()->route('leave.info');
         }
-
     }
 
-    public function optStatus(Request $request, $id)
+    /**
+     * 审核管理页面
+     */
+    public function reviewIndex()
+    {
+        $ids = OperateLogHelper::getLogInfoIdToUid(\Auth::user()->user_id);
+
+        $data = Leave::whereIn('leave_id', $ids)->orderBy('created_at', 'desc')
+            ->paginate(30);
+
+        $title = trans('att.申请单管理');
+        return view('attendance.leave.review', compact('title', 'data', 'scope'));
+    }
+
+    public function reviewOptStatus(Request $request, $id)
     {
         $status = $request->get('status');
 
-        if(!in_array($status, [1, 2]) || empty($id))  return response()->json(['status' => -1, 'msg' => '错误的提交信息']);
+        if(!in_array($status, [1, 2]) || empty($id)) return response()->json(['status' => -1, 'msg' => '操作失败']);
 
-        $leave = Leave::findOrFail($id);
+        $optStatus = self::OptStatus($id, $status);
+
+        if($optStatus) {
+            return response()->json(['status' => 1, 'msg' => '操作成功']);
+        } else {
+            return response()->json(['status' => -1, 'msg' => '操作失败']);
+        }
+    }
+
+    public function reviewBatchOptStatus(Request $request, $status)
+    {
+        $leaveIds = $request->get('leaveIds');
+
+        if(!in_array($status, [1, 2]) || empty($status) || empty($leaveIds) || !is_array($leaveIds)) return response()->json(['status' => -1, 'msg' => '操作失败']);
+
+        foreach ($leaveIds as $id) {
+            self::OptStatus($id, $status);
+        }
+
+        flash(trans('app.审核成功', ['value' => trans('app.假期申请')]), 'success');
+
+        return redirect()->route('leave.review.info');
+
+    }
+
+    public function OptStatus($leaveId, $status)
+    {
+        $leave = Leave::findOrFail($leaveId);
+
         if(empty($leave->leave_id) || $leave->review_user_id != \Auth::user()->user_id) {
-            return redirect()->route('leave.info');
+            return false;
         }
         $msg = '';
         try {
@@ -215,11 +251,11 @@ class LeaveController extends Controller
             }
 
             OperateLogHelper::createOperateLog(OperateLogHelper::LEAVE_TYPE_ID, $leave->leave_id, $msg);
-            return response()->json(['status' => 1, 'msg' => '操作成功']);
 
         } catch (Exception $ex) {
-            return response()->json(['status' => -1, 'msg' => '操作失败']);
+            return false;
         }
 
+        return true;
     }
 }
