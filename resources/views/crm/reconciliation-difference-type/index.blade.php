@@ -7,7 +7,7 @@
     @parent
     <div class="col-sm-8">
         <div class="title-action">
-            @if(Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationDifferenceType.create']))
+            @if(Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationDifferenceType', 'reconciliation-reconciliationDifferenceType.create']))
                 <a href="{{ route('reconciliationDifferenceType.create', array_merge(Request::all(), ['pid' => $pid])) }}"
                    class="btn btn-primary btn-sm">{{ trans('app.添加', ['value' => $title]) }}</a>
             @endif
@@ -59,7 +59,7 @@
                                     <tr>
                                         <td>{{ $v['type_name'] }}</td>
                                         <td>
-                                            @if(Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationDifferenceType.edit']))
+                                            @if(Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationDifferenceType', 'reconciliation-reconciliationDifferenceType.edit']))
                                                 {!! BaseHtml::tooltip(trans('crm.编辑'), route('reconciliationDifferenceType.edit', ['id' => $v['id'], 'pid' => $pid]), 'cog fa-lg') !!}
                                             @endif
                                         </td>
