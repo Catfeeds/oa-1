@@ -75,6 +75,10 @@ class LeaveController extends Controller
         $startTime = $p['start_time'] .' '. Leave::$startId[$p['start_id']];
         $endTime = $p['end_time'] .' '. Leave::$endId[$p['end_id']];
         $day = DataHelper::diffTime($startTime, $endTime);
+        if(empty($day)) {
+            flash('申请失败,时间跨度最长为一周，有疑问请联系人事', 'danger');
+            return redirect()->route('leave.info');
+        }
         $user = User::findOrFail(\Auth::user()->user_id);
         $stepId = RoleLeaveStep::where(['role_id' => $user->role_id])->get(['step_id'])->pluck('step_id');
         $betDay = 1;
@@ -96,7 +100,6 @@ class LeaveController extends Controller
         $leader = [];
 
         foreach ($leaveStep as $lk => $lv) {
-
             $userLeader = User::where(['role_id' => $lv, 'is_leader' => 1])->first();
 
             if (empty($userLeader)) continue;
