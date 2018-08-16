@@ -63,7 +63,7 @@
             $('#tj_button').batch({
                 url: '{!! route('reconciliationAudit.review', array_merge(Request::all(), ['status' => $first + 1, 'pid' => $pid, 'source' => $source])) !!}',
                 selector: '.i-checks:checked',
-                type: '2',
+                type: '1',
                 alert_confirm: '确定要提交审核吗？'
             });
             $('#warning_button').batch({
@@ -75,7 +75,7 @@
             $('#button').batch({
                 url: '{!! route('reconciliationAudit.review', array_merge(Request::all(), ['status' => $second + 1, 'pid' => $pid, 'source' => $source])) !!}',
                 selector: '.i-checks:checked',
-                type: '2',
+                type: '1',
                 alert_confirm: '确定要通过提审吗？'
             });
             $('#warning_button_tow').batch({

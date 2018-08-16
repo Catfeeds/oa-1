@@ -41,15 +41,11 @@
                                     title: "操作",
                                     inputType: 'text',
                                     callback: function (reason) {
-                                        if (reason) {
-                                            var data = {
-                                                reason: reason
-                                            };
-                                            data = $.extend(selector_params, data);
-                                            window.location = opt.url + '&' + $.param(data);
-                                        }else{
-                                            window.location.reload();
-                                        }
+                                        var data = {
+                                            reason: reason
+                                        };
+                                        data = $.extend(selector_params, data);
+                                        window.location = opt.url + '&' + $.param(data);
                                     }
                                 });
                                 break;

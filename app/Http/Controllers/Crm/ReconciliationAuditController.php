@@ -62,11 +62,10 @@ class ReconciliationAuditController extends Controller
         if (!empty($data)) {
             $status = array_keys($data)[0];
         }
-        $diff = Difference::getList($pid);
 
         $title = trans('crm.对账审核');
 
-        return view('crm.reconciliation-audit.index', compact('title', 'scope', 'review', 'source', 'products', 'pid', 'header', 'status', 'limitPost', 'diff', 'columns'));
+        return view('crm.reconciliation-audit.index', compact('title', 'scope', 'review', 'source', 'products', 'pid', 'header', 'status', 'limitPost', 'columns'));
     }
 
     public function data()
@@ -150,6 +149,7 @@ class ReconciliationAuditController extends Controller
             'reconciliation_divide_other',
             'reconciliation_divide_rmb',
         ];
+        $diff = Difference::getList($pid);
         foreach ($tmp as $k => $v) {
             $v = (array)$v;
             $tmp2['num'] = $k + 1;
@@ -172,7 +172,7 @@ class ReconciliationAuditController extends Controller
                     $tmp2['backstage_water_other'] = $v['backstage_water_other'];
                     $tmp2['backstage_water_rmb'] = $v['backstage_water_rmb'];
                     $tmp2['operation_adjustment'] = $v['operation_adjustment'];
-                    $tmp2['operation_type'] = $v['operation_type'];
+                    $tmp2['operation_type'] = $diff[$v['operation_type']] ?? '未知'.$v['operation_type'];
                     $tmp2['operation_remark'] = $v['operation_remark'];
                     $tmp2['operation_user_name'] = $v['operation_user_name'];
                     $tmp2['operation_time'] = $v['operation_time'];
@@ -188,7 +188,7 @@ class ReconciliationAuditController extends Controller
                     $tmp2['operation_water_other'] = $v['operation_water_other'];
                     $tmp2['operation_water_rmb'] = $v['operation_water_rmb'];
                     $tmp2['accrual_adjustment'] = $v['accrual_adjustment'];
-                    $tmp2['accrual_type'] = $v['accrual_type'];
+                    $tmp2['accrual_type'] = $diff[$v['accrual_type']] ?? '未知'.$v['accrual_type'];
                     $tmp2['accrual_remark'] = $v['accrual_remark'];
                     $tmp2['accrual_user_name'] = $v['accrual_user_name'];
                     $tmp2['accrual_time'] = $v['accrual_time'];
@@ -206,7 +206,7 @@ class ReconciliationAuditController extends Controller
                     $tmp2['accrual_water_other'] = $v['accrual_water_other'];
                     $tmp2['accrual_water_rmb'] = $v['accrual_water_rmb'];
                     $tmp2['reconciliation_adjustment'] = $v['reconciliation_adjustment'];
-                    $tmp2['reconciliation_type'] = $v['reconciliation_type'];
+                    $tmp2['reconciliation_type'] = $diff[$v['reconciliation_type']] ?? '未知'.$v['reconciliation_type'];
                     $tmp2['reconciliation_remark'] = $v['reconciliation_remark'];
                     $tmp2['reconciliation_user_name'] = $v['reconciliation_user_name'];
                     $tmp2['reconciliation_time'] = $v['reconciliation_time'];
@@ -226,7 +226,7 @@ class ReconciliationAuditController extends Controller
                     $tmp2['backstage_divide_other'] = CrmHelper::dividedInto($v['channel_rate'], $v['first_division'], $v['second_division'], $v['second_division_condition'], $v['backstage_water_other']);
                     $tmp2['backstage_divide_rmb'] = CrmHelper::dividedInto($v['channel_rate'], $v['first_division'], $v['second_division'], $v['second_division_condition'], $v['backstage_water_rmb']);
                     $tmp2['operation_adjustment'] = $v['operation_adjustment'];
-                    $tmp2['operation_type'] = $v['operation_type'];
+                    $tmp2['operation_type'] = $diff[$v['operation_type']] ?? '未知'.$v['operation_type'];
                     $tmp2['operation_remark'] = $v['operation_remark'];
                     $tmp2['operation_user_name'] = $v['operation_user_name'];
                     $tmp2['operation_time'] = $v['operation_time'];
@@ -235,7 +235,7 @@ class ReconciliationAuditController extends Controller
                     $tmp2['operation_divide_other'] = CrmHelper::dividedInto($v['channel_rate'], $v['first_division'], $v['second_division'], $v['second_division_condition'], $v['operation_water_other']);
                     $tmp2['operation_divide_rmb'] = CrmHelper::dividedInto($v['channel_rate'], $v['first_division'], $v['second_division'], $v['second_division_condition'], $v['operation_water_rmb']);
                     $tmp2['accrual_adjustment'] = $v['accrual_adjustment'];
-                    $tmp2['accrual_type'] = $v['accrual_type'];
+                    $tmp2['accrual_type'] = $diff[$v['accrual_type']] ?? '未知'.$v['accrual_type'];
                     $tmp2['accrual_remark'] = $v['accrual_remark'];
                     $tmp2['accrual_user_name'] = $v['accrual_user_name'];
                     $tmp2['accrual_time'] = $v['accrual_time'];
@@ -244,7 +244,7 @@ class ReconciliationAuditController extends Controller
                     $tmp2['accrual_divide_other'] = CrmHelper::dividedInto($v['channel_rate'], $v['first_division'], $v['second_division'], $v['second_division_condition'], $v['accrual_water_other']);
                     $tmp2['accrual_divide_rmb'] = CrmHelper::dividedInto($v['channel_rate'], $v['first_division'], $v['second_division'], $v['second_division_condition'], $v['accrual_water_rmb']);
                     $tmp2['reconciliation_adjustment'] = $v['reconciliation_adjustment'];
-                    $tmp2['reconciliation_type'] = $v['reconciliation_type'];
+                    $tmp2['reconciliation_type'] = $diff[$v['reconciliation_type']] ?? '未知'.$v['reconciliation_type'];
                     $tmp2['reconciliation_remark'] = $v['reconciliation_remark'];
                     $tmp2['reconciliation_user_name'] = $v['reconciliation_user_name'];
                     $tmp2['reconciliation_time'] = $v['reconciliation_time'];
@@ -452,7 +452,7 @@ class ReconciliationAuditController extends Controller
                 break;
         }
         if (!empty($reason)) {
-            $reason = sprintf('，原因备注：%s', $reason);
+            $reason = sprintf('，拒绝原因备注：%s', $reason);
         }
         try {
             $username = $user[$job[$key]];
