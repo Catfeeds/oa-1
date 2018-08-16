@@ -22,6 +22,7 @@ class EditLog extends Model
 
     protected $fillable = [
         'product_id',
+        'rec_id',
         'billing_cycle_start',
         'billing_cycle_end',
         'client',
