@@ -141,7 +141,7 @@ class LeaveController extends Controller
             return redirect()->route('leave.info');
         }
 
-        flash(trans('app.添加成功', ['value' => trans('app.假期申请')]), 'success');
+        flash(trans('app.添加成功', ['value' => trans('att.假期申请')]), 'success');
 
         return redirect()->route('leave.info');
     }
@@ -152,7 +152,7 @@ class LeaveController extends Controller
 
         $leave->update($request->all());
 
-        flash(trans('app.编辑成功', ['value' => trans('app.假期申请')]), 'success');
+        flash(trans('app.编辑成功', ['value' => trans('att.假期申请')]), 'success');
         return redirect()->route('leave.info');
     }
 
@@ -213,7 +213,7 @@ class LeaveController extends Controller
             self::OptStatus($id, $status);
         }
 
-        flash(trans('app.审核成功', ['value' => trans('app.假期申请')]), 'success');
+        flash(trans('att.审核成功', ['value' => trans('att.假期申请')]), 'success');
 
         return redirect()->route('leave.review.info');
     }
@@ -248,7 +248,7 @@ class LeaveController extends Controller
                     break;
                 case 2 :
                     $msg = '拒绝通过';
-                    $leave->update(['status' => 2, 'review_user_id' => '']);
+                    $leave->update(['status' => 2, 'review_user_id' => 0]);
                     break;
             }
 

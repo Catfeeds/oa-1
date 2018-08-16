@@ -25,6 +25,7 @@ class UserController extends Controller
         'password_confirmation' => 'min:6',
         'status' => 'required|in:' . User::STATUS_DISABLE . ',' . User::STATUS_ENABLE,
         'role_id' => 'required|numeric|exists:roles,id',
+        'mobile' => 'nullable|phone_number',
     ];
 
     private $_validateRuleExt = [
