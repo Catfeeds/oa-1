@@ -14,6 +14,7 @@ use App\Http\Components\ScopeCrm\Reconciliation as Scope;
 use App\User;
 use Illuminate\Http\Request;
 use App\Http\Components\Helpers\QywxHelper;
+use DB;
 
 class ReconciliationAuditController extends Controller
 {
@@ -355,14 +356,23 @@ class ReconciliationAuditController extends Controller
         $pid = \Request::get('pid');
         $source = \Request::get('source');
         $reason = \Request::get('reason');
-        $data = Reconciliation::where(['product_id' => $pid])
-            ->whereBetween('billing_cycle_start', [$scope->startTimestamp, $scope->endTimestamp])
-            ->get();
-        foreach ($data as $v) {
-            $v->update(['review_type' => $status]);
+        DB::beginTransaction();
+        try {
+            $data = Reconciliation::where(['product_id' => $pid])
+                ->whereBetween('billing_cycle_start', [$scope->startTimestamp, $scope->endTimestamp])
+                ->get();
+            foreach ($data as $v) {
+                $v->update(['review_type' => $status]);
+            }
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            flash(trans('crm.录入数据库失败：' . $e->getMessage()), 'danger');
+            return redirect()->route('reconciliationAudit', ['source' => $source, 'product_id' => $pid, 'scope[startDate]' => $scope->startTimestamp, 'scope[endDate]' => $scope->endTimestamp]);
         }
+
         $this->push($pid, $source, $status,$reason);
-        flash(trans('app.审核', ['value' => trans('crm.对账审核')]), 'success');
+        flash(trans('crm.审核', ['value' => trans('crm.对账审核')]), 'success');
         return redirect()->route('reconciliationAudit', ['source' => $source, 'product_id' => $pid, 'scope[startDate]' => $scope->startTimestamp, 'scope[endDate]' => $scope->endTimestamp]);
     }
 
