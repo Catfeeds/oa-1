@@ -64,9 +64,39 @@
                     </div>
                     <div class="stat-view">
                         <div class="table-responsive">
-                            <table id="example" class="table table-bordered table-hover table-bordered" cellspacing="0"
+                            <table id="example" class="table table-striped table-hover table-bordered dataTable" cellspacing="0"
                                    width="100%">
                                 <thead>
+                                <tr>
+                                    <th colspan="14" class="red-color">基本数据</th>
+                                    @if($source == \App\Models\Crm\Reconciliation::OPERATION)
+                                        <th colspan="2" class="orange-color">后台流水</th>
+                                        <th colspan="5" class="yellow-color">运营调整</th>
+                                        <th colspan="2" class="green-color">运营流水</th>
+                                        <th colspan="1">--</th>
+                                    @elseif($source == \App\Models\Crm\Reconciliation::ACCRUAL)
+                                        <th colspan="4" class="orange-color">分成费率</th>
+                                        <th colspan="2" class="yellow-color">运营流水</th>
+                                        <th colspan="5" class="green-color">计提调整</th>
+                                        <th colspan="4" class="blue-color">计提流水分成</th>
+                                        <th colspan="1">--</th>
+                                    @elseif($source == \App\Models\Crm\Reconciliation::RECONCILIATION)
+                                        <th colspan="4" class="orange-color">分成费率</th>
+                                        <th colspan="2" class="yellow-color">计提流水</th>
+                                        <th colspan="5" class="green-color">对账调整</th>
+                                        <th colspan="4" class="blue-color">对账流水分成</th>
+                                        <th colspan="1">--</th>
+                                    @elseif($source == \App\Models\Crm\Reconciliation::ALL)
+                                        <th colspan="4" class="orange-color">分成费率</th>
+                                        <th colspan="4" class="yellow-color">后台流水分成</th>
+                                        <th colspan="5" class="green-color">运营调整</th>
+                                        <th colspan="4" class="blue-color">运营流水分成</th>
+                                        <th colspan="5" class="indigo-color">计提调整</th>
+                                        <th colspan="4" class="violet-color">计提流水分成</th>
+                                        <th colspan="5" class="red-color">对账调整</th>
+                                        <th colspan="4" class="orange-color">对账流水分成</th>
+                                    @endif
+                                </tr>
                                 <tr>
                                     @foreach($columns as $v)
                                         <th>{{ $v }}</th>
