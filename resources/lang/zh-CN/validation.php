@@ -112,6 +112,12 @@ return [
     'uploaded'             => ':attribute 上传失败。',
     'url'                  => ':attribute 格式不正确。',
 
+    /**
+     * 自定义规则
+     */
+
+    'phone_number'     => ':attribute 无效的手机号码。',
+
     /*
     |--------------------------------------------------------------------------
     | Custom Validation Language Lines
