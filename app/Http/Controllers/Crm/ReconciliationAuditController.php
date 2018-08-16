@@ -71,7 +71,7 @@ class ReconciliationAuditController extends Controller
 
     public function data()
     {
-        $permission = \Entrust::can('crm-all', 'reconciliation-all', 'reconciliation-reconciliationAudit', 'reconciliation-reconciliationAudit.edit');
+        $permission = \Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationAudit', 'reconciliation-reconciliationAudit.edit']);
         $pid = \Request::get('product_id');
         $source = \Request::get('source');
         $scope = $this->scope;
@@ -268,7 +268,9 @@ class ReconciliationAuditController extends Controller
             }
             $data[] = array_values($tmp2);
         }
-        $data = array_merge([0 => array_values($tmp3)], $data);
+        if (!empty($tmp3)) {
+            $data = array_merge([0 => array_values($tmp3)], $data);
+        }
         return $this->response($data);
     }
 
@@ -371,12 +373,12 @@ class ReconciliationAuditController extends Controller
             return redirect()->route('reconciliationAudit', ['source' => $source, 'product_id' => $pid, 'scope[startDate]' => $scope->startTimestamp, 'scope[endDate]' => $scope->endTimestamp]);
         }
 
-        $this->push($pid, $source, $status,$reason);
+        $this->push($pid, $source, $status, $reason);
         flash(trans('crm.审核', ['value' => trans('crm.对账审核')]), 'success');
         return redirect()->route('reconciliationAudit', ['source' => $source, 'product_id' => $pid, 'scope[startDate]' => $scope->startTimestamp, 'scope[endDate]' => $scope->endTimestamp]);
     }
 
-    public function push($pid, $source, $review,$reason)
+    public function push($pid, $source, $review, $reason)
     {
         $scope = $this->scope;
         $job = Principal::where(['product_id' => $pid])->get(['job_id', 'principal_id'])->pluck('principal_id', 'job_id')->toArray();
@@ -449,7 +451,7 @@ class ReconciliationAuditController extends Controller
                 }
                 break;
         }
-        if (!empty($reason)){
+        if (!empty($reason)) {
             $reason = sprintf('，原因备注：%s', $reason);
         }
         try {
