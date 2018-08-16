@@ -4,7 +4,7 @@
  *
  */
 .red-color {
-    background-color: red!important;
+    background-color: #E8D51E!important;
     color: green;
     text-align:center
 }
@@ -24,12 +24,12 @@
     text-align:center
 }
 .blue-color {
-    background-color: blue!important;;
+    background-color: #1EC3E8!important;;
     color: green;
     text-align:center
 }
 .indigo-color {
-    background-color: indigo!important;;
+    background-color: #1EE895!important;;
     color: green;
     text-align:center
 }
