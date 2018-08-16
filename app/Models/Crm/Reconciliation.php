@@ -26,6 +26,7 @@ class Reconciliation extends Model
     const TREASURER = 5;
     const FRC = 6;
     const FSR = 7;
+    const COMPLETE = 8;
     const REVIEW_TYPE = [
         self::UNRD => '未审核',
         self::OPS => '运营专员审核',
@@ -34,6 +35,7 @@ class Reconciliation extends Model
         self::TREASURER => '财务计提主管审核',
         self::FRC => '财务对账专员审核',
         self::FSR => '财务对账主管审核',
+        self::COMPLETE => '审核完成',
     ];
 
     const OPERATION = 1;
@@ -50,6 +52,7 @@ class Reconciliation extends Model
     protected $fillable = [
         'id',
         'product_id',
+        'billing_cycle',
         'billing_cycle_start',
         'income_type',
         'billing_cycle_end',

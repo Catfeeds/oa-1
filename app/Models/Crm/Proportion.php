@@ -21,6 +21,7 @@ class Proportion extends Model
 
     protected $fillable = [
         'product_id',
+        'rec_id',
         'billing_cycle',
         'client',
         'backstage_channel',
