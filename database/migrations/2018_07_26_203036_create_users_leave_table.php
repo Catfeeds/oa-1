@@ -8,7 +8,7 @@ class CreateUsersLeaveTable extends Migration
 {
     /**
      * Run the migrations.
-     *
+     *  员工 申请假期表
      * @return void
      */
     public function up()

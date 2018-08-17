@@ -8,7 +8,6 @@
 
 namespace App\Http\Components\Helpers;
 
-
 use App\Models\Sys\OperateLog;
 
 class OperateLogHelper
@@ -64,5 +63,23 @@ class OperateLogHelper
         return $userIds;
     }
 
+    /**
+     * 微信 信息推送接口
+     * @param $userId //工号ID 支持多个 |分割 sy0001|sy0002
+     * @param $message //消息内容 支持a标签和换行
+     */
+    public static function sendWXMsg($userId, $message)
+    {
+        $time = time();
+        $pushData = [
+            'userid'  => $userId,
+            'message' => $message,
+            'dateTime' => $time,
+            'sign' => md5($userId . 'oU0lD8GRVpvYfYUq6ensuQtHUkwtE0o3' . $time)
+        ];
+        //微信通知推送消息接口
+        //\BackstageApi::sendWXMsg($pushData, 'push');
+
+    }
 
 }

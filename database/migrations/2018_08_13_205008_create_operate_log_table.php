@@ -8,7 +8,7 @@ class CreateOperateLogTable extends Migration
 {
     /**
      * Run the migrations.
-     *
+     *  审核操作日志表
      * @return void
      */
     public function up()

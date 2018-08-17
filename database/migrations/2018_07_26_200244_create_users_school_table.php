@@ -8,7 +8,7 @@ class CreateUsersSchoolTable extends Migration
 {
     /**
      * Run the migrations.
-     *
+     *  员工 系统配置 学校配置表
      * @return void
      */
     public function up()

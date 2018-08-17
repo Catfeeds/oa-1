@@ -8,7 +8,7 @@ class CreateRolesLeaveStepTable extends Migration
 {
     /**
      * Run the migrations.
-     *
+     *  职务审核步骤关联表
      * @return void
      */
     public function up()

@@ -119,9 +119,8 @@ class DataHelper
 
         if ($startTime <= $endTime) {
         $day = floor($endTime - $startTime)/86400;
-
             switch ($day) {
-                case $day > 0.1 && $day < 0.3 :
+                case $day > 0 && $day < 0.3 :
                     return 0.5;
                     break;
                 case $day > 0.3 && $day < 1 :

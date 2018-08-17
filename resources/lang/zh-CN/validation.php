@@ -118,6 +118,7 @@ return [
 
     'phone_number'     => ':attribute 无效的手机号码。',
 
+
     /*
     |--------------------------------------------------------------------------
     | Custom Validation Language Lines
@@ -176,5 +177,7 @@ return [
         'time'                  => '时间',
         'available'             => '可用的',
         'size'                  => '大小',
+        'start_time'            => '请假开始时间',
+        'end_time'              => '请假结束时间',
     ],
 ];

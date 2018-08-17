@@ -19,7 +19,7 @@
             startView: 2,
             minView: 2,
             todayHighlight: 1,
-            todayBtn: 1,
+            todayBtn: 1
         });
 
         $('.date_time').datetimepicker({
@@ -29,14 +29,22 @@
             autoclose: 1,
             startView: 2,
             todayHighlight: 1,
-            todayBtn: 1,
+            todayBtn: 1
         });
         $('.date_month').datetimepicker({
             language: "{{ Lang::locale() }}",
             format: 'yyyy-mm',
             autoclose: 1,
             startView: 3,
-            minView: 3,
+            minView: 3
+        });
+        $('.date_h').datetimepicker({
+            language: "{{ Lang::locale() }}",
+            format: 'hh:ii',
+            autoclose: true,
+            minView: 0,
+            minuteStep:5,
+            startView:1
         });
     });
 </script>

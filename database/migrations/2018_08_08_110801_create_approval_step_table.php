@@ -8,7 +8,7 @@ class CreateApprovalStepTable extends Migration
 {
     /**
      * Run the migrations.
-     *
+     *  系统配置 审核步骤配置表
      * @return void
      */
     public function up()

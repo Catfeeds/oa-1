@@ -10,6 +10,7 @@ namespace App\Http\Controllers\Attendance;
 
 use App\Components\Helper\DataHelper;
 use App\Components\Helper\FileHelper;
+use App\Http\Components\Helpers\AttendanceHelper;
 use App\Http\Components\Helpers\OperateLogHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Attendance\Leave;
@@ -74,6 +75,12 @@ class LeaveController extends Controller
 
         $startTime = $p['start_time'] .' '. Leave::$startId[$p['start_id']];
         $endTime = $p['end_time'] .' '. Leave::$endId[$p['end_id']];
+
+        //时间判断
+        if(strtotime($startTime) > strtotime($endTime)) {
+            return redirect()->back()->withInput()->withErrors(['end_time' => trans('请选择有效的时间范围')]);
+        }
+        //时间天数分配
         $day = DataHelper::diffTime($startTime, $endTime);
         if(empty($day)) {
             flash('申请失败,时间跨度最长为一周，有疑问请联系人事', 'danger');
@@ -132,10 +139,14 @@ class LeaveController extends Controller
         ];
 
         try {
+
             $leave = Leave::create($data);
             if(!empty($leave->leave_id)) {
                 OperateLogHelper::createOperateLog(OperateLogHelper::LEAVE_TYPE_ID, $leave->leave_id, '提交申请');
             }
+            //通知审核人员
+            OperateLogHelper::sendWXMsg($review_user_id, '测试下');
+
         } catch (Exception $ex) {
             flash('申请失败,请重新提交申请!', 'danger');
             return redirect()->route('leave.info');

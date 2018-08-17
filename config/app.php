@@ -194,6 +194,7 @@ return [
         Mews\Captcha\CaptchaServiceProvider::class,
         //https://github.com/laracasts/flash
         Laracasts\Flash\FlashServiceProvider::class,
+        Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class,
 
         //https://github.com/Maatwebsite/Laravel-Excel
         Maatwebsite\Excel\ExcelServiceProvider::class,
@@ -206,6 +207,8 @@ return [
         //https://github.com/toplan/laravel-sms
         Toplan\PhpSms\PhpSmsServiceProvider::class,
         Toplan\Sms\SmsManagerServiceProvider::class,
+        //
+        App\Providers\BackstageServiceProvider::class,
 
         //https://packagist.org/packages/laravelcollective/html
         Collective\Html\HtmlServiceProvider::class,
@@ -275,8 +278,7 @@ return [
         //https://github.com/Maatwebsite/Laravel-Excel
         'Excel' => Maatwebsite\Excel\Facades\Excel::class,
 
-        'BaseHtml' => App\Http\Components\Helpers\BaseHtml::class,
-
+        'BackstageApi' => App\Http\Components\BackstageApi\BackstageApiFacade::class,
         //https://github.com/toplan/laravel-sms
         'PhpSms' => Toplan\PhpSms\Facades\Sms::class,
         'SmsManager' => Toplan\Sms\Facades\SmsManager::class,

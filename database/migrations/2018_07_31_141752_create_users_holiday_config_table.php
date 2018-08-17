@@ -8,7 +8,7 @@ class CreateUsersHolidayConfigTable extends Migration
 {
     /**
      * Run the migrations.
-     *
+     *  系统配置 员工 假期配置表
      * @return void
      */
     public function up()
