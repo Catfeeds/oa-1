@@ -19,7 +19,7 @@
                         {!! Form::label('channel_rate', trans('crm.渠道费率'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-5">
                             <div class="input-daterange input-group">
-                                {!! Form::number('channel_rate', $data->channel_rate ?? old('channel_rate'), [
+                                {!! Form::number('channel_rate', $data->channel_rate*100 ?? old('channel_rate'), [
                                     'class' => 'form-control',
                                     'placeholder' => trans('app.请输入', ['value' => trans('crm.渠道费率')]),
                                 ]) !!}
@@ -35,7 +35,7 @@
                         {!! Form::label('first_division', trans('crm.一级分成'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-5">
                             <div class="input-daterange input-group">
-                                {!! Form::number('first_division', $data->first_division ?? old('first_division'), [
+                                {!! Form::number('first_division', $data->first_division*100 ?? old('first_division'), [
                                     'class' => 'form-control',
                                     'placeholder' => trans('app.请输入', ['value' => trans('crm.一级分成')]),
                                 ]) !!}
@@ -64,7 +64,7 @@
                         {!! Form::label('second_division', trans('crm.二级分成'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-5">
                             <div class="input-daterange input-group">
-                                {!! Form::number('second_division', $data->second_division ?? old('second_division'), [
+                                {!! Form::number('second_division', $data->second_division*100 ?? old('second_division'), [
                                     'class' => 'form-control',
                                     'placeholder' => trans('app.请输入', ['value' => trans('crm.二级分成')]),
                                 ]) !!}
