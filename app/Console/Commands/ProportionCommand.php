@@ -59,7 +59,7 @@ class ProportionCommand extends BaseCommand
             if (isset($ops['principal_id'])) {
                 try {
                     $user = User::findOrFail($ops['principal_id']);
-                    QywxHelper::push($user->username, sprintf('你好！%s,%s%s月的流水审计转存完成，请及时处理:%s', $user->username, $val, date('m', strtotime($cycle)), route('reconciliationAudit', ['source' => Reconciliation::OPERATION, 'product_id' => $k])), time());
+                    QywxHelper::push($user->username, sprintf('你好！%s,%s%s月的流水审计拉取完成，请及时处理:%s', $user->username, $val, date('m', strtotime($cycle)), route('reconciliationAudit', ['source' => Reconciliation::OPERATION, 'product_id' => $k])), time());
                 } catch (\Exception $e) {
                     \Log::error($e->getMessage());
                 }

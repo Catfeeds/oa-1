@@ -384,9 +384,10 @@ class ReconciliationAuditController extends Controller
         $job = Principal::where(['product_id' => $pid])->get(['job_id', 'principal_id'])->pluck('principal_id', 'job_id')->toArray();
         $user = User::get(['user_id', 'username'])->pluck('username', 'user_id')->toArray();
         $product = Product::getList();
-        $message = '';
+        $message = $water = '';
         switch ($source) {
             case Reconciliation::OPERATION:
+                $water = '运营流水';
                 switch ($review) {
                     case Reconciliation::UNRD:
                         $key = Principal::OPS;
@@ -403,6 +404,7 @@ class ReconciliationAuditController extends Controller
                 }
                 break;
             case Reconciliation::ACCRUAL:
+                $water = '计提流水';
                 switch ($review) {
                     case Reconciliation::OPS:
                         $key = Principal::OPD;
@@ -423,6 +425,7 @@ class ReconciliationAuditController extends Controller
                 }
                 break;
             case Reconciliation::RECONCILIATION:
+                $water = '对账流水';
                 switch ($review) {
                     case Reconciliation::FAC:
                         $key = Principal::TREASURER;
@@ -443,6 +446,7 @@ class ReconciliationAuditController extends Controller
                 }
                 break;
             case Reconciliation::ALL:
+                $water = '对账流水';
                 switch ($review) {
                     case Reconciliation::FRC:
                         $key = Principal::FSR;
@@ -456,8 +460,8 @@ class ReconciliationAuditController extends Controller
         }
         try {
             $username = $user[$job[$key]];
-            QywxHelper::push($username, sprintf('你好！%s,%s%s月的流水审计已%s%s，请及时处理:%s', $username, $product[$pid],
-                date('m', strtotime($scope->startTimestamp)), $message, $reason, route('reconciliationAudit',
+            QywxHelper::push($username, sprintf('你好！%s,%s%s月的%s审计已%s%s，请及时处理:%s', $username, $product[$pid],
+                date('m', strtotime($scope->startTimestamp)), $water, $message, $reason, route('reconciliationAudit',
                     ['source' => $source, 'product_id' => $pid])), time());
         } catch (\Exception $e) {
             \Log::error($e->getMessage());
