@@ -20,13 +20,12 @@ class Difference extends Model
     protected $primaryKey = 'id';
 
     protected $fillable = [
-        'product_id',
         'type_name',
     ];
 
-    public static function getList($productId)
+    public static function getList()
     {
-        return self::where(['product_id' => $productId])->get(['id','type_name'])->pluck('type_name', 'id')->toArray();
+        return self::get(['id','type_name'])->pluck('type_name', 'id')->toArray();
     }
 
 }

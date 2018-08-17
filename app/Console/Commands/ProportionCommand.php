@@ -28,32 +28,42 @@ class ProportionCommand extends BaseCommand
 
     public function handle()
     {
-        $end = date('Y-m-t 23:59:59', strtotime('-2month'));
-        $start = date('Y-m-01 00:00:00', strtotime('-2month'));
+        $cycle = date('Y-m', strtotime('-1month'));
         $billingCycle = date('Y-m-t 23:59:59', strtotime('-2month'));
         $p = Product::getList();
         foreach ($p as $k => $val) {
-            $ret = Reconciliation::where(['product_id' => $k])->whereBetween('billing_cycle_start', [$start, $end])->get()->toArray();
+            $ret = Reconciliation::where(['product_id' => $k, 'billing_cycle' => $cycle])->get()->toArray();
+            $isHasProduct = Principal::where(['product_id' => $k])->get()->toArray();
+            if (!$isHasProduct) {
+                foreach (Principal::JOB as $job => $jobName) {
+                    Principal::create(['product_id' => $k, 'job_id' => $job]);
+                }
+            }
+
             $ops = Principal::where(['product_id' => $k, 'job_id' => Principal::OPS])->first();
-            $principal_id = $ops['principal_id'] ? $ops['principal_id'] : 1;
-            $user = User::findOrFail($principal_id);
+
             foreach ($ret as $v) {
                 $proprotion = Proportion::where(['product_id' => $k, 'billing_cycle' => $billingCycle, 'client' => $v['client'], 'backstage_channel' => $v['backstage_channel']])->first();
-                $has = Proportion::where(['product_id' => $k, 'billing_cycle' => $end, 'client' => $v['client'], 'backstage_channel' => $v['backstage_channel']])->first();
-                if ($has){
+                $has = Proportion::where(['product_id' => $k, 'rec_id' =>  $v['id']])->first();
+                if ($has) {
                     continue;
                 }
                 if ($proprotion) {
                     Proportion::create(['product_id' => $k, 'billing_cycle' => $v['billing_cycle_end'], 'client' => $v['client'], 'backstage_channel' => $v['backstage_channel'],
                         'channel_rate' => $proprotion['channel_rate'], 'first_division' => $proprotion['first_division'], 'first_division_remark' => $proprotion['first_division_remark'], 'second_division' => $proprotion['second_division'],
-                        'second_division_remark' => $proprotion['second_division_remark'], 'second_division_condition' => $proprotion['second_division_condition'], 'review_type' => 1]);
+                        'second_division_remark' => $proprotion['second_division_remark'], 'second_division_condition' => $proprotion['second_division_condition'], 'rec_id' => $v['id'], 'review_type' => 1]);
                 } else {
-                    Proportion::create(['product_id' => $k, 'billing_cycle' => $v['billing_cycle_end'], 'client' => $v['client'], 'backstage_channel' => $v['backstage_channel'], 'review_type' => 1]);
+                    Proportion::create(['product_id' => $k, 'billing_cycle' => $v['billing_cycle_end'], 'client' => $v['client'], 'backstage_channel' => $v['backstage_channel'], 'rec_id' => $v['id'],'review_type' => 1]);
                 }
             }
-            QywxHelper::push($user->username,sprintf('你好！%s,%s%s月的流水审计转存完成，请及时处理:%s',$user->username, $val,
-                date('m', strtotime($start)),route('reconciliationAudit',
-                    ['source' => Reconciliation::OPERATION,'product_id' => $k])),time());
+            if (isset($ops['principal_id'])) {
+                try {
+                    $user = User::findOrFail($ops['principal_id']);
+                    QywxHelper::push($user->username, sprintf('你好！%s,%s%s月的流水审计拉取完成，请及时处理:%s', $user->username, $val, date('m', strtotime($cycle)), route('reconciliationAudit', ['source' => Reconciliation::OPERATION, 'product_id' => $k])), time());
+                } catch (\Exception $e) {
+                    \Log::error($e->getMessage());
+                }
+            }
         }
     }
 }

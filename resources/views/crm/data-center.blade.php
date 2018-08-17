@@ -32,11 +32,11 @@
                                     <a href="{{ route('reconciliationAudit') }}">{{ trans('crm.对账审核') }}</a>
                                 </li>
                             @endif
-                            @if(Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationProduct']))
+                            {{--@if(Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationProduct']))
                                 <li @if (Route::is('reconciliationProduct*') ) class="active" @endif>
                                     <a href="{{ route('reconciliationProduct') }}">{{ trans('crm.游戏列表') }}</a>
                                 </li>
-                            @endif
+                            @endif--}}
                             @if(Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationPrincipal']))
                                 <li @if (Route::is('reconciliationPrincipal*') ) class="active" @endif>
                                     <a href="{{ route('reconciliationPrincipal') }}">{{ trans('crm.对账负责人管理') }}</a>

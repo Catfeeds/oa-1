@@ -8,7 +8,7 @@
     <div class="col-sm-8">
         <div class="title-action">
             @if(Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationDifferenceType', 'reconciliation-reconciliationDifferenceType.create']))
-                <a href="{{ route('reconciliationDifferenceType.create', array_merge(Request::all(), ['pid' => $pid])) }}"
+                <a href="{{ route('reconciliationDifferenceType.create') }}"
                    class="btn btn-primary btn-sm">{{ trans('app.添加', ['value' => $title]) }}</a>
             @endif
         </div>
@@ -18,26 +18,6 @@
 
 @section('content')
     @include('flash::message')
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="panel blank-panel">
-
-                <div class="panel-heading">
-                    <div class="panel-options">
-
-                        <ul class="nav nav-tabs">
-                            @foreach($product as $k => $v)
-                                <li @if($k == $pid) class="active" @endif>
-                                    <a href="{!! route('reconciliationDifferenceType', array_merge(Request::all(), ['pid' => $k])) !!}">{{ $v }}</a>
-                                </li>
-                            @endforeach
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div class="row">
         <div class="col-lg-12">
             <div class="ibox float-e-margins">
@@ -60,7 +40,7 @@
                                         <td>{{ $v['type_name'] }}</td>
                                         <td>
                                             @if(Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationDifferenceType', 'reconciliation-reconciliationDifferenceType.edit']))
-                                                {!! BaseHtml::tooltip(trans('crm.编辑'), route('reconciliationDifferenceType.edit', ['id' => $v['id'], 'pid' => $pid]), 'cog fa-lg') !!}
+                                                {!! BaseHtml::tooltip(trans('crm.编辑'), route('reconciliationDifferenceType.edit', ['id' => $v['id']]), 'cog fa-lg') !!}
                                             @endif
                                         </td>
                                     </tr>

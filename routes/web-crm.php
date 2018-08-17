@@ -14,6 +14,9 @@ Route::group([
     Route::get('reconciliation-audit', [
         'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationAudit'],
         'uses' => 'ReconciliationAuditController@index'])->name('reconciliationAudit');
+    Route::get('reconciliation-audit/data', [
+        'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationAudit'],
+        'uses' => 'ReconciliationAuditController@data'])->name('reconciliationAudit.data');
     Route::get('reconciliation-audit/edit/{id}/{source}', [
         'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationAudit|reconciliation-reconciliationAudit.edit'],
         'uses' => 'ReconciliationAuditController@edit'])->name('reconciliationAudit.edit');
@@ -23,9 +26,9 @@ Route::group([
     Route::get('reconciliation-audit/review/{status}', [
         'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationAudit|reconciliation-reconciliationAudit.review'],
         'uses' => 'ReconciliationAuditController@review'])->name('reconciliationAudit.review');
-    Route::get('reconciliation-audit/download', [
+    /*Route::get('reconciliation-audit/download', [
         'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationAudit|reconciliation-reconciliationAudit.download'],
-        'uses' => 'ReconciliationAuditController@download'])->name('reconciliationAudit.download');
+        'uses' => 'ReconciliationAuditController@download'])->name('reconciliationAudit.download');*/
 
     //负责人
     Route::get('reconciliation-principal', [
@@ -42,7 +45,7 @@ Route::group([
         'uses' => 'ReconciliationPrincipalController@update']);
 
     //游戏列表
-    Route::get('reconciliation-product', [
+    /*Route::get('reconciliation-product', [
         'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationProduct'],
         'uses' => 'ReconciliationProductController@index'])->name('reconciliationProduct');
     Route::get('reconciliation-product/create', [
@@ -56,22 +59,22 @@ Route::group([
         'uses' => 'ReconciliationProductController@edit'])->name('reconciliationProduct.edit');
     Route::post('reconciliation-product/edit/{id}', [
         'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationProduct|reconciliation-reconciliationProduct.edit'],
-        'uses' => 'ReconciliationProductController@update']);
+        'uses' => 'ReconciliationProductController@update']);*/
 
     //差异类管理
     Route::get('reconciliation-difference-type', [
         'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationDifferenceType'],
         'uses' => 'ReconciliationDifferenceTypeController@index'])->name('reconciliationDifferenceType');
-    Route::get('reconciliation-difference-type/create/{pid}', [
+    Route::get('reconciliation-difference-type/create', [
         'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationDifferenceType|reconciliation-reconciliationDifferenceType.create'],
         'uses' => 'ReconciliationDifferenceTypeController@create'])->name('reconciliationDifferenceType.create');
-    Route::post('reconciliation-difference-type/create/{pid}', [
+    Route::post('reconciliation-difference-type/create', [
         'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationDifferenceType|reconciliation-reconciliationDifferenceType.create'],
         'uses' => 'ReconciliationDifferenceTypeController@store']);
-    Route::get('reconciliation-difference-type/edit/{id}/{pid}', [
+    Route::get('reconciliation-difference-type/edit/{id}', [
         'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationDifferenceType|reconciliation-reconciliationDifferenceType.edit'],
         'uses' => 'ReconciliationDifferenceTypeController@edit'])->name('reconciliationDifferenceType.edit');
-    Route::post('reconciliation-difference-type/edit/{id}/{pid}', [
+    Route::post('reconciliation-difference-type/edit/{id}', [
         'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationDifferenceType|reconciliation-reconciliationDifferenceType.edit'],
         'uses' => 'ReconciliationDifferenceTypeController@update']);
 

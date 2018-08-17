@@ -3,3 +3,38 @@
  *   项目公共css文件
  *
  */
+.red-color {
+    background-color: #E8D51E!important;
+    color: green;
+    text-align:center
+}
+.orange-color {
+     background-color: orange!important;;
+     color: green;
+     text-align:center
+ }
+.yellow-color {
+    background-color: yellow!important;;
+    color: green;
+    text-align:center
+}
+.green-color {
+    background-color: green!important;;
+    color: black;
+    text-align:center
+}
+.blue-color {
+    background-color: #1EC3E8!important;;
+    color: green;
+    text-align:center
+}
+.indigo-color {
+    background-color: #1EE895!important;;
+    color: green;
+    text-align:center
+}
+.violet-color {
+    background-color: violet!important;;
+    color: green;
+    text-align:center
+}
