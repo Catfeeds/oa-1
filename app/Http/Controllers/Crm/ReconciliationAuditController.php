@@ -437,7 +437,7 @@ class ReconciliationAuditController extends Controller
                         $message = '提交审核';
                         break;
                     case Reconciliation::FSR:
-                        $key = Principal::FSR;
+                        $key = Principal::FRC;
                         $message = '通过审核';
                         break;
                 }
