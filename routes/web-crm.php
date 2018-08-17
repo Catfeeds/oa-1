@@ -65,16 +65,16 @@ Route::group([
     Route::get('reconciliation-difference-type', [
         'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationDifferenceType'],
         'uses' => 'ReconciliationDifferenceTypeController@index'])->name('reconciliationDifferenceType');
-    Route::get('reconciliation-difference-type/create/{pid}', [
+    Route::get('reconciliation-difference-type/create', [
         'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationDifferenceType|reconciliation-reconciliationDifferenceType.create'],
         'uses' => 'ReconciliationDifferenceTypeController@create'])->name('reconciliationDifferenceType.create');
-    Route::post('reconciliation-difference-type/create/{pid}', [
+    Route::post('reconciliation-difference-type/create', [
         'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationDifferenceType|reconciliation-reconciliationDifferenceType.create'],
         'uses' => 'ReconciliationDifferenceTypeController@store']);
-    Route::get('reconciliation-difference-type/edit/{id}/{pid}', [
+    Route::get('reconciliation-difference-type/edit/{id}', [
         'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationDifferenceType|reconciliation-reconciliationDifferenceType.edit'],
         'uses' => 'ReconciliationDifferenceTypeController@edit'])->name('reconciliationDifferenceType.edit');
-    Route::post('reconciliation-difference-type/edit/{id}/{pid}', [
+    Route::post('reconciliation-difference-type/edit/{id}', [
         'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationDifferenceType|reconciliation-reconciliationDifferenceType.edit'],
         'uses' => 'ReconciliationDifferenceTypeController@update']);
 

@@ -149,7 +149,7 @@ class ReconciliationAuditController extends Controller
             'reconciliation_divide_other',
             'reconciliation_divide_rmb',
         ];
-        $diff = Difference::getList($pid);
+        $diff = Difference::getList();
         foreach ($tmp as $k => $v) {
             $v = (array)$v;
             $tmp2['num'] = $k + 1;
@@ -278,7 +278,7 @@ class ReconciliationAuditController extends Controller
     {
         $tmp = Reconciliation::findOrFail($id);
         $data = $this->transformName($source, $tmp, '', '');
-        $type = CrmHelper::addEmptyToArray('差异类型', Difference::getList($tmp['product_id']));
+        $type = CrmHelper::addEmptyToArray('差异类型', Difference::getList());
         $title = trans('app.编辑', ['value' => trans('crm.对账审核')]);
         return view('crm.reconciliation-audit.edit', compact('title', 'data', 'type'));
     }

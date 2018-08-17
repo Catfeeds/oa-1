@@ -108,7 +108,7 @@
                     <div class="form-group">
                         <div class="col-sm-4 col-sm-offset-2">
                             {!! Form::submit(trans('app.提交'), ['class' => 'btn btn-primary']) !!}
-                            @if(Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationProduct']))
+                            @if(Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationProportion']))
                                 <a href="{{ route('reconciliationProportion') }}"
                                    class="btn btn-info">{{ trans('crm.返回列表') }}</a>
                             @endif
