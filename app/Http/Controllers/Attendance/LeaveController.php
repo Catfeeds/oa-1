@@ -113,6 +113,11 @@ class LeaveController extends Controller
             $leader[$userLeader->user_id] = $userLeader->user_id;
         }
 
+        if(empty($leader)) {
+            flash('申请失败,未匹配审核人员,请联系人事', 'danger');
+            return redirect()->route('leave.info');
+        }
+
         $review_user_id = reset($leader);
         unset($leader[$review_user_id]);
 
@@ -121,6 +126,8 @@ class LeaveController extends Controller
         } else {
             $remain_user = json_encode($leader);
         }
+
+
 
         $data = [
             'user_id' => \Auth::user()->user_id,
