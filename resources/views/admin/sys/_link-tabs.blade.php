@@ -28,3 +28,15 @@
     </li>
 @endif
 
+@if(Entrust::can(['punch-rules-all', 'punch-rules']))
+    <li @if (Route::is('punch-rules*')) class="active" @endif>
+        <a href="{{ route('punch-rules') }}">{{ trans('app.上下班时间规则配置') }}</a>
+    </li>
+@endif
+
+@if(Entrust::can(['calendar-all', 'calendar']))
+    <li @if (Route::is('calendar*')) class="active" @endif>
+        <a href="{{ route('calendar') }}">{{ trans('app.日历表配置') }}</a>
+    </li>
+@endif
+

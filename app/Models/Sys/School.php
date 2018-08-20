@@ -23,6 +23,8 @@ class School extends Model
         'school',
     ];
 
+
+
     public static function getSchoolList()
     {
         return self::get(['school_id', 'school'])->pluck('school', 'school_id')->toArray();

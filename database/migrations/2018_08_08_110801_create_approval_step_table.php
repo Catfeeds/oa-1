@@ -17,7 +17,8 @@ class CreateApprovalStepTable extends Migration
             $table->increments('step_id');
             $table->string('name', 20)->comment = '步骤名称';
             $table->string('step', 20)->comment = '审批步骤';
-            $table->unsignedTinyInteger('day')->default(0)->comment = '请假天数限制条件';
+            $table->decimal('min_day', 8, 1)->default(0)->comment = '请假天数最小天数限制条件';
+            $table->decimal('max_day', 8, 1)->default(0)->comment = '请假天数最大天数限制条件';
             $table->timestamps();
 
             $table->index('name');

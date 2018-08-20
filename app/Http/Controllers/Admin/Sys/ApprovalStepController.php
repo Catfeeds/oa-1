@@ -21,7 +21,8 @@ class ApprovalStepController extends Controller
     private $_validateRule = [
         'name' => 'required|unique:approval_step,name|max:20',
         'step' => 'required',
-        'day' => 'required|numeric'
+        'min_day' => 'required|numeric',
+        'max_day' => 'required|numeric',
     ];
 
     public function index()
@@ -76,7 +77,8 @@ class ApprovalStepController extends Controller
         ksort($steps);
         $data = [
             'name' => $p['name'],
-            'day' => $p['day'],
+            'min_day' => $p['min_day'],
+            'max_day' => $p['max_day'],
             'step' => json_encode($steps),
         ];
 
@@ -106,7 +108,8 @@ class ApprovalStepController extends Controller
         ksort($steps);
         $data = [
             'name' => $p['name'],
-            'day' => $p['day'],
+            'min_day' => $p['min_day'],
+            'max_day' => $p['max_day'],
             'step' => json_encode($steps),
         ];
 

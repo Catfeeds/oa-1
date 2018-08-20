@@ -49,7 +49,7 @@
                                                         <tr>
                                                             <td>{{ $v['step_id'] }}</td>
                                                             <td>{{ $v['name'] }}</td>
-                                                            <td>{{ $v['day'] }}</td>
+                                                            <td>{{ $v['min_day'].'~'. $v['max_day']}}</td>
                                                             <td>{{ \App\Http\Components\Helpers\AttendanceHelper::showApprovalStep($v['step_id']) }}</td>
                                                             <td>{{ $v['created_at'] }}</td>
                                                             <td>

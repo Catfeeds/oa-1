@@ -7,10 +7,10 @@
                 <div class="col-lg-12">
                     <div class="ibox float-e-margins">
                         <div class="ibox-title">
-                            <h5>{{ $title ?? trans('app.游戏设置') }}</h5>
+                            <h5>{{ $title ?? trans('app.系统设置') }}</h5>
                             <div class="ibox-tools">
-                                <a class="btn btn-xs btn-primary" href="{{ route('school.create') }}">
-                                    {{ trans('app.添加', ['value' => trans('app.学校')]) }}
+                                <a class="btn btn-xs btn-primary" href="{{ route('punch-rules.create') }}">
+                                    {{ trans('app.添加', ['value' => trans('app.上下班时间规则配置')]) }}
                                 </a>
                             </div>
                         </div>
@@ -36,8 +36,12 @@
                                                 <table class="table table-hover table-striped tooltip-demo">
                                                     <thead>
                                                     <tr>
-                                                        <th>{{ trans('app.学校ID') }}</th>
-                                                        <th>{{ trans('app.学校名称') }}</th>
+                                                        <th>{{ trans('app.规则ID') }}</th>
+                                                        <th>{{ trans('app.规则类型') }}</th>
+                                                        <th>{{ trans('app.规则名称') }}</th>
+                                                        <th>{{ trans('app.上班准备时间') }}</th>
+                                                        <th>{{ trans('app.上班时间') }}</th>
+                                                        <th>{{ trans('app.下班时间') }}</th>
                                                         <th>{{ trans('app.提交时间') }}</th>
                                                         <th>{{ trans('app.操作') }}</th>
                                                     </tr>
@@ -45,12 +49,16 @@
                                                     <tbody>
                                                     @foreach($data as $v)
                                                         <tr>
-                                                            <td>{{ $v['school_id'] }}</td>
-                                                            <td>{{ $v['school'] }}</td>
+                                                            <td>{{ $v['id'] }}</td>
+                                                            <td>{{ \App\Models\Sys\PunchRules::$punchType[$v['punch_type_id']] ?? '' }}</td>
+                                                            <td>{{ $v['name'] }}</td>
+                                                            <td>{{ $v['ready_time'] }}</td>
+                                                            <td>{{ $v['work_start_time'] }}</td>
+                                                            <td>{{ $v['work_end_time'] }}</td>
                                                             <td>{{ $v['created_at'] }}</td>
                                                             <td>
                                                                 {!!
-                                                                    BaseHtml::tooltip(trans('app.设置'), route('school.edit', ['id' => $v['school_id']]))
+                                                                    BaseHtml::tooltip(trans('app.设置'), route('punch-rules.edit', ['id' => $v['id']]))
                                                                 !!}
                                                             </td>
                                                         </tr>

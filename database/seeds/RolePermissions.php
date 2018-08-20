@@ -43,6 +43,8 @@ class RolePermissions extends Seeder
                 'job-all',
                 'school-all',
                 'crm-all',
+                'punch-rules-all',
+                'calendar-all',
                 'holiday-config-all',
                 'approval-step-all',
             ],

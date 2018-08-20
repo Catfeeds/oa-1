@@ -33,8 +33,8 @@
                         @endif
 
                         @if(Entrust::can(['attendance-all', 'job-all', 'job', 'dept-all', 'dept', 'school-all', 'school',
-                        'holiday-config-all', 'holiday-config','approval-step-all', 'approval-step']))
-                            <li @if(Route::is(['job*', 'dept*', 'school*', 'holiday-config' ,'approval-step*'])) class="active" @endif>
+                        'holiday-config-all', 'holiday-config','approval-step-all', 'approval-step', 'punch-rules-all', 'punch-rules']))
+                            <li @if(Route::is(['job*', 'dept*', 'school*', 'holiday-config' , 'approval-step*', 'punch-rules*', 'calendar'])) class="active" @endif>
                                 <a aria-expanded="false" role="button" href="{{ route('dept') }}">{{ trans('app.系统配置') }}</a>
                             </li>
                         @endif

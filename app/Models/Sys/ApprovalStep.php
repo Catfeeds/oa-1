@@ -23,7 +23,8 @@ class ApprovalStep extends Model
     protected $fillable = [
         'name',
         'step',
-        'day',
+        'min_day',
+        'max_day',
     ];
 
 }

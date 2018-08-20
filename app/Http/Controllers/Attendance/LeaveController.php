@@ -88,16 +88,15 @@ class LeaveController extends Controller
         }
         $user = User::findOrFail(\Auth::user()->user_id);
         $stepId = RoleLeaveStep::where(['role_id' => $user->role_id])->get(['step_id'])->pluck('step_id');
-        $betDay = 1;
-        switch ($day) {
-            case $day > 0 && $day < 3;
-                $day = 2;
-                break;
-            default:
-                $betDay = 3;
-        }
-        $step = ApprovalStep::whereIn('step_id', $stepId)->whereBetween('day', [$betDay, $day])->first();
 
+        //职务绑定的审核步骤ID
+        $steps = ApprovalStep::whereIn('step_id', $stepId)->get();
+
+        $step = (object)[];
+        foreach ($steps as $sk => $sv) {
+            //判断请假天数，是否再绑定的审核步骤时间范围之内
+            if($sv->min_day <= $day && $sv->max_day >= $day) $step = $sv;
+        }
         if(empty($step->step)) {
             flash('申请失败,未匹配到请假模版，请联系人事', 'danger');
             return redirect()->route('leave.info');
@@ -126,8 +125,6 @@ class LeaveController extends Controller
         } else {
             $remain_user = json_encode($leader);
         }
-
-
 
         $data = [
             'user_id' => \Auth::user()->user_id,

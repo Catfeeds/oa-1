@@ -88,6 +88,16 @@ class Permissions extends Seeder
             'approval-step.create' => '系统配置/审核流程管理/「添加」',
             'approval-step.edit' => '系统配置/审核流程管理/「设置」',
 
+            'punch-rules-all' => '系统配置/上下班时间管理/「所有」',
+            'punch-rules' => '系统配置/上下班时间管理/「列表」',
+            'punch-rules.create' => '系统配置/上下班时间管理/「添加」',
+            'punch-rules.edit' => '系统配置/上下班时间管理/「设置」',
+
+            'calendar-all' => '系统配置/日历表管理/「所有」',
+            'calendar' => '系统配置/日历表管理/「列表」',
+            'calendar.create' => '系统配置/日历表管理/「添加」',
+            'calendar.edit' => '系统配置/日历表管理/「设置」',
+
         ];
     }
 

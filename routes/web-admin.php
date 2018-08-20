@@ -169,4 +169,38 @@ Route::group([
         'middleware' => ['permission:approval-step-all|approval-step.edit'],
         'uses' => 'Sys\ApprovalStepController@update']);
 
+    //上下班时间配置管理
+    Route::get('sys/punch-rules', [
+        'middleware' => ['permission:punch-rules-all|punch-rules'],
+        'uses' => 'Sys\PunchRulesController@index'])->name('punch-rules');
+    Route::get('sys/punch-rules/create', [
+        'middleware' => ['permission:punch-rules-all|punch-rules.create'],
+        'uses' => 'Sys\PunchRulesController@create'])->name('punch-rules.create');
+    Route::post('sys/punch-rules/create', [
+        'middleware' => ['permission:punch-rules-all|punch-rules.create'],
+        'uses' => 'Sys\PunchRulesController@store']);
+    Route::get('sys/punch-rules/edit/{id}', [
+        'middleware' => ['permission:punch-rules-all|punch-rules.edit'],
+        'uses' => 'Sys\PunchRulesController@edit'])->name('punch-rules.edit');
+    Route::post('sys/punch-rules/edit/{id}', [
+        'middleware' => ['permission:punch-rules-all|punch-rules.edit'],
+        'uses' => 'Sys\PunchRulesController@update']);
+
+    //日历表配置
+    Route::get('sys/calendar', [
+        'middleware' => ['permission:punch-rules-all|calendar'],
+        'uses' => 'Sys\CalendarController@index'])->name('calendar');
+    Route::get('sys/calendar/create', [
+        'middleware' => ['permission:punch-rules-all|calendar.create'],
+        'uses' => 'Sys\CalendarController@create'])->name('calendar.create');
+    Route::post('sys/calendar/create', [
+        'middleware' => ['permission:punch-rules-all|calendar.create'],
+        'uses' => 'Sys\CalendarController@store']);
+    Route::get('sys/calendar/edit/{id}', [
+        'middleware' => ['permission:punch-rules-all|calendar.edit'],
+        'uses' => 'Sys\CalendarController@edit'])->name('calendar.edit');
+    Route::post('sys/calendar/edit/{id}', [
+        'middleware' => ['permission:punch-rules-all|calendar.edit'],
+        'uses' => 'Sys\CalendarController@update']);
+
 });

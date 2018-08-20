@@ -41,17 +41,25 @@
                                                 </div>
                                             </div>
 
-                                            <div class="form-group @if (!empty($errors->first('day'))) has-error @endif">
-                                                {!! Form::label('day', trans('app.假期天数'), ['class' => 'col-sm-3 control-label']) !!}
+                                            <div class="form-group @if (!empty($errors->first('min_day')) || !empty($errors->first('max_day'))) has-error @endif">
+                                                {!! Form::label('valid_time', trans('app.假期时间范围'), ['class' => 'col-sm-3 control-label']) !!}
                                                 <div class="col-sm-6">
-                                                    {!! Form::number('day', isset($step->day) ? $step->day: old('day'), [
-                                                    'class' => 'form-control',
-                                                    'placeholder' => trans('app.请输入', ['value' => trans('app.假期天数')]),
-                                                    'required' => true,
-                                                    ]) !!}
-                                                    <span class="help-block m-b-none">{{ $errors->first('day') }}</span>
+                                                    <div class="input-group">
+                                                        {!! Form::text('min_day', $step->min_day ?? old('min_day'), [
+                                                        'class' => 'input-sm form-control',
+                                                        'placeholder' => trans('app.请输入', ['value' => trans('app.最小天数')]),
+                                                        ]) !!}
+                                                        <span class="input-group-addon" style="background-color:#eeeeee;">to</span>
+                                                        {!! Form::text('max_day', $step->max_day ?? old('max_day'), [
+                                                        'class' => 'input-sm form-control',
+                                                        'placeholder' => trans('app.请输入', ['value' => trans('app.最大天数')]),
+                                                        ]) !!}
+                                                    </div>
+                                                    <span class="help-block m-b-none">{{ $errors->first('min_day') }}</span>
+                                                    <span class="help-block m-b-none">{{ $errors->first('max_day') }}</span>
                                                 </div>
                                             </div>
+
 
                                             <div class="form-group @if (!empty($errors->first('step'))) has-error @endif">
                                                 {!! Form::label('step', trans('app.职务'), ['class' => 'col-sm-3 control-label']) !!}
