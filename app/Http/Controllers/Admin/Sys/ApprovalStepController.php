@@ -66,6 +66,11 @@ class ApprovalStepController extends Controller
         $this->validate($request, $this->_validateRule);
 
         $p = $request->all();
+
+        if($p['min_day'] > $p['max_day']) {
+            return redirect()->back()->withInput()->withErrors(['min_day' => trans('请选择有效的天数范围')]);
+        }
+
         $step = array_filter($p['check_step']);
 
         $steps = [];
@@ -96,6 +101,9 @@ class ApprovalStepController extends Controller
             'name' => 'required|max:20|unique:approval_step,name,' . $p['name'] .',name',
         ]));
 
+        if($p['min_day'] > $p['max_day']) {
+            return redirect()->back()->withInput()->withErrors(['min_day' => trans('请选择有效的天数范围')]);
+        }
 
         $step = array_filter($p['check_step']);
 
