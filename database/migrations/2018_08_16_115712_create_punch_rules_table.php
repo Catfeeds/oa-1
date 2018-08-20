@@ -23,6 +23,9 @@ class CreatePunchRulesTable extends Migration
 
             $table->timestamps();
 
+            $table->unique(['name']);
+            $table->index('punch_type_id');
+
         });
     }
 

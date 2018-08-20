@@ -24,6 +24,9 @@ class CreateCalendarTable extends Migration
 
             $table->timestamps();
 
+            $table->unique(['year', 'month', 'day', 'week'], 'unique_calendar_date');
+            $table->index('punch_rules_id');
+
         });
     }
 
