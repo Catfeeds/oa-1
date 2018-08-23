@@ -32,6 +32,16 @@
                                 <div class="tab-content">
                                     <div class="tab-pane active">
                                         <div class="ibox-content profile-content">
+                                            {{--收索区域--}}
+                                            <div class="row m-b-md">
+                                                {!! Form::open([ 'class' => 'form-inline', 'method' => 'get' ]) !!}
+                                                <div class="form-group">
+                                                    {!! Form::text('dept', $form['dept'], [ 'class' => 'form-control m-b-xs', 'placeholder' => trans('app.部门名称') ]) !!}
+                                                </div>
+                                                {!! Form::submit(trans('app.提交'), ['class' => 'btn btn-primary btn-sm m-l-md']) !!}
+                                                {!! Form::close() !!}
+                                            </div>
+
                                             <div class="table-responsive">
                                                 <table class="table table-hover table-striped tooltip-demo">
                                                     <thead>

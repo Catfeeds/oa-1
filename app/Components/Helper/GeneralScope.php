@@ -28,7 +28,6 @@ class GeneralScope extends Scope
         $this->setWhere();
     }
 
-
     public function setWhere($tableAlias = null)
     {
         if ($tableAlias !== null) {
@@ -58,6 +57,6 @@ class GeneralScope extends Scope
 
     protected function commonCondition($tableAlias, $field, $value)
     {
-        return sprintf("%s%s IN(%s)", $tableAlias, $field, $value);;
+        return sprintf("%s%s IN(%s)", $tableAlias, $field, $value);
     }
 }

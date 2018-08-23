@@ -35,4 +35,12 @@ class FileHelper
         $file->move($uploadPath, $fileName);
         return $fileName;
     }
+
+    public static function uploadExcel(UploadedFile $file, $name, $uploadPath = '')
+    {
+        $uploadPath = $uploadPath ? storage_path($uploadPath) : storage_path('app/punch-record/');
+        $fileName = $name . '.' . $file->getClientOriginalExtension();
+        $file->move($uploadPath, $fileName);
+        return $fileName;
+    }
 }

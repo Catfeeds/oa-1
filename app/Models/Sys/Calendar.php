@@ -39,4 +39,8 @@ class Calendar extends Model
         'memo',
     ];
 
+    public function punchRules()
+    {
+        return $this->hasOne(PunchRules::class, 'id', 'punch_rules_id');
+    }
 }
