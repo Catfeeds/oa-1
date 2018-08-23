@@ -39,6 +39,8 @@ class RolePermissions extends Seeder
                 'stat-cron-all',
                 'profile.password',
                 'attendance-all',
+                'leave-all',
+                'daily-detail-all',
                 'dept-all',
                 'job-all',
                 'school-all',

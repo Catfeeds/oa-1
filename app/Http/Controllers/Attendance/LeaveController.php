@@ -10,21 +10,21 @@ namespace App\Http\Controllers\Attendance;
 
 use App\Components\Helper\DataHelper;
 use App\Components\Helper\FileHelper;
-use App\Http\Components\Helpers\AttendanceHelper;
 use App\Http\Components\Helpers\OperateLogHelper;
-use App\Http\Controllers\Controller;
+use App\Http\Components\ScopeAtt\LeaveScope;
 use App\Models\Attendance\Leave;
 use App\Models\RoleLeaveStep;
 use App\Models\Sys\ApprovalStep;
 use App\Models\Sys\Dept;
-use App\Models\Sys\HolidayConfig;
 use App\Models\Sys\OperateLog;
 use App\User;
 use EasyWeChat\Kernel\Exceptions\Exception;
 use Illuminate\Http\Request;
 
-class LeaveController extends Controller
+class LeaveController extends AttController
 {
+    protected $scopeClass = LeaveScope::class;
+
     private $_validateRule = [
         'holiday_id' => 'required',
         'start_time' => 'required',
@@ -34,12 +34,17 @@ class LeaveController extends Controller
 
     public function index()
     {
-        $data = Leave::where(['user_id' => \Auth::user()->user_id])->orderBy('created_at', 'desc')
+        $scope = $this->scope;
+
+        $scope->block = 'attendance.leave.scope';
+
+        $data = Leave::where(['user_id' => \Auth::user()->user_id])
+            ->whereRaw($scope->getWhere())
+            ->orderBy('created_at', 'desc')
             ->paginate(30);
 
         $title = trans('att.我的假期详情');
         return view('attendance.leave.index', compact('title', 'data', 'scope', 'holidayList'));
-
     }
 
     public function create()
@@ -64,13 +69,13 @@ class LeaveController extends Controller
         $p = $request->all();
 
         $file = 'annex';
-        $image_path = $image_name = '';
+        $imagePath = $imageName = '';
         if ($request->hasFile($file) && $request->file($file)->isValid()) {
             $time = date('Ymd', time());
             $uploadPath = 'assert/images/'. $time;
-            $file_name = $file .'_'. time() . rand(100000, 999999);
-            $image_name = FileHelper::uploadImage($request->file($file), $file_name, $uploadPath);
-            $image_path = $uploadPath .'/'. $image_name;
+            $fileName = $file .'_'. time() . rand(100000, 999999);
+            $imageName = FileHelper::uploadImage($request->file($file), $fileName, $uploadPath);
+            $imagePath = $uploadPath .'/'. $imageName;
         }
 
         $startTime = $p['start_time'] .' '. Leave::$startId[$p['start_id']];
@@ -137,7 +142,7 @@ class LeaveController extends Controller
             'reason' => $p['reason'],
             'user_list' => $p['user_list'] ?? '',
             'status' => 0, //默认 0 待审批
-            'annex' => $image_path ?? '',
+            'annex' => $imagePath ?? '',
             'review_user_id' => $review_user_id,
             'remain_user' => $remain_user,
         ];

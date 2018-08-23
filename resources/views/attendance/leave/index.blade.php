@@ -6,7 +6,7 @@
     @parent
     <div class="col-sm-8">
         <div class="title-action">
-            @if(Entrust::can(['leave.all', 'leave.edit', 'leave.create']))
+            @if(Entrust::can(['attendance-all', 'leave.all', 'leave.edit', 'leave.create']))
                 <a href="{{ route('leave.create') }}" class="btn btn-primary btn-sm">{{ trans('请假申请') }}</a>
             @endif
         </div>
@@ -17,6 +17,7 @@
 @section('content')
 
     @include('flash::message')
+    @include('widget.scope-date', ['scope' => $scope])
 
     <div class="row">
         <div class="col-lg-12">
@@ -56,7 +57,7 @@
                                         {{--@if(Entrust::can(['leave-all', 'leave.edit']))--}}
                                             {{--{!! BaseHtml::tooltip(trans('app.设置'), route('leave.edit', ['id' => $v['leave_id']]), 'cog fa-lg') !!}--}}
                                         {{--@endif--}}
-                                        @if(($v['user_id'] == \Auth::user()->user_id || $v['review_user_id'] == \Auth::user()->user_id ) && Entrust::can(['leave-all', 'leave.edit', 'leave.optStatus']))
+                                        @if(($v['user_id'] == \Auth::user()->user_id || $v['review_user_id'] == \Auth::user()->user_id ) && Entrust::can(['attendance-all', 'leave-all', 'leave.edit', 'leave.optStatus']))
                                             {!! BaseHtml::tooltip(trans('att.请假详情'), route('leave.optInfo', ['id' => $v['leave_id']]), 'cog fa fa-newspaper-o') !!}
                                         @endif
 
@@ -73,3 +74,4 @@
         </div>
     </div>
 @endsection
+@include('widget.select2')

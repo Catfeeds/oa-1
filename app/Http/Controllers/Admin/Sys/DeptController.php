@@ -22,9 +22,10 @@ class DeptController extends Controller
 
     public function index()
     {
-        $data = Dept::paginate();
+        $form['dept'] = \Request::get('dept');
+        $data = Dept::where('dept', 'LIKE', "%{$form['dept']}%")->paginate();
         $title = trans('app.部门列表');
-        return view('admin.sys.dept', compact('title', 'data'));
+        return view('admin.sys.dept', compact('title', 'data', 'form'));
     }
 
     public function create()
