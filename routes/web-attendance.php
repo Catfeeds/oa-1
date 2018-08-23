@@ -51,5 +51,9 @@ Route::group([
             'middleware' => ['permission:leave-all|leave.review.optStatus'],
             'uses' => 'LeaveController@reviewBatchOptStatus'])->name('leave.review.batchOptStatus');
 
+        #补打卡
+        Route::any('leave/recheck', [
+            'middleware' => ['permission:leave-all|leave.edit'],
+            'uses' => 'LeaveController@recheck'])->name('leave.recheck');
     });
 });

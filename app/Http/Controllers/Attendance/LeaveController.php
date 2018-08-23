@@ -59,6 +59,7 @@ class LeaveController extends Controller
 
     public function store(Request $request)
     {
+        dd($request->all());exit();
         $this->validate($request, $this->_validateRule);
 
         $p = $request->all();
@@ -73,19 +74,26 @@ class LeaveController extends Controller
             $image_path = $uploadPath .'/'. $image_name;
         }
 
+        $p['apply_type_id'] = HolidayConfig::where('holiday_id', $p['holiday_id'])->first()->apply_type_id;
+
         $startTime = $p['start_time'] .' '. Leave::$startId[$p['start_id']];
         $endTime = $p['end_time'] .' '. Leave::$endId[$p['end_id']];
 
         //时间判断
-        if(strtotime($startTime) > strtotime($endTime)) {
+        if($endTime != '1999-1-1' && strtotime($startTime) > strtotime($endTime)) {
             return redirect()->back()->withInput()->withErrors(['end_time' => trans('请选择有效的时间范围')]);
         }
-        //时间天数分配
-        $day = DataHelper::diffTime($startTime, $endTime);
-        if(empty($day)) {
-            flash('申请失败,时间跨度最长为一周，有疑问请联系人事', 'danger');
-            return redirect()->route('leave.info');
+
+        //申请类型
+        if ($p['apply_type_id'] != 3){
+            //时间天数分配
+            $day = DataHelper::diffTime($startTime, $endTime);
+            if(empty($day)) {
+                flash('申请失败,时间跨度最长为一周，有疑问请联系人事', 'danger');
+                return redirect()->route('leave.info');
+            }
         }
+
         $user = User::findOrFail(\Auth::user()->user_id);
         $stepId = RoleLeaveStep::where(['role_id' => $user->role_id])->get(['step_id'])->pluck('step_id');
 
@@ -187,6 +195,14 @@ class LeaveController extends Controller
         } else {
             return redirect()->route('leave.info');
         }
+    }
+
+    //补打卡
+    public function recheck(Request $request){
+        $leave = (object)['holiday_id' => '', 'start_id' => '', 'end_id' => ''];
+        $reviewUserId = '';
+        $title = trans('att.补打卡');
+        return view('attendance.leave.recheck', compact('title', 'holidayList', 'leave', 'reviewUserId'));
     }
 
     /**
