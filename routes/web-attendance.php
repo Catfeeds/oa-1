@@ -70,9 +70,18 @@ Route::group([
         Route::post('daily-detail/review/import', [
             'middleware' => ['permission:attendance-all|daily-detail-all|daily-detail.review'],
             'uses' => 'PunchRecordController@store']);
+        Route::get('daily-detail/review/import/edit/{id}', [
+            'middleware' => ['permission:attendance-all|daily-detail-all|daily-detail.review'],
+            'uses' => 'PunchRecordController@edit'])->name('daily-detail.review.import.edit');
+        Route::post('daily-detail/review/import/edit/{id}', [
+            'middleware' => ['permission:attendance-all|daily-detail-all|daily-detail.review'],
+            'uses' => 'PunchRecordController@update']);
         Route::get('daily-detail/review/import/generate/{id}', [
             'middleware' => ['permission:attendance-all|daily-detail-all|daily-detail.review'],
             'uses' => 'PunchRecordController@generate'])->name('daily-detail.review.import.generate');
+        Route::get('daily-detail/review/import/generate/log/{id}', [
+            'middleware' => ['permission:attendance-all|daily-detail-all|daily-detail.review'],
+            'uses' => 'PunchRecordController@log'])->name('daily-detail.review.import.generate.log');
 
 
     });

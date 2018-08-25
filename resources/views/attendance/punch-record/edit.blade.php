@@ -17,7 +17,7 @@
                     <div class="form-group @if (!empty($errors->first('name'))) has-error @endif">
                         {!! Form::label('name', trans('att.记录名称'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-6">
-                            {!! Form::text('name', isset($dept->dept) ? $dept->dept: old('name'), [
+                            {!! Form::text('name', isset($punchRecord->name) ? $punchRecord->name: old('name'), [
                             'class' => 'form-control',
                             'placeholder' => trans('app.请输入', ['value' => trans('att.记录名称')]),
                             'required' => true,

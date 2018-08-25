@@ -20,9 +20,18 @@ class PunchRecord extends Model
 
     protected $primaryKey = 'id';
 
+    public static $status = [
+        0 => '未生成',
+        1 => '生成中',
+        2 => '生成失败',
+        3 => '生成完成',
+    ];
+
     protected $fillable = [
         'name',
         'annex',
+        'log_file',
+        'status',
     ];
 
 }
