@@ -33,6 +33,7 @@
                                 <th>{{ trans('att.录入名称') }}</th>
                                 <th>{{ trans('att.附件') }}</th>
                                 <th>{{ trans('att.上传时间') }}</th>
+                                <th>{{ trans('att.生成状态') }}</th>
                                 <th>{{ trans('att.操作') }}</th>
                             </tr>
                             </thead>
@@ -42,9 +43,14 @@
                                     <td>{{ $v['name'] }}</td>
                                     <td>{{ $v['annex'] }}</td>
                                     <td>{{ $v['created_at'] }}</td>
+                                    <td>{{ \App\Models\Attendance\PunchRecord::$status[$v['status']] ?? '未知状态' }}</td>
                                     <td>
                                         @if(Entrust::can(['attendance-all', 'daily-detail.all', 'daily-detail.review']))
                                             {!! BaseHtml::tooltip(trans('att.生成员工每日打卡信息'), route('daily-detail.review.import.generate', ['id' => $v['id']]), 'cog fa fa-newspaper-o') !!}
+                                            {!! BaseHtml::tooltip(trans('app.设置'), route('daily-detail.review.import.edit', ['id' => $v['id']]), 'cog fa fa-search') !!}
+                                            @if($v['status'] == 3)
+                                                {!! BaseHtml::tooltip(trans('att.查看生成日志'), route('daily-detail.review.import.generate.log', ['id' => $v['id']]), 'cog fa fa-info-circle') !!}
+                                            @endif
                                         @endif
                                     </td>
                                 </tr>
