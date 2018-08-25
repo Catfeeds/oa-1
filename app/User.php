@@ -66,7 +66,7 @@ class User extends Authenticatable
         'dept_id',
         'job_id',
         'is_leader',
-        'desc',
+        'desc'
     ];
 
     // 可用 $user->is_admin 来判断角色是否属于 admin
