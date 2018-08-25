@@ -11,6 +11,7 @@
 namespace App\Http\Components\ScopeAtt;
 
 use App\Components\Helper\GeneralScope;
+use App\Models\Sys\HolidayConfig;
 
 class LeaveScope extends GeneralScope
 {
@@ -31,7 +32,7 @@ class LeaveScope extends GeneralScope
         }
 
         $where = [
-            $this->getDateWhere($tableAlias, 'start_time'),
+            $this->getDateWhere($tableAlias, 'created_at'),
         ];
 
         if(!empty($this->holidayId)) {

@@ -53,26 +53,28 @@
                                     <td>{{ \App\Models\Sys\HolidayConfig::getHolidayList()[$v['holiday_id']] }}</td>
 
                                     <td>
-                                        @if($v['apply_type_id'] == 3)
-                                            @if(date('Y-m-d', strtotime($v['start_time'])) == '1999-01-01')
+                                        @if($v['apply_type_id'] == \App\Models\Sys\HolidayConfig::RECHECK)
+                                            @if(($a = date('Y-m-d', strtotime($v['start_time']))) == \App\Models\Attendance\Leave::HASNOTIME)
                                                 暂无上班补打卡
                                             @else
-                                                {{ '上班补打卡:' }}<br>{{  date('Y-m-d', strtotime($v['start_time'])) }}
+                                                {{ '上班补打卡:' }}<br>{{  date('Y-m-d H:i:s', strtotime($v['start_time'])) }}
                                             @endif
                                         @else
-                                            {{  date('Y-m-d', strtotime($v['start_time'])) }}
+                                            {{  date('Y-m-d', strtotime($v['start_time'])).' '.
+                                            \App\Models\Attendance\Leave::$startId[$v['start_id']] }}
                                         @endif
                                     </td>
 
                                     <td>
-                                        @if($v['apply_type_id'] == 3)
-                                            @if(($a = date('Y-m-d', strtotime($v['end_time']))) == '1999-01-01')
+                                        @if($v['apply_type_id'] == \App\Models\Sys\HolidayConfig::RECHECK)
+                                            @if(($a = date('Y-m-d', strtotime($v['end_time']))) == \App\Models\Attendance\Leave::HASNOTIME)
                                                 暂无下班补打卡
                                             @else
-                                                {{ '下班补打卡:' }}<br>{{  date('Y-m-d', strtotime($v['end_time'])) }}
+                                                {{ '下班补打卡:' }}<br>{{  date('Y-m-d H:i:s', strtotime($v['end_time'])) }}
                                             @endif
                                         @else
-                                            {{  date('Y-m-d', strtotime($v['end_time'])) }}
+                                            {{  date('Y-m-d', strtotime($v['end_time'])).' '.
+                                            \App\Models\Attendance\Leave::$endId[$v['end_id']] }}
                                         @endif
                                     </td>
 
@@ -81,7 +83,7 @@
                                     . ' ' . \App\Models\Attendance\Leave::$startId[$v['start_id']],
                                     date('Y-m-d', strtotime($v['end_time']))
                                     . ' ' . \App\Models\Attendance\Leave::$endId[$v['end_id']])}}
-                                        <?php echo empty($a)?'暂无':'天'; ?></td>
+                                        {{ empty($a) ? '暂无' : '天' }}</td>
 
                                     <td><pre style="height: 5em;width: 20em">{{ $v['reason'] }}</pre></td>
                                     <td>{{ $v['created_at'] }}</td>

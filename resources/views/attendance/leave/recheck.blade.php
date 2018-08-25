@@ -14,7 +14,8 @@
 
                     {!! Form::open(['class' => 'form-horizontal', 'enctype' => 'multipart/form-data', 'url' => 'attendance/leave/create' ]) !!}
 
-                    {!! Form::hidden('holiday_id', 3) !!}
+                    {!! Form::hidden('apply_type_id', \App\Models\Sys\HolidayConfig::RECHECK) !!}
+                    {!! Form::hidden('holiday_id', \App\Models\Sys\HolidayConfig::where('apply_type_id', \App\Models\Sys\HolidayConfig::RECHECK)->first()->holiday_id) !!}
 
                     <div class="form-group @if (!empty($errors->first('holiday_id'))) has-error @endif">
                         {!! Form::label('holiday_id', trans('att.补打卡类型'), ['class' => 'col-sm-2 control-label']) !!}
@@ -147,7 +148,7 @@
                         $('#start_time').val('');
                         $('#onwork_div').show();
                     } else {
-                        $('#start_time').val('1999-1-1');
+                        $('#start_time').val('{{ \App\Models\Attendance\Leave::HASNOTIME }}');
                         $('#onwork_div').hide();
                     }
                 }else {
@@ -155,14 +156,15 @@
                         $('#end_time').val('');
                         $('#offwork_div').show();
                     } else {
-                        $('#end_time').val('1999-1-1');
+                        $('#end_time').val('{{ \App\Models\Attendance\Leave::HASNOTIME }}');
                         $('#offwork_div').hide();
                     }
                 }
             });
             //若用户未选择补打卡选项,进行提示
             $('form').submit(function () {
-                if ($('#end_time').val() == '1999-1-1' && $('#start_time').val() == '1999-1-1'){
+                if ($('#end_time').val() == '{{ \App\Models\Attendance\Leave::HASNOTIME }}' &&
+                    $('#start_time').val() == '{{ \App\Models\Attendance\Leave::HASNOTIME }}'){
                     alert('请选择补打卡');
                     return false;
                 }
