@@ -11,8 +11,10 @@ namespace App\Http\Controllers\Admin\Sys;
 
 use App\Http\Controllers\Controller;
 use App\Models\Role;
+use App\Models\RoleLeaveStep;
 use App\Models\Sys\ApprovalStep;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ApprovalStepController extends Controller
 {
@@ -86,8 +88,13 @@ class ApprovalStepController extends Controller
             'max_day' => $p['max_day'],
             'step' => json_encode($steps),
         ];
+        $asObject = ApprovalStep::create($data);
 
-        ApprovalStep::create($data);
+        foreach (Role::getRoleTextList() as $id => $display_name){
+            $data1[] = ['step_id' => $asObject->step_id, 'role_id' => $id];
+        }
+        DB::table('roles_leave_step')->insert($data1);
+
         flash(trans('app.添加成功', ['value' => trans('app.审核流程配置')]), 'success');
 
         return redirect($this->redirectTo);
