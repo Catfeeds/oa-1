@@ -16,12 +16,14 @@ use App\Models\Sys\HolidayConfig;
 class LeaveScope extends GeneralScope
 {
     public $holidayId;
+    public $statusId;
     public $displayLastMonth = false;
 
     public function __construct(array $params, $user = null)
     {
 
         $this->holidayId = $params['holiday_id'] ?? '';
+        $this->statusId = $params['status'] ?? NULL;
         parent::__construct($params, $user);
     }
 
@@ -38,7 +40,9 @@ class LeaveScope extends GeneralScope
         if(!empty($this->holidayId)) {
             $where[] = sprintf("holiday_id = %d", $this->holidayId);
         }
-
+        if (!is_null($this->statusId)){
+            $where[] = sprintf("status = %d", $this->statusId);
+        }
         $this->where = empty($where) ? '1 = 1' : implode(' AND ', $where);
     }
 }

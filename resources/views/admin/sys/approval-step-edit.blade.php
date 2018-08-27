@@ -60,8 +60,7 @@
                                                 </div>
                                             </div>
 
-
-                                            <div class="form-group @if (!empty($errors->first('step'))) has-error @endif">
+                                            <div class="form-group @if (!empty($errors->first('step'))) has-error @endif" id="checkbox_div">
                                                 {!! Form::label('step', trans('app.职务'), ['class' => 'col-sm-3 control-label']) !!}
                                                 <div class="col-sm-9">
                                                     <label class="checkbox-inline col-sm-12"> </label>
@@ -99,7 +98,7 @@
         $(function() {
             var i = {{$maxStep ?? 0}};
 
-            $('input:checkbox').change(function () {
+            $('#checkbox_div input:checkbox').change(function () {
                 var id = $(this).val();
                 if($(this).is(':checked')) {
                     i++;

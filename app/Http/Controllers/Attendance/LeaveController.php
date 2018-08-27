@@ -33,10 +33,9 @@ class LeaveController extends AttController
         'reason' => 'required',
     ];
 
-    public function index(Request $request)
+    public function index()
     {
         $scope = $this->scope;
-
         $scope->block = 'attendance.leave.scope';
 
         $data = Leave::where(['user_id' => \Auth::user()->user_id])
@@ -83,7 +82,7 @@ class LeaveController extends AttController
         $endTime = trim($p['end_time'] .' '. Leave::$endId[$p['end_id'] ?? 0]);
 
         //时间判断
-        //若该同学只用上班补打卡,所以endTime的时间等于默认值不用进行时间比较
+        //若该同学只要上班补打卡,所以endTime的时间等于默认值不用进行时间比较
         if($endTime != Leave::HASNOTIME && strtotime($startTime) > strtotime($endTime)) {
             return redirect()->back()->withInput()->withErrors(['end_time' => trans('请选择有效的时间范围')]);
         }
@@ -218,9 +217,16 @@ class LeaveController extends AttController
      */
     public function reviewIndex()
     {
+        $scope = $this->scope;
+        $scope->block = 'attendance.leave.scope';
+
         $ids = OperateLogHelper::getLogInfoIdToUid(\Auth::user()->user_id);
 
-        $data = Leave::whereIn('leave_id', $ids)->orWhereRaw('review_user_id = '.\Auth::user()->user_id )->orderBy('created_at', 'desc')
+        $data = Leave::where(function ($query) use ($ids){
+            $query->whereIn('leave_id', $ids)->orWhereRaw('review_user_id = '.\Auth::user()->user_id);
+        })
+            ->whereRaw($scope->getWhere())
+            ->orderBy('created_at', 'desc')
             ->paginate(30);
 
         $title = trans('att.申请单管理');

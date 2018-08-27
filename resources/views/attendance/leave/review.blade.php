@@ -10,6 +10,7 @@
 @section('content')
 
     @include('flash::message')
+    @include('widget.scope-date', ['scope' => $scope])
 
     <div class="row">
         <div class="col-lg-12">
@@ -49,8 +50,31 @@
                                     <td>{{ \App\Models\Sys\HolidayConfig::$applyType[\App\Models\Sys\HolidayConfig::getHolidayApplyList()[$v['holiday_id']]] }}</td>
                                     <td>{{ \App\Models\Sys\HolidayConfig::getHolidayList()[$v['holiday_id']] }}</td>
                                     <td>{{ \App\User::getAliasList()[$v['user_id']] ?? '' }}</td>
-                                    <td>{{ date('Y-m-d', strtotime($v['start_time'])) .' '. \App\Models\Attendance\Leave::$startId[$v['start_id']] ?? '' }}</td>
-                                    <td>{{ date('Y-m-d', strtotime($v['end_time'])) .' '. \App\Models\Attendance\Leave::$endId[$v['end_id']] ?? ''  }}</td>
+
+                                    <td>
+                                        @if($v['apply_type_id'] == \App\Models\Sys\HolidayConfig::RECHECK)
+                                            @if(($a = date('Y-m-d', strtotime($v['start_time']))) == \App\Models\Attendance\Leave::HASNOTIME)
+                                                暂无上班补打卡
+                                            @else
+                                                {{ '上班补打卡:' }}<br>{{  date('Y-m-d H:i:s', strtotime($v['start_time'])) }}
+                                        @endif
+                                        @else
+                                            {{  date('Y-m-d', strtotime($v['start_time'])).' '.
+                                            \App\Models\Attendance\Leave::$startId[$v['start_id']] }}
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($v['apply_type_id'] == \App\Models\Sys\HolidayConfig::RECHECK)
+                                            @if(($a = date('Y-m-d', strtotime($v['end_time']))) == \App\Models\Attendance\Leave::HASNOTIME)
+                                                暂无下班补打卡
+                                            @else
+                                                {{ '下班补打卡:' }}<br>{{  date('Y-m-d H:i:s', strtotime($v['end_time'])) }}
+                                            @endif
+                                        @else
+                                            {{  date('Y-m-d', strtotime($v['end_time'])).' '.
+                                            \App\Models\Attendance\Leave::$endId[$v['end_id']] }}
+                                        @endif
+                                    </td>
                                     <td>{{ App\Components\Helper\DataHelper::diffTime(date('Y-m-d', strtotime($v['start_time'])) . ' ' . \App\Models\Attendance\Leave::$startId[$v['start_id']], date('Y-m-d', strtotime($v['end_time'])) . ' ' . \App\Models\Attendance\Leave::$endId[$v['end_id']]) .'天'}}</td>
                                     <td><pre style="height: 5em;width: 20em">{{ $v['reason'] }}</pre></td>
                                     <td>{{ $v['created_at'] }}</td>
