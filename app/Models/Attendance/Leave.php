@@ -18,16 +18,20 @@ class Leave extends Model
 
     protected $primaryKey = 'leave_id';
 
+    const HASNOTIME = '1999-01-01';
+
     public static $startId = [
         1 => '09:00',
         2 => '13:45',
         3 => '19:00',
+        0 => ''
     ];
 
     public static $endId = [
         1 => '12:00',
         2 => '18:00',
         3 => '20:00',
+        0 => ''
     ];
 
     /**
@@ -43,6 +47,7 @@ class Leave extends Model
 
     protected $fillable = [
         'user_id',
+        'apply_type_id',
         'step_id',
         'holiday_id',
         'start_time',
