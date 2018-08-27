@@ -122,9 +122,9 @@ class PunchRecordController extends Controller
 
                 $endTime = end($v);
                 //打卡记录里面的第五列是打卡开始时间
-                $startTtime = $v[5];
+                $startTime = $v[5];
                 if(count($v) <= 6 && (int)str_replace(':', '', $v[5]) >= 1400) {
-                    $startTtime = '';
+                    $startTime = '';
                 } elseif (count($v) <= 6 && (int)str_replace(':', '', $v[5]) <= 1400){
                     $endTime = '';
                 }
@@ -132,7 +132,7 @@ class PunchRecordController extends Controller
                 $row = [
                     'ts' => $ts,
                     'alias' => $v[3],
-                    'start_time' => $startTtime,
+                    'start_time' => $startTime,
                     'end_time' => $endTime,
                 ];
 
@@ -217,6 +217,5 @@ class PunchRecordController extends Controller
 
         $title = trans('att.生成日志查看');
         return view('attendance.punch-record.log', compact('title', 'data'));
-
     }
 }

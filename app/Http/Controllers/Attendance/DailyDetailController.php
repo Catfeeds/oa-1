@@ -25,19 +25,4 @@ class DailyDetailController extends Controller
 
     }
 
-    public function reviewIndex()
-    {
-        $data = DailyDetail::where(['user_id' => \Auth::user()->user_id])->orderBy('created_at', 'desc')
-            ->paginate(30);
-
-        $title = trans('att.考勤功能');
-        return view('attendance.daily-detail.review', compact('title', 'data', 'scope'));
-
-    }
-
-    public function reviewImport(Request $request)
-    {
-
-    }
-
 }

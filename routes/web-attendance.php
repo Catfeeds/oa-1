@@ -59,8 +59,8 @@ Route::group([
         //每日考勤管理
         Route::get('daily-detail/review/', [
             'middleware' => ['permission:attendance-all|daily-detail-all|daily-detail.review'],
-            'uses' => 'DailyDetailController@reviewIndex'])->name('daily-detail.review.info');
-
+            'uses' => 'ReviewController@index'])->name('daily-detail.review.info');
+        #考勤导入功能
         Route::get('daily-detail/review/import/info', [
             'middleware' => ['permission:attendance-all|daily-detail-all|daily-detail.review'],
             'uses' => 'PunchRecordController@index'])->name('daily-detail.review.import.info');
