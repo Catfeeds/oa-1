@@ -16,6 +16,7 @@ use App\Models\Sys\Calendar;
 use App\User;
 use Illuminate\Http\Request;
 
+
 class PunchRecordController extends Controller
 {
     private $_validateRule = [
