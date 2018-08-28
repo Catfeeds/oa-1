@@ -59,9 +59,7 @@ class CalendarController extends Controller
     {
         $calendar = Calendar::findOrFail($id);
 
-        $this->validate($request, array_merge($this->_validateRule, [
-            'name' => 'required|max:32|unique:punch_rules,name,' . $calendar->id .',id',
-        ]));
+        $this->validate($request, $this->_validateRule);
 
         $calendar->update($request->all());
 

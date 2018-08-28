@@ -18,7 +18,7 @@
                         {!! Form::label('holiday_id', trans('att.请假类型'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-2">
                             <select class="js-select2-single form-control" name="holiday_id" >
-                                @foreach(\App\Models\Sys\HolidayConfig::getHolidayList() as $k => $v)
+                                @foreach(\App\Models\Sys\HolidayConfig::getHolidayListExceptRecheck() as $k => $v)
                                     <option value="{{ $k }}" @if($k === $leave->holiday_id) selected="selected" @endif>{{ $v }}</option>
                                 @endforeach
                             </select>

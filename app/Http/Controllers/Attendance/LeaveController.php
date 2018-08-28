@@ -16,6 +16,7 @@ use App\Models\Attendance\Leave;
 use App\Models\RoleLeaveStep;
 use App\Models\Sys\ApprovalStep;
 use App\Models\Sys\Dept;
+use App\Models\Sys\HolidayConfig;
 use App\Models\Sys\OperateLog;
 use App\User;
 use EasyWeChat\Kernel\Exceptions\Exception;
@@ -35,7 +36,6 @@ class LeaveController extends AttController
     public function index()
     {
         $scope = $this->scope;
-
         $scope->block = 'attendance.leave.scope';
 
         $data = Leave::where(['user_id' => \Auth::user()->user_id])
@@ -67,7 +67,6 @@ class LeaveController extends AttController
         $this->validate($request, $this->_validateRule);
 
         $p = $request->all();
-
         $file = 'annex';
         $imagePath = $imageName = '';
         if ($request->hasFile($file) && $request->file($file)->isValid()) {
@@ -78,25 +77,36 @@ class LeaveController extends AttController
             $imagePath = $uploadPath .'/'. $imageName;
         }
 
-        $startTime = $p['start_time'] .' '. Leave::$startId[$p['start_id']];
-        $endTime = $p['end_time'] .' '. Leave::$endId[$p['end_id']];
+        //补打卡没有使用start_id,end_id
+        $startTime = trim($p['start_time'] .' '. Leave::$startId[$p['start_id'] ?? 0]);
+        $endTime = trim($p['end_time'] .' '. Leave::$endId[$p['end_id'] ?? 0]);
 
         //时间判断
-        if(strtotime($startTime) > strtotime($endTime)) {
+        //若该同学只要上班补打卡,所以endTime的时间等于默认值不用进行时间比较
+        if($endTime != Leave::HASNOTIME && strtotime($startTime) > strtotime($endTime)) {
             return redirect()->back()->withInput()->withErrors(['end_time' => trans('请选择有效的时间范围')]);
         }
-        //时间天数分配
-        $day = DataHelper::diffTime($startTime, $endTime);
-        if(empty($day)) {
-            flash('申请失败,时间跨度最长为一周，有疑问请联系人事', 'danger');
-            return redirect()->route('leave.info');
+
+        //在补打卡页面本身就有apply_type_id, 而在请假申请页面没有 故没有就查找
+        $p['apply_type_id'] = $p['apply_type_id'] ?? HolidayConfig::where('holiday_id', $p['holiday_id'])->first()->apply_type_id;
+
+        //申请类型
+        if ($p['apply_type_id'] != HolidayConfig::RECHECK){
+            //时间天数分配
+            $day = DataHelper::diffTime($startTime, $endTime);
+            if(empty($day)) {
+                flash('申请失败,时间跨度最长为一周，有疑问请联系人事', 'danger');
+                return redirect()->route('leave.info');
+            }
+        }else{
+            $day = 0;
         }
+
         $user = User::findOrFail(\Auth::user()->user_id);
         $stepId = RoleLeaveStep::where(['role_id' => $user->role_id])->get(['step_id'])->pluck('step_id');
 
         //职务绑定的审核步骤ID
         $steps = ApprovalStep::whereIn('step_id', $stepId)->get();
-
         $step = (object)[];
         foreach ($steps as $sk => $sv) {
             //判断请假天数，是否再绑定的审核步骤时间范围之内
@@ -134,11 +144,12 @@ class LeaveController extends AttController
         $data = [
             'user_id' => \Auth::user()->user_id,
             'holiday_id' => $p['holiday_id'],
+            'apply_type_id' => $p['apply_type_id'],
             'step_id' => $step->step_id,
             'start_time' => $p['start_time'],
-            'start_id' => $p['start_id'],
+            'start_id' => $p['start_id'] ?? 0,
             'end_time' => $p['end_time'],
-            'end_id' => $p['end_id'],
+            'end_id' => $p['end_id'] ?? 0,
             'reason' => $p['reason'],
             'user_list' => $p['user_list'] ?? '',
             'status' => 0, //默认 0 待审批
@@ -148,7 +159,6 @@ class LeaveController extends AttController
         ];
 
         try {
-
             $leave = Leave::create($data);
             if(!empty($leave->leave_id)) {
                 OperateLogHelper::createOperateLog(OperateLogHelper::LEAVE_TYPE_ID, $leave->leave_id, '提交申请');
@@ -194,14 +204,29 @@ class LeaveController extends AttController
         }
     }
 
+    //补打卡
+    public function recheck(Request $request){
+        $leave = (object)['holiday_id' => '', 'start_id' => '', 'end_id' => ''];
+        $reviewUserId = '';
+        $title = trans('att.补打卡');
+        return view('attendance.leave.recheck', compact('title', 'holidayList', 'leave', 'reviewUserId'));
+    }
+
     /**
      * 审核管理页面
      */
     public function reviewIndex()
     {
+        $scope = $this->scope;
+        $scope->block = 'attendance.leave.scope';
+
         $ids = OperateLogHelper::getLogInfoIdToUid(\Auth::user()->user_id);
 
-        $data = Leave::whereIn('leave_id', $ids)->orWhereRaw('review_user_id = '.\Auth::user()->user_id )->orderBy('created_at', 'desc')
+        $data = Leave::where(function ($query) use ($ids){
+            $query->whereIn('leave_id', $ids)->orWhereRaw('review_user_id = '.\Auth::user()->user_id);
+        })
+            ->whereRaw($scope->getWhere())
+            ->orderBy('created_at', 'desc')
             ->paginate(30);
 
         $title = trans('att.申请单管理');

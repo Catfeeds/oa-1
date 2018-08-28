@@ -20,10 +20,15 @@ class HolidayConfig extends Model
 
     protected $primaryKey = 'holiday_id';
 
+    const LEAVEID = 1;
+    const OVERTIME = 2;
+    const RECHECK = 3;
+
     public static $applyType = [
         1 => '请假',
         2 => '加班调休',
         3 => '补打卡',
+        0 => ''
     ];
 
     protected $fillable = [
@@ -41,5 +46,9 @@ class HolidayConfig extends Model
     public static function getHolidayApplyList()
     {
         return self::get(['holiday_id', 'apply_type_id'])->pluck('apply_type_id', 'holiday_id')->toArray();
+    }
+
+    public static function getHolidayListExceptRecheck(){
+        return self::where('apply_type_id', '<>', self::RECHECK)->get(['holiday_id', 'holiday'])->pluck('holiday', 'holiday_id')->toArray();
     }
 }

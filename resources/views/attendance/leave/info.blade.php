@@ -63,9 +63,27 @@
                         {!! Form::label('holiday_id', trans('att.请假时间'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-6">
                             <span class="help-block m-b-none">
-                                {{date('Y-m-d', strtotime($leave->start_time)) .' '. \App\Models\Attendance\Leave::$startId[$leave->start_id] ?? '' }}
+                                @if($leave->apply_type_id == \App\Models\Sys\HolidayConfig::RECHECK)
+                                    @if(date('Y-m-d', strtotime($leave->start_time)) == \App\Models\Attendance\Leave::HASNOTIME)
+                                        暂无上班补打卡
+                                    @else
+                                        {{ date('Y-m-d H:i:s', strtotime($leave->start_time)) }}
+                                    @endif
+                                @else
+                                    {{  date('Y-m-d', strtotime($leave->start_time)).' '.
+                                    \App\Models\Attendance\Leave::$startId[$leave->start_id] }}
+                                @endif
                                 ~
-                                {{date('Y-m-d', strtotime($leave->end_time)) .' '. \App\Models\Attendance\Leave::$endId[$leave->end_id] ?? '' }}
+                                @if($leave->apply_type_id == \App\Models\Sys\HolidayConfig::RECHECK)
+                                    @if(($a = date('Y-m-d', strtotime($leave->end_time))) == \App\Models\Attendance\Leave::HASNOTIME)
+                                        暂无下班补打卡
+                                    @else
+                                        {{ '下班补打卡:' }}<br>{{  date('Y-m-d H:i:s', strtotime($leave->end_time)) }}
+                                    @endif
+                                @else
+                                    {{  date('Y-m-d', strtotime($leave->end_time)).' '.
+                                    \App\Models\Attendance\Leave::$endId[$leave->end_id] }}
+                                @endif
                             </span>
                         </div>
                     </div>
@@ -76,7 +94,7 @@
                         {!! Form::label('day', trans('att.请假天数'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-6">
                             <span class="help-block m-b-none">
-                                {{ App\Components\Helper\DataHelper::diffTime(date('Y-m-d', strtotime($leave->start_time)) . ' ' . \App\Models\Attendance\Leave::$startId[$leave->start_id], date('Y-m-d', strtotime($leave->end_time)) . ' ' . \App\Models\Attendance\Leave::$endId[$leave->end_id]) .'天'}}
+                                {{ $a = App\Components\Helper\DataHelper::diffTime(date('Y-m-d', strtotime($leave->start_time)) . ' ' . \App\Models\Attendance\Leave::$startId[$leave->start_id], date('Y-m-d', strtotime($leave->end_time)) . ' ' . \App\Models\Attendance\Leave::$endId[$leave->end_id])}}{{ empty($a)?'暂无':'天' }}
                             </span>
                         </div>
                     </div>

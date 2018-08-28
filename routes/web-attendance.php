@@ -50,6 +50,10 @@ Route::group([
         Route::get('leave/review-batch/{id}', [
             'middleware' => ['permission:attendance-all|leave-all|leave.review.optStatus'],
             'uses' => 'LeaveController@reviewBatchOptStatus'])->name('leave.review.batchOptStatus');
+			#补打卡
+        Route::any('leave/recheck', [
+            'middleware' => ['permission:leave-all|leave.edit'],
+            'uses' => 'LeaveController@recheck'])->name('leave.recheck');
 
         #考勤每日明细管理
         Route::get('daily-detail', [
@@ -70,9 +74,18 @@ Route::group([
         Route::post('daily-detail/review/import', [
             'middleware' => ['permission:attendance-all|daily-detail-all|daily-detail.review'],
             'uses' => 'PunchRecordController@store']);
+        Route::get('daily-detail/review/import/edit/{id}', [
+            'middleware' => ['permission:attendance-all|daily-detail-all|daily-detail.review'],
+            'uses' => 'PunchRecordController@edit'])->name('daily-detail.review.import.edit');
+        Route::post('daily-detail/review/import/edit/{id}', [
+            'middleware' => ['permission:attendance-all|daily-detail-all|daily-detail.review'],
+            'uses' => 'PunchRecordController@update']);
         Route::get('daily-detail/review/import/generate/{id}', [
             'middleware' => ['permission:attendance-all|daily-detail-all|daily-detail.review'],
             'uses' => 'PunchRecordController@generate'])->name('daily-detail.review.import.generate');
+        Route::get('daily-detail/review/import/generate/log/{id}', [
+            'middleware' => ['permission:attendance-all|daily-detail-all|daily-detail.review'],
+            'uses' => 'PunchRecordController@log'])->name('daily-detail.review.import.generate.log');
 
 
     });

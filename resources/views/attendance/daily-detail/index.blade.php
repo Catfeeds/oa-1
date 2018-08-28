@@ -37,6 +37,8 @@
                                 <th>{{ trans('att.当日累积迟到分钟数') }}</th>
                                 <th>{{ trans('att.剩余缓冲时间') }}</th>
                                 <th>{{ trans('att.扣分') }}</th>
+                                <th>{{ trans('att.调休') }}</th>
+                                <th>{{ trans('att.假期') }}</th>
                                 <th>{{ trans('att.操作') }}</th>
                             </tr>
                             </thead>
@@ -46,15 +48,24 @@
                                     <td>{{ $v['day'] }}</td>
                                     <td>{{ \Auth::user()->username}}</td>
                                     <td>{{ \Auth::user()->alias}}</td>
-                                    <td>{{ $v['punch_start_time'] }}</td>
-                                    <td>{{ $v['punch_end_time'] }}</td>
-                                    <td>{{ $v['heap_late_num'] }}</td>
-                                    <td>{{ $v['lave_buffer_num'] }}</td>
-                                    <td>{{ $v['deduction_num'] }}</td>
+                                    @if(empty($v['punch_start_time']))
+                                        <td style="color: red">--</td>
+                                    @else
+                                        <td>{{ $v['punch_start_time'] }}</td>
+                                    @endif
+                                    @if(empty($v['punch_end_time']))
+                                        <td style="color: red">--</td>
+                                    @else
+                                        <td>{{ $v['punch_end_time'] }}</td>
+                                    @endif
+                                    <td>{{ $v['heap_late_num'] ? $v['heap_late_num']  : '--' }}</td>
+                                    <td>{{ $v['lave_buffer_num'] ? $v['heap_late_num']  : '--'  }}</td>
+                                    <td>{{ $v['deduction_num'] ? $v['heap_late_num']  : '--'  }}</td>
+                                    <td></td>
+                                    <td></td>
                                     <td>
-                                        @if(($v['user_id'] == \Auth::user()->user_id || $v['review_user_id'] == \Auth::user()->user_id ) && Entrust::can(['leave-all', 'leave.edit', 'leave.optStatus']))
-                                            {!! BaseHtml::tooltip(trans('att.请假详情'), route('leave.optInfo', ['id' => $v['leave_id']]), 'cog fa fa-newspaper-o') !!}
-                                        @endif
+                                        <a>{{ trans('att.补打卡') }}</a>
+                                        <a>{{ trans('att.补假') }}</a>
                                     </td>
                                 </tr>
                             @endforeach
