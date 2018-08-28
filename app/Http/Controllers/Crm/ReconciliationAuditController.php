@@ -562,15 +562,15 @@ class ReconciliationAuditController extends Controller
         }
         if (in_array($data['review_type'], [Reconciliation::TREASURER]) && $p2 && in_array($data['review_type'], $limitPost)) {
             $tmp .= '<a href="' . $url['edit'] . '" target="_self"> <i class="fa fa-cog fa-lg" data-toggle="tooltip" data-placement="top" title="" data-original-title="编辑"></i> </a>
-<a href="' . $url['review'] . '" target="_self"> <i class="fa fa-level-up fa-lg" data-toggle="tooltip" data-placement="top" title="" data-original-title="审核"></i> </a>';
+<a href="' . $url['review'] . '" target="_self"> <i class="fa fa-level-up fa-lg confirmation" data-toggle="tooltip" data-placement="top" title="" data-original-title="提交审核" data-confirm="确认提交审核?"></i> </a>';
         }
         if (in_array($data['review_type'], [Reconciliation::FRC]) && $p2 && in_array(Principal::OPS, $limitPost)) {
-            $tmp .= '<a href="' . $url['review'] . '" target="_self"> <i class="fa fa-level-up fa-lg" data-toggle="tooltip" data-placement="top" title="" data-original-title="审核"></i> </a>
-<a href="' . $url['refuse'] . '" target="_self"> <i class="fa fa-level-down fa-lg" data-toggle="tooltip" data-placement="top" title="" data-original-title="拒绝"></i> </a>';
+            $tmp .= '<a href="' . $url['review'] . '" target="_self"> <i class="fa fa-level-up fa-lg confirmation" data-toggle="tooltip" data-placement="top" title="" data-original-title="复核" data-confirm="确认复核?"></i> </a>
+<a href="' . $url['refuse'] . '" target="_self"> <i class="fa fa-level-down fa-lg confirmation" data-toggle="tooltip" data-placement="top" title="" data-original-title="拒绝" data-confirm="确认拒绝?"></i> </a>';
         }
         if (in_array($data['review_type'], [Reconciliation::OOR]) && $p2 && in_array(Principal::FSR, $limitPost)) {
-            $tmp .= '<a href="' . $url['review'] . '" target="_self"> <i class="fa fa-check fa-lg" data-toggle="tooltip" data-placement="top" title="" data-original-title="审核"></i> </a>
-<a href="' . $url['refuse'] . '" target="_self"> <i class="fa fa-times fa-lg" data-toggle="tooltip" data-placement="top" title="" data-original-title="拒绝"></i> </a>';
+            $tmp .= '<a href="' . $url['review'] . '" target="_self"> <i class="fa fa-check fa-lg confirmation" data-toggle="tooltip" data-placement="top" title="" data-original-title="审核" data-confirm="确认提交审核?"></i> </a>
+<a href="' . $url['refuse'] . '" target="_self"> <i class="fa fa-times fa-lg confirmation" data-toggle="tooltip" data-placement="top" title="" data-original-title="拒绝" data-confirm="确认拒绝?"></i> </a>';
         }
         return $tmp;
     }

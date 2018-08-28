@@ -171,13 +171,13 @@
             url: '{!! route('reconciliationAudit.invoice') !!}',
             selector: '.i-checks:checked',
             type: '3',
-            alert_confirm: '确定要拒绝提审吗？'
+            alert_confirm: '确定要批量开票吗？'
         });
         $('#pay-btn').batch({
             url: '{!! route('reconciliationAudit.payback') !!}',
             selector: '.i-checks:checked',
             type: '4',
-            alert_confirm: '确定要拒绝提审吗？'
+            alert_confirm: '确定要批量确认回款吗？'
         });
     </script>
 @endpush
