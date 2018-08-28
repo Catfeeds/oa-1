@@ -26,9 +26,12 @@ Route::group([
     Route::get('reconciliation-audit/review/{status}', [
         'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationAudit|reconciliation-reconciliationAudit.review'],
         'uses' => 'ReconciliationAuditController@review'])->name('reconciliationAudit.review');
-    /*Route::get('reconciliation-audit/download', [
-        'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationAudit|reconciliation-reconciliationAudit.download'],
-        'uses' => 'ReconciliationAuditController@download'])->name('reconciliationAudit.download');*/
+    Route::get('reconciliation-audit/invoice', [
+        'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationAudit|reconciliation-reconciliationAudit.invoice'],
+        'uses' => 'ReconciliationAuditController@invoice'])->name('reconciliationAudit.invoice');
+    Route::get('reconciliation-audit/payback', [
+        'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationAudit|reconciliation-reconciliationAudit.payback'],
+        'uses' => 'ReconciliationAuditController@payback'])->name('reconciliationAudit.payback');
 
     //负责人
     Route::get('reconciliation-principal', [
@@ -82,11 +85,61 @@ Route::group([
     Route::get('reconciliation-proportion', [
         'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationProportion'],
         'uses' => 'ReconciliationProportionController@index'])->name('reconciliationProportion');
+    Route::get('reconciliation-proportion/data', [
+        'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationProportion'],
+        'uses' => 'ReconciliationProportionController@data'])->name('reconciliationProportion.data');
     Route::get('reconciliation-proportion/edit/{id}/{pid}', [
         'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationProportion|reconciliation-reconciliationProportion.edit'],
         'uses' => 'ReconciliationProportionController@edit'])->name('reconciliationProportion.edit');
     Route::post('reconciliation-proportion/edit/{id}/{pid}', [
         'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationProportion|reconciliation-reconciliationProportion.edit'],
         'uses' => 'ReconciliationProportionController@update']);
+    Route::get('reconciliation-proportion/batch', [
+        'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationProportion|reconciliation-reconciliationProportion.batch'],
+        'uses' => 'ReconciliationProportionController@batch'])->name('reconciliationProportion.batch');
+    Route::post('reconciliation-proportion/batch', [
+        'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationProportion|reconciliation-reconciliationProportion.batch'],
+        'uses' => 'ReconciliationProportionController@add']);
 
+    //货币汇率
+    Route::get('reconciliation-exchange-rate', [
+        'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationExchangeRate'],
+        'uses' => 'ReconciliationExchangeRateController@index'])->name('reconciliationExchangeRate');
+    Route::get('reconciliation-exchange-rate/create', [
+        'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationExchangeRate|reconciliation-reconciliationExchangeRate.create'],
+        'uses' => 'ReconciliationExchangeRateController@create'])->name('reconciliationExchangeRate.create');
+    Route::post('reconciliation-exchange-rate/create', [
+        'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationExchangeRate|reconciliation-reconciliationExchangeRate.create'],
+        'uses' => 'ReconciliationExchangeRateController@store']);
+    Route::get('reconciliation-exchange-rate/edit/{id}', [
+        'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationExchangeRate|reconciliation-reconciliationExchangeRate.edit'],
+        'uses' => 'ReconciliationExchangeRateController@edit'])->name('reconciliationExchangeRate.edit');
+    Route::post('reconciliation-exchange-rate/edit/{id}', [
+        'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationExchangeRate|reconciliation-reconciliationExchangeRate.edit'],
+        'uses' => 'ReconciliationExchangeRateController@update']);
+    Route::get('reconciliation-exchange-rate/conversion', [
+        'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationExchangeRate|reconciliation-reconciliationExchangeRate.conversion'],
+        'uses' => 'ReconciliationExchangeRateController@conversion'])->name('reconciliationExchangeRate.conversion');
+
+    //对账汇总
+    Route::get('reconciliation-pool', [
+        'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationPool'],
+        'uses' => 'ReconciliationPoolController@index'])->name('reconciliationPool');
+    Route::get('reconciliation-pool/data', [
+        'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationPool'],
+        'uses' => 'ReconciliationPoolController@data'])->name('reconciliationPool.data');
+    Route::get('reconciliation-pool/detail', [
+        'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationPool|reconciliation-reconciliationPool.detail'],
+        'uses' => 'ReconciliationPoolController@detail'])->name('reconciliationPool.detail');
+
+    //对账进度跟踪表
+    Route::get('reconciliation-schedule', [
+        'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationSchedule'],
+        'uses' => 'ReconciliationScheduleController@index'])->name('reconciliationSchedule');
+    Route::get('reconciliation-schedule/data', [
+        'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationSchedule'],
+        'uses' => 'ReconciliationScheduleController@data'])->name('reconciliationSchedule.data');
+    Route::get('reconciliation-schedule/detail', [
+        'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationPool|reconciliation-reconciliationSchedule.detail'],
+        'uses' => 'ReconciliationScheduleController@detail'])->name('reconciliationSchedule.detail');
 });

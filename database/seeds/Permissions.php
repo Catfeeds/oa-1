@@ -132,6 +132,8 @@ class Permissions extends Seeder
             'reconciliation-reconciliationAudit.edit' => 'CRM功能/对账功能/对账审核/「编辑」',
             'reconciliation-reconciliationAudit.review' => 'CRM功能/对账功能/对账审核/「审核」',
             'reconciliation-reconciliationAudit.download' => 'CRM功能/对账功能/对账审核/「导出」',
+            'reconciliation-reconciliationAudit.invoice' => 'CRM功能/对账功能/对账审核/「开票确认」',
+            'reconciliation-reconciliationAudit.payback' => 'CRM功能/对账功能/对账审核/「回款确认」',
 
             'reconciliation-reconciliationProduct' => 'CRM功能/对账功能/游戏列表/「所有」',
             'reconciliation-reconciliationProduct.create' => 'CRM功能/对账功能/游戏列表/「添加」',
@@ -146,6 +148,16 @@ class Permissions extends Seeder
 
             'reconciliation-reconciliationProportion' => 'CRM功能/对账功能/分成比例管理/「所有」',
             'reconciliation-reconciliationProportion.edit' => 'CRM功能/对账功能/分成比例管理/「编辑」',
+
+            'reconciliation-reconciliationExchangeRate' => 'CRM功能/对账功能/货币汇率管理/「所有」',
+            'reconciliation-reconciliationExchangeRate.create' => 'CRM功能/对账功能/货币汇率管理/「添加」',
+            'reconciliation-reconciliationExchangeRate.edit' => 'CRM功能/对账功能/货币汇率管理/「编辑」',
+            'reconciliation-reconciliationExchangeRate.conversion' => 'CRM功能/对账功能/货币汇率管理/「转化」',
+
+            'reconciliation-reconciliationPool' => 'CRM功能/对账功能/分成比例汇总/「所有」',
+            'reconciliation-reconciliationPool.detail' => 'CRM功能/对账功能/分成比例汇总/「明细」',
+
+            'reconciliation-reconciliationSchedule' => 'CRM功能/对账功能/对账进度跟踪/「所有」',
         ];
     }
 

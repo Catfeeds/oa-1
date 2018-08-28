@@ -13,13 +13,13 @@
 }
 
 .daterangepicker.opensleft .ranges, .daterangepicker.opensleft .calendar {
-  float: left;
+  float: right;
   margin: 4px;
 }
 
 .daterangepicker.opensright .ranges, .daterangepicker.opensright .calendar,
 .daterangepicker.openscenter .ranges, .daterangepicker.openscenter .calendar {
-  float: right;
+  float: left;
   margin: 4px;
 }
 
