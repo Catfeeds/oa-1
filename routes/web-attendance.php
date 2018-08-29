@@ -20,10 +20,10 @@ Route::group([
         Route::get('leave', [
             'middleware' => ['permission:attendance-all|leave-all|leave'],
             'uses' => 'LeaveController@index'])->name('leave.info');
-        Route::get('leave/create', [
+        Route::get('leave/create/{id}', [
             'middleware' => ['permission:attendance-all|leave-all|leave.create'],
             'uses' => 'LeaveController@create'])->name('leave.create');
-        Route::post('leave/create', [
+        Route::post('leave/create/{id}', [
             'middleware' => ['permission:attendance-all|leave-all|leave.create'],
             'uses' => 'LeaveController@store']);
         Route::get('leave/edit', [
@@ -50,10 +50,6 @@ Route::group([
         Route::get('leave/review-batch/{id}', [
             'middleware' => ['permission:attendance-all|leave-all|leave.review.optStatus'],
             'uses' => 'LeaveController@reviewBatchOptStatus'])->name('leave.review.batchOptStatus');
-			#补打卡
-        Route::any('leave/recheck', [
-            'middleware' => ['permission:leave-all|leave.edit'],
-            'uses' => 'LeaveController@recheck'])->name('leave.recheck');
 
         #考勤每日明细管理
         Route::get('daily-detail', [
@@ -63,8 +59,8 @@ Route::group([
         //每日考勤管理
         Route::get('daily-detail/review/', [
             'middleware' => ['permission:attendance-all|daily-detail-all|daily-detail.review'],
-            'uses' => 'DailyDetailController@reviewIndex'])->name('daily-detail.review.info');
-
+            'uses' => 'ReviewController@index'])->name('daily-detail.review.info');
+        #考勤导入功能
         Route::get('daily-detail/review/import/info', [
             'middleware' => ['permission:attendance-all|daily-detail-all|daily-detail.review'],
             'uses' => 'PunchRecordController@index'])->name('daily-detail.review.import.info');
