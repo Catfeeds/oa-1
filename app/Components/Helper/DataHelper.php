@@ -114,50 +114,55 @@ class DataHelper
      */
     public static function diffTime($startTime, $endTime)
     {
+
         $startTime = strtotime($startTime);
         $endTime = strtotime($endTime);
 
-        if ($startTime <= $endTime) {
+        $day = '';
+
+        //时间为空的时候
+        if ($startTime > 946656000 && $startTime <= $endTime) {
         $day = floor($endTime - $startTime)/86400;
             switch ($day) {
                 case $day > 0 && $day < 0.3 :
-                    return 0.5;
+                    $day = 0.5;
                     break;
                 case $day > 0.3 && $day < 1 :
-                    return 1;
+                    $day = 1;
                     break;
                 case $day > 1.1 && $day < 1.3 :
-                    return 1.5;
+                    $day = 1.5;
                     break;
                 case $day > 1.3 && $day < 2 :
-                    return 2;
+                    $day = 2;
                     break;
                 case $day > 2.1 && $day < 2.3 :
-                    return 2.5;
+                    $day = 2.5;
                     break;
                 case $day > 2.1 && $day < 3 :
-                    return 3;
+                    $day = 3;
                     break;
                 case $day > 3.1 && $day < 3.3 :
-                    return 3.5;
+                    $day = 3.5;
                     break;
                 case $day > 4.1 && $day < 5 :
-                    return 4.5;
+                    $day = 4.5;
                     break;
                 case $day > 5.1 && $day < 5.3 :
-                    return 5;
+                    $day = 5;
                     break;
                 case $day > 6.1 && $day < 7 :
-                    return 6.5;
+                    $day = 6.5;
                     break;
                 case $day > 7.1 && $day < 7.3 :
-                    return 7;
+                    $day = 7;
                     break;
                 default :
-                    return '';
+                    $day = (int)(($endTime - $startTime) / 86400);
+                    break;
             }
         }
+        return $day;
 
-        return '';
     }
 }

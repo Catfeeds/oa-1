@@ -86,8 +86,6 @@
 
                     <div class="hr-line-dashed"></div>
 
-
-
                     <div class="form-group @if (!empty($errors->first('reason'))) has-error @endif">
                         {!! Form::label('reason', trans('att.请假理由'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-8">

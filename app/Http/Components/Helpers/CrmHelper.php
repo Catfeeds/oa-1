@@ -16,19 +16,23 @@ class CrmHelper
         return ['' => $allName] + $array;
     }
 
-    public static function percentage($number)
+    public static function percentage($number, $model = false)
     {
-        return ($number * 100).'%';
+        if ($model) {
+            return (int)$number / 100;
+        } else {
+            return round(($number * 100),2) . '%';
+        }
     }
 
-    public static function dividedInto($channel_rate,$first_division,$second_division,$second_division_condition,$water)
+    public static function dividedInto($channel_rate, $first_division, $second_division, $second_division_condition, $water)
     {
         $first_division = $first_division != 0 ? $first_division : 1;
-        if ($water > $second_division_condition && $second_division_condition != 0){
+        if ($water > $second_division_condition && $second_division_condition != 0) {
             $first = $second_division_condition * (1 - $channel_rate) * $first_division;
-            $second = ($water - $second_division_condition) *  (1 - $channel_rate) * $second_division;
+            $second = ($water - $second_division_condition) * (1 - $channel_rate) * $second_division;
             $divided = $first + $second;
-        }else{
+        } else {
             $divided = $water * (1 - $channel_rate) * $first_division;
         }
 

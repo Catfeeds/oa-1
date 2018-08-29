@@ -1,6 +1,6 @@
 @push('css')
 
-    <link href="{{ asset('css/plugins/daterangepicker/daterangepicker-bs3.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/plugins/daterangepicker/daterangepicker-bs3.css').'?t='.time() }}" rel="stylesheet">
 
 @endpush
 

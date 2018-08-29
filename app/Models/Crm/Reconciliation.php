@@ -19,14 +19,27 @@ class Reconciliation extends Model
 
     protected $primaryKey = 'id';
 
+    const NO = 1;
+    const YES = 2;
+
+    const INVOICE = [
+        self::NO => '未开票',
+        self::YES => '已开票',
+    ];
+    const PAYBACK = [
+        self::NO => '未回款',
+        self::YES => '已回款',
+    ];
+
     const UNRD = 1;
     const OPS = 2;
     const OPD = 3;
     const FAC = 4;
     const TREASURER = 5;
     const FRC = 6;
-    const FSR = 7;
-    const COMPLETE = 8;
+    const OOR = 7;
+    const FSR = 8;
+    const COMPLETE = 9;
     const REVIEW_TYPE = [
         self::UNRD => '未审核',
         self::OPS => '运营专员审核',
@@ -34,6 +47,7 @@ class Reconciliation extends Model
         self::FAC => '财务计提专员审核',
         self::TREASURER => '财务计提主管审核',
         self::FRC => '财务对账专员审核',
+        self::OOR => '运营专员复核',
         self::FSR => '财务对账主管审核',
         self::COMPLETE => '审核完成',
     ];
@@ -67,10 +81,20 @@ class Reconciliation extends Model
         'divided_type',
         'backstage_channel',
         'unified_channel',
+        'period_name',
+        'period',
+        'billing_type',
+        'billing_num',
+        'billing_time',
+        'billing_user',
+        'payback_type',
+        'payback_time',
+        'payback_user',
         'review_type',
         'backstage_water_other',
         'backstage_water_rmb',
         'operation_adjustment',
+        'operation_rmb_adjustment',
         'operation_type',
         'operation_remark',
         'operation_user_name',
@@ -78,6 +102,7 @@ class Reconciliation extends Model
         'operation_water_other',
         'operation_water_rmb',
         'accrual_adjustment',
+        'accrual_rmb_adjustment',
         'accrual_type',
         'accrual_remark',
         'accrual_user_name',
@@ -85,6 +110,7 @@ class Reconciliation extends Model
         'accrual_water_other',
         'accrual_water_rmb',
         'reconciliation_adjustment',
+        'reconciliation_rmb_adjustment',
         'reconciliation_type',
         'reconciliation_remark',
         'reconciliation_user_name',
@@ -93,4 +119,8 @@ class Reconciliation extends Model
         'reconciliation_water_rmb',
     ];
 
+    public static function getBilling()
+    {
+        return self::get()->pluck('billing_cycle','billing_cycle')->toArray();
+    }
 }

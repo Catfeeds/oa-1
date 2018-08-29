@@ -9,6 +9,7 @@
 namespace App\Http\Components\Helpers;
 
 
+use App\Models\Attendance\Leave;
 use App\Models\Role;
 use App\Models\Sys\ApprovalStep;
 
@@ -32,6 +33,16 @@ class AttendanceHelper
 
         $roleName = implode('->', $roleName);
         return $roleName;
+    }
+
+    public static function getLeaveStartTime($startTime, $startId)
+    {
+        return date('Y-m-d', strtotime($startTime)) . ' ' . Leave::$startId[$startId];
+    }
+
+    public static function getLeaveEndTime($endTime, $endId)
+    {
+        return date('Y-m-d', strtotime($endTime)) . ' ' . Leave::$endId[$endId];
     }
 
 }
