@@ -586,9 +586,14 @@ class ReconciliationAuditController extends Controller
                 $message[] = sprintf('%s_%s_%s_%d_暂无审核', $v['billing_cycle'], $v['client'], $v['backstage_channel'], $v['product_id']);
             }
         }
+        if (!empty($message)){
+            flash(trans(implode(',', $message), ['value' => trans('crm.对账审核')]), 'danger');
+            return redirect()->back()->withInput();
+        }else{
+            flash(trans('crm.开票成功', ['value' => trans('crm.对账审核')]), 'success');
+            return redirect()->back()->withInput();
+        }
 
-        flash(trans('crm.开票成功'.implode(',', $message), ['value' => trans('crm.对账审核')]), 'success');
-        return redirect()->back()->withInput();
     }
 
     public function payback(Request $request)
@@ -602,8 +607,12 @@ class ReconciliationAuditController extends Controller
                 $message[] = sprintf('%s_%s_%s_%d_暂无开票', $v['billing_cycle'], $v['client'], $v['backstage_channel'], $v['product_id']);
             }
         }
-
-        flash(trans('crm.回款成功'.implode(',', $message), ['value' => trans('crm.对账审核')]), 'success');
-        return redirect()->back()->withInput();
+        if (!empty($message)){
+            flash(trans(implode(',', $message), ['value' => trans('crm.对账审核')]), 'danger');
+            return redirect()->back()->withInput();
+        }else{
+            flash(trans('crm.回款成功', ['value' => trans('crm.对账审核')]), 'success');
+            return redirect()->back()->withInput();
+        }
     }
 }
