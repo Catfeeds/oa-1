@@ -20,6 +20,9 @@ class HolidayConfig extends Model
 
     protected $primaryKey = 'holiday_id';
 
+    const STATUS_DISABLE = 0;
+    const STATUS_ENABLE = 1;
+
     const LEAVEID = 1;
     const OVERTIME = 2;
     const RECHECK = 3;
@@ -28,13 +31,35 @@ class HolidayConfig extends Model
         1 => '请假',
         2 => '加班调休',
         3 => '补打卡',
-        0 => ''
+    ];
+
+    public static $isBoon = [
+        self::STATUS_DISABLE => '否',
+        self::STATUS_ENABLE => '是',
+
+    ];
+
+    public static $condition = [
+        1 => '按年重置',
+        2 => '按月重置'
+    ];
+
+    public static $punchType = [
+        0 => '不设置',
+        1 => '上班补卡',
+        2 => '下班补卡'
     ];
 
     protected $fillable = [
         'holiday',
         'apply_type_id',
         'memo',
+        'is_boon',
+        'is_renew',
+        'is_annex',
+        'condition_id',
+        'restrict_sex',
+        'punch_type',
         'num',
     ];
 

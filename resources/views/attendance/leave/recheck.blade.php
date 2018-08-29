@@ -12,31 +12,24 @@
                 </div>
                 <div class="ibox-content">
 
-                    {!! Form::open(['class' => 'form-horizontal', 'enctype' => 'multipart/form-data', 'url' => 'attendance/leave/create' ]) !!}
-
-                    {!! Form::hidden('apply_type_id', \App\Models\Sys\HolidayConfig::RECHECK) !!}
-                    {!! Form::hidden('holiday_id', \App\Models\Sys\HolidayConfig::where('apply_type_id', \App\Models\Sys\HolidayConfig::RECHECK)->first()->holiday_id) !!}
+                    {!! Form::open(['class' => 'form-horizontal', 'enctype' => 'multipart/form-data']) !!}
 
                     <div class="form-group @if (!empty($errors->first('holiday_id'))) has-error @endif">
                         {!! Form::label('holiday_id', trans('att.补打卡类型'), ['class' => 'col-sm-2 control-label']) !!}
-                        <div class="checkbox col-sm-2">
-                            <label> 
-                                <input type="checkbox" id="onwork_recheck" checked>上班补打卡
-                            </label>
-                        </div>
-
-                        <div class="checkbox col-sm-2">
-                            <label> 
-                                <input type="checkbox" id="offwork_recheck" checked>下班补打卡
-                            </label>
-                        </div>
+                        @foreach($holidayList as $k => $v)
+                            <div class="checkbox col-sm-2">
+                                <label>
+                                    <input name="holiday_id" type="checkbox" class="i-checks" value="{{$v->holiday_id .'$$'. $v->punch_type }}" id="recheck_{{$v->punch_type}}">{{$v->holiday}}
+                                </label>
+                            </div>
+                        @endforeach
                         <span class="help-block m-b-none">{{ $errors->first('holiday_id') }}</span>
                     </div>
 
+                    <input type="hidden" id="check_box" value="{{old('holiday_id')}}">
 
-                    <div id="onwork_div">
+                    <div id="onwork_div" style="display: none">
                         <div class="hr-line-dashed"></div>
-
                         <div class="form-group @if (!empty($errors->first('start_time'))) has-error @endif" >
                             {!! Form::label('start_time', trans('att.上班补打卡时间'), ['class' => 'col-sm-2 control-label']) !!}
                             <div class="col-sm-3">
@@ -44,7 +37,6 @@
                                     <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
                                     {!! Form::text('start_time', !empty($leave->start_time) ? $leave->start_time : (old('start_time') ?? '') , [
                                     'class' => 'form-control date_time',
-                                    'required' => true
                                     ]) !!}
                                     <span class="help-block m-b-none">{{ $errors->first('start_time') }}</span>
                                 </div>
@@ -52,10 +44,8 @@
                         </div>
                     </div>
 
-
-                    <div id="offwork_div">
+                    <div id="offwork_div" style="display: none">
                         <div class="hr-line-dashed"></div>
-
                         <div class="form-group @if (!empty($errors->first('end_time'))) has-error @endif" >
                             {!! Form::label('end_time', trans('att.下班补打卡时间'), ['class' => 'col-sm-2 control-label']) !!}
                             <div class="col-sm-3">
@@ -63,7 +53,6 @@
                                     <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
                                     {!! Form::text('end_time', !empty($leave->end_time) ? $leave->end_time : (old('end_time') ?? '') , [
                                     'class' => 'form-control date_time',
-                                    'required' => true
                                     ]) !!}
                                     <span class="help-block m-b-none">{{ $errors->first('end_time') }}</span>
                                 </div>
@@ -80,13 +69,13 @@
                                  id="show_associate_image">
                             <input name="annex" type="file" accept="image/*" id="select-associate-file"/>
                         </div>
-
+                        <span class="help-block m-b-none">{{ $errors->first('annex') }}</span>
                     </div>
 
                     <div class="hr-line-dashed"></div>
 
                     <div class="form-group @if (!empty($errors->first('reason'))) has-error @endif">
-                        {!! Form::label('reason', trans('att.请假理由'), ['class' => 'col-sm-2 control-label']) !!}
+                        {!! Form::label('reason', trans('att.补打卡理由'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-8">
                             {!! Form::textarea('reason', $leave->reason ?? old('reason'), [
                             'required' => true,
@@ -141,34 +130,44 @@
                 readURL(this, '#show_mobile_header_image');
             });
 
-            //未选择补卡则隐藏填写时间
-            $('input:checkbox').click(function(){
-                if ($(this).attr('id') == "onwork_recheck"){
-                    if ($(this).is(":checked")) {
-                        $('#start_time').val('');
-                        $('#onwork_div').show();
-                    } else {
-                        $('#start_time').val('{{ \App\Models\Attendance\Leave::HASNOTIME }}');
-                        $('#onwork_div').hide();
-                    }
-                }else {
-                    if ($(this).is(":checked")) {
-                        $('#end_time').val('');
-                        $('#offwork_div').show();
-                    } else {
-                        $('#end_time').val('{{ \App\Models\Attendance\Leave::HASNOTIME }}');
-                        $('#offwork_div').hide();
-                    }
+
+            if($('#check_box').val() != '') {
+                var arr = $('#check_box').val().split('$$');
+
+                if(arr[1] == 1) {
+                    $('#recheck_1').iCheck('check');
+                    $('#onwork_div').show();
                 }
-            });
-            //若用户未选择补打卡选项,进行提示
-            $('form').submit(function () {
-                if ($('#end_time').val() == '{{ \App\Models\Attendance\Leave::HASNOTIME }}' &&
-                    $('#start_time').val() == '{{ \App\Models\Attendance\Leave::HASNOTIME }}'){
-                    alert('请选择补打卡');
-                    return false;
+
+                if(arr[1] == 2) {
+                    $('#recheck_2').iCheck('check');
+                    $('#offwork_div').show();
                 }
+            };
+
+            $('input[type="checkbox"]').on('ifChecked', function () {
+
+                if ($(this).attr('id') == "recheck_1") {
+                    $('#onwork_div').show();
+                }
+
+                if ($(this).attr('id') == "recheck_2") {
+                    $('#offwork_div').show();
+                }
+
             });
+
+            $('input[type="checkbox"]').on('ifUnchecked', function () {
+                if ($(this).attr('id') == "recheck_1") {
+                    $('#onwork_div').hide();
+                }
+
+                if ($(this).attr('id') == "recheck_2") {
+                    $('#offwork_div').hide();
+                }
+
+            });
+
         });
     </script>
 @endsection

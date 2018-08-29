@@ -20,10 +20,10 @@ Route::group([
         Route::get('leave', [
             'middleware' => ['permission:attendance-all|leave-all|leave'],
             'uses' => 'LeaveController@index'])->name('leave.info');
-        Route::get('leave/create', [
+        Route::get('leave/create/{id}', [
             'middleware' => ['permission:attendance-all|leave-all|leave.create'],
             'uses' => 'LeaveController@create'])->name('leave.create');
-        Route::post('leave/create', [
+        Route::post('leave/create/{id}', [
             'middleware' => ['permission:attendance-all|leave-all|leave.create'],
             'uses' => 'LeaveController@store']);
         Route::get('leave/edit', [
@@ -50,10 +50,6 @@ Route::group([
         Route::get('leave/review-batch/{id}', [
             'middleware' => ['permission:attendance-all|leave-all|leave.review.optStatus'],
             'uses' => 'LeaveController@reviewBatchOptStatus'])->name('leave.review.batchOptStatus');
-			#补打卡
-        Route::any('leave/recheck', [
-            'middleware' => ['permission:leave-all|leave.edit'],
-            'uses' => 'LeaveController@recheck'])->name('leave.recheck');
 
         #考勤每日明细管理
         Route::get('daily-detail', [

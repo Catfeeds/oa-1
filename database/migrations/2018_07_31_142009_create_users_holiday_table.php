@@ -14,9 +14,10 @@ class CreateUsersHolidayTable extends Migration
     public function up()
     {
         Schema::create('users_holiday', function (Blueprint $table) {
+            $table->increments('id');
             $table->integer('user_id')->comment = '员工ID';
             $table->integer('holiday_id')->comment = '假期类型ID';
-            $table->integer('num')->comment = '假期天数';
+            $table->decimal('num', 11, 1)->comment = '假期天数';
 
             $table->unique(['user_id', 'holiday_id']);
         });

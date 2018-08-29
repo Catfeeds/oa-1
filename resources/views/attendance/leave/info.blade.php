@@ -11,7 +11,6 @@
                     <h5>{{ $title }}</h5>
                 </div>
                 <div class="ibox-content">
-
                     {!! Form::open(['class' => 'form-horizontal', 'enctype' => 'multipart/form-data']) !!}
                     {{--分割线--}}
                 <div class="col-sm-6 b-r">
@@ -63,27 +62,7 @@
                         {!! Form::label('holiday_id', trans('att.请假时间'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-6">
                             <span class="help-block m-b-none">
-                                @if($leave->apply_type_id == \App\Models\Sys\HolidayConfig::RECHECK)
-                                    @if(date('Y-m-d', strtotime($leave->start_time)) == \App\Models\Attendance\Leave::HASNOTIME)
-                                        暂无上班补打卡
-                                    @else
-                                        {{ date('Y-m-d H:i:s', strtotime($leave->start_time)) }}
-                                    @endif
-                                @else
-                                    {{  date('Y-m-d', strtotime($leave->start_time)).' '.
-                                    \App\Models\Attendance\Leave::$startId[$leave->start_id] }}
-                                @endif
-                                ~
-                                @if($leave->apply_type_id == \App\Models\Sys\HolidayConfig::RECHECK)
-                                    @if(($a = date('Y-m-d', strtotime($leave->end_time))) == \App\Models\Attendance\Leave::HASNOTIME)
-                                        暂无下班补打卡
-                                    @else
-                                        {{ '下班补打卡:' }}<br>{{  date('Y-m-d H:i:s', strtotime($leave->end_time)) }}
-                                    @endif
-                                @else
-                                    {{  date('Y-m-d', strtotime($leave->end_time)).' '.
-                                    \App\Models\Attendance\Leave::$endId[$leave->end_id] }}
-                                @endif
+
                             </span>
                         </div>
                     </div>
@@ -169,8 +148,8 @@
                         <div class="col-sm-4 col-sm-offset-5">
                             @if(in_array($leave->status, [0, 1]))
                                 @if($leave->review_user_id == Auth::user()->user_id )
-                                    <a id="edit_status" data-id=1 class="btn btn-success">{{ trans('att.审核通过') }}</a>
-                                    <a id="edit_status" data-id=2 class="btn btn-primary">{{ trans('att.拒绝通过') }}</a>
+                                    <a id="by_status" data-id=1 class="btn btn-success">{{ trans('att.审核通过') }}</a>
+                                    <a id="refuse_status" data-id=2 class="btn btn-primary">{{ trans('att.拒绝通过') }}</a>
                                 @endif
                             @endif
 
@@ -217,18 +196,14 @@
             });
 
 
-            $('#edit_status').click(function () {
+            $('#by_status').click(function () {
                 var status = $(this).data('id');
-                switch (status) {
-                    case 1 :
-                        $msg = '是否审核通过!';
-                        break;
-                    case 2 :
-                        $msg = '是否拒绝通过!';
-                        break;
-                }
+                edit_status(status, '是否审核通过!');
+            });
 
-                edit_status(status, $msg, $(this));
+            $('#refuse_status').click(function () {
+                var status = $(this).data('id');
+                edit_status(status, '是否拒绝通过!');
             });
 
             function edit_status(status, $msg, obj){
