@@ -16,6 +16,11 @@ Route::group([
         Route::get('index', [
             'uses' => 'IndexController@index',
         ])->name('attIndex');
+        # ajax获取工作日历
+        Route::get('calIndex', [
+            'uses' => 'IndexController@getCalendarByAjax',
+        ])->name('calIndex');
+
         # 我的假期明细
         Route::get('leave', [
             'middleware' => ['permission:attendance-all|leave-all|leave'],
