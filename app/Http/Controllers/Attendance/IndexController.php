@@ -11,6 +11,7 @@ namespace App\Http\Controllers\Attendance;
 use App\Http\Controllers\Controller;
 use App\Models\Sys\Calendar;
 use App\Models\Sys\HolidayConfig;
+use App\Models\Sys\PunchRules;
 use App\Models\UserHoliday;
 use Illuminate\Http\Request;
 
@@ -34,7 +35,7 @@ class IndexController extends Controller
             $info[] = [
                 'date' => date('Y-m-d', strtotime($v->year . '-' . $v->month . '-' . $v->day)),
                 'event' => $punchRules->name,
-                'color' => '#' . str_pad(dechex($v->punch_rules_id * 100), 6, '0'),
+                'color' => PunchRules::$punchTypeColor[$punchRules->punch_type_id],
                 'content' => "上班准备时间:" . $punchRules->ready_time . '<br>上班时间:' . $punchRules->work_start_time .
                     '<br>下班时间:' . $punchRules->work_end_time . '<br>备注:'.($v->memo ?? '暂无')
             ];
@@ -44,26 +45,16 @@ class IndexController extends Controller
 
     //返回剩余天数与福利假期详情
     public function getRemainDay(){
-        $uh = new UserHoliday();
-        $objects = $uh->where('user_id', \Auth::id())->get();
-        $data = [];
-        foreach ($objects as $object){
-            //关联查询到假期配置表
-            $holidayConfig = $object->holidayConfig;
-
-            $num = (int)$object->num;
-            $now = date_create();
-            $after = date_create(date('Y-m-d H:i:s', strtotime("+$num days", strtotime($holidayConfig->created_at))));
-            if ($now > $after)
-                continue;
-
-            $data[] = [
-                'id' => $object->user_id,
-                'holiday' => $holidayConfig->holiday,
-                'memo' => $holidayConfig->memo,
-                'remain_num' => date_diff($now, $after)
+        $datas = UserHoliday::with('holidayConfig')->where(['user_id' => \Auth::user()->user_id])->get();
+        $info = [];
+        foreach ($datas as $data){
+            $info[] = [
+                'id' => $data->user_id,
+                'holiday' => $data->holidayConfig->holiday,
+                'memo' => $data->holidayConfig->memo,
+                'num' => $data->num
             ];
         }
-        return $data;
+        return $info;
     }
 }

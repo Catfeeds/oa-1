@@ -10,7 +10,7 @@
     <div class="col-xs-6">
         <div class="ibox float-e-margins">
             <div class="ibox-title">
-                <h5>假期剩余天数</h5>
+                <h5>假期天数</h5>
             </div>
             <div class="ibox-content">
 
@@ -24,7 +24,7 @@
                             <th>用户ID</th>
                             <th>假期名</th>
                             <th>假期详情</th>
-                            <th>剩余天数</th>
+                            <th>假期天数</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -33,7 +33,7 @@
                                 <td>{{ $d['id'] }}</td>
                                 <td>{{ $d['holiday'] }}</td>
                                 <td><pre style="width: 15em; height: 3em" >{{ $d['memo'] }}</pre></td>
-                                <td>{{ $d['remain_num']->d.'天'.$d['remain_num']->h.'小时' }}</td>
+                                <td>{{ $d['num'].'天'}}</td>
                             </tr>
                             @endforeach
                         </tbody>

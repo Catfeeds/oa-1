@@ -8,6 +8,7 @@
 
 namespace App\Models;
 
+use App\Models\Sys\HolidayConfig;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -28,7 +29,7 @@ class UserHoliday extends Model
     ];
 
     public function holidayConfig(){
-        return $this->belongsTo('\App\Models\Sys\HolidayConfig', 'holiday_id', 'holiday_id');
+        return $this->hasOne(HolidayConfig::class, 'holiday_id', 'holiday_id');
     }
 
 }

@@ -34,6 +34,12 @@ class PunchRules extends Model
         3 => '节假日',
     ];
 
+    public static $punchTypeColor = [
+        1 => '#337ab7',
+        2 => '#1ab394',
+        3 => '#b31a57'
+    ];
+
     public static function getPunchTypeList()
     {
         return self::get(['punch_type_id', 'name'])->pluck('name', 'punch_type_id')->toArray();
