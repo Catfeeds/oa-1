@@ -9,23 +9,23 @@
 namespace App\Http\Controllers\Attendance;
 
 use App\Http\Controllers\Controller;
-use App\Models\Attendance\Leave;
 use App\Models\Sys\Calendar;
 use App\Models\Sys\HolidayConfig;
+use App\Models\UserHoliday;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class IndexController extends Controller
 {
     public function index()
     {
         $title = '考勤系统首页';
+        $data = $this->getRemainDay();
         return view('attendance.index', compact('title', 'data'));
     }
 
+    //接收考勤系统首页发送过来的ajax请求,完成工作日历的显示
     public function getCalendarByAjax(Request $request)
     {
-        //接收考勤系统首页发送过来的ajax请求,完成工作日历的显示
         $month = (int)$request->input('month');
         $data = Calendar::where('month', $month)->get();
         $info = [];
@@ -40,5 +40,30 @@ class IndexController extends Controller
             ];
         }
         return $info;
+    }
+
+    //返回剩余天数与福利假期详情
+    public function getRemainDay(){
+        $uh = new UserHoliday();
+        $objects = $uh->where('user_id', \Auth::id())->get();
+        $data = [];
+        foreach ($objects as $object){
+            //关联查询到假期配置表
+            $holidayConfig = $object->holidayConfig;
+
+            $num = (int)$object->num;
+            $now = date_create();
+            $after = date_create(date('Y-m-d H:i:s', strtotime("+$num days", strtotime($holidayConfig->created_at))));
+            if ($now > $after)
+                continue;
+
+            $data[] = [
+                'id' => $object->user_id,
+                'holiday' => $holidayConfig->holiday,
+                'memo' => $holidayConfig->memo,
+                'remain_num' => date_diff($now, $after)
+            ];
+        }
+        return $data;
     }
 }

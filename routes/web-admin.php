@@ -203,4 +203,8 @@ Route::group([
         'middleware' => ['permission:punch-rules-all|calendar.edit'],
         'uses' => 'Sys\CalendarController@update']);
 
+    Route::post('sys/calendar', [
+        'middleware' => ['permission:punch-rules-all|calendar'],
+        'uses' => 'Sys\CalendarController@storeAllMonth']);
+
 });

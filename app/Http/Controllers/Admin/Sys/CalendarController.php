@@ -10,6 +10,8 @@ namespace App\Http\Controllers\Admin\Sys;
 
 
 use App\Models\Sys\Calendar;
+use App\Models\Sys\PunchRules;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -26,7 +28,7 @@ class CalendarController extends Controller
 
     public function index()
     {
-        $data = Calendar::paginate();
+        $data = Calendar::orderByRaw('year desc, month desc, day desc')->paginate(15);
         $title = trans('app.日历表');
         return view('admin.sys.calendar', compact('title', 'data'));
     }
@@ -65,5 +67,55 @@ class CalendarController extends Controller
 
         flash(trans('app.编辑成功', ['value' => trans('app.日历表')]), 'success');
         return redirect($this->redirectTo);
+    }
+
+    //批量添加当月的工作日历
+    public function storeAllMonth(Request $request){
+        $punch_rules_id = $request->input('punch_rules_id');
+        $year = date('Y', time());
+        $month = date('m', time());
+
+        if (isset($punch_rules_id)) {
+            //一键生成日历需要休息这一项, 没有的话自动创建
+            $rest = PunchRules::firstOrCreate(['punch_type_id' => 2, 'name' => '周末休息']);
+
+            for ($day = 1; $day <= (int)date('t', time()); $day++) {
+                //星期几
+                $week = date('N', strtotime("$year-$month-$day"));
+
+                //如果是周日还有双周的周六 ,修改排班规则为周末休息
+                if (($week == 6 && !$this->ifSingleWeek("$year-$month-$day")) || $week == 7) {
+                    $prId = $rest->id;
+                }else{
+                    $prId = $punch_rules_id;
+                }
+
+                //若日历表已有部分天数已配置则不进行覆盖添加, 没有则添加
+                Calendar::firstOrCreate(
+                    [
+                        'year' => $year,
+                        'month' => $month,
+                        'day' => $day,
+                        'week' => $week
+                    ], ['punch_rules_id' => $prId]);
+            }
+            flash('批量添加日历成功', 'success');
+        }else{
+            flash('请选择批量添加日历的排班规则', 'danger');
+        }
+        return redirect()->back();
+    }
+
+    //判断单双周
+    public function ifSingleWeek($arg_date){
+        $date = '2018-8-1';//这个以后待设置
+        $isSingle = date('W', strtotime($date));//假如这周开始是单周
+
+        //相减取余为1 则为双周
+        if (abs(date('W', strtotime($arg_date)) -$isSingle) % 2 == 1){
+            return false;
+        }else{
+            return true;
+        }
     }
 }

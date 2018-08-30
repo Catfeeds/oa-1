@@ -83,7 +83,7 @@
                                                 <div class="col-sm-2">
                                                     <select class="js-select2-single form-control" name="punch_rules_id" >
                                                         <option value="">请选择排班规则</option>
-                                                        @foreach(\App\Models\Sys\PunchRules::getPunchTypeList() as $k => $v)
+                                                        @foreach(\App\Models\Sys\PunchRules::getPunchRulesList() as $k => $v)
                                                             <option value="{{ $k }}" @if($k === $calendar->punch_rules_id) selected="selected" @endif>{{ $v }}</option>
                                                         @endforeach
                                                     </select>

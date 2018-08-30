@@ -23,17 +23,17 @@
                         <tr>
                             <th>用户ID</th>
                             <th>假期名</th>
-                            <th>假期结束时间</th>
+                            <th>假期详情</th>
                             <th>剩余天数</th>
                         </tr>
                         </thead>
                         <tbody>
                             @foreach($data as $d)
                             <tr>
-                                <td>{{ $d['user_id'] }}</td>
+                                <td>{{ $d['id'] }}</td>
                                 <td>{{ $d['holiday'] }}</td>
-                                <td>{{ $d['end_time'] }}</td>
-                                <td>{{ $d['num']->d.'天'.$d['num']->h.'小时' }}</td>
+                                <td><pre style="width: 15em; height: 3em" >{{ $d['memo'] }}</pre></td>
+                                <td>{{ $d['remain_num']->d.'天'.$d['remain_num']->h.'小时' }}</td>
                             </tr>
                             @endforeach
                         </tbody>

@@ -27,4 +27,8 @@ class UserHoliday extends Model
         'num',
     ];
 
+    public function holidayConfig(){
+        return $this->belongsTo('\App\Models\Sys\HolidayConfig', 'holiday_id', 'holiday_id');
+    }
+
 }

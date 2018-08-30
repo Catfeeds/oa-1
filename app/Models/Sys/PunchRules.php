@@ -39,4 +39,8 @@ class PunchRules extends Model
         return self::get(['punch_type_id', 'name'])->pluck('name', 'punch_type_id')->toArray();
     }
 
+    public static function getPunchRulesList(){
+        return self::get(['id', 'name'])->pluck('name', 'id')->toArray();
+    }
+
 }
