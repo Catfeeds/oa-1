@@ -37,8 +37,7 @@
                                 <th>{{ trans('att.当日累积迟到分钟数') }}</th>
                                 <th>{{ trans('att.剩余缓冲时间') }}</th>
                                 <th>{{ trans('att.扣分') }}</th>
-                                <th>{{ trans('att.调休') }}</th>
-                                <th>{{ trans('att.假期') }}</th>
+                                <th>{{ trans('att.类型') }}</th>
                                 <th>{{ trans('att.操作') }}</th>
                             </tr>
                             </thead>
@@ -61,11 +60,12 @@
                                     <td>{{ $v['heap_late_num'] ? $v['heap_late_num']  : '--' }}</td>
                                     <td>{{ $v['lave_buffer_num'] ? $v['heap_late_num']  : '--'  }}</td>
                                     <td>{{ $v['deduction_num'] ? $v['heap_late_num']  : '--'  }}</td>
-                                    <td></td>
-                                    <td></td>
+                                    <td>{{ \App\Models\Sys\HolidayConfig::getHolidayList()[$v['holiday_id']] ?? '--' }}</td>
                                     <td>
-                                        <a>{{ trans('att.补打卡') }}</a>
-                                        <a>{{ trans('att.补假') }}</a>
+                                        @if(empty($v['punch_start_time']) || empty($v['punch_end_time']))
+                                            <a href="{{route('leave.create', ['id' => \App\Models\Sys\HolidayConfig::RECHECK])}}">{{ trans('att.补打卡') }}</a>
+                                            <a href="{{route('leave.create', ['id' => \App\Models\Sys\HolidayConfig::LEAVEID])}}">{{ trans('att.补假') }}</a>
+                                        @endif
                                     </td>
                                 </tr>
                             @endforeach

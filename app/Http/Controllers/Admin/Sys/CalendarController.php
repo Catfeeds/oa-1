@@ -28,7 +28,7 @@ class CalendarController extends Controller
 
     public function index()
     {
-        $data = Calendar::orderByRaw('year desc, month desc, day desc')->paginate(15);
+        $data = Calendar::orderByRaw('year desc, month desc, day desc')->paginate(31);
         $title = trans('app.日历表');
         return view('admin.sys.calendar', compact('title', 'data'));
     }

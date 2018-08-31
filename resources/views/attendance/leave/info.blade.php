@@ -37,7 +37,7 @@
                     <div class="hr-line-dashed"></div>
 
                     <div class="form-group">
-                        {!! Form::label('holiday_id', trans('att.请假类型'), ['class' => 'col-sm-2 control-label']) !!}
+                        {!! Form::label('holiday_id', trans('att.申请类型'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-6">
                             <span class="help-block m-b-none">
                                 {{ \App\Models\Sys\HolidayConfig::$applyType[\App\Models\Sys\HolidayConfig::getHolidayApplyList()[$leave->holiday_id]] ?? ''}}
@@ -48,7 +48,7 @@
                     <div class="hr-line-dashed"></div>
 
                     <div class="form-group">
-                        {!! Form::label('holiday_id', trans('att.假期类型'), ['class' => 'col-sm-2 control-label']) !!}
+                        {!! Form::label('holiday_id', trans('att.明细类型'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-6">
                             <span class="help-block m-b-none">
                                 {{ \App\Models\Sys\HolidayConfig::getHolidayList()[$leave->holiday_id] ?? ''}}
@@ -59,9 +59,22 @@
                     <div class="hr-line-dashed"></div>
 
                     <div class="form-group">
-                        {!! Form::label('holiday_id', trans('att.请假时间'), ['class' => 'col-sm-2 control-label']) !!}
+                        {!! Form::label('holiday_id', trans('att.申请时间'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-6">
                             <span class="help-block m-b-none">
+                                @if($applyTypeId == \App\Models\Sys\HolidayConfig::LEAVEID || $applyTypeId == \App\Models\Sys\HolidayConfig::CHANGE)
+                                    {{ \App\Http\Components\Helpers\AttendanceHelper::getLeaveStartTime($leave->start_time, $leave->start_id)}}
+                                    ~
+                                    {{ \App\Http\Components\Helpers\AttendanceHelper::getLeaveEndTime($leave->end_time,$leave->end_id)}}
+                                @elseif($applyTypeId == \App\Models\Sys\HolidayConfig::RECHECK)
+                                    @if(!empty($leave->start_time) && !empty($leave->end_time))
+                                       {{ $leave->start_time }} ~ {{ $leave->end_time }}
+                                    @elseif(!empty($leave->start_time))
+                                            {{ $leave->start_time }}
+                                    @elseif(!empty($leave->end_time))
+                                        {{ $leave->end_time }}
+                                    @endif
+                                @endif
 
                             </span>
                         </div>
@@ -70,7 +83,7 @@
                     <div class="hr-line-dashed"></div>
 
                     <div class="form-group">
-                        {!! Form::label('day', trans('att.请假天数'), ['class' => 'col-sm-2 control-label']) !!}
+                        {!! Form::label('day', trans('att.申请天数'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-6">
                             <span class="help-block m-b-none">
                                 {{ $a = App\Components\Helper\DataHelper::diffTime(date('Y-m-d', strtotime($leave->start_time)) . ' ' . \App\Models\Attendance\Leave::$startId[$leave->start_id], date('Y-m-d', strtotime($leave->end_time)) . ' ' . \App\Models\Attendance\Leave::$endId[$leave->end_id])}}{{ empty($a)?'暂无':'天' }}
@@ -117,10 +130,26 @@
                         {!! Form::label('reason', trans('att.审核状态'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-6">
                             <span class="help-block m-b-none">
-                                {{ empty($reviewUserId) ?  \App\Models\Attendance\Leave::$status[$leave->status]: '待'. $user->role->name . '审核' }}
+                                {{ empty($reviewUserId) ?  \App\Models\Attendance\Leave::$status[$leave->status] : '待'. $user->role->name . '审核' }}
                             </span>
                         </div>
                     </div>
+
+                    {{--调休名单显示--}}
+                    @if($applyTypeId === \App\Models\Sys\HolidayConfig::CHANGE && !empty($leave->user_list))
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            {!! Form::label('reason', trans('att.调休名单'), ['class' => 'col-sm-2 control-label']) !!}
+                            <div class="col-sm-6">
+                                <select disabled="disabled" multiple="multiple" class="js-select2-multiple form-control">
+                                    @foreach($deptUsers as $key => $val)
+                                        <option value="{{ $val['user_id'] }}"
+                                                @if (in_array($val['user_id'], $userIds ?: old('dept_users') ?? [])) selected @endif>{{ $val['alias'].'('.$val['username'].')' }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                    @endif
 
                     <div class="hr-line-dashed"></div>
 
@@ -148,7 +177,7 @@
                         <div class="col-sm-4 col-sm-offset-5">
                             @if(in_array($leave->status, [0, 1]))
                                 @if($leave->review_user_id == Auth::user()->user_id )
-                                    <a id="by_status" data-id=1 class="btn btn-success">{{ trans('att.审核通过') }}</a>
+                                    <a id="by_status" data-id=3 class="btn btn-success">{{ trans('att.审核通过') }}</a>
                                     <a id="refuse_status" data-id=2 class="btn btn-primary">{{ trans('att.拒绝通过') }}</a>
                                 @endif
                             @endif
@@ -206,7 +235,7 @@
                 edit_status(status, '是否拒绝通过!');
             });
 
-            function edit_status(status, $msg, obj){
+            function edit_status(status, $msg){
                 if(confirm($msg)==false) {
                     return false;
                 }

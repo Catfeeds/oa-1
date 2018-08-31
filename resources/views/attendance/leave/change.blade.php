@@ -15,7 +15,7 @@
                     {!! Form::open(['class' => 'form-horizontal', 'enctype' => 'multipart/form-data']) !!}
 
                     <div class="form-group @if (!empty($errors->first('holiday_id'))) has-error @endif">
-                        {!! Form::label('holiday_id', trans('att.请假类型'), ['class' => 'col-sm-2 control-label']) !!}
+                        {!! Form::label('holiday_id', trans('att.调休类型'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-2">
                             <select class="js-select2-single form-control" name="holiday_id" >
                                 @foreach($holidayList as $k => $v)
@@ -29,7 +29,7 @@
                     <div class="hr-line-dashed"></div>
 
                     <div class="form-group @if (!empty($errors->first('start_time'))) has-error @endif">
-                        {!! Form::label('start_time', trans('att.请假开始时间'), ['class' => 'col-sm-2 control-label']) !!}
+                        {!! Form::label('start_time', trans('att.调休开始时间'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-3">
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
@@ -52,7 +52,7 @@
                     <div class="hr-line-dashed"></div>
 
                     <div class="form-group @if (!empty($errors->first('end_time'))) has-error @endif">
-                        {!! Form::label('end_time', trans('att.请假结束时间'), ['class' => 'col-sm-2 control-label']) !!}
+                        {!! Form::label('end_time', trans('att.调休结束时间'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-3">
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
@@ -71,7 +71,24 @@
                             </select>
                         </div>
                     </div>
+                    {{--只有上级才可以显示批量选择人员--}}
+                    @if(Auth::user()->is_leader === 1)
+                        <div class="hr-line-dashed"></div>
 
+                        <div class="form-group @if (!empty($errors->first('dept_users'))) has-error @endif">
+                            {!! Form::label('dept_users', trans('att.批量申请人员'), ['class' => 'col-sm-2 control-label']) !!}
+                            <div class="col-sm-5">
+                                <select multiple="multiple" class="js-select2-multiple form-control"
+                                        name="dept_users[]">
+                                    @foreach($deptUsers as $key => $val)
+                                        <option value="{{ $val['user_id'] }}"
+                                                @if (in_array($val['user_id'], $deptUsersSelected ?: old('dept_users') ?? [])) selected @endif>{{ $val['alias'].'('.$val['username'].')' }}</option>
+                                    @endforeach
+                                </select>
+                                <span class="help-block m-b-none">{{ $errors->first('dept_users') }}</span>
+                            </div>
+                        </div>
+                    @endif
                     <div class="hr-line-dashed"></div>
 
                     <div class="form-group @if (!empty($errors->first('annex'))) has-error @endif">
@@ -81,13 +98,12 @@
                                  id="show_associate_image">
                             <input name="annex" type="file" accept="image/*" id="select-associate-file"/>
                         </div>
-
                     </div>
 
                     <div class="hr-line-dashed"></div>
 
                     <div class="form-group @if (!empty($errors->first('reason'))) has-error @endif">
-                        {!! Form::label('reason', trans('att.请假理由'), ['class' => 'col-sm-2 control-label']) !!}
+                        {!! Form::label('reason', trans('att.申请理由'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-8">
                             {!! Form::textarea('reason', $leave->reason ?? old('reason'), [
                             'required' => true,
