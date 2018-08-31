@@ -26,16 +26,27 @@ class ReconciliationPoolController extends Controller
         foreach ($post as $v) {
             $limitProduct[] = $v['product_id'];
             $limitPost[] = $v['job_id'];
-            switch (true) {
-                case in_array($v['job_id'], [1, 2]):
+            switch ($v['job_id']) {
+                case Principal::OPS:
                     $job[$v['product_id']][1] = 1;
-                    $job[$v['product_id']][3] = 3;
+                    $job[$v['product_id']][6] = 6;
                     break;
-                case in_array($v['job_id'], [3, 4]):
+                case Principal::OPD:
                     $job[$v['product_id']][2] = 2;
                     break;
-                case in_array($v['job_id'], [5, 6]):
+                case Principal::FAC:
                     $job[$v['product_id']][3] = 3;
+                    break;
+                case Principal::TREASURER:
+                    $job[$v['product_id']][4] = 4;
+                    $job[$v['product_id']][8] = 8;
+                    break;
+                case Principal::FRC:
+                    $job[$v['product_id']][5] = 5;
+                    break;
+                case Principal::FSR:
+                    $job[$v['product_id']][7] = 7;
+                    $job[$v['product_id']][8] = 8;
                     break;
             }
         }
@@ -45,7 +56,7 @@ class ReconciliationPoolController extends Controller
             return redirect()->back()->withInput();
         }
 
-        $review = array_intersect_key(Reconciliation::REVIEW, $job[$pid]);
+        $review = array_intersect_key(Reconciliation::REVIEW_TYPE, $job[$pid]);
         $source = \Request::get('source', key($review));
 
         $columns = $this->header($source);
@@ -71,7 +82,7 @@ class ReconciliationPoolController extends Controller
         $scope = $this->scope;
         $billing_cycle = date('Y-m', strtotime($scope->startTimestamp));
         switch (true) {
-            case $source == Reconciliation::OPERATION:
+            case in_array($source, [Reconciliation::UNRD, Reconciliation::OPS]):
                 $sql = "
                     SELECT 
                         a.client AS client,
@@ -84,7 +95,7 @@ class ReconciliationPoolController extends Controller
                 ";
                 $ret = \DB::select($sql);
                 break;
-            case $source == Reconciliation::ACCRUAL:
+            case in_array($source, [Reconciliation::OPD, Reconciliation::FAC]):
                 $sql = "
                     SELECT 
                         a.client AS client,
@@ -97,7 +108,7 @@ class ReconciliationPoolController extends Controller
                 ";
                 $ret = \DB::select($sql);
                 break;
-            case $source == Reconciliation::RECONCILIATION:
+            case in_array($source, [Reconciliation::TREASURER, Reconciliation::FRC, Reconciliation::OOR]):
                 $sql = "
                     SELECT 
                         a.client AS client,
@@ -118,7 +129,7 @@ class ReconciliationPoolController extends Controller
         }
         $data = [];
         foreach ($ret as $k => $v) {
-            if ($source == Reconciliation::RECONCILIATION) {
+            if (in_array($source, [Reconciliation::TREASURER, Reconciliation::FRC, Reconciliation::OOR])) {
                 $v = (array)$v;
                 $data[$k]['client'] = $v['client'];
                 $data[$k]['period_name'] = $v['period_name'];
@@ -149,13 +160,13 @@ class ReconciliationPoolController extends Controller
     public function header($source)
     {
         switch (true) {
-            case $source == Reconciliation::OPERATION:
+            case in_array($source, [Reconciliation::UNRD, Reconciliation::OPS]):
                 $header = ['客户名称', '信期类型', '后台流水', '运营流水', '差异额', '差异率', '明细'];
                 break;
-            case $source == Reconciliation::ACCRUAL:
+            case in_array($source, [Reconciliation::OPD, Reconciliation::FAC]):
                 $header = ['客户名称', '信期类型', '后台流水', '运营流水', '差异额', '差异率', '明细'];
                 break;
-            case $source == Reconciliation::RECONCILIATION:
+            case in_array($source, [Reconciliation::TREASURER, Reconciliation::FRC, Reconciliation::OOR]):
                 $header = ['客户名称', '信期类型', '未对账流水', '已对账流水', '对账差异额', '差异率', '对账率', '开票完成率', '已开票流水', '已收款', '待收款', '明细'];
                 break;
         }
@@ -167,50 +178,37 @@ class ReconciliationPoolController extends Controller
     {
         switch (true){
             case $request->source == Reconciliation::OPERATION:
-                $sql = "
-                    SELECT 
-                        operation_type,
-                        SUM(operation_rmb_adjustment) AS operation_rmb_adjustment
-                    FROM cmr_reconciliation AS a 
-                    WHERE a.product_id = {$request->product_id} AND a.billing_cycle = '{$request->billing_cycle}'
-                    AND a.client = '{$request->client}' AND a.period_name = '{$request->period_name}'
-                    GROUP BY operation_type
-                ";
-                $ret = \DB::select($sql);
+                $adjustment = 'operation_rmb_adjustment';
+                $type = 'operation_type';
                 break;
             case $request->source == Reconciliation::ACCRUAL:
-                $sql = "
-                    SELECT 
-                        accrual_type,
-                        SUM(accrual_rmb_adjustment) AS accrual_rmb_adjustment
-                    FROM cmr_reconciliation AS a 
-                    WHERE a.product_id = {$request->product_id} AND a.billing_cycle = '{$request->billing_cycle}'
-                    AND a.client = '{$request->client}' AND a.period_name = '{$request->period_name}'
-                    GROUP BY accrual_type
-                ";
-                $ret = \DB::select($sql);
+                $adjustment = 'accrual_rmb_adjustment';
+                $type = 'accrual_type';
                 break;
             case $request->source == Reconciliation::RECONCILIATION:
-                $sql = "
-                    SELECT 
-                        reconciliation_type,
-                        SUM(reconciliation_rmb_adjustment) AS reconciliation_rmb_adjustment
-                    FROM cmr_reconciliation AS a 
-                    WHERE a.product_id = {$request->product_id} AND a.billing_cycle = '{$request->billing_cycle}'
-                    AND a.client = '{$request->client}' AND a.period_name = '{$request->period_name}'
-                    GROUP BY reconciliation_rmb_adjustment
-                ";
-                $ret = \DB::select($sql);
+                $adjustment = 'reconciliation_rmb_adjustment';
+                $type = 'reconciliation_type';
                 break;
         }
+        $sql = "
+            SELECT 
+                {$type},
+                SUM({$adjustment}) AS {$adjustment}
+            FROM cmr_reconciliation AS a 
+            WHERE a.product_id = {$request->product_id} AND a.billing_cycle = '{$request->billing_cycle}'
+            AND a.client = '{$request->client}' AND a.period_name = '{$request->period_name}'
+            GROUP BY {$type}
+        ";
+        $ret = \DB::select($sql);
+        $sum = array_sum(array_column($ret, $adjustment));
         $diff = Difference::getList();
-        $sum = array_sum(array_column($ret, 'operation_rmb_adjustment'));
+
         $data = [];
         foreach ($ret as $k => $v){
             $v = (array)$v;
-            if (isset($diff[$v['operation_type']])){
-                $data[$k]['type'] = $diff[$v['operation_type']];
-                $data[$k]['adjustment'] = sprintf('%s|%s',$v['operation_rmb_adjustment'], CrmHelper::percentage($v['operation_rmb_adjustment']/$sum));
+            if (isset($diff[$v[$type]])){
+                $data[$k]['type'] = $diff[$v[$type]];
+                $data[$k]['adjustment'] = sprintf('%s|%s',$v[$adjustment], $v[$adjustment] == 0 ? '0%' : CrmHelper::percentage($v[$adjustment]/$sum));
             }
         }
 

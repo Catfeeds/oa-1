@@ -48,13 +48,15 @@ class LeaveController extends AttController
         $scope = $this->scope;
         $scope->block = 'attendance.leave.scope';
 
+        $where = AttendanceHelper::setChangeList()['where'];
+        $userIds = AttendanceHelper::setChangeList()['user_ids'];
         $data = Leave::where(['user_id' => \Auth::user()->user_id])
-            ->whereRaw($scope->getWhere())
+            ->whereRaw($scope->getWhere() . $where)
             ->orderBy('created_at', 'desc')
             ->paginate(30);
 
         $title = trans('att.我的假期详情');
-        return view('attendance.leave.index', compact('title', 'data', 'scope', 'holidayList'));
+        return view('attendance.leave.index', compact('title', 'data', 'scope', 'holidayList',  'userIds'));
     }
 
     public function create($applyTypeId)
@@ -63,9 +65,9 @@ class LeaveController extends AttController
         $reviewUserId = '';
         switch ($applyTypeId) {
             //请假
-            case 1:
+            case HolidayConfig::LEAVEID:
                 $userExt = UserExt::where(['user_id' => \Auth::user()->user_id])->first();
-                $holidayList = HolidayConfig::where(['apply_type_id' => 1])
+                $holidayList = HolidayConfig::where(['apply_type_id' => HolidayConfig::LEAVEID])
                     ->whereIn('restrict_sex',[$userExt->sex, 2])
                     ->get(['holiday_id', 'holiday'])
                     ->pluck('holiday', 'holiday_id')->toArray();
@@ -73,16 +75,23 @@ class LeaveController extends AttController
                 $title = trans('att.请假申请');
                 break;
             //调休
-            case 2:
-                $holidayList = HolidayConfig::where(['apply_type_id' => 2])
+            case HolidayConfig::CHANGE:
+                $holidayList = HolidayConfig::where(['apply_type_id' => HolidayConfig::CHANGE])
                     ->get(['holiday_id', 'holiday'])
                     ->pluck('holiday', 'holiday_id')->toArray();
                 $models = 'change';
-                $title = trans('att.调休');
+                $title = trans('att.调休申请');
+
+                $deptUsersSelected = [];
+                $deptUsers = [];
+                //是否上级获取部门所有人员
+                if (\Auth::user()->is_leader === 1) {
+                    $deptUsers = User::where(['dept_id' => \Auth::user()->dept_id, 'status' => 1])->get()->toArray();
+                }
                 break;
             //补打卡
-            case 3:
-                $holidayList = HolidayConfig::where(['apply_type_id' => 3])
+            case HolidayConfig::RECHECK:
+                $holidayList = HolidayConfig::where(['apply_type_id' => HolidayConfig::RECHECK])
                     ->get(['holiday_id', 'holiday', 'punch_type']);
                 $models = 'recheck';
                 $title = trans('att.补打卡');
@@ -91,7 +100,7 @@ class LeaveController extends AttController
                 return redirect()->route('leave.info');
         }
 
-        return view('attendance.leave.'.$models, compact('title', 'holidayList', 'leave', 'reviewUserId'));
+        return view('attendance.leave.'.$models, compact('title', 'holidayList', 'leave', 'reviewUserId' , 'deptUsersSelected', 'deptUsers'));
     }
 
     //设置上传附件
@@ -117,15 +126,18 @@ class LeaveController extends AttController
     public function store(Request $request, $applyTypeId)
     {
         //验证是否是有效的请假配置类型
-        if(!in_array((int)$applyTypeId, [1, 2, 3])) {
+        if(!in_array((int)$applyTypeId, [HolidayConfig::LEAVEID, HolidayConfig::CHANGE, HolidayConfig::RECHECK])) {
             flash('申请失败,请勿非法操作', 'danger');
             return redirect()->route('leave.info');
         }
         $p = $request->all();
-        $holidayId = $p['holiday_id'];
+        //假期配置ID
+        $holidayId = $p['holiday_id'] ?? '';
+        //批量调休人员名单
+        $userList = $p['dept_users'] ?? '';
 
         //补打卡特殊表单验证
-        if((int)$applyTypeId === 3) {
+        if((int)$applyTypeId === HolidayConfig::RECHECK) {
             $this->validate($request, $this->_validateRuleRe);
             list($hId, $punchType) = explode('$$', $p['holiday_id']);
             $holidayId = $hId;
@@ -143,7 +155,7 @@ class LeaveController extends AttController
 
         $userConfig = [];
         //请假和调休，时间验证
-        if(in_array($applyTypeId, [1, 2])) {
+        if(in_array($applyTypeId, [HolidayConfig::LEAVEID, HolidayConfig::CHANGE])) {
             // 拼接 有效时间戳
             $startTime = (string)$p['start_time'];
             $endTime = (string)$p['end_time'];
@@ -185,6 +197,8 @@ class LeaveController extends AttController
                     }
             }
 
+            $userList = json_encode($userList);
+
         } else {
             $startTime = $p['start_time'];
             $endTime = $p['end_time'];
@@ -205,15 +219,18 @@ class LeaveController extends AttController
 
         //职务绑定的审核步骤ID
         $steps = ApprovalStep::whereIn('step_id', $stepId)->get();
+
         $step = (object)[];
         foreach ($steps as $sk => $sv) {
             //判断请假天数，是否在绑定的审核步骤时间范围之内
             if($sv->min_day <= $day && $sv->max_day >= $day) $step = $sv;
         }
+
         if(empty($step->step)) {
             flash('申请失败,未匹配到假期模版，请联系人事', 'danger');
             return redirect()->route('leave.info');
         }
+
         $leaveStep = json_decode($step->step, true);
 
         $leader = [];
@@ -248,7 +265,7 @@ class LeaveController extends AttController
             'end_time' => $endTime,
             'end_id' => $p['end_id'] ?? 0,
             'reason' => $p['reason'],
-            'user_list' => $p['user_list'] ?? '',
+            'user_list' => $userList,
             'status' => 0, //默认 0 待审批
             'annex' => $imagePath ?? '',
             'review_user_id' => $review_user_id,
@@ -286,17 +303,24 @@ class LeaveController extends AttController
 
     public function optInfo($id)
     {
-        $leave = Leave::findOrFail($id);
+        $leave = Leave::with('holidayConfig')->findOrFail($id);
+
         $logUserIds = OperateLogHelper::getLogUserIdToInId($leave->leave_id);
         $logUserIds[] = $leave->user_id;
         $logUserIds[] = $leave->review_user_id;
-        if(in_array(\Auth::user()->user_id, $logUserIds) && !empty($leave->leave_id) ) {
-            $reviewUserId = json_decode($leave->review_user_id, true);
+        $userDept = User::getUserAliasToId($leave->user_id);
+        //调休包含人员也可以查看
+        $userIds = AttendanceHelper::setChangeList($userDept->dept_id)['user_ids'];
+        if((in_array(\Auth::user()->user_id, $logUserIds) || in_array(\Auth::user()->user_id, $userIds)) && !empty($leave->leave_id) ) {
+            $reviewUserId = $leave->review_user_id;
             $user = User::with(['role', 'dept'])->where(['user_id' => $reviewUserId])->first();
             $logs = OperateLog::where(['type_id' => 1, 'info_id' => $leave->leave_id])->get();
             $dept = Dept::getDeptList();
             $title = trans('att.假期详情');
-            return view('attendance.leave.info', compact('title',  'leave', 'dept', 'reviewUserId', 'user', 'logs'));
+            $applyTypeId = HolidayConfig::getHolidayApplyList()[$leave->holiday_id];
+            $deptUsers = User::where(['dept_id' => $userDept->dept_id, 'status' => 1])->get()->toArray();
+            $deptUsers = array_filter($deptUsers);
+            return view('attendance.leave.info', compact('title',  'leave', 'dept', 'reviewUserId', 'user', 'logs', 'applyTypeId', 'userIds', 'deptUsers'));
         } else {
             return redirect()->route('leave.info');
         }
@@ -323,11 +347,17 @@ class LeaveController extends AttController
         return view('attendance.leave.review', compact('title', 'data', 'scope'));
     }
 
+    /**
+     * 审核人员操作
+     * @param Request $request
+     * @param $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function reviewOptStatus(Request $request, $id)
     {
         $status = $request->get('status');
 
-        if(!in_array($status, [1, 2]) || empty($id)) return response()->json(['status' => -1, 'msg' => '操作失败']);
+        if(!in_array($status, [2, 3, 4]) || empty($id)) return response()->json(['status' => -1, 'msg' => '操作失败']);
 
         $optStatus = self::OptStatus($id, $status);
 
@@ -338,11 +368,20 @@ class LeaveController extends AttController
         }
     }
 
+    /**
+     * 批量审核操作
+     * @param Request $request
+     * @param $status
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function reviewBatchOptStatus(Request $request, $status)
     {
         $leaveIds = $request->get('leaveIds');
 
-        if(!in_array($status, [1, 2]) || empty($status) || empty($leaveIds) || !is_array($leaveIds)) return response()->json(['status' => -1, 'msg' => '操作失败']);
+        if(!in_array($status, [2, 3, 4]) || empty($status) || empty($leaveIds) || !is_array($leaveIds)){
+            flash(trans('att.审核失败', ['value' => trans('att.假期申请')]), 'danger');
+            return redirect()->route('leave.review.info');
+        }
 
         foreach ($leaveIds as $id) {
             self::OptStatus($id, $status);
@@ -353,52 +392,53 @@ class LeaveController extends AttController
         return redirect()->route('leave.review.info');
     }
 
+    /**
+     * 设置申请单状态和关联信息
+     * @param $leaveId
+     * @param $status
+     * @return bool
+     */
     public function OptStatus($leaveId, $status)
     {
-        $leave = Leave::findOrFail($leaveId);
+        $leave = Leave::with('holidayConfig')->findOrFail($leaveId);
+
+        if($leave->status === $status) return false;
 
         if(empty($leave->leave_id) || $leave->review_user_id != \Auth::user()->user_id) {
             return false;
         }
+
         $msg = '';
         try {
             switch ($status) {
-                case 1 :
-                    $msg = '审核通过';
-                    if(empty($leave->remain_user)) {
-                        $leave->update(['status' => 3, 'review_user_id' => 0]);
-                    } else {
-                        $remain_user = json_decode($leave->remain_user, true);
-
-                        $review_user_id = reset($remain_user);
-                        unset($remain_user[$review_user_id]);
-                        if(empty($remain_user)) {
-                            $remain_user = '';
-                        } else {
-                            $remain_user = json_encode($remain_user);
-                        }
-
-                        $leave->update(['status' => 1, 'review_user_id' => $review_user_id, 'remain_user' => $remain_user]);
-                    }
-                    break;
+                //拒绝通过状态
                 case 2 :
                     $msg = '拒绝通过';
                     $leave->update(['status' => 2, 'review_user_id' => 0]);
-
-                    //拒绝之后，福利假回退
-                    $holidayConfig = HolidayConfig::where(['holiday_id' => $leave->holiday_id])->first();
-                    $userConfig = UserHoliday::where(['user_id' => $leave->user_id, 'holiday_id' => $holidayConfig->holiday_id])->first();
-                    if(!empty($userConfig->num) && $holidayConfig->num >= $userConfig->num) {
-                        $startTime = date('Y-m-d', strtotime($leave->start_time)) .' '. Leave::$startId[$leave->start_id];
-                        $endTime = date('Y-m-d', strtotime($leave->end_time)) .' '. Leave::$endId[$leave->end_id];
-                        //时间天数分配
-                        $day = DataHelper::diffTime($startTime, $endTime);
-                        $num = $userConfig->num + $day;
-                        if($num > $holidayConfig->num) $num = $holidayConfig->num;
-
-                        $userConfig->update(['num' => $num]);
+                    //假期天数回退
+                    AttendanceHelper::leaveNumBack($leave);
+                    break;
+                //审核通过状态
+                case 3 :
+                    $msg = '审核通过';
+                    //申请单状态操作
+                    AttendanceHelper::leaveReviewPass($leave);
+                    //提前生成每日详情信息
+                    switch ($leave->holiday_config->apply_type_id) {
+                        case HolidayConfig::LEAVEID;
+                        case HolidayConfig::CHANGE;
+                            AttendanceHelper::setDailyDetail($leave);
+                            break;
+                        case HolidayConfig::RECHECK;
+                            AttendanceHelper::setRecheckDailyDetail($leave);
+                            break;
                     }
-
+                    break;
+                case 4 :
+                    $msg = '取消申请';
+                    $leave->update(['status' => 4, 'review_user_id' => 0]);
+                    //假期天数回退
+                    AttendanceHelper::leaveNumBack($leave);
                     break;
             }
 
@@ -410,4 +450,5 @@ class LeaveController extends AttController
 
         return true;
     }
+
 }

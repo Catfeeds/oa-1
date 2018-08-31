@@ -31,17 +31,27 @@ class ReconciliationAuditController extends Controller
         foreach ($post as $v) {
             $limitProduct[] = $v['product_id'];
             $limitPost[] = $v['job_id'];
-            switch (true) {
-                case in_array($v['job_id'], [1, 2]):
+            switch ($v['job_id']) {
+                case Principal::OPS:
                     $job[$v['product_id']][1] = 1;
-                    $job[$v['product_id']][3] = 3;
+                    $job[$v['product_id']][6] = 6;
                     break;
-                case in_array($v['job_id'], [3, 4]):
+                case Principal::OPD:
                     $job[$v['product_id']][2] = 2;
                     break;
-                case in_array($v['job_id'], [5, 6]):
+                case Principal::FAC:
                     $job[$v['product_id']][3] = 3;
+                    break;
+                case Principal::TREASURER:
                     $job[$v['product_id']][4] = 4;
+                    $job[$v['product_id']][8] = 8;
+                    break;
+                case Principal::FRC:
+                    $job[$v['product_id']][5] = 5;
+                    break;
+                case Principal::FSR:
+                    $job[$v['product_id']][7] = 7;
+                    $job[$v['product_id']][8] = 8;
                     break;
             }
         }
@@ -51,7 +61,7 @@ class ReconciliationAuditController extends Controller
             return redirect()->back()->withInput();
         }
 
-        $review = array_intersect_key(Reconciliation::REVIEW, $job[$pid]);
+        $review = array_intersect_key(Reconciliation::REVIEW_TYPE, $job[$pid]);
         $source = \Request::get('source', key($review));
 
         $columns = $this->header($source);
@@ -64,7 +74,6 @@ class ReconciliationAuditController extends Controller
         if (!empty($data)) {
             $status = array_keys($data)[0];
         }
-
         $title = trans('crm.对账审核');
 
         return view('crm.reconciliation-audit.index', compact('title', 'scope', 'review', 'source', 'products', 'pid', 'header', 'status', 'limitPost', 'columns'));
@@ -74,6 +83,10 @@ class ReconciliationAuditController extends Controller
     {
         $pid = \Request::get('product_id');
         $source = \Request::get('source');
+        $where = '';
+        if (in_array($source, [Reconciliation::FRC, Reconciliation::OOR])) {
+            $where = ' and a.review_type = ' . $source;
+        }
         $scope = $this->scope;
         $billing_cycle = date('Y-m', strtotime($scope->startTimestamp));
         $sql = "
@@ -115,6 +128,8 @@ class ReconciliationAuditController extends Controller
                 a.operation_time,
                 a.operation_water_other,
                 a.operation_water_rmb,
+                a.operation_divide_other,
+                a.operation_divide_rmb,
                 a.accrual_adjustment,
                 a.accrual_rmb_adjustment,
                 a.accrual_type,
@@ -123,6 +138,8 @@ class ReconciliationAuditController extends Controller
                 a.accrual_time,
                 a.accrual_water_other,
                 a.accrual_water_rmb,
+                a.accrual_divide_other,
+                a.accrual_divide_rmb,
                 a.reconciliation_adjustment,
                 a.reconciliation_rmb_adjustment,
                 a.reconciliation_type,
@@ -136,11 +153,11 @@ class ReconciliationAuditController extends Controller
                 p.second_division,
                 p.second_division_condition
             FROM cmr_reconciliation AS a 
-            INNER JOIN cmr_reconciliation_proportion AS p ON (
+            LEFT JOIN cmr_reconciliation_proportion AS p ON (
                 a.product_id = p.product_id
-                AND a.id = p.rec_id
+                AND a.backstage_channel = p.backstage_channel
             )
-            WHERE a.product_id = {$pid} AND a.billing_cycle = '{$billing_cycle}'
+            WHERE a.product_id = {$pid} AND a.billing_cycle = '{$billing_cycle}'{$where}
         ";
         $tmp = \DB::select($sql);
         $data = $tmp3 = $tmp2 = [];
@@ -165,7 +182,7 @@ class ReconciliationAuditController extends Controller
         $diff = Difference::getList();
         foreach ($tmp as $k => $v) {
             $v = (array)$v;
-            if ($source == Reconciliation::RECONCILIATION) {
+            if (in_array($source, [Reconciliation::TREASURER, Reconciliation::FRC, Reconciliation::OOR])) {
                 $tmp2['id'] = $v['payback_type'] == 1 ? '<input type="checkbox" class="i-checks" name="id[]" value="' . $v['id'] . '">' : '--';
             }
             $tmp2['num'] = $k + 1;
@@ -185,10 +202,11 @@ class ReconciliationAuditController extends Controller
             $tmp2['period_name'] = $v['period_name'];
             $tmp2['period'] = $v['period'];
             $url['edit'] = route('reconciliationAudit.edit', ['id' => $v['id'], 'source' => $source]);
-            $url['review'] = route('reconciliationAudit.review', ['status' => $v['review_type'] + 1, 'pid' => $pid, 'source' => $source, 'id' => $v['id']]);
-            $url['refuse'] = route('reconciliationAudit.review', ['status' => $v['review_type'] - 1, 'pid' => $pid, 'source' => $source, 'id' => $v['id']]);
+            $url['review'] = route('reconciliationAudit.review', ['status' => $v['review_type'] + 1, 'pid' => $pid, 'source' => $source, 'id[]' => $v['id']]);
+            $url['refuse'] = route('reconciliationAudit.review', ['status' => $v['review_type'] - 1, 'pid' => $pid, 'source' => $source, 'id[]' => $v['id']]);
+            $url['revision'] = route('reconciliationAudit.revision', ['id' => $v['id']]);
             switch (true) {
-                case $source == Reconciliation::OPERATION:
+                case in_array($source, [Reconciliation::UNRD, Reconciliation::OPS]):
                     $tmp2['backstage_water_other'] = $v['backstage_water_other'];
                     $tmp2['backstage_water_rmb'] = $v['backstage_water_rmb'];
                     $tmp2['operation_adjustment'] = $v['operation_adjustment'];
@@ -199,9 +217,9 @@ class ReconciliationAuditController extends Controller
                     $tmp2['operation_time'] = $v['operation_time'];
                     $tmp2['operation_water_other'] = $v['operation_water_other'];
                     $tmp2['operation_water_rmb'] = $v['operation_water_rmb'];
-                    $tmp2['review_type'] = $this->url($url, $v);
+                    $tmp2['review_type'] = $this->url($url, $v, $source);
                     break;
-                case $source == Reconciliation::ACCRUAL:
+                case in_array($source, [Reconciliation::OPD, Reconciliation::FAC]):
                     $tmp2['channel_rate'] = CrmHelper::percentage($v['channel_rate']);
                     $tmp2['first_division'] = CrmHelper::percentage($v['first_division']);
                     $tmp2['second_division'] = CrmHelper::percentage($v['second_division']);
@@ -216,11 +234,11 @@ class ReconciliationAuditController extends Controller
                     $tmp2['accrual_time'] = $v['accrual_time'];
                     $tmp2['accrual_water_other'] = $v['accrual_water_other'];
                     $tmp2['accrual_water_rmb'] = $v['accrual_water_rmb'];
-                    $tmp2['accrual_divide_other'] = CrmHelper::dividedInto($v['channel_rate'], $v['first_division'], $v['second_division'], $v['second_division_condition'], $v['accrual_water_other']);
-                    $tmp2['accrual_divide_rmb'] = CrmHelper::dividedInto($v['channel_rate'], $v['first_division'], $v['second_division'], $v['second_division_condition'], $v['accrual_water_rmb']);
-                    $tmp2['review_type'] = $this->url($url, $v);
+                    $tmp2['accrual_divide_other'] = $v['accrual_divide_other'];
+                    $tmp2['accrual_divide_rmb'] = $v['accrual_divide_rmb'];
+                    $tmp2['review_type'] = $this->url($url, $v, $source);
                     break;
-                case $source == Reconciliation::RECONCILIATION:
+                case in_array($source, [Reconciliation::TREASURER, Reconciliation::FRC, Reconciliation::OOR]):
                     $tmp2['billing_type'] = $v['billing_type'] == Reconciliation::NO ? sprintf('<span style="color: red">%s</span>', Reconciliation::INVOICE[Reconciliation::NO]) : sprintf('<span style="color: green">%s</span>', Reconciliation::INVOICE[Reconciliation::YES]);
                     $tmp2['billing_num'] = $v['billing_num'];
                     $tmp2['billing_time'] = $v['billing_time'];
@@ -244,7 +262,7 @@ class ReconciliationAuditController extends Controller
                     $tmp2['reconciliation_water_rmb'] = $v['reconciliation_water_rmb'];
                     $tmp2['reconciliation_divide_other'] = CrmHelper::dividedInto($v['channel_rate'], $v['first_division'], $v['second_division'], $v['second_division_condition'], $v['reconciliation_water_other']);
                     $tmp2['reconciliation_divide_rmb'] = CrmHelper::dividedInto($v['channel_rate'], $v['first_division'], $v['second_division'], $v['second_division_condition'], $v['reconciliation_water_rmb']);
-                    $tmp2['review_type'] = $this->url($url, $v);
+                    $tmp2['review_type'] = sprintf('%s%s', $this->url($url, $v, $source), $source == Reconciliation::TREASURER && \Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationAudit', 'reconciliation-reconciliationAudit.revision']) && $v['review_type'] == Reconciliation::FSR ? '<a href="' . $url['revision'] . '" class="generate"> <i class="fa fa-edit fa-lg" data-toggle="tooltip" data-placement="top" title="" data-original-title="调整流水"></i> </a>' : '');
                     break;
                 default:
                     $tmp2['channel_rate'] = CrmHelper::percentage($v['channel_rate']);
@@ -263,8 +281,8 @@ class ReconciliationAuditController extends Controller
                     $tmp2['operation_time'] = $v['operation_time'];
                     $tmp2['operation_water_other'] = $v['operation_water_other'];
                     $tmp2['operation_water_rmb'] = $v['operation_water_rmb'];
-                    $tmp2['operation_divide_other'] = CrmHelper::dividedInto($v['channel_rate'], $v['first_division'], $v['second_division'], $v['second_division_condition'], $v['operation_water_other']);
-                    $tmp2['operation_divide_rmb'] = CrmHelper::dividedInto($v['channel_rate'], $v['first_division'], $v['second_division'], $v['second_division_condition'], $v['operation_water_rmb']);
+                    $tmp2['operation_divide_other'] = $v['operation_divide_other'];
+                    $tmp2['operation_divide_rmb'] = $v['operation_divide_rmb'];
                     $tmp2['accrual_adjustment'] = $v['accrual_adjustment'];
                     $tmp2['accrual_rmb_adjustment'] = $v['accrual_rmb_adjustment'];
                     $tmp2['accrual_type'] = $diff[$v['accrual_type']] ?? '未知' . $v['accrual_type'];
@@ -273,8 +291,8 @@ class ReconciliationAuditController extends Controller
                     $tmp2['accrual_time'] = $v['accrual_time'];
                     $tmp2['accrual_water_other'] = $v['accrual_water_other'];
                     $tmp2['accrual_water_rmb'] = $v['accrual_water_rmb'];
-                    $tmp2['accrual_divide_other'] = CrmHelper::dividedInto($v['channel_rate'], $v['first_division'], $v['second_division'], $v['second_division_condition'], $v['accrual_water_other']);
-                    $tmp2['accrual_divide_rmb'] = CrmHelper::dividedInto($v['channel_rate'], $v['first_division'], $v['second_division'], $v['second_division_condition'], $v['accrual_water_rmb']);
+                    $tmp2['accrual_divide_other'] = $v['accrual_divide_other'];
+                    $tmp2['accrual_divide_rmb'] = $v['accrual_divide_rmb'];
                     $tmp2['reconciliation_adjustment'] = $v['reconciliation_adjustment'];
                     $tmp2['reconciliation_rmb_adjustment'] = $v['reconciliation_rmb_adjustment'];
                     $tmp2['reconciliation_type'] = $diff[$v['reconciliation_type']] ?? '未知' . $v['reconciliation_type'];
@@ -340,7 +358,7 @@ class ReconciliationAuditController extends Controller
     {
         if ($time) {
             switch ($source) {
-                case Reconciliation::OPERATION:
+                case $source == Reconciliation::UNRD:
                     $tmp['operation_adjustment'] = $request['adjustment'];
                     $tmp['operation_rmb_adjustment'] = $request['adjustment'] * $rate;
                     $tmp['operation_type'] = $request['type'];
@@ -349,8 +367,10 @@ class ReconciliationAuditController extends Controller
                     $tmp['operation_time'] = $time;
                     $tmp['operation_water_other'] = $data['backstage_water_other'] + $request['adjustment'];
                     $tmp['operation_water_rmb'] = $data['backstage_water_rmb'] + $tmp['operation_rmb_adjustment'];
+                    $tmp['operation_divide_other'] = CrmHelper::dividedInto($data['channel_rate'], $data['first_division'], $data['second_division'], $data['second_division_condition'], $tmp['operation_water_other']);
+                    $tmp['operation_divide_rmb'] = CrmHelper::dividedInto($data['channel_rate'], $data['first_division'], $data['second_division'], $data['second_division_condition'], $tmp['operation_water_rmb']);
                     break;
-                case Reconciliation::ACCRUAL:
+                case $source == Reconciliation::OPD:
                     $tmp['accrual_adjustment'] = $request['adjustment'];
                     $tmp['accrual_rmb_adjustment'] = $request['adjustment'] * $rate;
                     $tmp['accrual_type'] = $request['type'];
@@ -359,8 +379,10 @@ class ReconciliationAuditController extends Controller
                     $tmp['accrual_time'] = $time;
                     $tmp['accrual_water_other'] = $data['operation_water_other'] + $request['adjustment'];
                     $tmp['accrual_water_rmb'] = $data['operation_water_rmb'] + $tmp['accrual_rmb_adjustment'];
+                    $tmp['accrual_divide_other'] = CrmHelper::dividedInto($data['channel_rate'], $data['first_division'], $data['second_division'], $data['second_division_condition'], $tmp['accrual_water_other']);
+                    $tmp['accrual_divide_rmb'] = CrmHelper::dividedInto($data['channel_rate'], $data['first_division'], $data['second_division'], $data['second_division_condition'], $tmp['accrual_divide_rmb']);
                     break;
-                case Reconciliation::RECONCILIATION:
+                case $source == Reconciliation::TREASURER:
                     $tmp['reconciliation_adjustment'] = $request['adjustment'];
                     $tmp['reconciliation_rmb_adjustment'] = $request['adjustment'] * $rate;
                     $tmp['reconciliation_type'] = $request['type'];
@@ -373,17 +395,17 @@ class ReconciliationAuditController extends Controller
             }
         } else {
             switch ($source) {
-                case Reconciliation::OPERATION:
+                case $source == Reconciliation::UNRD:
                     $tmp['adjustment'] = $data['operation_adjustment'];
                     $tmp['type'] = $data['operation_type'];
                     $tmp['remark'] = $data['operation_remark'];
                     break;
-                case Reconciliation::ACCRUAL:
+                case $source == Reconciliation::OPD:
                     $tmp['adjustment'] = $data['accrual_adjustment'];
                     $tmp['type'] = $data['accrual_type'];
                     $tmp['remark'] = $data['accrual_remark'];
                     break;
-                case Reconciliation::RECONCILIATION:
+                case $source == Reconciliation::TREASURER:
                     $tmp['adjustment'] = $data['reconciliation_adjustment'];
                     $tmp['type'] = $data['reconciliation_type'];
                     $tmp['remark'] = $data['reconciliation_remark'];
@@ -403,7 +425,22 @@ class ReconciliationAuditController extends Controller
         $reason = \Request::get('reason');
         if ($id) {
             $data = Reconciliation::findOrFail($id);
-            $data->update(['review_type' => $status]);
+            foreach ($data as $v) {
+                if ($v['review_type'] > $status) {
+                    continue;
+                }
+                $update = ['review_type' => $status];
+                if ($status == Reconciliation::FRC) {
+                    if ($v['reconciliation_water_other'] == 0) {
+                        $update += [
+                            'reconciliation_water_other' => $v['accrual_water_other'],
+                            'reconciliation_water_rmb' => $v['accrual_water_rmb']
+                        ];
+                    }
+                }
+                $v->update($update);
+                unset($update);
+            }
             $this->push($pid, $source, $status, $reason);
             flash(trans('crm.审核', ['value' => trans('crm.对账审核')]), 'success');
             return redirect()->route('reconciliationAudit', ['source' => $source, 'product_id' => $pid, 'scope[startDate]' => $scope->startTimestamp, 'scope[endDate]' => $scope->endTimestamp]);
@@ -414,7 +451,31 @@ class ReconciliationAuditController extends Controller
                     ->whereBetween('billing_cycle_start', [$scope->startTimestamp, $scope->endTimestamp])
                     ->get();
                 foreach ($data as $v) {
-                    $v->update(['review_type' => $status]);
+                    $update = ['review_type' => $status];
+                    switch (true) {
+                        case $status == Reconciliation::OPS:
+                            if ($v['operation_water_other'] == 0) {
+                                $update += [
+                                    'operation_water_other' => $v['backstage_water_other'],
+                                    'operation_water_rmb' => $v['backstage_water_rmb'],
+                                    'operation_divide_other' => CrmHelper::dividedInto($v['channel_rate'], $v['first_division'], $v['second_division'], $v['second_division_condition'], $v['backstage_water_other']),
+                                    'operation_divide_rmb' => CrmHelper::dividedInto($v['channel_rate'], $v['first_division'], $v['second_division'], $v['second_division_condition'], $v['backstage_water_rmb']),
+                                ];
+                            }
+                            break;
+                        case $status == Reconciliation::FAC:
+                            if ($v['accrual_water_other'] == 0) {
+                                $update += [
+                                    'accrual_water_other' => $v['operation_water_other'],
+                                    'accrual_water_rmb' => $v['operation_water_rmb'],
+                                    'accrual_divide_other' => CrmHelper::dividedInto($v['channel_rate'], $v['first_division'], $v['second_division'], $v['second_division_condition'], $v['operation_water_other']),
+                                    'accrual_divide_rmb' => CrmHelper::dividedInto($v['channel_rate'], $v['first_division'], $v['second_division'], $v['second_division_condition'], $v['operation_water_rmb']),
+                                ];
+                            }
+                            break;
+                    }
+                    $v->update($update);
+                    unset($update);
                 }
                 DB::commit();
             } catch (\Exception $e) {
@@ -437,67 +498,86 @@ class ReconciliationAuditController extends Controller
         $product = Product::getList();
         $message = $water = '';
         switch ($source) {
-            case Reconciliation::OPERATION:
+            case Reconciliation::UNRD:
                 $water = '运营流水';
                 switch ($review) {
-                    case Reconciliation::UNRD:
-                        $key = Principal::OPS;
-                        $message = '被拒绝';
-                        break;
                     case Reconciliation::OPS:
                         $key = Principal::OPD;
                         $message = '提交审核';
                         break;
+                }
+                break;
+            case Reconciliation::OPS:
+                $water = '运营流水';
+                switch ($review) {
                     case Reconciliation::OPD:
                         $key = Principal::FAC;
                         $message = '通过审核';
                         break;
+                    case Reconciliation::UNRD:
+                        $key = Principal::OPS;
+                        $message = '拒绝审核';
+                        break;
                 }
                 break;
-            case Reconciliation::ACCRUAL:
+            case Reconciliation::OPD:
                 $water = '计提流水';
                 switch ($review) {
-                    case Reconciliation::OPS:
-                        $key = Principal::OPD;
-                        $message = '被拒绝';
-                        break;
-                    case Reconciliation::OPD:
-                        $key = Principal::FAC;
-                        $message = '被拒绝';
-                        break;
                     case Reconciliation::FAC:
                         $key = Principal::TREASURER;
                         $message = '提交审核';
                         break;
+                    case Reconciliation::OPS:
+                        $key = Principal::OPD;
+                        $message = '拒绝审核';
+                        break;
+                }
+                break;
+            case Reconciliation::FAC:
+                $water = '计提流水';
+                switch ($review) {
                     case Reconciliation::TREASURER:
                         $key = Principal::FRC;
                         $message = '通过审核';
                         break;
+                    case Reconciliation::OPD:
+                        $key = Principal::FAC;
+                        $message = '拒绝审核';
+                        break;
                 }
                 break;
-            case Reconciliation::RECONCILIATION:
+            case Reconciliation::TREASURER:
                 $water = '对账流水';
                 switch ($review) {
                     case Reconciliation::FRC:
                         $key = Principal::OPS;
-                        $message = '复核';
-                        break;
-                    case Reconciliation::TREASURER:
-                        $key = Principal::FRC;
-                        $message = '拒绝';
-                        break;
-                    case Reconciliation::OOR:
-                        $key = Principal::FSR;
-                        $message = '通过审核';
+                        $message = '提交审核';
                         break;
                 }
                 break;
-            case Reconciliation::ALL:
+            case Reconciliation::FRC:
                 $water = '对账流水';
                 switch ($review) {
-                    case Reconciliation::FRC:
+                    case Reconciliation::OOR:
                         $key = Principal::FSR;
-                        $message = '返结账';
+                        $message = '通过复核';
+                        break;
+                    case Reconciliation::TREASURER:
+                        $key = Principal::FRC;
+                        $message = '拒绝复核';
+                        break;
+                }
+                break;
+            case Reconciliation::OOR:
+                $water = '对账流水';
+                switch ($review) {
+                    case Reconciliation::FSR:
+                        $key = Principal::FSR;
+                        $message = '完成审核';
+                        break;
+                    case Reconciliation::FRC:
+                        $key = Principal::OPS;
+                        $message = '拒绝审核';
                         break;
                 }
                 break;
@@ -519,17 +599,17 @@ class ReconciliationAuditController extends Controller
     public function header($source)
     {
         switch (true) {
-            case $source == Reconciliation::OPERATION:
+            case in_array($source, [Reconciliation::UNRD, Reconciliation::OPS]):
                 $header = ['序号', '结算周期', '收入类型', '我方', '客户', '游戏', '上线名称', '业务线',
                     '地区', '对账币', '系统', '分成类型', '诗悦后台渠道', '统一渠道名称', '信期类型', '信期', '对账币', '人民币',
                     '调整', '转化rmb调整', '调整类型', '调整备注', '调整人', '调整时间', '对账币', '人民币', '操作'];
                 break;
-            case $source == Reconciliation::ACCRUAL:
+            case in_array($source, [Reconciliation::OPD, Reconciliation::FAC]):
                 $header = ['序号', '结算周期', '收入类型', '我方', '客户', '游戏', '上线名称', '业务线',
                     '地区', '对账币', '系统', '分成类型', '诗悦后台渠道', '统一渠道名称', '信期类型', '信期', '渠道费率', '一级分成', '二级分成', '二级分成条件', '对账币', '人民币',
                     '调整', '转化rmb调整', '类型', '备注', '调整人', '调整时间', '对账币', '人民币', '对账币-费率分成', '人民币-费率分成', '操作'];
                 break;
-            case $source == Reconciliation::RECONCILIATION:
+            case in_array($source, [Reconciliation::TREASURER, Reconciliation::FRC, Reconciliation::OOR]):
                 $header = ['#', '序号', '结算周期', '收入类型', '我方', '客户', '游戏', '上线名称', '业务线',
                     '地区', '对账币', '系统', '分成类型', '诗悦后台渠道', '统一渠道名称', '信期类型', '信期', '开票状态', '开票号', '开票时间', '开票人', '回款状态', '回款时间', '回款确认人',
                     '渠道费率', '一级分成', '二级分成', '二级分成条件', '对账币', '人民币',
@@ -547,7 +627,7 @@ class ReconciliationAuditController extends Controller
         return $header;
     }
 
-    public function url($url, $data)
+    public function url($url, $data, $source)
     {
         $post = Principal::where(['principal_id' => \Auth::user()->user_id])->get(['product_id', 'job_id'])->toArray();
         $limitPost = [];
@@ -557,18 +637,21 @@ class ReconciliationAuditController extends Controller
         $p1 = \Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationAudit', 'reconciliation-reconciliationAudit.edit']);
         $p2 = \Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationAudit', 'reconciliation-reconciliationAudit.review']);
         $tmp = '';
-        if (in_array($data['review_type'], [Reconciliation::UNRD, Reconciliation::OPD]) && $p1 && in_array($data['review_type'], $limitPost)) {
+        if ($source == Reconciliation::UNRD && $p1 && in_array(Principal::OPS, $limitPost) && $data['review_type'] == Reconciliation::UNRD) {
             $tmp .= '<a href="' . $url['edit'] . '" target="_self"> <i class="fa fa-cog fa-lg" data-toggle="tooltip" data-placement="top" title="" data-original-title="编辑"></i> </a>';
         }
-        if (in_array($data['review_type'], [Reconciliation::TREASURER]) && $p2 && in_array($data['review_type'], $limitPost)) {
+        if ($source == Reconciliation::OPD && $p1 && in_array(Principal::OPD, $limitPost) && $data['review_type'] == Reconciliation::OPD) {
+            $tmp .= '<a href="' . $url['edit'] . '" target="_self"> <i class="fa fa-cog fa-lg" data-toggle="tooltip" data-placement="top" title="" data-original-title="编辑"></i> </a>';
+        }
+        if ($source == Reconciliation::TREASURER && $p1 && in_array(Principal::FRC, $limitPost) && $data['review_type'] == Reconciliation::TREASURER) {
             $tmp .= '<a href="' . $url['edit'] . '" target="_self"> <i class="fa fa-cog fa-lg" data-toggle="tooltip" data-placement="top" title="" data-original-title="编辑"></i> </a>
 <a href="' . $url['review'] . '" target="_self"> <i class="fa fa-level-up fa-lg confirmation" data-toggle="tooltip" data-placement="top" title="" data-original-title="提交审核" data-confirm="确认提交审核?"></i> </a>';
         }
-        if (in_array($data['review_type'], [Reconciliation::FRC]) && $p2 && in_array(Principal::OPS, $limitPost)) {
+        if ($source == Reconciliation::FRC && $p2 && in_array(Principal::OPS, $limitPost) && $data['review_type'] == Reconciliation::FRC) {
             $tmp .= '<a href="' . $url['review'] . '" target="_self"> <i class="fa fa-level-up fa-lg confirmation" data-toggle="tooltip" data-placement="top" title="" data-original-title="复核" data-confirm="确认复核?"></i> </a>
 <a href="' . $url['refuse'] . '" target="_self"> <i class="fa fa-level-down fa-lg confirmation" data-toggle="tooltip" data-placement="top" title="" data-original-title="拒绝" data-confirm="确认拒绝?"></i> </a>';
         }
-        if (in_array($data['review_type'], [Reconciliation::OOR]) && $p2 && in_array(Principal::FSR, $limitPost)) {
+        if ($source == Reconciliation::OOR && $p2 && in_array(Principal::FSR, $limitPost) && $data['review_type'] == Reconciliation::OOR) {
             $tmp .= '<a href="' . $url['review'] . '" target="_self"> <i class="fa fa-check fa-lg confirmation" data-toggle="tooltip" data-placement="top" title="" data-original-title="审核" data-confirm="确认提交审核?"></i> </a>
 <a href="' . $url['refuse'] . '" target="_self"> <i class="fa fa-times fa-lg confirmation" data-toggle="tooltip" data-placement="top" title="" data-original-title="拒绝" data-confirm="确认拒绝?"></i> </a>';
         }
@@ -580,16 +663,16 @@ class ReconciliationAuditController extends Controller
         $data = Reconciliation::findOrFail($request->id);
         $message = [];
         foreach ($data as $v) {
-            if ($v['review_type'] == Reconciliation::FSR){
+            if ($v['review_type'] == Reconciliation::FSR) {
                 $v->update(['billing_num' => $request->billing_num, 'billing_time' => $request->billing_time, 'billing_type' => Reconciliation::YES, 'billing_user' => \Auth::user()->alias]);
-            }else{
+            } else {
                 $message[] = sprintf('%s_%s_%s_%d_暂无审核', $v['billing_cycle'], $v['client'], $v['backstage_channel'], $v['product_id']);
             }
         }
-        if (!empty($message)){
+        if (!empty($message)) {
             flash(trans(implode(',', $message), ['value' => trans('crm.对账审核')]), 'danger');
             return redirect()->back()->withInput();
-        }else{
+        } else {
             flash(trans('crm.开票成功', ['value' => trans('crm.对账审核')]), 'success');
             return redirect()->back()->withInput();
         }
@@ -601,18 +684,79 @@ class ReconciliationAuditController extends Controller
         $data = Reconciliation::findOrFail($request->id);
         $message = [];
         foreach ($data as $v) {
-            if ($v['billing_type'] == Reconciliation::YES){
+            if ($v['billing_type'] == Reconciliation::YES) {
                 $v->update(['payback_time' => $request->payback_time, 'payback_type' => Reconciliation::YES, 'payback_user' => \Auth::user()->alias]);
-            }else{
+            } else {
                 $message[] = sprintf('%s_%s_%s_%d_暂无开票', $v['billing_cycle'], $v['client'], $v['backstage_channel'], $v['product_id']);
             }
         }
-        if (!empty($message)){
+        if (!empty($message)) {
             flash(trans(implode(',', $message), ['value' => trans('crm.对账审核')]), 'danger');
             return redirect()->back()->withInput();
-        }else{
+        } else {
             flash(trans('crm.回款成功', ['value' => trans('crm.对账审核')]), 'success');
             return redirect()->back()->withInput();
         }
+    }
+
+    public function revision(Request $request)
+    {
+        $data = Reconciliation::findOrFail($request->id);
+        $rate = ExchangeRate::getList($data->billing_cycle);
+        $createData = $update = [];
+        $create = [
+            'billing_cycle',
+            'product_id',
+            'billing_cycle_start',
+            'income_type',
+            'billing_cycle_end',
+            'company',
+            'client',
+            'game_name',
+            'online_name',
+            'business_line',
+            'area',
+            'reconciliation_currency',
+            'os',
+            'divided_type',
+            'backstage_channel',
+            'unified_channel',
+            'period_name',
+            'period',
+            'review_type'
+        ];
+        $water = [
+            'backstage_water_other',
+            'backstage_water_rmb',
+            'operation_water_other',
+            'operation_water_rmb',
+            'operation_divide_other',
+            'operation_divide_rmb',
+            'accrual_water_other',
+            'accrual_water_rmb',
+            'accrual_divide_other',
+            'accrual_divide_rmb',
+            'reconciliation_water_other',
+            'reconciliation_water_rmb'
+        ];
+        $merge = array_merge($create, $water);
+        foreach ($merge as $v) {
+            $createData[$v] = $data->$v;
+            if (in_array($v, $water)) {
+                if (strstr($v, 'other')){
+                    $createData[$v] = $data->$v - $request->num;
+                    $update[$v] = (int)$request->num;
+                }else{
+                    $num = $request->num * $rate[$data->reconciliation_currency];
+                    $createData[$v] = $data->$v - $num;
+                    $update[$v] = $num;
+                }
+
+            }
+        }
+        Reconciliation::create($createData);
+        $data->update($update);
+        flash(trans('app.调整成功', ['value' => trans('crm.对账审核')]), 'success');
+        return redirect()->route('reconciliationAudit', ['source' => Reconciliation::TREASURER, 'product_id' => $data['product_id'], 'scope[startDate]' => $data['billing_cycle_start'], 'scope[endDate]' => $data['billing_cycle_end']]);
     }
 }

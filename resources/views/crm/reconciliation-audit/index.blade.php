@@ -18,7 +18,7 @@
                 <div class="progress progress-striped active m-b-sm" style="background-color: white">
                     <div style="width: {{ ($status - 1)*13 }}%;" class="progress-bar"></div>
                 </div>
-                <small>审核进度： <strong>{{ \App\Models\Crm\Reconciliation::REVIEW_TYPE[$status+1] }}</strong></small>
+                <small>审核进度： <strong>{{ \App\Models\Crm\Reconciliation::REVIEW_TYPE[$status] }}</strong></small>
             </dd>
         </div>
     @endif
@@ -63,15 +63,42 @@
                 </div>
                 <div class="ibox-content  tooltip-demo">
                     <div class="row">
-                        @if(isset($status))
-                            @if($source == \App\Models\Crm\Reconciliation::OPERATION)
-                                @include('widget.audit-button',['first' => 1, 'second' => 2, 'third' => 0])
-                            @elseif($source == \App\Models\Crm\Reconciliation::ACCRUAL)
-                                @include('widget.audit-button',['first' => 3, 'second' => 4, 'third' => 0])
-                            @elseif($source == \App\Models\Crm\Reconciliation::RECONCILIATION)
-                                @include('widget.button',['btn' => [['invoice-btn', '确认开票', 'btn-primary'],['pay-btn', '确认回款', 'btn-success']]])
-                            @elseif($source == \App\Models\Crm\Reconciliation::ALL)
-                                @include('widget.audit-button',['first' => 0, 'second' => 0, 'third' => 0])
+                        @if(Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationAudit', 'reconciliation-reconciliationAudit.invoice', 'reconciliation-reconciliationAudit.invoice', 'reconciliation-reconciliationAudit.review']))
+                            @if($source == \App\Models\Crm\Reconciliation::UNRD)
+                                @include('widget.button',['btn' => [
+                                    ['ops-submit-btn', '提交审核', 'btn-info', in_array(\App\Models\Crm\Principal::OPS, $limitPost) && $status == \App\Models\Crm\Reconciliation::UNRD],
+                                    ], 'isCheck' => false])
+                            @elseif($source == \App\Models\Crm\Reconciliation::OPS)
+                                @include('widget.button',['btn' => [
+                                    ['opd-submit-btn', '通过审核', 'btn-info', in_array(\App\Models\Crm\Principal::OPD, $limitPost)&& $status == \App\Models\Crm\Reconciliation::OPS],
+                                    ['opd-refuse-btn', '拒绝审核', 'btn-danger', in_array(\App\Models\Crm\Principal::OPD, $limitPost)&& $status == \App\Models\Crm\Reconciliation::OPS],
+                                    ], 'isCheck' => false])
+                            @elseif($source == \App\Models\Crm\Reconciliation::OPD)
+                                @include('widget.button',['btn' => [
+                                    ['fac-submit-btn', '提交审核', 'btn-info', in_array(\App\Models\Crm\Principal::FAC, $limitPost)&& $status == \App\Models\Crm\Reconciliation::OPD],
+                                    ['fac-refuse-btn', '拒绝审核', 'btn-danger', in_array(\App\Models\Crm\Principal::FAC, $limitPost)&& $status == \App\Models\Crm\Reconciliation::OPD],
+                                    ], 'isCheck' => false])
+                            @elseif($source == \App\Models\Crm\Reconciliation::FAC)
+                                @include('widget.button',['btn' => [
+                                    ['treasurer-submit-btn', '通过审核', 'btn-info', in_array(\App\Models\Crm\Principal::TREASURER, $limitPost)&& $status == \App\Models\Crm\Reconciliation::FAC],
+                                    ['treasurer-refuse-btn', '拒绝审核', 'btn-danger', in_array(\App\Models\Crm\Principal::TREASURER, $limitPost)&& $status == \App\Models\Crm\Reconciliation::FAC],
+                                    ], 'isCheck' => false])
+                            @elseif($source == \App\Models\Crm\Reconciliation::TREASURER)
+                                @include('widget.button',['btn' => [
+                                    ['frc-submit-btn', '提交审核', 'btn-info', in_array(\App\Models\Crm\Principal::FRC, $limitPost) && $status == \App\Models\Crm\Reconciliation::TREASURER],
+                                    ['frc-invoice-btn', '确认开票', 'btn-primary', in_array(\App\Models\Crm\Principal::FRC, $limitPost)],
+                                    ['frc-pay-btn', '确认回款', 'btn-success', in_array(\App\Models\Crm\Principal::FRC, $limitPost)],
+                                    ], 'isCheck' => true])
+                            @elseif($source == \App\Models\Crm\Reconciliation::FRC)
+                                @include('widget.button',['btn' => [
+                                    ['ops-review-btn', '通过复核', 'btn-info', in_array(\App\Models\Crm\Principal::OPS, $limitPost)],
+                                    ['ops-refuse-btn', '拒绝复核', 'btn-danger', in_array(\App\Models\Crm\Principal::OPS, $limitPost)],
+                                    ], 'isCheck' => true])
+                            @elseif($source == \App\Models\Crm\Reconciliation::OOR)
+                                @include('widget.button',['btn' => [
+                                    ['fsr-submit-btn', '通过审核', 'btn-info', in_array(\App\Models\Crm\Principal::FSR, $limitPost)],
+                                    ['fsr-refuse-btn', '拒绝审核', 'btn-danger', in_array(\App\Models\Crm\Principal::FSR, $limitPost)],
+                                    ], 'isCheck' => true])
                             @endif
                         @endif
                     </div>
@@ -82,20 +109,20 @@
                                    width="100%">
                                 <thead>
                                 <tr>
-                                    @if($source == \App\Models\Crm\Reconciliation::OPERATION)
+                                    @if(in_array($source, [\App\Models\Crm\Reconciliation::UNRD, \App\Models\Crm\Reconciliation::OPS]))
                                         <th colspan="16" class="red-color">基本数据</th>
                                         <th colspan="2" class="orange-color">后台流水</th>
                                         <th colspan="6" class="yellow-color">运营调整</th>
                                         <th colspan="2" class="green-color">运营流水</th>
                                         <th colspan="1">--</th>
-                                    @elseif($source == \App\Models\Crm\Reconciliation::ACCRUAL)
+                                    @elseif(in_array($source, [\App\Models\Crm\Reconciliation::OPD, \App\Models\Crm\Reconciliation::FAC]))
                                         <th colspan="16" class="red-color">基本数据</th>
                                         <th colspan="4" class="orange-color">分成费率</th>
                                         <th colspan="2" class="yellow-color">运营流水</th>
                                         <th colspan="6" class="green-color">计提调整</th>
                                         <th colspan="4" class="blue-color">计提流水分成</th>
                                         <th colspan="1">--</th>
-                                    @elseif($source == \App\Models\Crm\Reconciliation::RECONCILIATION)
+                                    @elseif(in_array($source, [\App\Models\Crm\Reconciliation::TREASURER, \App\Models\Crm\Reconciliation::FRC, \App\Models\Crm\Reconciliation::OOR]))
                                         <th colspan="17" class="red-color">基本数据</th>
                                         <th colspan="4" class="blue-color">开票信息</th>
                                         <th colspan="3" class="red-color">回款信息</th>
@@ -104,7 +131,7 @@
                                         <th colspan="6" class="green-color">对账调整</th>
                                         <th colspan="4" class="blue-color">对账流水分成</th>
                                         <th colspan="1">--</th>
-                                    @elseif($source == \App\Models\Crm\Reconciliation::ALL)
+                                    @else
                                         <th colspan="16" class="red-color">基本数据</th>
                                         <th colspan="4" class="orange-color">分成费率</th>
                                         <th colspan="4" class="yellow-color">后台流水分成</th>
@@ -159,25 +186,113 @@
                 ]
             });
         });
-        $('.btn-audit').click(function () {
-            $("#warning_button").attr('disabled', true);
-            $("#button").attr('disabled', true);
-            $("#back_go").attr('disabled', true);
-            $("#tj_button").attr('disabled', true);
-            $("#warning_button_tow").attr('disabled', true);
-        });
 
-        $('#invoice-btn').batch({
+        $('#frc-invoice-btn').batch({
             url: '{!! route('reconciliationAudit.invoice') !!}',
             selector: '.i-checks:checked',
             type: '3',
             alert_confirm: '确定要批量开票吗？'
         });
-        $('#pay-btn').batch({
+        $('#frc-pay-btn').batch({
             url: '{!! route('reconciliationAudit.payback') !!}',
             selector: '.i-checks:checked',
             type: '4',
             alert_confirm: '确定要批量确认回款吗？'
+        });
+
+        //审核按键
+        $('#ops-submit-btn').batch({
+            url: '{!! route('reconciliationAudit.review', ['status' => \App\Models\Crm\Reconciliation::OPS, 'pid' => $pid, 'source' => $source]) !!}',
+            selector: '.i-checks:checked',
+            type: '2',
+            alert_confirm: '确定要批量提交审核吗？'
+        });
+
+        $('#opd-submit-btn').batch({
+            url: '{!! route('reconciliationAudit.review', ['status' => \App\Models\Crm\Reconciliation::OPD, 'pid' => $pid, 'source' => $source]) !!}',
+            selector: '.i-checks:checked',
+            type: '2',
+            alert_confirm: '确定要批量通过审核吗？'
+        });
+        $('#opd-refuse-btn').batch({
+            url: '{!! route('reconciliationAudit.review', ['status' => \App\Models\Crm\Reconciliation::UNRD, 'pid' => $pid, 'source' => $source]) !!}',
+            selector: '.i-checks:checked',
+            type: '2',
+            alert_confirm: '确定要批量拒绝审核吗？'
+        });
+        $('#fac-submit-btn').batch({
+            url: '{!! route('reconciliationAudit.review', ['status' => \App\Models\Crm\Reconciliation::FAC, 'pid' => $pid, 'source' => $source]) !!}',
+            selector: '.i-checks:checked',
+            type: '2',
+            alert_confirm: '确定要批量提交审核吗？'
+        });
+        $('#fac-refuse-btn').batch({
+            url: '{!! route('reconciliationAudit.review', ['status' => \App\Models\Crm\Reconciliation::OPS, 'pid' => $pid, 'source' => $source]) !!}',
+            selector: '.i-checks:checked',
+            type: '2',
+            alert_confirm: '确定要批量拒绝审核吗？'
+        });
+        $('#treasurer-submit-btn').batch({
+            url: '{!! route('reconciliationAudit.review', ['status' => \App\Models\Crm\Reconciliation::TREASURER, 'pid' => $pid, 'source' => $source]) !!}',
+            selector: '.i-checks:checked',
+            type: '2',
+            alert_confirm: '确定要批量通过审核吗？'
+        });
+        $('#treasurer-refuse-btn').batch({
+            url: '{!! route('reconciliationAudit.review', ['status' => \App\Models\Crm\Reconciliation::OPD, 'pid' => $pid, 'source' => $source]) !!}',
+            selector: '.i-checks:checked',
+            type: '2',
+            alert_confirm: '确定要批量拒绝审核吗？'
+        });
+        $('#frc-submit-btn').batch({
+            url: '{!! route('reconciliationAudit.review', ['status' => \App\Models\Crm\Reconciliation::FRC, 'pid' => $pid, 'source' => $source]) !!}',
+            selector: '.i-checks:checked',
+            type: '5',
+            alert_confirm: '确定要批量提交审核吗？'
+        });
+        $('#ops-review-btn').batch({
+            url: '{!! route('reconciliationAudit.review', ['status' => \App\Models\Crm\Reconciliation::OOR, 'pid' => $pid, 'source' => $source]) !!}',
+            selector: '.i-checks:checked',
+            type: '5',
+            alert_confirm: '确定要批量通过复核吗？'
+        });
+        $('#ops-refuse-btn').batch({
+            url: '{!! route('reconciliationAudit.review', ['status' => \App\Models\Crm\Reconciliation::TREASURER, 'pid' => $pid, 'source' => $source]) !!}',
+            selector: '.i-checks:checked',
+            type: '5',
+            alert_confirm: '确定要批量拒绝复核吗？'
+        });
+        $('#fsr-submit-btn').batch({
+            url: '{!! route('reconciliationAudit.review', ['status' => \App\Models\Crm\Reconciliation::FSR, 'pid' => $pid, 'source' => $source]) !!}',
+            selector: '.i-checks:checked',
+            type: '5',
+            alert_confirm: '确定要批量通过审核吗？'
+        });
+        $('#fsr-refuse-btn').batch({
+            url: '{!! route('reconciliationAudit.review', ['status' => \App\Models\Crm\Reconciliation::FRC, 'pid' => $pid, 'source' => $source]) !!}',
+            selector: '.i-checks:checked',
+            type: '5',
+            alert_confirm: '确定要批量拒绝审核吗？'
+        });
+
+        $(document).on('click', '.generate', function (event) {
+            event.preventDefault();
+            var href = $(this).is('a') ? $(this).attr('href') : $(this).parent('a').attr('href');
+
+            bootbox.prompt({
+                title: "调整数量",
+                inputType: 'number',
+                callback: function (num) {
+                    if (num) {
+                        if (num) {
+                            var data = {
+                                num: num
+                            };
+                            window.location = href + '&' + $.param(data);
+                        }
+                    }
+                }
+            });
         });
     </script>
 @endpush

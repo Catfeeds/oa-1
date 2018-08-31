@@ -23,6 +23,7 @@ class DailyDetail extends Model
     protected $fillable = [
         'user_id',
         'day',
+        'leave_id',
         'punch_start_time',
         'punch_start_time_num',
         'punch_end_time',

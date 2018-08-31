@@ -24,6 +24,7 @@ class CreateAttendanceDailyDetailTable extends Migration
             $table->unsignedInteger('heap_late_num')->defult(0)->comment = '累积迟到分钟数';
             $table->unsignedInteger('lave_buffer_num')->defult(0)->comment = '剩余缓冲分钟数';
             $table->unsignedInteger('deduction_num')->defult(0)->comment = '扣分';
+            $table->unsignedInteger('leave_id')->nullable()->comment = '假期申请单ID，默认为空';
             $table->timestamps();
 
             $table->unique(['day', 'user_id'], 'unique_user_daily');

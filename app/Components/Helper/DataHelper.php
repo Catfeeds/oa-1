@@ -139,19 +139,31 @@ class DataHelper
                 case $day > 2.1 && $day < 2.3 :
                     $day = 2.5;
                     break;
-                case $day > 2.1 && $day < 3 :
+                case $day > 2.3 && $day < 3 :
                     $day = 3;
                     break;
                 case $day > 3.1 && $day < 3.3 :
                     $day = 3.5;
                     break;
-                case $day > 4.1 && $day < 5 :
+                case $day > 3.3 && $day < 4 :
+                    $day = 4;
+                    break;
+                case $day > 4.1 && $day < 4.3 :
+                    $day = 4.5;
+                    break;
+                case $day > 4.3 && $day < 5 :
                     $day = 4.5;
                     break;
                 case $day > 5.1 && $day < 5.3 :
                     $day = 5;
                     break;
-                case $day > 6.1 && $day < 7 :
+                case $day > 5.3 && $day < 6 :
+                    $day = 5.5;
+                    break;
+                case $day > 6.1 && $day < 6.3 :
+                    $day = 6;
+                    break;
+                case $day > 6.3 && $day < 7 :
                     $day = 6.5;
                     break;
                 case $day > 7.1 && $day < 7.3 :
@@ -164,5 +176,17 @@ class DataHelper
         }
         return $day;
 
+    }
+
+    public static function prDates($startDay, $endDay)
+    {
+        $day = [];
+        if(empty($startDay) || empty($endDay)) return $day;
+        while ($startDay < $endDay){
+            $startDay = strtotime('+1 day', $startDay);
+            if($startDay == $endDay) continue;
+            $day[] = $startDay;
+        }
+        return array_unique($day);
     }
 }

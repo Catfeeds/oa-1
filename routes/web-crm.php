@@ -32,6 +32,9 @@ Route::group([
     Route::get('reconciliation-audit/payback', [
         'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationAudit|reconciliation-reconciliationAudit.payback'],
         'uses' => 'ReconciliationAuditController@payback'])->name('reconciliationAudit.payback');
+    Route::get('reconciliation-audit/revision', [
+        'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationAudit|reconciliation-reconciliationAudit.revision'],
+        'uses' => 'ReconciliationAuditController@revision'])->name('reconciliationAudit.revision');
 
     //负责人
     Route::get('reconciliation-principal', [
