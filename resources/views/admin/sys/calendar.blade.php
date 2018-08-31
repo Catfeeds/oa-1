@@ -29,6 +29,21 @@
                             </div>
 
                             <div class="panel-body">
+                                {{--收索区域--}}
+                                <div>
+                                    {!! Form::open([ 'class' => 'form-inline', 'method' => 'post']) !!}
+                                    <div class="col-sm-2">
+                                        <select class="js-select2-single form-control" name="punch_rules_id" >
+                                            <option value="">请选择排班规则</option>
+                                            @foreach(\App\Models\Sys\PunchRules::getPunchRulesList() as $k => $v)
+                                                <option value="{{ $k }}" >{{ $v }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    {!! Form::submit(trans('app.一键生成当月日历'), ['class' => 'btn btn-primary']) !!}
+                                    {!! Form::close() !!}
+                                </div>
+
                                 <div class="tab-content">
                                     <div class="tab-pane active">
                                         <div class="ibox-content profile-content">
@@ -52,7 +67,7 @@
                                                             <td>{{ $v['month'] }}</td>
                                                             <td>{{ $v['day'] }}</td>
                                                             <td>{{ \App\Models\Sys\Calendar::$week[$v['week']] ?? ''}}</td>
-                                                            <td>{{ \App\Models\Sys\PunchRules::getPunchTypeList()[$v['punch_rules_id']] ?? '' }}</td>
+                                                            <td>{{ \App\Models\Sys\PunchRules::getPunchRulesList()[$v['punch_rules_id']] ?? '' }}</td>
                                                             <td>{{ $v['memo'] }}</td>
                                                             <td>{{ $v['created_at'] }}</td>
                                                             <td>
@@ -78,3 +93,4 @@
     </div>
 
 @endsection
+@include('widget.select2')

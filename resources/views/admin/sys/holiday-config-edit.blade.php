@@ -33,11 +33,13 @@
                                                 {!! Form::label('apply_type_id', trans('app.申请类型'), ['class' => 'col-sm-3 control-label']) !!}
                                                 <div class="col-sm-6">
                                                     @foreach(\App\Models\Sys\HolidayConfig::$applyType as $k => $v)
+                                                        @if($k != 0)
                                                         <label class="radio-inline i-checks">
                                                             {!! Form::radio('apply_type_id', $k, $k === ($holiday->apply_type_id ?? old('apply_type_id') ?? 1), [
                                                             'required' => true,
                                                         ]) !!} {{ $v }}
                                                         </label>
+                                                        @endif
                                                     @endforeach
                                                 </div>
                                             </div>

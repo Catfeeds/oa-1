@@ -146,7 +146,6 @@
             };
 
             $('input[type="checkbox"]').on('ifChecked', function () {
-
                 if ($(this).attr('id') == "recheck_1") {
                     $('#onwork_div').show();
                 }
