@@ -424,7 +424,7 @@ class LeaveController extends AttController
                     //申请单状态操作
                     AttendanceHelper::leaveReviewPass($leave);
                     //提前生成每日详情信息
-                    switch ($leave->holiday_config->apply_type_id) {
+                    switch ($leave->holidayConfig->apply_type_id) {
                         case HolidayConfig::LEAVEID;
                         case HolidayConfig::CHANGE;
                             AttendanceHelper::setDailyDetail($leave);

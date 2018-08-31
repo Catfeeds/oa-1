@@ -112,6 +112,7 @@
                         </div>
                     </div>
                 </div>
+
                     {{--分割线--}}
                 <div class="col-sm-6">
 
@@ -119,7 +120,7 @@
                         {!! Form::label('reason', trans('att.审核流程'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-6">
                             <span class="help-block m-b-none">
-                                {{ \App\Http\Components\Helpers\AttendanceHelper::showApprovalStep($leave->step_id) }}
+                                {{ \App\Http\Components\Helpers\AttendanceHelper::showApprovalStep($leave->step_id) ?? '未匹配到流程' }}
                             </span>
                         </div>
                     </div>
