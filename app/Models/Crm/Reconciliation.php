@@ -39,17 +39,15 @@ class Reconciliation extends Model
     const FRC = 6;
     const OOR = 7;
     const FSR = 8;
-    const COMPLETE = 9;
     const REVIEW_TYPE = [
-        self::UNRD => '未审核',
-        self::OPS => '运营专员审核',
-        self::OPD => '运营主管审核',
-        self::FAC => '财务计提专员审核',
-        self::TREASURER => '财务计提主管审核',
-        self::FRC => '财务对账专员审核',
-        self::OOR => '运营专员复核',
-        self::FSR => '财务对账主管审核',
-        self::COMPLETE => '审核完成',
+        self::UNRD => '运营专员审核',
+        self::OPS => '运营主管审核',
+        self::OPD => '财务计提专员审核',
+        self::FAC => '财务计提主管审核',
+        self::TREASURER => '财务对账专员审核',
+        self::FRC => '运营专员复核',
+        self::OOR => '财务对账主管审核',
+        self::FSR => '审核完成',
     ];
 
     const OPERATION = 1;

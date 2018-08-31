@@ -32,7 +32,7 @@
                     selector_params = opt.selector;
                 }
 
-                if ($.isEmptyObject(selector_params) && (opt.type == 3 || opt.type == 4)) {
+                if ($.isEmptyObject(selector_params) && (opt.type == 3 || opt.type == 4 || opt.type == 5)) {
                     bootbox.alert({
                         size: "small",
                         message: opt.alert_message,
@@ -48,11 +48,13 @@
                                     title: "操作",
                                     inputType: 'text',
                                     callback: function (reason) {
-                                        var data = {
-                                            reason: reason
-                                        };
-                                        data = $.extend(selector_params, data);
-                                        window.location = opt.url + '&' + $.param(data);
+                                        if (reason != null) {
+                                            var data = {
+                                                reason: reason
+                                            };
+                                            data = $.extend(selector_params, data);
+                                            window.location = opt.url + '&' + $.param(data);
+                                        }
                                     }
                                 });
                                 break;
@@ -84,7 +86,7 @@
                                                     billing_time: billing_time,
                                                 };
                                                 data = $.extend(selector_params, data);
-                                                window.location = opt.url  + '?' + $.param(data);
+                                                window.location = opt.url + '?' + $.param(data);
                                             }
                                         },
                                         "cancel": {

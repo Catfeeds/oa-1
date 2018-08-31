@@ -25,7 +25,7 @@
 
                     <div class="hr-line-dashed"></div>
 
-                    <div class="form-group @if (!empty($errors->first('currency'))) has-error @endif">
+                    {{--<div class="form-group @if (!empty($errors->first('currency'))) has-error @endif">
                         {!! Form::label('currency', trans('crm.货币'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-5">
                             @include('widget.select-single', ['name' => 'currency', 'lists' => $currency, 'selected' => $data->currency ?? old('currency')])
@@ -33,7 +33,7 @@
                         </div>
                     </div>
 
-                    <div class="hr-line-dashed"></div>
+                    <div class="hr-line-dashed"></div>--}}
 
                     <div class="form-group @if (!empty($errors->first('exchange_rate'))) has-error @endif">
                         {!! Form::label('exchange_rate', trans('crm.汇率'), ['class' => 'col-sm-2 control-label']) !!}

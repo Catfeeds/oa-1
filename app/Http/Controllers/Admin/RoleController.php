@@ -81,7 +81,7 @@ class RoleController extends Controller
                 'display_name' => implode('/', $arr)
             ];
         }
-
+        \Cache::tags(\Config::get('entrust.permission_role_table'))->flush();
         $title = trans('app.职务权限指派');
         return view('admin.roles.appoint', compact('role', 'permissionsGroup', 'enables', 'title'));
     }
