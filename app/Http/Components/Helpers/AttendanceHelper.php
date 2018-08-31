@@ -70,7 +70,7 @@ class AttendanceHelper
         $leaveIds = $users = [];
         $user = User::where(['dept_id' => $deptId, 'is_leader' => 1])->first();
 
-        if(empty($user->user_id)) return $leaveIds;
+        if(empty($user->user_id)) return ['leave_ids' => $leaveIds, 'user_ids' => $users];
 
         $leave = Leave::where(['user_id' => $user->user_id])->where('user_list', '!=', '')->get();
 
