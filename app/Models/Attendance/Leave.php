@@ -67,4 +67,9 @@ class Leave extends Model
         return $this->hasOne(HolidayConfig::class, 'holiday_id', 'holiday_id');
     }
 
+    public static function getHolidayIdList()
+    {
+        return self::get(['holiday_id', 'leave_id'])->pluck('holiday_id', 'leave_id')->toArray();
+    }
+
 }

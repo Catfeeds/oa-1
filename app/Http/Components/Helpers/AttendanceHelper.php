@@ -174,7 +174,6 @@ class AttendanceHelper
         $endDay = strtotime($leave->end_time);
 
         $day = DataHelper::prDates($startDay, $endDay);
-
         if(!empty($day)) {
             foreach ($day as $k => $d) {
                 $daily = DailyDetail::whereIn('day', [date('Y-m-d', $d)])->where(['user_id' => $leave->user_id])->first();
@@ -182,7 +181,7 @@ class AttendanceHelper
                 $data = [
                     'user_id' => $leave->user_id,
                     'day' => date('Y-m-d', $d),
-                    'holiday_id' => $leave->holiday_id,
+                    'leave_id' => $leave->leave_id,
                     'punch_start_time' => Leave::$startId[1],
                     'punch_start_time_num' => strtotime(date('Y-m-d', $d) . ' ' . Leave::$startId[1]),
                     'punch_end_time' => Leave::$endId[3],
@@ -203,13 +202,14 @@ class AttendanceHelper
             $startData = [
                 'user_id' => $leave->user_id,
                 'day' => date('Y-m-d', $startDay),
-                'holiday_id' => $leave->holiday_id,
+                'leave_id' => $leave->leave_id,
                 'punch_start_time' => Leave::$startId[$leave->start_id],
                 'punch_start_time_num' => strtotime(date('Y-m-d', $startDay) . ' ' . Leave::$startId[$leave->start_id]),
                 'punch_end_time' => Leave::$endId[$leave->end_id],
                 'punch_end_time_num' => strtotime(date('Y-m-d', $endDay) . ' ' . Leave::$endId[$leave->end_id]),
 
             ];
+
             DailyDetail::create($startData);
         }
 
@@ -217,7 +217,7 @@ class AttendanceHelper
             $startData = [
                 'user_id' => $leave->user_id,
                 'day' => date('Y-m-d', $startDay),
-                'holiday_id' => $leave->holiday_id,
+                'leave_id' => $leave->leave_id,
                 'punch_start_time' => Leave::$startId[$leave->start_id],
                 'punch_start_time_num' => strtotime(date('Y-m-d', $startDay) . ' ' . Leave::$startId[$leave->start_id]),
                 'punch_end_time' => Leave::$endId[3],
@@ -230,7 +230,7 @@ class AttendanceHelper
                 $endData = [
                     'user_id' => $leave->user_id,
                     'day' => date('Y-m-d', $endDay),
-                    'holiday_id' => $leave->holiday_id,
+                    'leave_id' => $leave->leave_id,
                     'punch_start_time' => Leave::$startId[1],
                     'punch_start_time_num' => strtotime(date('Y-m-d', $endDay) . ' ' . Leave::$startId[1]),
                     'punch_end_time' => 0,
@@ -243,7 +243,7 @@ class AttendanceHelper
                 $endData = [
                     'user_id' => $leave->user_id,
                     'day' => date('Y-m-d', $endDay),
-                    'holiday_id' => $leave->holiday_id,
+                    'leave_id' => $leave->leave_id,
                     'punch_start_time' => Leave::$startId[1],
                     'punch_start_time_num' => strtotime(date('Y-m-d', $endDay) . ' ' . Leave::$startId[1]),
                     'punch_end_time' => Leave::$endId[$leave->end_id],
@@ -270,7 +270,7 @@ class AttendanceHelper
             $startData = [
                 'user_id' => $leave->user_id,
                 'day' => date('Y-m-d', $startDay),
-                'holiday_id' => $leave->holiday_id,
+                'leave_id' => $leave->leave_id,
                 'punch_start_time' => date('h:i', $startDay),
                 'punch_start_time_num' => $startDay,
             ];
@@ -286,7 +286,7 @@ class AttendanceHelper
             $endData = [
                 'user_id' => $leave->user_id,
                 'day' => date('Y-m-d', $endDay),
-                'holiday_id' => $leave->holiday_id,
+                'leave_id' => $leave->leave_id,
                 'punch_end_time' => date('H:i', $endDay),
                 'punch_end_time_num' => $endDay,
             ];

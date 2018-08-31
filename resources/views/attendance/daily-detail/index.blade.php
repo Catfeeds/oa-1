@@ -60,7 +60,7 @@
                                     <td>{{ $v['heap_late_num'] ? $v['heap_late_num']  : '--' }}</td>
                                     <td>{{ $v['lave_buffer_num'] ? $v['heap_late_num']  : '--'  }}</td>
                                     <td>{{ $v['deduction_num'] ? $v['heap_late_num']  : '--'  }}</td>
-                                    <td>{{ \App\Models\Sys\HolidayConfig::getHolidayList()[$v['holiday_id']] ?? '--' }}</td>
+                                    <td>{{ \App\Models\Sys\HolidayConfig::getHolidayList()[\App\Models\Attendance\Leave::getHolidayIdList()[$v['leave_id']] ?? 0] ?? '--' }}</td>
                                     <td>
                                         @if(empty($v['punch_start_time']) || empty($v['punch_end_time']))
                                             <a href="{{route('leave.create', ['id' => \App\Models\Sys\HolidayConfig::RECHECK])}}">{{ trans('att.补打卡') }}</a>

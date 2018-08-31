@@ -304,6 +304,7 @@ class LeaveController extends AttController
     public function optInfo($id)
     {
         $leave = Leave::with('holidayConfig')->findOrFail($id);
+
         $logUserIds = OperateLogHelper::getLogUserIdToInId($leave->leave_id);
         $logUserIds[] = $leave->user_id;
         $logUserIds[] = $leave->review_user_id;
