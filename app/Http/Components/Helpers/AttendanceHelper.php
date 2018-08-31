@@ -26,6 +26,7 @@ class AttendanceHelper
      */
     public static function showApprovalStep($stepId)
     {
+
         $step = ApprovalStep::findOrFail($stepId);
 
         $roleId = $roleName = [];
@@ -85,6 +86,24 @@ class AttendanceHelper
         return ['leave_ids' => $leaveIds, 'user_ids' => $users];
     }
 
+    public static function getCopyUser()
+    {
+        $leaveIds = $users = [];
+
+        $leaves = Leave::where('copy_user', '!=', '')->get();
+
+        foreach ($leaves as $k => $v) {
+            $copyUsers = json_decode($v->copy_user);
+
+            if(!empty($copyUsers) && in_array(\Auth::user()->user_id, $copyUsers)) {
+                $leaveIds[] = $v->leave_id;
+                $users[] = $copyUsers;
+            }
+        }
+        return ['leave_ids' => $leaveIds, 'user_ids' => $users];
+    }
+
+
 
     /**
      * 申请单 拒绝/取消 福利天数回退
@@ -106,6 +125,8 @@ class AttendanceHelper
             $userConfig->update(['num' => $num]);
         }
     }
+
+
 
     /**
      * 申请单 通过 操作
@@ -142,11 +163,14 @@ class AttendanceHelper
         $where = '';
         $userIds = [];
         if($isLeader) {
-            $changeLeaveIds = AttendanceHelper::getMyChangeLeaveId($deptId);
+            $changeLeaveIds = self::getMyChangeLeaveId($deptId);
+            $copyLeaveIds = self::getCopyUser();
 
-            $userIds = $changeLeaveIds['user_ids'];
-            if(!empty($changeLeaveIds['leave_ids'])) {
-                $leaveIds = implode(',', $changeLeaveIds['leave_ids']);
+            $userIds = $changeLeaveIds['user_ids'] + $copyLeaveIds['user_ids'];
+            $leaveIds =  $changeLeaveIds['leave_ids'] + $copyLeaveIds['leave_ids'];
+
+            if(!empty($leaveIds)) {
+                $leaveIds = implode(',', $leaveIds);
                 $where = " or Leave_id in ($leaveIds)";
             }
         }

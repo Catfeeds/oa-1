@@ -63,6 +63,7 @@ class LeaveController extends AttController
     {
         $leave = (object)['holiday_id' => '', 'start_id' => '', 'end_id' => ''];
         $reviewUserId = '';
+        $allUsers = User::where(['status' => 1])->get();
         switch ($applyTypeId) {
             //请假
             case HolidayConfig::LEAVEID:
@@ -100,7 +101,7 @@ class LeaveController extends AttController
                 return redirect()->route('leave.info');
         }
 
-        return view('attendance.leave.'.$models, compact('title', 'holidayList', 'leave', 'reviewUserId' , 'deptUsersSelected', 'deptUsers'));
+        return view('attendance.leave.'.$models, compact('title', 'holidayList', 'leave', 'reviewUserId' , 'deptUsersSelected', 'deptUsers', 'allUsers'));
     }
 
     //设置上传附件
@@ -256,6 +257,9 @@ class LeaveController extends AttController
             $remain_user = json_encode($leader);
         }
 
+        $copy_user = '';
+        if(!empty($p['copy_user'])) $copy_user = json_encode($p['copy_user']);
+
         $data = [
             'user_id' => \Auth::user()->user_id,
             'holiday_id' => $holidayId,
@@ -270,6 +274,7 @@ class LeaveController extends AttController
             'annex' => $imagePath ?? '',
             'review_user_id' => $review_user_id,
             'remain_user' => $remain_user,
+            'copy_user' => $copy_user,
         ];
 
         try {
