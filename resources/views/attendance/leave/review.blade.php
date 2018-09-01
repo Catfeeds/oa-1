@@ -101,7 +101,7 @@
     $(function () {
 
         $('#review-btn-ok').batch({
-            url: '{{ route('leave.review.batchOptStatus', ['status' => 1]) }}',
+            url: '{{ route('leave.review.batchOptStatus', ['status' => 3]) }}',
             selector: '.i-checks:checked',
             type: '0',
             alert_confirm: '确定要批量通过审核吗？'

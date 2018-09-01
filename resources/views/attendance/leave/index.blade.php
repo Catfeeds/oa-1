@@ -7,15 +7,15 @@
     <div class="col-sm-8">
         <div class="title-action">
             @if(Entrust::can(['attendance-all', 'leave.all', 'leave.edit', 'leave.create']))
-                <a href="{{ route('leave.create', ['id' => 1]) }}" class="btn btn-primary btn-sm">{{ trans('请假申请') }}</a>
+                <a href="{{ route('leave.create', ['id' => \App\Models\Sys\HolidayConfig::LEAVEID]) }}" class="btn btn-primary btn-sm">{{ trans('请假申请') }}</a>
             @endif
 
             @if(Entrust::can(['attendance-all', 'leave.all', 'leave.edit', 'leave.create']))
-                <a href="{{ route('leave.create', ['id' => 2]) }}" class="btn btn-primary btn-sm">{{ trans('调休申请') }}</a>
+                <a href="{{ route('leave.create', ['id' => \App\Models\Sys\HolidayConfig::CHANGE]) }}" class="btn btn-success btn-sm">{{ trans('调休申请') }}</a>
             @endif
 
             @if(Entrust::can(['attendance-all', 'leave.all', 'leave.edit', 'leave.create']))
-                <a href="{{ route('leave.create', ['id' => 3]) }}" class="btn btn-primary btn-sm">{{ trans('补打卡') }}</a>
+                <a href="{{ route('leave.create', ['id' => \App\Models\Sys\HolidayConfig::RECHECK]) }}" class="btn btn-danger btn-sm">{{ trans('补打卡') }}</a>
             @endif
         </div>
     </div>
@@ -38,12 +38,12 @@
                         <table class="table table-striped table-striped tooltip-demo">
                             <thead>
                             <tr>
-                                <th>{{ trans('att.请假类型') }}</th>
-                                <th>{{ trans('att.假期类型') }}</th>
+                                <th>{{ trans('att.申请类型') }}</th>
+                                <th>{{ trans('att.明细类型') }}</th>
                                 <th>{{ trans('att.开始时间') }}</th>
                                 <th>{{ trans('att.结束时间') }}</th>
-                                <th>{{ trans('att.假期时长') }}</th>
-                                <th>{{ trans('att.事由') }}</th>
+                                <th>{{ trans('att.申请时长') }}</th>
+                                <th>{{ trans('att.申请事由') }}</th>
                                 <th>{{ trans('att.申请时间') }}</th>
                                 <th>{{ trans('att.申请状态') }}</th>
                                 <th>{{ trans('att.操作') }}</th>
@@ -89,7 +89,7 @@
                                         {{--@if(Entrust::can(['leave-all', 'leave.edit']))--}}
                                             {{--{!! BaseHtml::tooltip(trans('app.设置'), route('leave.edit', ['id' => $v['leave_id']]), 'cog fa-lg') !!}--}}
                                         {{--@endif--}}
-                                        @if(($v['user_id'] == \Auth::user()->user_id || $v['review_user_id'] == \Auth::user()->user_id ) && Entrust::can(['attendance-all', 'leave-all', 'leave.edit', 'leave.optStatus']))
+                                        @if(($v['user_id'] == \Auth::user()->user_id || $v['review_user_id'] == \Auth::user()->user_id || in_array(\Auth::user()->user_id, $userIds)) && Entrust::can(['attendance-all', 'leave-all', 'leave.edit', 'leave.optStatus']))
                                             {!! BaseHtml::tooltip(trans('att.请假详情'), route('leave.optInfo', ['id' => $v['leave_id']]), 'cog fa fa-newspaper-o') !!}
                                         @endif
 

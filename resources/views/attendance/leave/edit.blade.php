@@ -86,8 +86,6 @@
 
                     <div class="hr-line-dashed"></div>
 
-
-
                     <div class="form-group @if (!empty($errors->first('reason'))) has-error @endif">
                         {!! Form::label('reason', trans('att.请假理由'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-8">
@@ -97,6 +95,22 @@
                         </div>
                         <span class="help-block m-b-none">{{ $errors->first('reason') }}</span>
                     </div>
+
+                    <div class="hr-line-dashed"></div>
+
+                    <div class="form-group @if (!empty($errors->first('copy_user'))) has-error @endif">
+                        {!! Form::label('copy_user', trans('att.抄送'), ['class' => 'col-sm-2 control-label']) !!}
+                        <div class="col-sm-5">
+                            <select multiple="multiple" class="js-select2-multiple form-control"
+                                    name="copy_user[]">
+                                @foreach($allUsers as $key => $val)
+                                    <option value="{{ $val['user_id'] }}">{{ $val['alias'].'('.$val['username'].')' }}</option>
+                                @endforeach
+                            </select>
+                            <span class="help-block m-b-none">{{ $errors->first('copy_user') }}</span>
+                        </div>
+                    </div>
+
 
                     <div class="hr-line-dashed"></div>
 

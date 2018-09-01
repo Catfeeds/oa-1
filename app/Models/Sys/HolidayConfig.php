@@ -24,13 +24,14 @@ class HolidayConfig extends Model
     const STATUS_ENABLE = 1;
 
     const LEAVEID = 1;
+    const CHANGE = 2;
     const OVERTIME = 2;
     const RECHECK = 3;
 
     public static $applyType = [
-        1 => '请假',
-        2 => '加班调休',
-        3 => '补打卡',
+        self::LEAVEID => '请假',
+        self::CHANGE => '加班调休',
+        self::RECHECK => '补打卡',
     ];
 
     public static $isBoon = [

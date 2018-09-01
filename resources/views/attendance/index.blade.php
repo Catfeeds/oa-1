@@ -21,19 +21,17 @@
                     <table class="table table-striped">
                         <thead>
                         <tr>
-                            <th>用户ID</th>
                             <th>假期名</th>
                             <th>假期详情</th>
-                            <th>假期天数</th>
+                            <th>剩余假期天数</th>
                         </tr>
                         </thead>
                         <tbody>
                             @foreach($data as $d)
                             <tr>
-                                <td>{{ $d['id'] }}</td>
                                 <td>{{ $d['holiday'] }}</td>
                                 <td><pre style="width: 15em; height: 3em" >{{ $d['memo'] }}</pre></td>
-                                <td>{{ $d['num'].'天'}}</td>
+                                <td>{{ $d['num'] . '天'}}</td>
                             </tr>
                             @endforeach
                         </tbody>

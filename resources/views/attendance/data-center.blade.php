@@ -16,11 +16,16 @@
                             </span>
                             </a>
                         </div>
+
                         <div class="logo-element">
                             {{ config('app.nickname') }}
                         </div>
                     </li>
-
+                    <li @if (Route::is(['attIndex'])) class="active" @endif>
+                        <a href="{{ route('attIndex') }}">
+                            <i class="fa fa-home"></i> <span class="nav-label">{{ trans('app.考勤系统首页') }}</span>
+                        </a>
+                    </li>
                     {{--考勤菜单--}}
                     @include('attendance.side')
 

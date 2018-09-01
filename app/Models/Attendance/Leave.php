@@ -7,6 +7,7 @@
  */
 namespace App\Models\Attendance;
 
+use App\Models\Sys\HolidayConfig;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -43,6 +44,7 @@ class Leave extends Model
         1 => '审核中',
         2 => '已拒绝',
         3 => '已通过',
+        4 => '已取消',
     ];
 
     protected $fillable = [
@@ -58,7 +60,17 @@ class Leave extends Model
         'user_list',
         'annex',
         'review_user_id',
-        'remain_user'
+        'remain_user',
+        'copy_user',
     ];
+
+    public function holidayConfig() {
+        return $this->hasOne(HolidayConfig::class, 'holiday_id', 'holiday_id');
+    }
+
+    public static function getHolidayIdList()
+    {
+        return self::get(['holiday_id', 'leave_id'])->pluck('holiday_id', 'leave_id')->toArray();
+    }
 
 }
