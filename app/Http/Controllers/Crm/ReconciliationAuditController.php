@@ -70,7 +70,7 @@ class ReconciliationAuditController extends Controller
             return redirect()->back()->withInput();
         }
         $data = Reconciliation::where(['product_id' => $pid, 'billing_cycle' => date('Y-m', strtotime($scope->startTimestamp))])->get(['review_type'])->keyBy('review_type')->toArray();
-
+        $status = 1;
         if (!empty($data)) {
             $status = array_keys($data)[0];
         }
