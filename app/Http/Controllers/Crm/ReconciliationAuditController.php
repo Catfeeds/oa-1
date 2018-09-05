@@ -157,7 +157,7 @@ class ReconciliationAuditController extends Controller
                 a.product_id = p.product_id
                 AND a.backstage_channel = p.backstage_channel
             )
-            WHERE a.product_id = {$pid} AND a.billing_cycle = '{$billing_cycle}'{$where}
+            WHERE a.product_id = {$pid} AND a.billing_cycle = '{$billing_cycle}'{$where} AND {$scope->getWhere()}
         ";
         $tmp = \DB::select($sql);
         $data = $tmp3 = $tmp2 = [];
@@ -262,7 +262,7 @@ class ReconciliationAuditController extends Controller
                     $tmp2['reconciliation_water_rmb'] = $v['reconciliation_water_rmb'];
                     $tmp2['reconciliation_divide_other'] = CrmHelper::dividedInto($v['channel_rate'], $v['first_division'], $v['second_division'], $v['second_division_condition'], $v['reconciliation_water_other']);
                     $tmp2['reconciliation_divide_rmb'] = CrmHelper::dividedInto($v['channel_rate'], $v['first_division'], $v['second_division'], $v['second_division_condition'], $v['reconciliation_water_rmb']);
-                    $tmp2['review_type'] = sprintf('%s%s', $this->url($url, $v, $source), $source == Reconciliation::TREASURER && \Entrust::can(['crm-all', 'reconciliation-all', 'reconciliation-reconciliationAudit', 'reconciliation-reconciliationAudit.revision']) && $v['review_type'] == Reconciliation::FSR ? '<a href="' . $url['revision'] . '" class="generate"> <i class="fa fa-edit fa-lg" data-toggle="tooltip" data-placement="top" title="" data-original-title="调整流水"></i> </a>' : '');
+                    $tmp2['review_type'] = $this->url($url, $v, $source);
                     break;
                 default:
                     $tmp2['channel_rate'] = CrmHelper::percentage($v['channel_rate']);
@@ -645,6 +645,7 @@ class ReconciliationAuditController extends Controller
         }
         if ($source == Reconciliation::TREASURER && $p1 && in_array(Principal::FRC, $limitPost) && $data['review_type'] == Reconciliation::TREASURER) {
             $tmp .= '<a href="' . $url['edit'] . '" target="_self"> <i class="fa fa-cog fa-lg" data-toggle="tooltip" data-placement="top" title="" data-original-title="编辑"></i> </a>
+<a href="' . $url['revision'] . '" class="generate"> <i class="fa fa-edit fa-lg" data-toggle="tooltip" data-placement="top" title="" data-original-title="调整流水"></i> </a>
 <a href="' . $url['review'] . '" target="_self"> <i class="fa fa-level-up fa-lg confirmation" data-toggle="tooltip" data-placement="top" title="" data-original-title="提交审核" data-confirm="确认提交审核?"></i> </a>';
         }
         if ($source == Reconciliation::FRC && $p2 && in_array(Principal::OPS, $limitPost) && $data['review_type'] == Reconciliation::FRC) {

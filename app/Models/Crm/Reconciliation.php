@@ -31,6 +31,12 @@ class Reconciliation extends Model
         self::YES => '已回款',
     ];
 
+    public static $sys = [
+        '安卓' => '安卓',
+        'IOS正版' => 'IOS正版',
+        'IOS越狱' => 'IOS越狱',
+    ];
+
     const UNRD = 1;
     const OPS = 2;
     const OPD = 3;
