@@ -17,7 +17,6 @@ class AddUniqueDeptTimeRangeApprovalStepTable extends Migration
             $table->dropColumn('name');
             $table->dropColumn('min_day');
             $table->dropColumn('max_day');
-            $table->dropIndex('approval_step_name_index');
 
             $table->unsignedInteger('dept_id')->after('step_id')->comment = '部门ID';
             $table->unsignedInteger('time_range_id')->after('dept_id')->comment = '时间范围配置ID，具体可在模型中查看配置';
