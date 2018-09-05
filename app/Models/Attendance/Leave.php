@@ -60,7 +60,8 @@ class Leave extends Model
         'user_list',
         'annex',
         'review_user_id',
-        'remain_user'
+        'remain_user',
+        'copy_user',
     ];
 
     public function holidayConfig() {

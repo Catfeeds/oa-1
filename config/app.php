@@ -213,6 +213,9 @@ return [
         //https://packagist.org/packages/laravelcollective/html
         Collective\Html\HtmlServiceProvider::class,
 
+        //考勤服务驱动接口
+        App\Providers\AttendanceServiceProvider::class,
+
     ],
 
     /*
@@ -288,6 +291,8 @@ return [
 
         //https://packagist.org/packages/overtrue/laravel-wechat
         'EasyWeChat' => Overtrue\LaravelWechat\Facade::class,
+        //
+        'AttendanceService' => App\Components\AttendanceService\AttendanceServiceFacade::class,
 
     ],
 

@@ -202,74 +202,74 @@
 
         //审核按键
         $('#ops-submit-btn').batch({
-            url: '{!! route('reconciliationAudit.review', ['status' => \App\Models\Crm\Reconciliation::OPS, 'pid' => $pid, 'source' => $source]) !!}',
+            url: '{!! route('reconciliationAudit.review', array_merge(['status' => \App\Models\Crm\Reconciliation::OPS, 'pid' => $pid, 'source' => $source], Request::all())) !!}',
             selector: '.i-checks:checked',
             type: '2',
             alert_confirm: '确定要批量提交审核吗？'
         });
 
         $('#opd-submit-btn').batch({
-            url: '{!! route('reconciliationAudit.review', ['status' => \App\Models\Crm\Reconciliation::OPD, 'pid' => $pid, 'source' => $source]) !!}',
+            url: '{!! route('reconciliationAudit.review', array_merge(['status' => \App\Models\Crm\Reconciliation::OPD, 'pid' => $pid, 'source' => $source], Request::all())) !!}',
             selector: '.i-checks:checked',
             type: '2',
             alert_confirm: '确定要批量通过审核吗？'
         });
         $('#opd-refuse-btn').batch({
-            url: '{!! route('reconciliationAudit.review', ['status' => \App\Models\Crm\Reconciliation::UNRD, 'pid' => $pid, 'source' => $source]) !!}',
+            url: '{!! route('reconciliationAudit.review', array_merge(['status' => \App\Models\Crm\Reconciliation::UNRD, 'pid' => $pid, 'source' => $source], Request::all())) !!}',
             selector: '.i-checks:checked',
             type: '2',
             alert_confirm: '确定要批量拒绝审核吗？'
         });
         $('#fac-submit-btn').batch({
-            url: '{!! route('reconciliationAudit.review', ['status' => \App\Models\Crm\Reconciliation::FAC, 'pid' => $pid, 'source' => $source]) !!}',
+            url: '{!! route('reconciliationAudit.review', array_merge(['status' => \App\Models\Crm\Reconciliation::FAC, 'pid' => $pid, 'source' => $source], Request::all())) !!}',
             selector: '.i-checks:checked',
             type: '2',
             alert_confirm: '确定要批量提交审核吗？'
         });
         $('#fac-refuse-btn').batch({
-            url: '{!! route('reconciliationAudit.review', ['status' => \App\Models\Crm\Reconciliation::OPS, 'pid' => $pid, 'source' => $source]) !!}',
+            url: '{!! route('reconciliationAudit.review', array_merge(['status' => \App\Models\Crm\Reconciliation::OPS, 'pid' => $pid, 'source' => $source], Request::all())) !!}',
             selector: '.i-checks:checked',
             type: '2',
             alert_confirm: '确定要批量拒绝审核吗？'
         });
         $('#treasurer-submit-btn').batch({
-            url: '{!! route('reconciliationAudit.review', ['status' => \App\Models\Crm\Reconciliation::TREASURER, 'pid' => $pid, 'source' => $source]) !!}',
+            url: '{!! route('reconciliationAudit.review', array_merge(['status' => \App\Models\Crm\Reconciliation::TREASURER, 'pid' => $pid, 'source' => $source], Request::all())) !!}',
             selector: '.i-checks:checked',
             type: '2',
             alert_confirm: '确定要批量通过审核吗？'
         });
         $('#treasurer-refuse-btn').batch({
-            url: '{!! route('reconciliationAudit.review', ['status' => \App\Models\Crm\Reconciliation::OPD, 'pid' => $pid, 'source' => $source]) !!}',
+            url: '{!! route('reconciliationAudit.review', array_merge(['status' => \App\Models\Crm\Reconciliation::OPD, 'pid' => $pid, 'source' => $source], Request::all())) !!}',
             selector: '.i-checks:checked',
             type: '2',
             alert_confirm: '确定要批量拒绝审核吗？'
         });
         $('#frc-submit-btn').batch({
-            url: '{!! route('reconciliationAudit.review', ['status' => \App\Models\Crm\Reconciliation::FRC, 'pid' => $pid, 'source' => $source]) !!}',
+            url: '{!! route('reconciliationAudit.review', array_merge(['status' => \App\Models\Crm\Reconciliation::FRC, 'pid' => $pid, 'source' => $source], Request::all())) !!}',
             selector: '.i-checks:checked',
             type: '5',
             alert_confirm: '确定要批量提交审核吗？'
         });
         $('#ops-review-btn').batch({
-            url: '{!! route('reconciliationAudit.review', ['status' => \App\Models\Crm\Reconciliation::OOR, 'pid' => $pid, 'source' => $source]) !!}',
+            url: '{!! route('reconciliationAudit.review', array_merge(['status' => \App\Models\Crm\Reconciliation::OOR, 'pid' => $pid, 'source' => $source], Request::all())) !!}',
             selector: '.i-checks:checked',
             type: '5',
             alert_confirm: '确定要批量通过复核吗？'
         });
         $('#ops-refuse-btn').batch({
-            url: '{!! route('reconciliationAudit.review', ['status' => \App\Models\Crm\Reconciliation::TREASURER, 'pid' => $pid, 'source' => $source]) !!}',
+            url: '{!! route('reconciliationAudit.review', array_merge(['status' => \App\Models\Crm\Reconciliation::TREASURER, 'pid' => $pid, 'source' => $source], Request::all())) !!}',
             selector: '.i-checks:checked',
             type: '5',
             alert_confirm: '确定要批量拒绝复核吗？'
         });
         $('#fsr-submit-btn').batch({
-            url: '{!! route('reconciliationAudit.review', ['status' => \App\Models\Crm\Reconciliation::FSR, 'pid' => $pid, 'source' => $source]) !!}',
+            url: '{!! route('reconciliationAudit.review', array_merge(['status' => \App\Models\Crm\Reconciliation::FSR, 'pid' => $pid, 'source' => $source], Request::all())) !!}',
             selector: '.i-checks:checked',
             type: '5',
             alert_confirm: '确定要批量通过审核吗？'
         });
         $('#fsr-refuse-btn').batch({
-            url: '{!! route('reconciliationAudit.review', ['status' => \App\Models\Crm\Reconciliation::FRC, 'pid' => $pid, 'source' => $source]) !!}',
+            url: '{!! route('reconciliationAudit.review', array_merge(['status' => \App\Models\Crm\Reconciliation::FRC, 'pid' => $pid, 'source' => $source], Request::all())) !!}',
             selector: '.i-checks:checked',
             type: '5',
             alert_confirm: '确定要批量拒绝审核吗？'

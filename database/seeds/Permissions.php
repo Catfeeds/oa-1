@@ -50,7 +50,6 @@ class Permissions extends Seeder
             'role.create' => '账号体系模块/职务/「添加」',
             'role.edit' => '账号体系模块/职务/「设置」',
             'role.appoint' => '账号体系模块/职务/「指派」',
-            'role.step' => '账号体系模块/职务/「审核步骤」',
             'profile.password' => '账号体系模块/「密码重置」',
 
             'version-all' => '账号体系模块/版本管理/「所有」',
@@ -111,7 +110,7 @@ class Permissions extends Seeder
             'leave' => '考勤功能/假期管理/我的假期/ 「列表」',
             'leave.create' => '考勤功能/假期管理/我的假期/「添加」',
             'leave.edit' => '考勤功能/假期管理/我的假期/「编辑」',
-            'leave.optStatus' => '考勤功能/假期管理/假期审核/「审核」',
+            'leave.review' => '考勤功能/假期管理/假期审核/「审核」',
 
             'daily-detail-all' => '考勤功能/每日考勤管理/「所有」',
             'daily-detail' => '考勤功能/每日考勤管理/我的明细/ 「列表」',

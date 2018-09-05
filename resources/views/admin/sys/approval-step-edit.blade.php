@@ -29,34 +29,27 @@
                                         <div class="ibox-content profile-content">
                                             {!! Form::open(['class' => 'form-horizontal']) !!}
 
-                                            <div class="form-group @if (!empty($errors->first('name'))) has-error @endif">
-                                                {!! Form::label('name', trans('app.步骤名称'), ['class' => 'col-sm-3 control-label']) !!}
-                                                <div class="col-sm-6">
-                                                    {!! Form::text('name', isset($step->name) ? $step->name: old('name'), [
-                                                    'class' => 'form-control',
-                                                    'placeholder' => trans('app.请输入', ['value' => trans('app.步骤名称')]),
+                                            <div class="form-group @if (!empty($errors->first('dept_id'))) has-error @endif">
+                                                {!! Form::label('dept_id', trans('app.部门'), ['class' => 'col-sm-3 control-label']) !!}
+                                                <div class="col-sm-3">
+                                                    {!! Form::select('dept_id', $dept,  $step->dept_id ?? old('dept_id'), [
+                                                    'class' => 'form-control js-select2-single',
+                                                    'placeholder' => trans('app.请选择', ['value' => trans('app.部门')]),
                                                     'required' => true,
                                                     ]) !!}
-                                                    <span class="help-block m-b-none">{{ $errors->first('name') }}</span>
+                                                    <span class="help-block m-b-none">{{ $errors->first('status') }}</span>
                                                 </div>
                                             </div>
 
-                                            <div class="form-group @if (!empty($errors->first('min_day')) || !empty($errors->first('max_day'))) has-error @endif">
-                                                {!! Form::label('valid_time', trans('app.假期时间范围'), ['class' => 'col-sm-3 control-label']) !!}
-                                                <div class="col-sm-6">
-                                                    <div class="input-group">
-                                                        {!! Form::text('min_day', $step->min_day ?? old('min_day'), [
-                                                        'class' => 'input-sm form-control',
-                                                        'placeholder' => trans('app.请输入', ['value' => trans('app.最小天数')]),
-                                                        ]) !!}
-                                                        <span class="input-group-addon" style="background-color:#eeeeee;">to</span>
-                                                        {!! Form::text('max_day', $step->max_day ?? old('max_day'), [
-                                                        'class' => 'input-sm form-control',
-                                                        'placeholder' => trans('app.请输入', ['value' => trans('app.最大天数')]),
-                                                        ]) !!}
-                                                    </div>
-                                                    <span class="help-block m-b-none">{{ $errors->first('min_day') }}</span>
-                                                    <span class="help-block m-b-none">{{ $errors->first('max_day') }}</span>
+                                            <div class="form-group @if (!empty($errors->first('time_range_id'))) has-error @endif">
+                                                {!! Form::label('time_range_id', trans('app.时间范围'), ['class' => 'col-sm-3 control-label']) !!}
+                                                <div class="col-sm-3">
+                                                    {!! Form::select('time_range_id', \App\Models\Sys\ApprovalStep::$timeType, isset($step->time_range_id) ? $step->time_range_id: old('time_range_id'), [
+                                                    'class' => 'form-control js-select2-single',
+                                                    'placeholder' => trans('app.请选择', ['value' => trans('app.时间范围')]),
+                                                    'required' => true,
+                                                    ]) !!}
+                                                    <span class="help-block m-b-none">{{ $errors->first('time_range_id') }}</span>
                                                 </div>
                                             </div>
 
@@ -93,6 +86,7 @@
         </div>
     </div>
 @endsection
+@include('widget.select2')
 @section('scripts-last')
     <script>
         $(function() {

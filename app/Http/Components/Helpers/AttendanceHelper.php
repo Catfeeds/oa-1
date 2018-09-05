@@ -8,8 +8,8 @@
 
 namespace App\Http\Components\Helpers;
 
-
 use App\Components\Helper\DataHelper;
+use App\Components\Helper\FileHelper;
 use App\Models\Attendance\DailyDetail;
 use App\Models\Attendance\Leave;
 use App\Models\Role;
@@ -17,6 +17,7 @@ use App\Models\Sys\ApprovalStep;
 use App\Models\Sys\HolidayConfig;
 use App\Models\UserHoliday;
 use App\User;
+use EasyWeChat\Kernel\Exceptions\Exception;
 
 class AttendanceHelper
 {
@@ -26,8 +27,7 @@ class AttendanceHelper
      */
     public static function showApprovalStep($stepId)
     {
-        $step = ApprovalStep::findOrFail($stepId);
-
+        $step = ApprovalStep::where(['step_id' => $stepId])->first();
         $roleId = $roleName = [];
         if(!empty($step->step)) {
             $roleId = json_decode($step->step, true);
@@ -61,6 +61,25 @@ class AttendanceHelper
     }
 
     /**
+     * 设置上传附件
+     * @param $request
+     * @return string
+     */
+    public static function setAnnex($request) {
+
+        $file = 'annex';
+        $imagePath = $imageName = '';
+        if ($request->hasFile($file) && $request->file($file)->isValid()) {
+            $time = date('Ymd', time());
+            $uploadPath = 'assert/images/'. $time;
+            $fileName = $file .'_'. time() . rand(100000, 999999);
+            $imageName = FileHelper::uploadImage($request->file($file), $fileName, $uploadPath);
+            $imagePath = $uploadPath .'/'. $imageName;
+        }
+        return $imagePath;
+    }
+
+    /**
      * 获取调休部门人员和假期ID
      * @param int $deptId
      * @return array
@@ -74,14 +93,34 @@ class AttendanceHelper
 
         $leave = Leave::where(['user_id' => $user->user_id])->where('user_list', '!=', '')->get();
 
+
         foreach ($leave as $k => $v) {
             $userList = json_decode($v->user_list);
-            if(!empty($userList) && in_array(\Auth::user()->user_id, $userList)) {
+
+            if(!empty($userList) && is_array($userList) && in_array(\Auth::user()->user_id, $userList)) {
                 $leaveIds[] = $v->leave_id;
                 $users[] = $userList;
             }
+
         }
 
+        return ['leave_ids' => $leaveIds, 'user_ids' => $users];
+    }
+
+    public static function getCopyUser()
+    {
+        $leaveIds = $users = [];
+
+        $leaves = Leave::where('copy_user', '!=', '')->get();
+
+        foreach ($leaves as $k => $v) {
+            $copyUsers = json_decode($v->copy_user);
+
+            if(!empty($copyUsers) && is_array($copyUsers) && in_array(\Auth::user()->user_id, $copyUsers)) {
+                $leaveIds[] = $v->leave_id;
+                $users[] = $copyUsers;
+            }
+        }
         return ['leave_ids' => $leaveIds, 'user_ids' => $users];
     }
 
@@ -142,11 +181,14 @@ class AttendanceHelper
         $where = '';
         $userIds = [];
         if($isLeader) {
-            $changeLeaveIds = AttendanceHelper::getMyChangeLeaveId($deptId);
+            $changeLeaveIds = self::getMyChangeLeaveId($deptId);
+            $copyLeaveIds = self::getCopyUser();
 
-            $userIds = $changeLeaveIds['user_ids'];
-            if(!empty($changeLeaveIds['leave_ids'])) {
-                $leaveIds = implode(',', $changeLeaveIds['leave_ids']);
+            $userIds = $changeLeaveIds['user_ids'] + $copyLeaveIds['user_ids'];
+            $leaveIds =  $changeLeaveIds['leave_ids'] + $copyLeaveIds['leave_ids'];
+
+            if(!empty($leaveIds)) {
+                $leaveIds = implode(',', $leaveIds);
                 $where = " or Leave_id in ($leaveIds)";
             }
         }
@@ -258,7 +300,6 @@ class AttendanceHelper
 
     public static function setRecheckDailyDetail($leave)
     {
-
         $startDay = strtotime($leave->start_time);
         $endDay = strtotime($leave->end_time);
 

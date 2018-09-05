@@ -23,6 +23,9 @@ class User extends Authenticatable
     const IS_MOBILE_FALSE = 0;
     const IS_MOBILE_TRUE = 1;
 
+    const IS_LEADER_FALSE = 0;
+    const IS_LEADER_TRUE = 1;
+
     public static $statusList = [
         self::STATUS_ENABLE => '在职',
         self::STATUS_DISABLE => '离职',
@@ -39,8 +42,8 @@ class User extends Authenticatable
     ];
 
     public static $isLeader = [
-        self::STATUS_DISABLE => '否',
-        self::STATUS_ENABLE => '是',
+        self::IS_LEADER_FALSE => '否',
+        self::IS_LEADER_TRUE => '是',
     ];
 
     protected $primaryKey = 'user_id';

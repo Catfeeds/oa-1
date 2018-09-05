@@ -28,10 +28,20 @@ class HolidayConfig extends Model
     const OVERTIME = 2;
     const RECHECK = 3;
 
+    const NO_SETTING = 0;
+    const GO_WORK = 1;
+    const OFF_WORK = 2;
+
     public static $applyType = [
         self::LEAVEID => '请假',
         self::CHANGE => '加班调休',
         self::RECHECK => '补打卡',
+    ];
+
+    public static $driverType = [
+        self::LEAVEID => 'leaved',
+        self::CHANGE => 'charge',
+        self::RECHECK => 'recheck',
     ];
 
     public static $isBoon = [
@@ -46,9 +56,9 @@ class HolidayConfig extends Model
     ];
 
     public static $punchType = [
-        0 => '不设置',
-        1 => '上班补卡',
-        2 => '下班补卡'
+        self::NO_SETTING => '不设置',
+        self::GO_WORK => '上班补卡',
+        self::OFF_WORK => '下班补卡'
     ];
 
     protected $fillable = [
