@@ -50,10 +50,10 @@ Route::group([
             'uses' => 'LeaveController@optInfo'])->name('leave.review.optInfo');
         //批量操作
         Route::get('leave/review/{id}', [
-            'middleware' => ['permission:attendance-all|leave-all|leave.review.optStatus'],
+            'middleware' => ['permission:attendance-all|leave-all|leave.review'],
             'uses' => 'LeaveController@reviewOptStatus'])->name('leave.review.optStatus');
         Route::get('leave/review-batch/{id}', [
-            'middleware' => ['permission:attendance-all|leave-all|leave.review.optStatus'],
+            'middleware' => ['permission:attendance-all|leave-all|leave.review'],
             'uses' => 'LeaveController@reviewBatchOptStatus'])->name('leave.review.batchOptStatus');
 
         #考勤每日明细管理

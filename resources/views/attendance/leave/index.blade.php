@@ -107,7 +107,7 @@
                                         {{--@if(Entrust::can(['leave-all', 'leave.edit']))--}}
                                             {{--{!! BaseHtml::tooltip(trans('app.设置'), route('leave.edit', ['id' => $v['leave_id']]), 'cog fa-lg') !!}--}}
                                         {{--@endif--}}
-                                        @if(($v['user_id'] == \Auth::user()->user_id || $v['review_user_id'] == \Auth::user()->user_id || in_array(\Auth::user()->user_id, $userIds)) && Entrust::can(['attendance-all', 'leave-all', 'leave.edit', 'leave.optStatus']))
+                                        @if(($v['user_id'] == \Auth::user()->user_id || $v['review_user_id'] == \Auth::user()->user_id || in_array(\Auth::user()->user_id, $userIds)) && Entrust::can(['attendance-all', 'leave-all', 'leave.edit', 'leave.review']))
                                             {!! BaseHtml::tooltip(trans('att.请假详情'), route('leave.optInfo', ['id' => $v['leave_id']]), 'cog fa fa-newspaper-o') !!}
                                         @endif
 

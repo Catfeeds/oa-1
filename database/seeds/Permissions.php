@@ -110,7 +110,7 @@ class Permissions extends Seeder
             'leave' => '考勤功能/假期管理/我的假期/ 「列表」',
             'leave.create' => '考勤功能/假期管理/我的假期/「添加」',
             'leave.edit' => '考勤功能/假期管理/我的假期/「编辑」',
-            'leave.optStatus' => '考勤功能/假期管理/假期审核/「审核」',
+            'leave.review' => '考勤功能/假期管理/假期审核/「审核」',
 
             'daily-detail-all' => '考勤功能/每日考勤管理/「所有」',
             'daily-detail' => '考勤功能/每日考勤管理/我的明细/ 「列表」',

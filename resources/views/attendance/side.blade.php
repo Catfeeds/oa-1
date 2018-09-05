@@ -8,7 +8,7 @@
                     <a href="{{ route('leave.info') }}">{{ trans('att.我的假期') }}</a>
                 </li>
             @endif
-            @if(Entrust::can(['attendance-all', 'leave-all', 'leave.optStatus']))
+            @if(Entrust::can(['attendance-all', 'leave-all', 'leave.review']))
                 <li @if (Route::is(['leave.review.*']) ) class="active" @endif>
                     <a href="{{ route('leave.review.info') }}">{{ trans('att.申请单管理') }}</a>
                 </li>

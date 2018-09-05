@@ -77,7 +77,6 @@ class Operate
         return self::backLeaveData(true, [], $data);
     }
 
-
     /**
      * 创建申请单
      * @param array $leave
