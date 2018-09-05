@@ -100,7 +100,7 @@
 
                     <div class="form-group @if (!empty($errors->first('copy_user'))) has-error @endif">
                         {!! Form::label('copy_user', trans('att.抄送'), ['class' => 'col-sm-2 control-label']) !!}
-                        <div class="col-sm-5">
+                        <div class="col-sm-3">
                             <select multiple="multiple" class="js-select2-multiple form-control"
                                     name="copy_user[]">
                                 @foreach($allUsers as $key => $val)

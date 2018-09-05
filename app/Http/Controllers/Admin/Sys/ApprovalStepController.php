@@ -12,6 +12,7 @@ namespace App\Http\Controllers\Admin\Sys;
 use App\Http\Controllers\Controller;
 use App\Models\Role;
 use App\Models\Sys\ApprovalStep;
+use App\Models\Sys\Dept;
 use Illuminate\Http\Request;
 
 class ApprovalStepController extends Controller
@@ -19,10 +20,9 @@ class ApprovalStepController extends Controller
     protected $redirectTo = '/admin/sys/approval-step';
 
     private $_validateRule = [
-        'name' => 'required|unique:approval_step,name|max:20',
         'step' => 'required',
-        'min_day' => 'required|numeric',
-        'max_day' => 'required|numeric',
+        'dept_id' => 'required|numeric',
+        'time_range_id' => 'required|numeric',
     ];
 
     public function index()
@@ -37,8 +37,9 @@ class ApprovalStepController extends Controller
 
         $roleList = Role::getRoleTextList();
         $roleId = [];
+        $dept= Dept::getDeptList();
         $title = trans('app.添加审核流程配置');
-        return view('admin.sys.approval-step-edit', compact('title', 'roleList', 'roleId'));
+        return view('admin.sys.approval-step-edit', compact('title', 'roleList', 'roleId', 'dept'));
     }
 
     public function edit($id)
@@ -56,9 +57,9 @@ class ApprovalStepController extends Controller
         }
         ksort($checkId);
         $maxStep = end($checkId);
-
+        $dept= Dept::getDeptList();
         $title = trans('app.编辑', ['value' => trans('app.审核流程配置')]);
-        return view('admin.sys.approval-step-edit', compact('title', 'step', 'roleList', 'roleId', 'stepId', 'maxStep', 'checkStep'));
+        return view('admin.sys.approval-step-edit', compact('title', 'step', 'roleList', 'roleId', 'stepId', 'maxStep', 'checkStep', 'dept'));
     }
 
     public function store(Request $request)
@@ -67,10 +68,12 @@ class ApprovalStepController extends Controller
 
         $p = $request->all();
 
-        if($p['min_day'] > $p['max_day']) {
-            return redirect()->back()->withInput()->withErrors(['min_day' => trans('请选择有效的天数范围')]);
-        }
+        $appStep = ApprovalStep::where(['dept_id' => $p['dept_id'], 'time_range_id' => $p['time_range_id']])->first();
 
+        if(!empty($appStep->dept_id)) {
+            flash(trans('app.添加失败,已存在该配置信息'), 'danger');
+            return redirect($this->redirectTo);
+        }
         $step = array_filter($p['check_step']);
 
         $steps = [];
@@ -81,9 +84,8 @@ class ApprovalStepController extends Controller
 
         ksort($steps);
         $data = [
-            'name' => $p['name'],
-            'min_day' => $p['min_day'],
-            'max_day' => $p['max_day'],
+            'dept_id' => $p['dept_id'],
+            'time_range_id' => $p['time_range_id'],
             'step' => json_encode($steps),
         ];
 
@@ -95,14 +97,17 @@ class ApprovalStepController extends Controller
 
     public function update(Request $request, $id)
     {
+
         $appStep = ApprovalStep::findOrFail($id);
         $p = $request->all();
-        $this->validate($request, array_merge($this->_validateRule, [
-            'name' => 'required|max:20|unique:approval_step,name,' . $p['name'] .',name',
-        ]));
 
-        if($p['min_day'] > $p['max_day']) {
-            return redirect()->back()->withInput()->withErrors(['min_day' => trans('请选择有效的天数范围')]);
+        $this->validate($request, $this->_validateRule);
+
+        $appCheckStep = ApprovalStep::where(['dept_id' => $p['dept_id'], 'time_range_id' => $p['time_range_id']])->first();
+
+        if(!empty($appCheckStep->dept_id) && (int)$appStep->time_range_id !== (int)$appCheckStep->time_range_id) {
+            flash(trans('app.添加失败,已存在该配置信息'), 'danger');
+            return redirect($this->redirectTo);
         }
 
         $step = array_filter($p['check_step']);
@@ -115,9 +120,8 @@ class ApprovalStepController extends Controller
 
         ksort($steps);
         $data = [
-            'name' => $p['name'],
-            'min_day' => $p['min_day'],
-            'max_day' => $p['max_day'],
+            'dept_id' => $p['dept_id'],
+            'time_range_id' => $p['time_range_id'],
             'step' => json_encode($steps),
         ];
 

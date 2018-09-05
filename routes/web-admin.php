@@ -76,12 +76,6 @@ Route::group([
         Route::post('role/appoint/{id}', [
             'uses' => 'RoleController@appointUpdate',
         ]);
-        Route::get('role/leave-step/edit/{id}', [
-            'middleware' => ['permission:role-all|role.step'],
-            'uses' => 'RoleController@editLeaveStep'])->name('role.step');
-        Route::post('role/leave-step/edit/{id}', [
-            'middleware' => ['permission:role-all|role.step'],
-            'uses' => 'RoleController@updateLeaveStep']);
     });
 
     //部门管理

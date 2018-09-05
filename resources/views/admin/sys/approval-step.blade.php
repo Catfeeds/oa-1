@@ -37,8 +37,8 @@
                                                     <thead>
                                                     <tr>
                                                         <th>{{ trans('app.步骤ID') }}</th>
-                                                        <th>{{ trans('app.步骤名称') }}</th>
-                                                        <th>{{ trans('app.假期天数') }}</th>
+                                                        <th>{{ trans('app.部门') }}</th>
+                                                        <th>{{ trans('app.假期时间范围') }}</th>
                                                         <th>{{ trans('app.步骤流程') }}</th>
                                                         <th>{{ trans('app.提交时间') }}</th>
                                                         <th>{{ trans('app.操作') }}</th>
@@ -48,8 +48,8 @@
                                                     @foreach($data as $v)
                                                         <tr>
                                                             <td>{{ $v['step_id'] }}</td>
-                                                            <td>{{ $v['name'] }}</td>
-                                                            <td>{{ $v['min_day'].'~'. $v['max_day']}}</td>
+                                                            <td>{{ \App\Models\Sys\Dept::getDeptList()[$v['dept_id']] ?? '---' }}</td>
+                                                            <td>{{ \App\Models\Sys\ApprovalStep::$timeType[$v['time_range_id']] ?? '---'}}</td>
                                                             <td>{{ \App\Http\Components\Helpers\AttendanceHelper::showApprovalStep($v['step_id']) }}</td>
                                                             <td>{{ $v['created_at'] }}</td>
                                                             <td>

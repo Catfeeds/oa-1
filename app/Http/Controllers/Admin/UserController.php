@@ -97,6 +97,13 @@ class UserController extends Controller
             'email' => 'required|email|unique:users,email|max:32',
         ]));
 
+        if(!empty($request->dept_id) && !empty($request->is_leader)) {
+            $checkUser = User::where(['dept_id' => $request->dept_id, 'is_leader' => User::IS_LEADER_TRUE])->first();
+            if (!empty($checkUser->user_id)) {
+                return redirect()->back()->withInput()->withErrors(['is_leader' => '该部门已存在上级,一个部门只能设置一个上级']);
+            }
+        }
+
         $user = User::create(array_merge($request->all(), [
             'creater_id' => \Auth::user()->user_id,
             'password' => bcrypt($request->password),
@@ -186,6 +193,15 @@ class UserController extends Controller
         }
 
         $this->validate($request, $validate);
+
+        if(!empty($request->dept_id) && !empty($request->is_leader)) {
+
+            $checkUser = User::where(['dept_id' => $request->dept_id, 'is_leader' => User::IS_LEADER_TRUE])
+                ->where('user_id', '!=', $user->user_id)->first();
+            if (!empty($checkUser->user_id)) {
+                return redirect()->back()->withInput()->withErrors(['is_leader' => '该部门已存在上级,一个部门只能设置一个上级']);
+            }
+        }
 
         $data = $request->all();
         $pwd = $data['password'];

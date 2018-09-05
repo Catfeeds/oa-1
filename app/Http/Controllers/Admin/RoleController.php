@@ -108,41 +108,4 @@ class RoleController extends Controller
         return redirect()->back();
     }
 
-    public function editLeaveStep($id)
-    {
-        $steps = ApprovalStep::paginate();
-        $role = Role::with('leaveStep')->findOrFail($id);
-        $leaveStep = $role->leaveStep;
-        $stepList = [];
-
-        foreach ($leaveStep as $s) {
-            $stepList[] = $s->step_id;
-        }
-
-        $title = trans('app.考勤步骤关联');
-        return view('admin.roles.step', compact('role', 'steps', 'title', 'stepList'));
-    }
-
-    public function updateLeaveStep(Request $request, $id)
-    {
-        $role = Role::findOrFail($id);
-
-        $this->validate($request, [
-            'step_id' => 'required',
-        ]);
-
-        if(empty($role->id)) return redirect($this->redirectTo);
-        // 清掉之前的
-        RoleLeaveStep::where(['role_id' => $role->id])->delete();
-
-        $stepIds= $request->get('step_id');
-        foreach($stepIds as $sid) {
-            RoleLeaveStep::create(['role_id' => $role->id, 'step_id' => $sid]);
-        }
-
-        flash(trans('app.编辑成功', ['value' => trans('app.职务与审核步骤')]), 'success');
-
-        return redirect($this->redirectTo);
-    }
-
 }

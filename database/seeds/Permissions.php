@@ -50,7 +50,6 @@ class Permissions extends Seeder
             'role.create' => '账号体系模块/职务/「添加」',
             'role.edit' => '账号体系模块/职务/「设置」',
             'role.appoint' => '账号体系模块/职务/「指派」',
-            'role.step' => '账号体系模块/职务/「审核步骤」',
             'profile.password' => '账号体系模块/「密码重置」',
 
             'version-all' => '账号体系模块/版本管理/「所有」',

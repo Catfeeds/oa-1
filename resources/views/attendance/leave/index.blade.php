@@ -27,6 +27,24 @@
     @include('flash::message')
     @include('widget.scope-date', ['scope' => $scope])
 
+
+    <div class="row">
+        <div class="col-lg-10">
+            <div class="panel blank-panel">
+                <div class="panel-heading">
+                    <div class="panel-options">
+                        <ul class="nav nav-tabs">
+                                <li  class="active">
+                                    <a  class="dropdown-toggle count-info" href="{{ route('leave.info' ) }}">{{trans('att.我的假期')}}</a>
+                                </li>
+
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row">
         <div class="col-lg-12">
             <div class="ibox float-e-margins">

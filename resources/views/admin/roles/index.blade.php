@@ -49,9 +49,6 @@
                                         BaseHtml::tooltip('权限', route('role.appoint', ['id' => $v['id']]), 'paper-plane')
                                         !!}
 
-                                        @if(Entrust::can(['role-all', 'role.step']))
-                                            {!! BaseHtml::tooltip(trans('app.考勤步骤'), route('role.step', ['id' => $v['id']]), 'gamepad') !!}
-                                        @endif
                                         </td>
                                     </tr>
                                     @endforeach
