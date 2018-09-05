@@ -22,7 +22,12 @@ class DailyDetailController extends Controller
 
         $title = trans('att.我的每日考勤详情');
         return view('attendance.daily-detail.index', compact('title', 'data', 'scope'));
+    }
 
+    public function detail($id){
+        $data = DailyDetail::where(['user_id' => $id])->orderBy('created_at', 'desc')->paginate(30);
+        $title = "用户{$id}的考勤详情";
+        return view('attendance.daily-detail.index', compact('title', 'data', 'scope'));
     }
 
 }

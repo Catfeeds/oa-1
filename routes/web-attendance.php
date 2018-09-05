@@ -57,6 +57,9 @@ Route::group([
             'uses' => 'LeaveController@reviewBatchOptStatus'])->name('leave.review.batchOptStatus');
 
         #考勤每日明细管理
+        Route::get('daily-detail/userId/{id}', [
+            'middleware' => ['permission:attendance-all|daily-detail-all|daily-detail'],
+            'uses' => 'DailyDetailController@detail'])->name('daily-detail.review.user');
         Route::get('daily-detail', [
             'middleware' => ['permission:attendance-all|daily-detail-all|daily-detail'],
             'uses' => 'DailyDetailController@index'])->name('daily-detail.info');

@@ -19,11 +19,20 @@ class LeaveScope extends GeneralScope
     public $statusId;
     public $displayLastMonth = false;
 
+    public $daily;
+    public $dailyUserId;
+    public $dailyAlias;
+    public $dailyDept;
+
     public function __construct(array $params, $user = null)
     {
 
         $this->holidayId = $params['holiday_id'] ?? '';
         $this->statusId = $params['status'] ?? NULL;
+        $this->dailyUserId = $params['daily_user_id'] ?? '';
+        $this->dailyAlias = $params['daily_alias'] ?? '';
+        $this->dailyDept = $params['daily_dept'] ?? '';
+        $this->daily = $params['daily'] ?? '';
         parent::__construct($params, $user);
     }
 
@@ -42,6 +51,20 @@ class LeaveScope extends GeneralScope
         }
         if (!is_null($this->statusId)){
             $where[] = sprintf("status = %d", $this->statusId);
+        }
+
+        if (isset($this->daily)){
+            if (!empty($this->dailyUserId)){
+                $where[] = sprintf("user_id = %d", $this->dailyUserId);
+            }
+            if (!empty($this->dailyAlias)){
+                $where[] = sprintf("alias = '%s'", $this->dailyAlias);
+            }
+            if (!empty($this->dailyDept)){
+                $where[] = sprintf("dept_id = %d", $this->dailyDept);
+            }
+            //当月考勤统计去掉默认的created_at字段的判断
+            array_shift($where);
         }
         $this->where = empty($where) ? '1 = 1' : implode(' AND ', $where);
     }

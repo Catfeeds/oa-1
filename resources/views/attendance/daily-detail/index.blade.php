@@ -6,9 +6,11 @@
     @parent
     <div class="col-sm-8">
         <div class="title-action">
-            @if(Entrust::can(['daily-detail.all', 'daily-detail.import']))
-                <a href="{{ route('leave.create') }}" class="btn btn-primary btn-sm">{{ trans('导入打卡记录') }}</a>
+            @if(Entrust::can(['attendance-all', 'daily-detail.all', 'daily-detail.review']))
+                <a href="{{ route('daily-detail.review.import.info') }}" class="btn btn-primary btn-sm">{{ trans('导入打卡记录') }}</a>
+                <a href="javascript:history.back()" class="btn btn-success btn-sm">{{ trans('返回') }}</a>
             @endif
+
         </div>
     </div>
 

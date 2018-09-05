@@ -28,16 +28,20 @@ class PunchRules extends Model
         'work_end_time',
     ];
 
+    const NORMALWORK = 1;
+    const RESTDAY = 2;
+    const HOLIDAY = 3;
+
     public static $punchType = [
-        1 => '正常上班',
-        2 => '休息日',
-        3 => '节假日',
+        self::NORMALWORK => '正常上班',
+        self::RESTDAY => '休息日',
+        self::HOLIDAY => '节假日',
     ];
 
     public static $punchTypeColor = [
-        1 => '#337ab7',
-        2 => '#1ab394',
-        3 => '#b31a57'
+        self::NORMALWORK => '#337ab7',
+        self::RESTDAY => '#1ab394',
+        self::HOLIDAY => '#b31a57'
     ];
 
     public static function getPunchTypeList()
