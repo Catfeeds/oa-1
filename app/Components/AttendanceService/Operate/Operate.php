@@ -49,7 +49,8 @@ class Operate
             $rangeTime = ApprovalStep::$timeRange[$sv['time_range_id']];
             if($rangeTime['min'] <= $numberDay && $rangeTime['max'] >= $numberDay) $step = $sv;
         }
-        if(empty($step)) self::backLeaveData(false, ['holiday_id' => trans('申请失败, 未设置部门审核人员，有疑问请联系人事')]);
+
+        if(empty($step)) return self::backLeaveData(false, ['holiday_id' => trans('申请失败, 未设置部门审核人员，有疑问请联系人事')]);
 
         $leaveStep = json_decode($step['step'], true);
 

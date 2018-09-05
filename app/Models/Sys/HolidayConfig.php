@@ -39,9 +39,9 @@ class HolidayConfig extends Model
     ];
 
     public static $driverType = [
-        self::LEAVEID => 'leaveEd',
+        self::LEAVEID => 'leaved',
         self::CHANGE => 'charge',
-        self::RECHECK => 'reCheck',
+        self::RECHECK => 'recheck',
     ];
 
     public static $isBoon = [

@@ -15,7 +15,7 @@ use App\Models\Sys\HolidayConfig;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 
 
-class ReCheck extends Operate implements AttendanceInterface
+class Recheck extends Operate implements AttendanceInterface
 {
     use  ValidatesRequests;
 

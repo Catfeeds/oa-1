@@ -12,7 +12,7 @@ namespace App\Components\AttendanceService\Operate;
 use App\Components\AttendanceService\AttendanceInterface;
 
 
-class LeaveEd extends Operate implements AttendanceInterface
+class Leaved extends Operate implements AttendanceInterface
 {
     public function checkLeave($request): array
     {
