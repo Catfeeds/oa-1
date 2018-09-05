@@ -380,7 +380,7 @@ class ReconciliationAuditController extends Controller
                     $tmp['accrual_water_other'] = $data['operation_water_other'] + $request['adjustment'];
                     $tmp['accrual_water_rmb'] = $data['operation_water_rmb'] + $tmp['accrual_rmb_adjustment'];
                     $tmp['accrual_divide_other'] = CrmHelper::dividedInto($data['channel_rate'], $data['first_division'], $data['second_division'], $data['second_division_condition'], $tmp['accrual_water_other']);
-                    $tmp['accrual_divide_rmb'] = CrmHelper::dividedInto($data['channel_rate'], $data['first_division'], $data['second_division'], $data['second_division_condition'], $tmp['accrual_divide_rmb']);
+                    $tmp['accrual_divide_rmb'] = CrmHelper::dividedInto($data['channel_rate'], $data['first_division'], $data['second_division'], $data['second_division_condition'], $tmp['accrual_water_rmb']);
                     break;
                 case $source == Reconciliation::TREASURER:
                     $tmp['reconciliation_adjustment'] = $request['adjustment'];
@@ -431,7 +431,7 @@ class ReconciliationAuditController extends Controller
                 }
                 $update = ['review_type' => $status];
                 if ($status == Reconciliation::FRC) {
-                    if ($v['reconciliation_water_other'] == 0) {
+                    if ($v['reconciliation_water_other'] == 0 && $v['reconciliation_type'] == 0) {
                         $update += [
                             'reconciliation_water_other' => $v['accrual_water_other'],
                             'reconciliation_water_rmb' => $v['accrual_water_rmb']
@@ -454,7 +454,7 @@ class ReconciliationAuditController extends Controller
                     $update = ['review_type' => $status];
                     switch (true) {
                         case $status == Reconciliation::OPS:
-                            if ($v['operation_water_other'] == 0) {
+                            if ($v['operation_water_other'] == 0 && $v['operation_type'] == 0) {
                                 $update += [
                                     'operation_water_other' => $v['backstage_water_other'],
                                     'operation_water_rmb' => $v['backstage_water_rmb'],
@@ -464,7 +464,7 @@ class ReconciliationAuditController extends Controller
                             }
                             break;
                         case $status == Reconciliation::FAC:
-                            if ($v['accrual_water_other'] == 0) {
+                            if ($v['accrual_water_other'] == 0 && $v['accrual_type'] == 0) {
                                 $update += [
                                     'accrual_water_other' => $v['operation_water_other'],
                                     'accrual_water_rmb' => $v['operation_water_rmb'],
