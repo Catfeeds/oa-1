@@ -53,12 +53,10 @@ class Operate
         if(empty($step)) return self::backLeaveData(false, ['holiday_id' => trans('申请失败, 未设置部门审核人员，有疑问请联系人事')]);
 
         $leaveStep = json_decode($step['step'], true);
-        \Log::info('审批人员:',$leaveStep);
         $leader = [];
         foreach ($leaveStep as $lk => $lv) {
             $userLeader = User::where(['role_id' => $lv, 'is_leader' => 1])->first();
-            \Log::info('审批人:', $userLeader->toArray());
-            if (empty($userLeader)) return self::backLeaveData(false, ['holiday_id' => trans('申请失败, 未设置部门主管权限，有疑问请联系人事')]);
+            if(empty($userLeader->user_id)) return self::backLeaveData(false, ['holiday_id' => trans('申请失败, 未设置部门主管权限，有疑问请联系人事')]);
             $leader[$userLeader->user_id] = $userLeader->user_id;
         }
 
