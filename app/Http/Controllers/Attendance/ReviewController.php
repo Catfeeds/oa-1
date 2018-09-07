@@ -9,6 +9,7 @@
 namespace App\Http\Controllers\Attendance;
 
 use App\Components\Helper\DataHelper;
+use App\Http\Components\ScopeAtt\DailyScope;
 use App\Http\Components\ScopeAtt\LeaveScope;
 use App\Http\Controllers\Controller;
 use App\Models\Attendance\DailyDetail;
@@ -24,18 +25,11 @@ use Illuminate\Support\Facades\DB;
 
 class ReviewController extends AttController
 {
-    protected $scopeClass = LeaveScope::class;
+    protected $scopeClass = DailyScope::class;
     public function index(Request $request)
     {
-        /*$data = DailyDetail::where(['user_id' => \Auth::user()->user_id])->orderBy('created_at', 'desc')
-            ->paginate(30);*/
-
         $scope = $this->scope;
         $scope->block = 'attendance.leave.monthscope';
-        if (!$request->all()) {
-            $scope->startDate = date('Y-m-1', strtotime('-1 months'));
-            $scope->endDate = date('Y-m-t', strtotime('-1 months'));
-        }
         $data = $this->dealAttendance($scope);
         $title = trans('att.考勤管理');
         return view('attendance.daily-detail.review', compact('title', 'data', 'scope'));
@@ -83,9 +77,9 @@ class ReviewController extends AttController
 
         //加班调休与无薪假(请假):不是福利假,已通过,不是补打卡,当月
         $leaveObjects = Leave::whereHas('holidayConfig', function ($query){
-            $query->where('is_boon', '<>', 1);
+            $query->where([['is_boon', '<>', 1], ['apply_type_id', '<>', HolidayConfig::RECHECK]]);
         })
-            ->where([['status', '=', 3], ['apply_type_id', '<>', HolidayConfig::RECHECK]])
+            ->where('status', '=', 3)
             ->whereYear('start_time', $year)->whereMonth('start_time', $month)->get();
         $diffTime[][] = 0;
         //将不同用户不同类型的假期天数存在diffTime中
@@ -97,11 +91,14 @@ class ReviewController extends AttController
         //上下班打卡总次数
         $punch= $builder->get([DB::raw('(count(punch_start_time) + count(punch_end_time)) as sum'), 'user_id'])->pluck('sum', 'user_id')->toArray();
         //上下班补打卡总次数
-        $re = Leave::where('apply_type_id', HolidayConfig::RECHECK)->where('status', 3)
+        $re = Leave::whereHas('holidayConfig', function ($query){
+            $query->where('apply_type_id', HolidayConfig::RECHECK);
+        })
+            ->where('status', 3)
             ->whereYear('created_at', $year)->whereMonth('created_at', $month)
             ->whereRaw('(start_time IS NOT NULL OR end_time IS NOT NULL)')
             ->groupBy('user_id')
-            ->get([DB::raw('count(leave_id) as a'), 'user_id'])
+            ->get([DB::raw('(count(start_time) + count(end_time)) as a'), 'user_id'])
             ->pluck('a', 'user_id')->toArray();
 
         //剩余年假
