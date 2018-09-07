@@ -58,7 +58,6 @@ class ReconciliationExchangeRateController extends Controller
 
     public function update(Request $request, $id)
     {
-        $this->validate($request, ['currency' => "required|unique:cmr_exchange_rate,currency,{$id},id,billing_cycle,{$request->billing_cycle}",]);
         $data = ExchangeRate::findOrFail($id);
         $data->update(array_merge($request->all(), ['type' => ExchangeRate::EDITED]));
 
