@@ -37,7 +37,7 @@ Route::group([
         Route::post('leave/edit', [
             'middleware' => ['permission:attendance-all|leave-all|leave.edit'],
             'uses' => 'LeaveController@update']);
-        Route::get('leave/optInfo/{id}', [
+        Route::get('leave/optInfo/{id}/{type}', [
             'middleware' => ['permission:attendance-all|leave-all|leave.edit|leave.create'],
             'uses' => 'LeaveController@optInfo'])->name('leave.optInfo');
 
@@ -45,7 +45,7 @@ Route::group([
         Route::get('leave/review/', [
             'middleware' => ['permission:attendance-all|leave-all|leave.review'],
             'uses' => 'LeaveController@reviewIndex'])->name('leave.review.info');
-        Route::get('leave/review/optInfo/{id}', [
+        Route::get('leave/review/optInfo/{id}/{type}', [
             'middleware' => ['permission:attendance-all|leave-all|leave.review'],
             'uses' => 'LeaveController@optInfo'])->name('leave.review.optInfo');
         //批量操作
