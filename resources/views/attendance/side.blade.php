@@ -5,7 +5,7 @@
         <ul class="nav nav-second-level">
             @if(Entrust::can(['attendance-all', 'leave-all', 'leave', 'leave.edit', 'leave.create']))
                 <li @if (Route::is(['leave.info', 'leave.optInfo', 'leave.edit', 'leave.create']) ) class="active" @endif>
-                    <a href="{{ route('leave.info') }}">{{ trans('att.我的假期') }}</a>
+                    <a href="{{ route('leave.info') }}">{{ trans('att.我的申请单') }}</a>
                 </li>
             @endif
             @if(Entrust::can(['attendance-all', 'leave-all', 'leave.review']))

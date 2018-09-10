@@ -19,7 +19,7 @@
                         <div class="col-sm-2">
                             <select class="js-select2-single form-control" name="holiday_id" >
                                 @foreach($holidayList as $k => $v)
-                                    <option value="{{ $k }}" @if($k === $leave->holiday_id) selected="selected" @endif>{{ $v }}</option>
+                                    <option value="{{ $k }}" @if($k === (int)old('holiday_id')) selected="selected" @endif>{{ $v }}</option>
                                 @endforeach
                             </select>
                             <span class="help-block m-b-none">{{ $errors->first('holiday_id') }}</span>
@@ -81,7 +81,7 @@
                                  id="show_associate_image">
                             <input name="annex" type="file" accept="image/*" id="select-associate-file"/>
                         </div>
-
+                        <span class="help-block m-b-none">{{ $errors->first('annex') }}</span>
                     </div>
 
                     <div class="hr-line-dashed"></div>

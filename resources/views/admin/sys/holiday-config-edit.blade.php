@@ -45,8 +45,8 @@
                                             </div>
 
                                             <div class="form-group @if (!empty($errors->first('holiday'))) has-error @endif">
-                                                {!! Form::label('holiday', trans('app.假期名称'), ['class' => 'col-sm-3 control-label']) !!}
-                                                <div class="col-sm-6">
+                                                {!! Form::label('holiday', trans('app.配置名称'), ['class' => 'col-sm-3 control-label']) !!}
+                                                <div class="col-sm-3">
                                                     {!! Form::text('holiday', isset($holiday->holiday) ? $holiday->holiday: old('holiday'), [
                                                     'class' => 'form-control',
                                                     'placeholder' => trans('app.请输入', ['value' => trans('app.假期名称')]),
@@ -57,14 +57,36 @@
                                             </div>
 
                                             <div class="form-group @if (!empty($errors->first('num'))) has-error @endif">
-                                                {!! Form::label('num', trans('app.假期天数'), ['class' => 'col-sm-3 control-label']) !!}
-                                                <div class="col-sm-6">
+                                                {!! Form::label('num', trans('app.配置天数'), ['class' => 'col-sm-3 control-label']) !!}
+                                                <div class="col-sm-3">
                                                     {!! Form::text('num', isset($holiday->num) ? $holiday->num: old('num'), [
                                                     'class' => 'form-control',
                                                     'placeholder' => trans('app.请输入', ['value' => trans('app.假期天数')]),
                                                     'required' => true,
                                                     ]) !!}
                                                     <span class="help-block m-b-none">{{ $errors->first('num') }}</span>
+                                                </div>
+                                                <div class="col-sm-3">
+                                                    <span class="help-block m-b-none">
+                                                        <i class="fa fa-info-circle"></i> {{ trans('app.未涉及到天数的，请填0') }}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group @if (!empty($errors->first('sort'))) has-error @endif">
+                                                {!! Form::label('sort', trans('app.排序'), ['class' => 'col-sm-3 control-label']) !!}
+                                                <div class="col-sm-3">
+                                                    {!! Form::number('sort', isset($holiday->sort) ? $holiday->sort: old('sort'), [
+                                                    'class' => 'form-control',
+                                                    'placeholder' => trans('app.请输入', ['value' => trans('app.排序')]),
+                                                    'required' => true,
+                                                    ]) !!}
+                                                    <span class="help-block m-b-none">{{ $errors->first('sort') }}</span>
+                                                </div>
+                                                <div class="col-sm-2">
+                                                    <span class="help-block m-b-none">
+                                                        <i class="fa fa-info-circle"></i> {{ trans('app.值越大，越靠前') }}
+                                                    </span>
                                                 </div>
                                             </div>
 
@@ -74,6 +96,18 @@
                                                     @foreach(\App\Models\Sys\HolidayConfig::$isBoon as $k => $v)
                                                         <label class="radio-inline i-checks">
                                                             {!! Form::radio('is_boon', $k, $k === ($holiday->is_boon ?? old('is_boon') ?? \App\Models\Sys\HolidayConfig::STATUS_DISABLE), [
+                                                        ]) !!} {{ $v }}
+                                                        </label>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                {!! Form::label('is_full', trans('app.是否影响全勤'), ['class' => 'col-sm-3 control-label']) !!}
+                                                <div class="col-sm-6">
+                                                    @foreach(\App\Models\Sys\HolidayConfig::$isBoon as $k => $v)
+                                                        <label class="radio-inline i-checks">
+                                                            {!! Form::radio('is_full', $k, $k === ($holiday->is_full ?? old('is_full') ?? \App\Models\Sys\HolidayConfig::STATUS_DISABLE), [
                                                         ]) !!} {{ $v }}
                                                         </label>
                                                     @endforeach
@@ -93,18 +127,6 @@
                                             </div>
 
                                             <div class="form-group">
-                                                {!! Form::label('is_renew', trans('app.福利假使用完是否可再提交申请假期'), ['class' => 'col-sm-3 control-label']) !!}
-                                                <div class="col-sm-6">
-                                                    @foreach(\App\Models\Sys\HolidayConfig::$isBoon as $k => $v)
-                                                        <label class="radio-inline i-checks">
-                                                            {!! Form::radio('is_renew', $k, $k === ($holiday->is_renew ?? old('is_renew') ?? \App\Models\Sys\HolidayConfig::STATUS_DISABLE), [
-                                                        ]) !!} {{ $v }}
-                                                        </label>
-                                                    @endforeach
-                                                </div>
-                                            </div>
-
-                                            <div class="form-group">
                                                 {!! Form::label('restrict_sex', trans('app.限制男女'), ['class' => 'col-sm-3 control-label']) !!}
                                                 <div class="col-sm-6">
                                                     @foreach(\App\Models\UserExt::$sex + [ 2 => '不限'] as $k => $v)
@@ -115,6 +137,19 @@
                                                     @endforeach
                                                 </div>
                                             </div>
+
+                                            <div class="form-group">
+                                                {!! Form::label('change_type', trans('app.加班调休设置'), ['class' => 'col-sm-3 control-label']) !!}
+                                                <div class="col-sm-6">
+                                                    @foreach(\App\Models\Sys\HolidayConfig::$changeType as $k => $v)
+                                                        <label class="radio-inline i-checks">
+                                                            {!! Form::radio('change_type', $k, $k === ($holiday->change_type ?? old('change_type') ?? \App\Models\Sys\HolidayConfig::STATUS_DISABLE), [
+                                                        ]) !!} {{ $v }}
+                                                        </label>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+
 
                                             <div class="form-group">
                                                 {!! Form::label('punch_type', trans('app.补打卡设置'), ['class' => 'col-sm-3 control-label']) !!}
@@ -128,12 +163,11 @@
                                                 </div>
                                             </div>
 
-
                                             <div class="form-group @if (!empty($errors->first('condition_id'))) has-error @endif">
                                                 {!! Form::label('condition_id', trans('app.是否需要重置条件'), ['class' => 'col-sm-3 control-label']) !!}
                                                 <div class="col-sm-2">
                                                     <select class="js-select2-single form-control" name="condition_id" >
-                                                        <option value="">重置条件选择</option>
+                                                        <option value="">{{trans('app.重置条件选择')}}</option>
                                                         @foreach(\App\Models\Sys\HolidayConfig::$condition as $k => $v)
                                                             <option value="{{ $k }}" @if($k === $holiday->condition_id) selected="selected" @endif>{{ $v }}</option>
                                                         @endforeach
@@ -143,11 +177,11 @@
                                             </div>
 
                                             <div class="form-group @if (!empty($errors->first('memo'))) has-error @endif">
-                                                {!! Form::label('memo', trans('app.假期描述'), ['class' => 'col-sm-3 control-label']) !!}
+                                                {!! Form::label('memo', trans('app.配置描述'), ['class' => 'col-sm-3 control-label']) !!}
                                                 <div class="col-sm-6">
                                                     {!! Form::textarea('memo', isset($holiday->memo) ? $holiday->memo: old('memo'), [
                                                     'class' => 'form-control',
-                                                    'placeholder' => trans('app.请输入', ['value' => trans('app.假期描述')]),
+                                                    'placeholder' => trans('app.请输入', ['value' => trans('app.配置描述')]),
                                                     'required' => true,
                                                     ]) !!}
                                                     <span class="help-block m-b-none">{{ $errors->first('memo') }}</span>

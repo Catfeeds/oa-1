@@ -86,7 +86,7 @@
                         {!! Form::label('day', trans('att.申请天数'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-6">
                             <span class="help-block m-b-none">
-                                {{ $a = App\Components\Helper\DataHelper::diffTime(date('Y-m-d', strtotime($leave->start_time)) . ' ' . \App\Models\Attendance\Leave::$startId[$leave->start_id], date('Y-m-d', strtotime($leave->end_time)) . ' ' . \App\Models\Attendance\Leave::$endId[$leave->end_id])}}{{ empty($a)?'暂无':'天' }}
+                                {{ empty($leave->number_day) ? trans('att.补打卡'): $leave->number_day . trans('att.天') }}
                             </span>
                         </div>
                     </div>
@@ -182,9 +182,11 @@
                                     <a id="refuse_status" data-id=2 class="btn btn-primary">{{ trans('att.拒绝通过') }}</a>
                                 @endif
                             @endif
-
-                            <a href="javascript:history.go(-1);"
-                               class="btn btn-info">{{ trans('att.返回列表') }}</a>
+                            @if($type === \App\User::IS_LEADER_TRUE)
+                                <a href="{{route('leave.review.info')}}" class="btn btn-info">{{ trans('att.返回列表') }}</a>
+                            @else
+                                <a href="{{route('leave.info')}}" class="btn btn-info">{{ trans('att.返回列表') }}</a>
+                            @endif
                         </div>
                     </div>
 

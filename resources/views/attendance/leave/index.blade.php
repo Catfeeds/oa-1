@@ -25,8 +25,7 @@
 @section('content')
 
     @include('flash::message')
-    @include('widget.scope-date', ['scope' => $scope])
-
+    @include('widget.scope-leave', ['scope' => $scope])
 
     <div class="row">
         <div class="col-lg-10">
@@ -34,10 +33,11 @@
                 <div class="panel-heading">
                     <div class="panel-options">
                         <ul class="nav nav-tabs">
-                                <li  class="active">
-                                    <a  class="dropdown-toggle count-info" href="{{ route('leave.info' ) }}">{{trans('att.我的假期')}}</a>
+                            @foreach($types as $k => $v)
+                                <li @if($k == $type) class="active" @endif>
+                                    <a  class="dropdown-toggle count-info" href="{{ route('leave.info', ['type' => $k]) }}">{{ $v }}</a>
                                 </li>
-
+                            @endforeach
                         </ul>
                     </div>
                 </div>
@@ -89,15 +89,8 @@
                                         @endif
                                     </td>
                                     <td>
-                                        {{ $day = App\Components\Helper\DataHelper::diffTime(
-                                    date('Y-m-d', strtotime($v['start_time']))
-                                    . ' ' . \App\Models\Attendance\Leave::$startId[$v['start_id']],
-                                    date('Y-m-d', strtotime($v['end_time']))
-                                    . ' ' . \App\Models\Attendance\Leave::$endId[$v['end_id']])
 
-                                    }}
-                                        {!! empty($day) ? '---' : '天' !!}
-
+                                        {{ empty($v['number_day']) ? '---' : $v['number_day'] . '天'}}
                                     </td>
 
                                     <td><pre style="height: 5em;width: 20em">{{ $v['reason'] }}</pre></td>
@@ -108,7 +101,7 @@
                                             {{--{!! BaseHtml::tooltip(trans('app.设置'), route('leave.edit', ['id' => $v['leave_id']]), 'cog fa-lg') !!}--}}
                                         {{--@endif--}}
                                         @if(($v['user_id'] == \Auth::user()->user_id || $v['review_user_id'] == \Auth::user()->user_id || in_array(\Auth::user()->user_id, $userIds)) && Entrust::can(['attendance-all', 'leave-all', 'leave.edit', 'leave.review']))
-                                            {!! BaseHtml::tooltip(trans('att.请假详情'), route('leave.optInfo', ['id' => $v['leave_id']]), 'cog fa fa-newspaper-o') !!}
+                                            {!! BaseHtml::tooltip(trans('att.请假详情'), route('leave.optInfo', ['id' => $v['leave_id'], 'type' => \App\Models\Attendance\Leave::LOGIN_INFO]), 'cog fa fa-newspaper-o') !!}
                                         @endif
 
                                     </td>
