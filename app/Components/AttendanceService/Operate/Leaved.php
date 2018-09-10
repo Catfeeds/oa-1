@@ -66,7 +66,7 @@ class Leaved extends Operate implements AttendanceInterface
         }
         //查询假期配置和员工剩余假期
         $holidayConfig = HolidayConfig::where(['holiday_id' => $holidayId])->first();
-        $userHoliday = AttendanceHelper::checkUserChangeHoliday($p, \Auth::user()->user_id, $holidayConfig, $numberDay);
+        $userHoliday = AttendanceHelper::checkUserLeaveHoliday($p, \Auth::user()->user_id, $holidayConfig, $numberDay);
 
         //验证是否要上次附件
         if($holidayConfig->is_annex === HolidayConfig::STATUS_ENABLE && empty($p['annex'])) {

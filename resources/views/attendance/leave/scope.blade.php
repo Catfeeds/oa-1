@@ -1,6 +1,6 @@
 <div class="form-group">
     <select class="js-select2-single form-control" name="scope[holiday_id]" >
-        <option value="">申请类型</option>
+        <option value="">明细类型</option>
         @foreach(\App\Models\Sys\HolidayConfig::getHolidayList() as $k => $v)
             <option value="{{ $k }}" @if($k == ($scope->holidayId ?? old("scope[holiday_id]"))) selected="selected" @endif>{{ $v }}</option>
         @endforeach
