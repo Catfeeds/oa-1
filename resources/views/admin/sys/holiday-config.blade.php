@@ -10,7 +10,7 @@
                             <h5>{{ $title ?? trans('app.系统设置') }}</h5>
                             <div class="ibox-tools">
                                 <a class="btn btn-xs btn-primary" href="{{ route('holiday-config.create') }}">
-                                    {{ trans('app.添加', ['value' => trans('app.假期配置')]) }}
+                                    {{ trans('app.添加', ['value' => trans('app.申请配置')]) }}
                                 </a>
                             </div>
                         </div>
@@ -36,11 +36,12 @@
                                                 <table class="table table-hover table-striped tooltip-demo">
                                                     <thead>
                                                     <tr>
-                                                        <th>{{ trans('app.假期ID') }}</th>
-                                                        <th>{{ trans('app.假期类型') }}</th>
-                                                        <th>{{ trans('app.假期名称') }}</th>
-                                                        <th>{{ trans('app.假期天数') }}</th>
-                                                        <th>{{ trans('app.假期描述') }}</th>
+                                                        <th>{{ trans('app.配置ID') }}</th>
+                                                        <th>{{ trans('app.排序值') }}</th>
+                                                        <th>{{ trans('app.配置类型') }}</th>
+                                                        <th>{{ trans('app.配置名称') }}</th>
+                                                        <th>{{ trans('app.配置天数') }}</th>
+                                                        <th>{{ trans('app.配置描述') }}</th>
                                                         <th>{{ trans('app.提交时间') }}</th>
                                                         <th>{{ trans('app.操作') }}</th>
                                                     </tr>
@@ -49,6 +50,7 @@
                                                     @foreach($data as $v)
                                                         <tr>
                                                             <td>{{ $v['holiday_id'] }}</td>
+                                                            <td>{{ $v['sort'] }}</td>
                                                             <td>{{ \App\Models\Sys\HolidayConfig::$applyType[$v['apply_type_id']] ?? '' }}</td>
                                                             <td>{{ $v['holiday'] }}</td>
                                                             <td>{{ $v['num'] }}</td>

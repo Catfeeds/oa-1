@@ -41,6 +41,7 @@ class AttendanceHelper
     }
 
     /**
+     * 获取申请单开始日期
      * @param $startTime
      * @param $startId
      * @return string
@@ -51,6 +52,7 @@ class AttendanceHelper
     }
 
     /**
+     * 获取申请单结束日期
      * @param $endTime
      * @param $endId
      * @return string
@@ -86,13 +88,12 @@ class AttendanceHelper
      */
     public static function getMyChangeLeaveId($deptId)
     {
-        $leaveIds = $users = [];
+        $leaveIds = $users = $changeWorkLeaveIds =  $changeLeaveIds =[];
         $user = User::where(['dept_id' => $deptId, 'is_leader' => 1])->first();
 
         if(empty($user->user_id)) return ['leave_ids' => $leaveIds, 'user_ids' => $users];
 
-        $leave = Leave::where(['user_id' => $user->user_id])->where('user_list', '!=', '')->get();
-
+        $leave = Leave::with('holidayConfig')->where(['user_id' => $user->user_id])->where('user_list', '!=', '')->get();
 
         foreach ($leave as $k => $v) {
             $userList = json_decode($v->user_list);
@@ -102,11 +103,23 @@ class AttendanceHelper
                 $users[] = $userList;
             }
 
+            if(!empty($userList) && !empty($v->holidayConfig) && $v->holidayConfig->change_type === HolidayConfig::WEEK_WORK && in_array(\Auth::user()->user_id, $userList)){
+                $changeWorkLeaveIds[] = $v->leave_id;
+            }
+
+            if(!empty($userList) && !empty($v->holidayConfig) && $v->holidayConfig->change_type === HolidayConfig::WORK_CHANGE && in_array(\Auth::user()->user_id, $userList)){
+                $changeLeaveIds[] = $v->leave_id;
+            }
+
         }
 
-        return ['leave_ids' => $leaveIds, 'user_ids' => $users];
+        return ['leave_ids' => $leaveIds, 'user_ids' => $users, 'leave_work_ids' => $changeWorkLeaveIds, 'leave_change_ids' => $changeLeaveIds];
     }
 
+    /**
+     * 获取抄送人员ID
+     * @return array
+     */
     public static function getCopyUser()
     {
         $leaveIds = $users = [];
@@ -169,29 +182,42 @@ class AttendanceHelper
         }
     }
 
+
     /**
-     * @param bool $isLeader
-     * @param $deptId
+     * 获取有关自己的调休和抄送人员申请单列表
+     * @param null $deptId
+     * @param int $type
      * @return array
      */
-    public static function setChangeList($deptId = NULL, $isLeader = true)
+    public static function setChangeList($type, $deptId = NULL)
     {
         if(empty($deptId)) $deptId = \Auth::user()->dept_id;
 
         $where = '';
-        $userIds = [];
-        if($isLeader) {
-            $changeLeaveIds = self::getMyChangeLeaveId($deptId);
-            $copyLeaveIds = self::getCopyUser();
+        $changeLeaveIds = self::getMyChangeLeaveId($deptId);
+        $copyLeaveIds = self::getCopyUser();
 
-            $userIds = $changeLeaveIds['user_ids'] + $copyLeaveIds['user_ids'];
-            $leaveIds =  $changeLeaveIds['leave_ids'] + $copyLeaveIds['leave_ids'];
-
-            if(!empty($leaveIds)) {
-                $leaveIds = implode(',', $leaveIds);
-                $where = " or Leave_id in ($leaveIds)";
-            }
+        switch ($type) {
+            case Leave::DEPT_LEAVE://调休
+                $leaveIds =  $changeLeaveIds['leave_ids'];
+                if(!empty($leaveIds)) {
+                    $leaveIds = implode(',', $leaveIds);
+                    $where = " AND Leave_id in ($leaveIds)";
+                } else {
+                    $where = " AND Leave_id in (-1)";
+                }
+                break;
+            case Leave::COPY_LEAVE://抄送
+                $leaveIds =  $copyLeaveIds['leave_ids'];
+                if(!empty($leaveIds)) {
+                    $leaveIds = implode(',', $leaveIds);
+                    $where = " AND Leave_id in ($leaveIds)";
+                } else {
+                    $where = " AND Leave_id in (-1)";
+                }
         }
+        $userIds = $changeLeaveIds['user_ids'] + $copyLeaveIds['user_ids'];
+
         if(!empty($userIds)) {
             $users = [];
             foreach ($userIds as $k => $v) {
@@ -336,4 +362,200 @@ class AttendanceHelper
         }
     }
 
+    /**
+     * 员工申请单和福利假期信息返回
+     * @param $success
+     * @param array $msg
+     * @param array $data
+     * @return array
+     */
+    public static function backUserHolidayInfo($success, $msg = [], $data = [])
+    {
+        return ['success' => $success, 'msg' => $msg, 'data' => $data];
+    }
+
+    /**
+     * 检验 员工申请单为请假类型
+     * @param $request
+     * @param $userId
+     * @param $holiday
+     * @param int $numberDay
+     * @return array
+     */
+    public static function checkUserLeaveHoliday($request, $userId, $holiday, $numberDay)
+    {
+        $useExt = \Auth::user()->UserExt;
+
+        switch($holiday->condition_id) {
+            //申请单为年周期类型判断
+            case HolidayConfig::YEAR_RESET:
+                //判断入职时间是否满一年
+                if(empty($useExt->entry_time) || strtotime($useExt->entry_time) + 84600 * 365 < time()) {
+                    return self::backUserHolidayInfo(false, ['holiday_id' => '未有该假期天数,如有疑问,请联系人事']);
+                }
+
+                //获取年周期剩余天数
+                $overDay = self::getUserYearHoliday($useExt->entry_time, $userId, $holiday);
+                //判断申请的天数是否大于剩余的天数
+                if($numberDay > $overDay) {
+                    return self::backUserHolidayInfo(false, ['holiday_id' => '剩余假期不足,如有疑问,请联系人事']);
+                }
+
+                return self::backUserHolidayInfo(true);
+                break;
+            //申请单为月周期类型判断
+            case HolidayConfig::MONTH_RESET:
+                //获取月周期余天数
+                $overDay = self::getUserMonthHoliday($request, $userId, $holiday);
+                //判断申请的天数是否大于剩余的天数
+                if($numberDay > $overDay)
+                    return self::backUserHolidayInfo(false, ['holiday_id' => '剩余假期不足,如有疑问,请联系人事']);
+                return self::backUserHolidayInfo(true);
+                break;
+
+            default :
+                return self::backUserHolidayInfo(true);
+                break;
+        }
+    }
+
+    /**
+     * 检验 员工申请单为调休类型
+     * @param $request
+     * @param $userId
+     * @param $holiday
+     * @param int $numberDay
+     * @return array
+     */
+    public static function checkUserChangeHoliday($userId, $holiday, $numberDay = 0)
+    {
+        //调休类型
+        switch($holiday->change_type)
+        {
+            //申请单为调休类型状态判断
+            case HolidayConfig::WORK_CHANGE;
+                $changeData = self::getUserChangeHoliday($userId, $holiday);
+
+                $lostDay = $changeData['change_work_day'] - $changeData['change_use_day'];
+                if($lostDay <= 0) {
+                    return self::backUserHolidayInfo(false, ['holiday_id' => '申请天数不足或未有该申请类型,如有疑问,请联系人事']);
+                }
+                if($numberDay > $lostDay) {
+                    return self::backUserHolidayInfo(false, ['holiday_id' => '申请天数不足或未有该申请类型,如有疑问,请联系人事']);
+                }
+
+                return self::backUserHolidayInfo(true);
+                break;
+            //其它类型默认返回正确
+            default :
+                return self::backUserHolidayInfo(true);
+                break;
+
+        }
+
+    }
+
+    /**
+     * 获取 员工调休/加班天数
+     * @param $userId
+     * @param $holiday
+     * @return array
+     */
+    public static function getUserChangeHoliday($userId, $holiday)
+    {
+        //获取节假日加班ID
+        $changeHoliday = HolidayConfig::where(['change_type' => HolidayConfig::WEEK_WORK])->first();
+        //获取部门批量调休或者加班的申请单ID
+        $leaves = self::getMyChangeLeaveId(\Auth::user()->dept_id);
+        //查询加班的所有记录天数
+        $userWorkChangeDay = self::selectChangeInfo($userId, $changeHoliday->holiday_id, $leaves['leave_work_ids']);
+        //查询已经调休过的天数
+        $userUseChangeDay = self::selectChangeInfo($userId, $holiday->holiday_id, $leaves['leave_work_ids']);
+
+        return ['change_work_day' => $userWorkChangeDay, 'change_use_day' => $userUseChangeDay];
+    }
+
+    /**
+     * 查询 员工调休/加班的天数
+     * @param $userId
+     * @param $holidayId
+     * @param $leaveIds
+     * @return int|mixed
+     */
+    public static function selectChangeInfo($userId, $holidayId, $leaveIds)
+    {
+        //调休的默认查询单年
+        $startDay = date("Y",time()) . "-01-01";
+        $endDay = date("Y",time()) . "-12-31";
+
+        $userChangeLog = Leave::select(\DB::raw('SUM(number_day) number_day'))
+            ->where('start_time', '>', $startDay)
+            ->where('end_time', '<=', $endDay)
+            ->whereIn('status', [Leave::PASS_REVIEW, Leave::WAIT_REVIEW, Leave::ON_REVIEW])
+            ->where(['user_id' => $userId, 'holiday_id' => $holidayId])
+            ->orWhere(function ($query) use ($leaveIds) {
+                $query->whereIn('leave_id', $leaveIds);
+            })
+            ->groupBy('user_id')->first('number_day');
+
+        return empty($userChangeLog->number_day) ? 0 :  $userChangeLog->number_day;
+    }
+
+
+    /**
+     * 获取员工 年假类型 记录信息
+     * @param $entryTime
+     * @param $userId
+     * @param $holidayId
+     */
+    public static function getUserYearHoliday($entryTime, $userId, $holiday)
+    {
+        //默认为上一年的入职月份的开始时间
+        $startDay= date("Y", strtotime("-1 year")) . '-' . date('m-d', strtotime($entryTime));
+        //当年的员工年假到期时间
+        $endDay = date("Y", time()) . '-' . date('m-d', strtotime($entryTime));
+
+        //年假到期时间之后，重置年假的开始时间和到期时间
+        if(strtotime($endDay) < time()) {
+            $startDay = date("Y", time()) . '-' . date('m-d', strtotime($entryTime));
+            $endDay = date("Y", time()) + 1 . '-' . date('m-d', strtotime($entryTime));
+        }
+
+        return self::selectLeaveInfo($startDay, $endDay, $userId, $holiday);
+    }
+
+    /** 获取员工 月类型 记录信息
+     * @param $userId
+     * @param $holiday
+     * @return mixed
+     */
+    public static function getUserMonthHoliday($request, $userId, $holiday)
+    {
+        $startDay =  date('Y-m-01', strtotime($request['start_time']));
+        $endDay =  date('Y-m-t', strtotime($request['end_time']));
+
+        return self::selectLeaveInfo($startDay, $endDay, $userId, $holiday);
+    }
+
+    /**
+     * 查询员工 福利假期类型 天数
+     * @param $startDay
+     * @param $endDay
+     * @param $userId
+     * @param $holiday
+     * @return mixed
+     */
+    public static function selectLeaveInfo($startDay, $endDay, $userId, $holiday)
+    {
+        $userLeaveLog = Leave::select(\DB::raw('SUM(number_day) number_day'))
+            ->where('start_time', '>', $startDay)
+            ->where('end_time', '<=', $endDay)
+            ->whereIn('status', [Leave::PASS_REVIEW, Leave::WAIT_REVIEW, Leave::ON_REVIEW])
+            ->where([
+                'user_id' => $userId,
+                'holiday_id' => $holiday->holiday_id,
+            ])->groupBy('user_id')->first('number_day');
+
+        return  empty($userLeaveLog->number_day) ? $holiday->num : $holiday->num - $userLeaveLog->number_day;
+    }
 }

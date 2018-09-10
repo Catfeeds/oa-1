@@ -19,7 +19,7 @@
                     <h5>{{ $title }}</h5>
                 </div>
                 <div class="ibox-content">
-                    @include('widget.review-batch-operation-btn', ['btn' => [['review-btn-ok', '批量通过', 'btn-success'],['review-btn-no', '批量拒绝', 'btn-red']]])
+                    @include('widget.review-batch-operation-btn', ['btn' => [['review-btn-ok', '批量通过', 'btn-success'],['review-btn-no', '批量拒绝', 'btn-group']]])
                     <div class="table-responsive">
                         <table class="table table-striped table-striped tooltip-demo">
                             <thead>

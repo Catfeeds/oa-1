@@ -25,33 +25,33 @@ class LeaveController extends AttController
 {
     protected $scopeClass = LeaveScope::class;
 
-    private $_validateRule = [
-        'holiday_id' => 'required',
-        'start_time' => 'required',
-        'end_time' => 'required',
-        'reason' => 'required',
-    ];
-
-    private $_validateRuleRe = [
-        'holiday_id' => 'required',
-        'annex' => 'required|file',
-        'reason' => 'required',
-    ];
-
     public function index()
     {
         $scope = $this->scope;
         $scope->block = 'attendance.leave.scope';
+        $types = Leave::$types;
+        $type = \Request::get('type', key($types));
 
-        $where = AttendanceHelper::setChangeList()['where'];
-        $userIds = AttendanceHelper::setChangeList()['user_ids'];
-        $data = Leave::where(['user_id' => \Auth::user()->user_id])
-            ->whereRaw($scope->getWhere() . $where)
+        $userIds = [];
+        switch ($type) {
+            case Leave::DEPT_LEAVE :
+                $where = AttendanceHelper::setChangeList($type)['where'];
+                $userIds = AttendanceHelper::setChangeList($type)['user_ids'];
+                break;
+            case Leave::COPY_LEAVE :
+                $where = AttendanceHelper::setChangeList($type)['where'];
+                $userIds = AttendanceHelper::setChangeList($type)['user_ids'];
+                break;
+            default:
+                $where = sprintf(" AND user_id = %s", \Auth::user()->user_id);
+                break;
+        }
+        $data = Leave::whereRaw($scope->getWhere() . $where)
             ->orderBy('created_at', 'desc')
             ->paginate(30);
 
         $title = trans('att.我的假期详情');
-        return view('attendance.leave.index', compact('title', 'data', 'scope', 'holidayList',  'userIds'));
+        return view('attendance.leave.index', compact('title', 'data', 'scope', 'holidayList', 'userIds', 'types', 'type'));
     }
 
     public function create($applyTypeId)
@@ -64,7 +64,8 @@ class LeaveController extends AttController
             case HolidayConfig::LEAVEID:
                 $userExt = UserExt::where(['user_id' => \Auth::user()->user_id])->first();
                 $holidayList = HolidayConfig::where(['apply_type_id' => HolidayConfig::LEAVEID])
-                    ->whereIn('restrict_sex',[$userExt->sex, 2])
+                    ->whereIn('restrict_sex', [$userExt->sex, 2])
+                    ->orderBy('sort', 'desc')
                     ->get(['holiday_id', 'holiday'])
                     ->pluck('holiday', 'holiday_id')->toArray();
                 $models = 'edit';
@@ -73,6 +74,7 @@ class LeaveController extends AttController
             //调休
             case HolidayConfig::CHANGE:
                 $holidayList = HolidayConfig::where(['apply_type_id' => HolidayConfig::CHANGE])
+                    ->orderBy('sort', 'desc')
                     ->get(['holiday_id', 'holiday'])
                     ->pluck('holiday', 'holiday_id')->toArray();
                 $models = 'change';
@@ -88,6 +90,7 @@ class LeaveController extends AttController
             //补打卡
             case HolidayConfig::RECHECK:
                 $holidayList = HolidayConfig::where(['apply_type_id' => HolidayConfig::RECHECK])
+                    ->orderBy('sort', 'desc')
                     ->get(['holiday_id', 'holiday', 'punch_type']);
                 $models = 'recheck';
                 $title = trans('att.补打卡');
@@ -116,28 +119,27 @@ class LeaveController extends AttController
         $p = $request->all();
 
         $driver = HolidayConfig::$driverType[$applyTypeId];
-
+        //申请单检验
         $retCheck = \AttendanceService::driver($driver)->checkLeave($request);
-        if(!$retCheck['success']) return redirect()->back()->withInput()->withErrors($retCheck['message']);
-
-
+        if(!$retCheck['success']) return redirect()->back()->with(['holiday_id' => $p['holiday_id']])->withInput()->withErrors($retCheck['message']);
+        //获取申请单审核步骤流程
         $step = \AttendanceService::driver($driver)->getLeaveStep($retCheck['data']['number_day']);
         if(!$step['success']) return redirect()->back()->withInput()->withErrors($step['message']);
-
         //设置上传图片
          $imagePath = AttendanceHelper::setAnnex($request);
-
+        //数据整合
         $leave = array_merge($retCheck['data'], $step['data']);
         $leave['image_path'] = $imagePath;
         $leave['reason'] = $p['reason'];
 
         try {
+            //创建申请单
             $retLeave = \AttendanceService::driver($driver)->createLeave($leave);
-
+            //日志记录操作
             if($retLeave['success']) {
                 OperateLogHelper::createOperateLog(OperateLogHelper::LEAVE_TYPE_ID, $retLeave['data']['leave_id'], '提交申请');
             }
-            //通知审核人员
+            //微信通知审核人员
             //OperateLogHelper::sendWXMsg($review_user_id, '测试下');
 
         } catch (Exception $ex) {
@@ -160,8 +162,10 @@ class LeaveController extends AttController
         return redirect()->route('leave.info');
     }
 
-    public function optInfo($id)
+    public function optInfo($id, $type)
     {
+        if(!in_array($type, [Leave::LOGIN_INFO, Leave::LOGIN_VERIFY_INFO])) return redirect()->route('leave.info');
+
         $leave = Leave::with('holidayConfig')->findOrFail($id);
 
         $logUserIds = OperateLogHelper::getLogUserIdToInId($leave->leave_id);
@@ -179,7 +183,7 @@ class LeaveController extends AttController
             $applyTypeId = HolidayConfig::getHolidayApplyList()[$leave->holiday_id];
             $deptUsers = User::where(['dept_id' => $userDept->dept_id, 'status' => 1])->get()->toArray();
             $deptUsers = array_filter($deptUsers);
-            return view('attendance.leave.info', compact('title',  'leave', 'dept', 'reviewUserId', 'user', 'logs', 'applyTypeId', 'userIds', 'deptUsers'));
+            return view('attendance.leave.info', compact('title',  'leave', 'dept', 'reviewUserId', 'user', 'logs', 'applyTypeId', 'userIds', 'deptUsers', 'type'));
         } else {
             return redirect()->route('leave.info');
         }

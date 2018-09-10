@@ -18,7 +18,7 @@
 
 @if(Entrust::can(['holiday-config-all', 'holiday-config']))
     <li @if (Route::is('holiday-config*')) class="active" @endif>
-        <a href="{{ route('holiday-config') }}">{{ trans('app.假期配置') }}</a>
+        <a href="{{ route('holiday-config') }}">{{ trans('app.申请类型配置') }}</a>
     </li>
 @endif
 

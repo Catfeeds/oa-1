@@ -32,6 +32,13 @@ class HolidayConfig extends Model
     const GO_WORK = 1;
     const OFF_WORK = 2;
 
+    const OVER_TIME = 1;
+    const WEEK_WORK = 2;
+    const WORK_CHANGE = 3;
+
+    const YEAR_RESET = 1;
+    const MONTH_RESET = 2;
+
     public static $applyType = [
         self::LEAVEID => '请假',
         self::CHANGE => '加班调休',
@@ -40,7 +47,7 @@ class HolidayConfig extends Model
 
     public static $driverType = [
         self::LEAVEID => 'leaved',
-        self::CHANGE => 'charge',
+        self::CHANGE => 'change',
         self::RECHECK => 'recheck',
     ];
 
@@ -51,8 +58,8 @@ class HolidayConfig extends Model
     ];
 
     public static $condition = [
-        1 => '按年重置',
-        2 => '按月重置'
+        self::YEAR_RESET => '按年重置',
+        self::MONTH_RESET => '按月重置'
     ];
 
     public static $punchType = [
@@ -61,22 +68,32 @@ class HolidayConfig extends Model
         self::OFF_WORK => '下班补卡'
     ];
 
+    public static $changeType = [
+        self::NO_SETTING => '不设置',
+        self::OVER_TIME => '夜班加班调休',
+        self::WEEK_WORK => '节假日加班',
+        self::WORK_CHANGE => '调休'
+    ];
+
     protected $fillable = [
         'holiday',
+        'change_type',
         'apply_type_id',
         'memo',
         'is_boon',
-        'is_renew',
+        'is_full',
+        'sort',
         'is_annex',
         'condition_id',
         'restrict_sex',
         'punch_type',
+        'change_type',
         'num',
     ];
 
     public static function getHolidayList()
     {
-        return self::get(['holiday_id', 'holiday'])->pluck('holiday', 'holiday_id')->toArray();
+        return self::whereIn('restrict_sex', [\Auth::user()->userExt->sex, 2])->orderBy('sort', 'desc')->get(['holiday_id', 'holiday'])->pluck('holiday', 'holiday_id')->toArray();
     }
 
     public static function getHolidayApplyList()
