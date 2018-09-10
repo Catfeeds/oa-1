@@ -68,9 +68,9 @@ class ProportionCommand extends BaseCommand
                 if ($proprotion) {
                     Proportion::create(['product_id' => $k, 'billing_cycle' => $v['billing_cycle_end'], 'client' => $v['client'], 'backstage_channel' => $v['backstage_channel'],
                         'channel_rate' => $proprotion['channel_rate'], 'first_division' => $proprotion['first_division'], 'first_division_remark' => $proprotion['first_division_remark'], 'second_division' => $proprotion['second_division'],
-                        'second_division_remark' => $proprotion['second_division_remark'], 'second_division_condition' => $proprotion['second_division_condition'], 'rec_id' => $v['id'], 'review_type' => 1]);
+                        'second_division_remark' => $proprotion['second_division_remark'], 'second_division_condition' => $proprotion['second_division_condition'], 'rec_id' => $v['id']]);
                 } else {
-                    Proportion::create(['product_id' => $k, 'billing_cycle' => $v['billing_cycle_end'], 'client' => $v['client'], 'backstage_channel' => $v['backstage_channel'], 'rec_id' => $v['id'], 'review_type' => 1]);
+                    Proportion::create(['product_id' => $k, 'billing_cycle' => $v['billing_cycle_end'], 'client' => $v['client'], 'backstage_channel' => $v['backstage_channel'], 'rec_id' => $v['id']]);
                 }
             }
             if (isset($ops['principal_id'])) {
