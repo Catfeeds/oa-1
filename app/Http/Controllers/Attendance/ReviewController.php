@@ -39,67 +39,27 @@ class ReviewController extends AttController
         list($year, $month) = explode('-', $scope->startDate);
 
         //该月应到天数:关联查找类型为正常工作的该月日历
-        $shouldCome = Calendar::whereHas('punchRules', function ($query){
-            $query->where('punch_type_id', PunchRules::NORMALWORK);
-        })
-            ->where(['year' => $year, 'month' => $month])
-            ->count();
-
-        $builder = DailyDetail::whereRaw('(punch_start_time IS NOT NULL OR punch_end_time IS NOT NULL)')
-            ->whereYear('day', $year)->whereMonth('day', $month)
-            ->groupBy('user_id');
+        $shouldCome = Calendar::getShouldComeDays($year, $month);
 
         //实际到的天数
-        $actuallyCome = $builder->get([DB::raw('count(*) as come'), 'user_id'])
-            ->pluck('come', 'user_id')
-            ->toArray();
+        $actuallyCome = DailyDetail::getActuallyCome($year, $month);
 
         //迟到总分钟数
-        $beLateNum = $builder->get([DB::raw('sum(heap_late_num) as late'), 'user_id'])
-            ->pluck('late', 'user_id')
-            ->toArray();
+        $beLateNum = DailyDetail::getBeLateNum($year, $month);
 
         //合计扣分
-        $deductNum = $builder->get([DB::raw('sum(deduction_num) as deduct'), 'user_id'])
-            ->pluck('deduct', 'user_id')
-            ->toArray();
+        $deductNum = DailyDetail::getBeLateNum($year, $month);
 
-        //带薪假:关联假期配置表 找出状态为已通过 且是福利假的假期
-        $hasSalaryLeaves = Leave::whereHas('holidayConfig', function ($query){
-            $query->where('is_boon', 1);
-        })
-            ->where('status', 3)->whereYear('start_time', $year)->whereMonth('start_time', $month)
-            ->get();
-        $hasSalary = [];//以'用户id => 带薪天数'存放
-        foreach ($hasSalaryLeaves as $hasSalaryLeaf){
-            $hasSalary[$hasSalaryLeaf->user_id] = $this->timeDiff($hasSalaryLeaf, $hasSalary[$hasSalaryLeaf->user_id] ?? 0);
-        }
+        //计算带薪假,返回数组
+        $hasSalary = $this->hasSalaryLeavesArray($year, $month);
 
-        //加班调休与无薪假(请假):不是福利假,已通过,不是补打卡,当月
-        $leaveObjects = Leave::whereHas('holidayConfig', function ($query){
-            $query->where([['is_boon', '<>', 1], ['apply_type_id', '<>', HolidayConfig::RECHECK]]);
-        })
-            ->where('status', '=', 3)
-            ->whereYear('start_time', $year)->whereMonth('start_time', $month)->get();
-        $diffTime[][] = 0;
-        //将不同用户不同类型的假期天数存在diffTime中
-        foreach ($leaveObjects as $leaveObject){
-            $diffTime[$leaveObject->user_id][$leaveObject->apply_type_id] =
-                $this->timeDiff($leaveObject, $diffTime[$leaveObject->user_id][$leaveObject->apply_type_id] ?? 0);
-        }
+        //计算无薪假,返回数组
+        $diffTime = $this->NoSalaryLeavesArray($year, $month);
 
         //上下班打卡总次数
-        $punch= $builder->get([DB::raw('(count(punch_start_time) + count(punch_end_time)) as sum'), 'user_id'])->pluck('sum', 'user_id')->toArray();
+        $punch = DailyDetail::getSumPunch($year, $month);
         //上下班补打卡总次数
-        $re = Leave::whereHas('holidayConfig', function ($query){
-            $query->where('apply_type_id', HolidayConfig::RECHECK);
-        })
-            ->where('status', 3)
-            ->whereYear('created_at', $year)->whereMonth('created_at', $month)
-            ->whereRaw('(start_time IS NOT NULL OR end_time IS NOT NULL)')
-            ->groupBy('user_id')
-            ->get([DB::raw('(count(start_time) + count(end_time)) as a'), 'user_id'])
-            ->pluck('a', 'user_id')->toArray();
+        $re = Leave::getReCheckSum($year, $month);
 
         //剩余年假
         $remainYear = $this->remain('年假');
@@ -111,13 +71,8 @@ class ReviewController extends AttController
         $users = User::whereRaw($scope->getwhere())->get();
         $info = [];
         foreach ($users as $user){
-
-            //是否全勤:应到天数等于实到 无请假 迟到分钟数合计为0 上下班打卡与上下班补打卡的和等于应到天数*2
-            $isFullWork = ($shouldCome <= ($actuallyCome[$user->user_id] ?? '') &&
-                !isset($diffTime[$user->user_id][HolidayConfig::LEAVEID]) &&
-                ($beLateNum[$user->user_id] ?? '') === '0' &&
-                ($punch[$user->user_id] ?? 0) + ($re[$user->user_id] ?? 0) >= $shouldCome * 2
-            ) ? '是' : '否';
+            //判断全勤
+            $isFullWork = $this->ifPresentAllDay($shouldCome, $actuallyCome, $user, $actuallyCome, $punch, $re);
 
             $info[] = [
                 'date' => "$year-$month",
@@ -155,4 +110,35 @@ class ReviewController extends AttController
         return $value+ DataHelper::diffTime(date('Y-m-d', strtotime($object->start_time)) . ' ' . Leave::$startId[$object->start_id],
             date('Y-m-d', strtotime($object->end_time)) . ' ' . Leave::$endId[$object->end_id]);
     }
+
+    public function NoSalaryLeavesArray($year, $month){
+        $leaveObjects = Leave::getNoSalaryLeaves($year, $month);
+        $diffTime[][] = 0;
+        //将不同用户不同类型的假期天数存在diffTime中
+        foreach ($leaveObjects as $leaveObject){
+            $diffTime[$leaveObject->user_id][$leaveObject->holidayConfig->apply_type_id] =
+                $this->timeDiff($leaveObject, $diffTime[$leaveObject->user_id][$leaveObject->apply_type_id] ?? 0);
+        }
+        return $diffTime;
+    }
+
+    public function hasSalaryLeavesArray($year, $month){
+        $hasSalaryLeaves = Leave::getSalaryLeaves($year, $month);
+        $hasSalary = [];//以'用户id => 带薪天数'存放
+        foreach ($hasSalaryLeaves as $hasSalaryLeaf){
+            $hasSalary[$hasSalaryLeaf->user_id] = $this->timeDiff($hasSalaryLeaf, $hasSalary[$hasSalaryLeaf->user_id] ?? 0);
+        }
+        return $hasSalary;
+    }
+
+    //是否全勤:应到天数等于实到 无请假 迟到分钟数合计为0 上下班打卡与上下班补打卡的和等于应到天数*2
+    public function ifPresentAllDay($shouldCome, $actuallyCome, $user, $beLateNum, $punch, $re){
+        $isFullWork = ($shouldCome <= ($actuallyCome[$user->user_id] ?? '') &&
+            !isset($diffTime[$user->user_id][HolidayConfig::LEAVEID]) &&
+            ($beLateNum[$user->user_id] ?? '') === '0' &&
+            ($punch[$user->user_id] ?? 0) + ($re[$user->user_id] ?? 0) >= $shouldCome * 2
+        ) ? '是' : '否';
+        return $isFullWork;
+    }
+
 }

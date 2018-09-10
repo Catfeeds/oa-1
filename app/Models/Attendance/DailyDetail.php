@@ -10,6 +10,7 @@
 namespace App\Models\Attendance;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class DailyDetail extends Model
@@ -32,5 +33,37 @@ class DailyDetail extends Model
         'lave_buffer_num',
         'deduction_num',
     ];
+
+    public static function dailyBuilder($year, $month){
+        return self::whereRaw('(punch_start_time IS NOT NULL OR punch_end_time IS NOT NULL)')
+            ->whereYear('day', $year)->whereMonth('day', $month)
+            ->groupBy('user_id');
+    }
+
+    //统计找出有打卡的天数
+    public static function getActuallyCome($year, $month){
+        return self::dailyBuilder($year, $month)->get([DB::raw('count(*) as come'), 'user_id'])
+            ->pluck('come', 'user_id')
+            ->toArray();
+    }
+
+    public static function getBeLateNum($year, $month){
+        return self::dailyBuilder($year, $month)->get([DB::raw('sum(heap_late_num) as late'), 'user_id'])
+            ->pluck('late', 'user_id')
+            ->toArray();
+    }
+
+    public static function getDeductNum($year, $month){
+        return self::dailyBuilder($year, $month)->get([DB::raw('sum(deduction_num) as deduct'), 'user_id'])
+            ->pluck('deduct', 'user_id')
+            ->toArray();
+    }
+
+    public static function getSumPunch($year, $month){
+        return self::dailyBuilder($year, $month)
+            ->get([DB::raw('(count(punch_start_time) + count(punch_end_time)) as sum'), 'user_id'])
+            ->pluck('sum', 'user_id')
+            ->toArray();
+    }
 
 }

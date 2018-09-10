@@ -9,6 +9,7 @@ namespace App\Models\Attendance;
 
 use App\Models\Sys\HolidayConfig;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class Leave extends Model
@@ -71,6 +72,37 @@ class Leave extends Model
     public static function getHolidayIdList()
     {
         return self::get(['holiday_id', 'leave_id'])->pluck('holiday_id', 'leave_id')->toArray();
+    }
+
+    //带薪假:关联假期配置表 找出状态为已通过 且是福利假的假期
+    public static function getSalaryLeaves($year, $month){
+        return self::whereHas('holidayConfig', function ($query){
+            $query->where('is_boon', 1);
+        })
+            ->where('status', 3)->whereYear('start_time', $year)->whereMonth('start_time', $month)
+            ->get();
+    }
+
+    //加班调休与无薪假(请假):不是福利假,已通过,不是补打卡,当月
+    public static function getNoSalaryLeaves($year, $month){
+        return self::whereHas('holidayConfig', function ($query){
+            $query->where([['is_boon', '<>', 1], ['apply_type_id', '<>', HolidayConfig::RECHECK]]);
+        })
+            ->with('holidayConfig')
+            ->where('status', '=', 3)
+            ->whereYear('start_time', $year)->whereMonth('start_time', $month)->get();
+    }
+
+    public static function getReCheckSum($year, $month){
+        return self::whereHas('holidayConfig', function ($query){
+            $query->where('apply_type_id', HolidayConfig::RECHECK);
+        })
+            ->where('status', 3)
+            ->whereYear('created_at', $year)->whereMonth('created_at', $month)
+            ->whereRaw('(start_time IS NOT NULL OR end_time IS NOT NULL)')
+            ->groupBy('user_id')
+            ->get([DB::raw('(count(start_time) + count(end_time)) as a'), 'user_id'])
+            ->pluck('a', 'user_id')->toArray();
     }
 
 }
