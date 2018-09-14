@@ -470,7 +470,7 @@ class AttendanceHelper
         //查询加班的所有记录天数
         $userWorkChangeDay = self::selectChangeInfo($userId, $changeHoliday->holiday_id, $leaves['leave_work_ids']);
         //查询已经调休过的天数
-        $userUseChangeDay = self::selectChangeInfo($userId, $holiday->holiday_id, $leaves['leave_work_ids']);
+        $userUseChangeDay = self::selectChangeInfo($userId, $holiday->holiday_id ?? '', $leaves['leave_work_ids']);
 
         return ['change_work_day' => $userWorkChangeDay, 'change_use_day' => $userUseChangeDay];
     }
@@ -502,11 +502,11 @@ class AttendanceHelper
     }
 
 
-    /**
-     * 获取员工 年假类型 记录信息
+    /** 获取员工 年假类型 记录信息
      * @param $entryTime
      * @param $userId
-     * @param $holidayId
+     * @param $holiday
+     * @return mixed 返回天数
      */
     public static function getUserYearHoliday($entryTime, $userId, $holiday)
     {

@@ -45,8 +45,9 @@ class Calendar extends Model
     }
 
     //统计打卡类型为当月正常上班的天数
-    public static function getShouldComeDays($year, $month){
-        return self::whereHas('punchRules', function ($query){
+    public static function getShouldComeDays($year, $month)
+    {
+        return self::whereHas('punchRules', function ($query) {
             $query->where('punch_type_id', PunchRules::NORMALWORK);
         })
             ->where(['year' => $year, 'month' => $month])

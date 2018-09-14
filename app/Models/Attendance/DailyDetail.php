@@ -9,6 +9,8 @@
 
 namespace App\Models\Attendance;
 
+use App\Models\Sys\HolidayConfig;
+use App\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -34,35 +36,54 @@ class DailyDetail extends Model
         'deduction_num',
     ];
 
-    public static function dailyBuilder($year, $month){
-        return self::whereRaw('(punch_start_time IS NOT NULL OR punch_end_time IS NOT NULL)')
+    public function leave()
+    {
+        return $this->hasOne(Leave::class, 'leave_id', 'leave_id');
+    }
+
+    //提取统计条件
+    public static function builder($year, $month)
+    {
+        return self::whereYear('day', $year)->whereMonth('day', $month)->groupBy('user_id');
+    }
+
+    //提取实到天数的条件 上下班打卡没有请假,或上下班没打卡但补打卡
+    public static function ActuallyBuilder($year, $month)
+    {
+        return self::where(function ($q) {
+            $q->where([['punch_start_time', '<>', NULL], ['punch_end_time', '<>', NULL], ['leave_id', '=', NULL]])
+                ->orWhere(function ($query) {
+                    $query->whereRaw('(punch_start_time IS NULL OR punch_end_time IS NULL)')
+                        ->whereHas('leave', function ($q1) {
+                            $q1->whereHas('holidayConfig', function ($q2) {
+                                $q2->where('apply_type_id', HolidayConfig::RECHECK);
+                            });
+                        });
+                });
+        })
             ->whereYear('day', $year)->whereMonth('day', $month)
             ->groupBy('user_id');
     }
 
-    //统计找出有打卡的天数
-    public static function getActuallyCome($year, $month){
-        return self::dailyBuilder($year, $month)->get([DB::raw('count(*) as come'), 'user_id'])
+    //统计实到天数
+    public static function getActuallyCome($year, $month)
+    {
+        return self::ActuallyBuilder($year, $month)->get([DB::raw('count(*) as come'), 'user_id'])
             ->pluck('come', 'user_id')
             ->toArray();
     }
 
-    public static function getBeLateNum($year, $month){
-        return self::dailyBuilder($year, $month)->get([DB::raw('sum(heap_late_num) as late'), 'user_id'])
+    public static function getBeLateNum($year, $month)
+    {
+        return self::builder($year, $month)->get([DB::raw('sum(heap_late_num) as late'), 'user_id'])
             ->pluck('late', 'user_id')
             ->toArray();
     }
 
-    public static function getDeductNum($year, $month){
-        return self::dailyBuilder($year, $month)->get([DB::raw('sum(deduction_num) as deduct'), 'user_id'])
+    public static function getDeductNum($year, $month)
+    {
+        return self::builder($year, $month)->get([DB::raw('sum(deduction_num) as deduct'), 'user_id'])
             ->pluck('deduct', 'user_id')
-            ->toArray();
-    }
-
-    public static function getSumPunch($year, $month){
-        return self::dailyBuilder($year, $month)
-            ->get([DB::raw('(count(punch_start_time) + count(punch_end_time)) as sum'), 'user_id'])
-            ->pluck('sum', 'user_id')
             ->toArray();
     }
 

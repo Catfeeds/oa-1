@@ -19,6 +19,7 @@
 @section('content')
 
     @include('flash::message')
+    @include('attendance.show-month')
 
     <div class="row">
         <div class="col-lg-12">
@@ -47,8 +48,8 @@
                             @foreach($data as $v)
                                 <tr>
                                     <td>{{ $v['day'] }}</td>
-                                    <td>{{ \Auth::user()->username}}</td>
-                                    <td>{{ \Auth::user()->alias}}</td>
+                                    <td>{{ $userInfo['username'] }}</td>
+                                    <td>{{ $userInfo['alias'] }}</td>
                                     @if(empty($v['punch_start_time']))
                                         <td style="color: red">--</td>
                                     @else

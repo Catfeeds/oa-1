@@ -1,5 +1,4 @@
 <div class="form-group">
-    {!! Form::hidden('scope[daily]', 1) !!}
     {!! Form::text('scope[daily_user_id]', '', [ 'class' => 'form-control', 'placeholder' => trans('app.账号') ]) !!}
 </div>
 <div class="form-group">

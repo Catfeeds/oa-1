@@ -78,7 +78,7 @@ class OperateLogHelper
             'sign' => md5($userId . 'oU0lD8GRVpvYfYUq6ensuQtHUkwtE0o3' . $time)
         ];
         //微信通知推送消息接口
-        //\BackstageApi::sendWXMsg($pushData, 'push');
+        \BackstageApi::sendWXMsg($pushData, 'push');
 
     }
 

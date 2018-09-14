@@ -94,35 +94,55 @@ class Leave extends Model
         return self::get(['holiday_id', 'leave_id'])->pluck('holiday_id', 'leave_id')->toArray();
     }
 
+    //提取统计条件
+    public static function leaveBuilder($year, $month)
+    {
+        return self::where('status', self::PASS_REVIEW)
+            ->whereYear('start_time', $year)
+            ->whereMonth('start_time', $month);
+    }
+
     //带薪假:关联假期配置表 找出状态为已通过 且是福利假的假期
-    public static function getSalaryLeaves($year, $month){
-        return self::whereHas('holidayConfig', function ($query){
-            $query->where('is_boon', 1);
-        })
-            ->where('status', 3)->whereYear('start_time', $year)->whereMonth('start_time', $month)
-            ->get();
-    }
-
-    //加班调休与无薪假(请假):不是福利假,已通过,不是补打卡,当月
-    public static function getNoSalaryLeaves($year, $month){
-        return self::whereHas('holidayConfig', function ($query){
-            $query->where([['is_boon', '<>', 1], ['apply_type_id', '<>', HolidayConfig::RECHECK]]);
-        })
-            ->with('holidayConfig')
-            ->where('status', '=', 3)
-            ->whereYear('start_time', $year)->whereMonth('start_time', $month)->get();
-    }
-
-    public static function getReCheckSum($year, $month){
-        return self::whereHas('holidayConfig', function ($query){
-            $query->where('apply_type_id', HolidayConfig::RECHECK);
-        })
-            ->where('status', 3)
-            ->whereYear('created_at', $year)->whereMonth('created_at', $month)
-            ->whereRaw('(start_time IS NOT NULL OR end_time IS NOT NULL)')
+    public static function getSalaryLeaves($year, $month)
+    {
+        return self::leaveBuilder($year, $month)
+            ->whereHas('holidayConfig', function ($query) {
+                $query->where('is_boon', 1);
+            })
             ->groupBy('user_id')
-            ->get([DB::raw('(count(start_time) + count(end_time)) as a'), 'user_id'])
+            ->get([DB::raw('sum(number_day) as s'), 'user_id'])->pluck('s', 'user_id')->toArray();
+    }
+
+    public static function noFull($year, $month)
+    {
+        return self::leaveBuilder($year, $month)
+            ->whereHas('holidayConfig', function ($query) {
+                $query->where('is_full', 1);
+            })
+            ->groupBy('user_id')
+            ->get([DB::raw('count(user_id) as a'), 'user_id'])
             ->pluck('a', 'user_id')->toArray();
+    }
+
+    public static function getNoSalaryLeaves($year, $month)
+    {
+        return self::leaveBuilder($year, $month)
+            ->whereHas('holidayConfig', function ($query1) {
+                $query1->where([['is_boon', '<>', 1], ['apply_type_id', '=', HolidayConfig::LEAVEID]]);
+            })
+            ->groupBy('user_id')
+            ->get([DB::raw('sum(number_day) as s'), 'user_id'])->pluck('s', 'user_id')->toArray();
+    }
+
+    //通过加班调休类型返回请假的id
+    public static function getLeavesIdByChangeTypes($changeTypes, $year, $month)
+    {
+        return self::leaveBuilder($year, $month)
+            ->whereHas('holidayConfig', function ($query) use ($changeTypes) {
+                $query->where('apply_type_id', HolidayConfig::CHANGE)->whereIn('change_type', $changeTypes);
+            })
+            ->groupBy('user_id')
+            ->get([DB::raw('group_concat(leave_id) as ls'), 'user_id'])->pluck('ls', 'user_id')->toArray();
     }
 
 }
