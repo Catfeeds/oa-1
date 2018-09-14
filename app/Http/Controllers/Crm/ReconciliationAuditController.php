@@ -356,6 +356,10 @@ class ReconciliationAuditController extends Controller
 
     public function transformName($source, $data, $request, $time, $rate)
     {
+        if (empty($request['adjustment'])) {
+            $request['adjustment'] = 0;
+            $request['type'] = 0;
+        }
         if ($time) {
             switch ($source) {
                 case $source == Reconciliation::UNRD:
@@ -744,10 +748,10 @@ class ReconciliationAuditController extends Controller
         foreach ($merge as $v) {
             $createData[$v] = $data->$v;
             if (in_array($v, $water)) {
-                if (strstr($v, 'other')){
+                if (strstr($v, 'other')) {
                     $createData[$v] = $data->$v - $request->num;
                     $update[$v] = (int)$request->num;
-                }else{
+                } else {
                     $num = $request->num * $rate[$data->reconciliation_currency];
                     $createData[$v] = $data->$v - $num;
                     $update[$v] = $num;

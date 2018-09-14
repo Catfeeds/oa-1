@@ -16,4 +16,10 @@
            placeholder="{{ trans('crm.统一渠道名称') }}">
 </div>
 
+<div class="form-group">
+    <input type="text" name="scope[client]" value="{{ $scope->client }}" class="form-control col-xs-6"
+           placeholder="{{ trans('crm.客户') }}">
+</div>
+
+
 
