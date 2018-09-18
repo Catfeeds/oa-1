@@ -644,7 +644,7 @@ class ReconciliationAuditController extends Controller
         if ($source == Reconciliation::UNRD && $p1 && in_array(Principal::OPS, $limitPost) && $data['review_type'] == Reconciliation::UNRD) {
             $tmp .= '<a href="' . $url['edit'] . '" target="_self"> <i class="fa fa-cog fa-lg" data-toggle="tooltip" data-placement="top" title="" data-original-title="编辑"></i> </a>';
         }
-        if ($source == Reconciliation::OPD && $p1 && in_array(Principal::OPD, $limitPost) && $data['review_type'] == Reconciliation::OPD) {
+        if ($source == Reconciliation::OPD && $p1 && in_array(Principal::FAC, $limitPost) && $data['review_type'] == Reconciliation::OPD) {
             $tmp .= '<a href="' . $url['edit'] . '" target="_self"> <i class="fa fa-cog fa-lg" data-toggle="tooltip" data-placement="top" title="" data-original-title="编辑"></i> </a>';
         }
         if ($source == Reconciliation::TREASURER && $p1 && in_array(Principal::FRC, $limitPost) && $data['review_type'] == Reconciliation::TREASURER) {
