@@ -213,8 +213,6 @@ return [
         //https://packagist.org/packages/laravelcollective/html
         Collective\Html\HtmlServiceProvider::class,
 
-        Dingo\Api\Provider\LaravelServiceProvider::class,
-
         //考勤服务驱动接口
         App\Providers\AttendanceServiceProvider::class,
 
