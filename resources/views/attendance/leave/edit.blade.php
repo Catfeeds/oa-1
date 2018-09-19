@@ -79,6 +79,7 @@
                         <div class="col-sm-2">
                             <img height="100px" width="100px" src="{{ !empty($leave->annex) ?  asset($leave->annex) : asset('img/blank.png') }}"
                                  id="show_associate_image">
+
                             <input name="annex" type="file" accept="image/*" id="select-associate-file"/>
                         </div>
                         <span class="help-block m-b-none">{{ $errors->first('annex') }}</span>

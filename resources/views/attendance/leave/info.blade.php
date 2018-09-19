@@ -131,7 +131,7 @@
                         {!! Form::label('reason', trans('att.审核状态'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-6">
                             <span class="help-block m-b-none">
-                                {{ empty($reviewUserId) ?  \App\Models\Attendance\Leave::$status[$leave->status] : '待'. $user->role->name . '审核' }}
+                                {{ empty($reviewUserId) ?  \App\Models\Attendance\Leave::$status[$leave->status] : '待'. /*$user->role->name ??*/ '' . '审核' }}
                             </span>
                         </div>
                     </div>

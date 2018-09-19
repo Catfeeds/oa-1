@@ -14,6 +14,7 @@ class Permissions extends Seeder
         '_base',
         '_attendance',
         '_crm',
+        '_staff',
     ];
 
     public function run()
@@ -119,6 +120,31 @@ class Permissions extends Seeder
             'daily-detail.review' => '考勤功能/每日考勤管理/明细管理/「管理员操作」',
         ];
     }
+
+    // 员工管理
+    private function _staff(): array
+    {
+        return [
+            'staff-all' => '员工管理/员工列表/「所有」',
+            'staff' => '员工管理/员工列表/「列表」',
+            'staff.edit' => '员工管理/员工列表/「编辑」',
+            'staff.info' => '员工管理/员工列表/「查看」',
+
+            'entry' => '员工管理/员工入职/「列表」',
+            'entry.create' => '员工管理/员工入职/「添加」',
+            'entry.edit' => '员工管理/员工入职/「编辑」',
+            'entry.del' => '员工管理/员工入职/「删除」',
+            'entry.sendMail' => '员工管理/员工入职/「发送入职信息填写」',
+            'entry.review' => '员工管理/员工入职/「入职审核」',
+
+            'firm-all' => '员工管理/公司配置/「所有」',
+            'firm' => '员工管理/公司配置/「列表」',
+            'firm.create' => '员工管理/公司配置/「添加」',
+            'firm.edit' => '员工管理/公司配置/「编辑」',
+
+        ];
+    }
+
 
     // 对账功能
     private function _crm(): array

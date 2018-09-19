@@ -111,7 +111,7 @@ class User extends Authenticatable
 
     public function role()
     {
-        return $this->hasOne(Role::class, 'id', 'role_id');
+        return $this->hasMany(Role::class, 'id', 'role_id');
     }
 
     public function dept()
@@ -136,6 +136,18 @@ class User extends Authenticatable
     public static function getAliasList()
     {
         return self::get(['user_id', 'alias'])->pluck('alias', 'user_id')->toArray();
+    }
+
+    public static function getUsernameAliasList()
+    {
+        $users = self::get(['user_id', 'alias', 'username'])->toArray();
+
+        $res = [];
+        foreach ($users as $k => $v) {
+            $res[$v['user_id']] = $v['alias'] . '('. $v['username'] . ')';
+        }
+
+        return $res;
     }
 
     public static function getStatusText($status)

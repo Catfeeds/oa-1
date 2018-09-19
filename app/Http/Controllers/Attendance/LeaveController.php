@@ -29,15 +29,18 @@ class LeaveController extends AttController
     {
         $scope = $this->scope;
         $scope->block = 'attendance.leave.scope';
+
         $types = Leave::$types;
         $type = \Request::get('type', key($types));
 
         $userIds = [];
         switch ($type) {
+            //调休
             case Leave::DEPT_LEAVE :
                 $where = AttendanceHelper::setChangeList($type)['where'];
                 $userIds = AttendanceHelper::setChangeList($type)['user_ids'];
                 break;
+            //抄送
             case Leave::COPY_LEAVE :
                 $where = AttendanceHelper::setChangeList($type)['where'];
                 $userIds = AttendanceHelper::setChangeList($type)['user_ids'];
@@ -176,7 +179,7 @@ class LeaveController extends AttController
         $userIds = AttendanceHelper::setChangeList($userDept->dept_id)['user_ids'];
         if((in_array(\Auth::user()->user_id, $logUserIds) || in_array(\Auth::user()->user_id, $userIds)) && !empty($leave->leave_id) ) {
             $reviewUserId = $leave->review_user_id;
-            $user = User::with(['role', 'dept'])->where(['user_id' => $reviewUserId])->first();
+            $user = User::with(['dept'])->where(['user_id' => $reviewUserId])->first();
             $logs = OperateLog::where(['type_id' => 1, 'info_id' => $leave->leave_id])->get();
             $dept = Dept::getDeptList();
             $title = trans('att.假期详情');

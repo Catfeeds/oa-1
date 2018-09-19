@@ -421,11 +421,11 @@ class AttendanceHelper
 
     /**
      * 检验 员工申请单为调休类型
-     * @param $request
      * @param $userId
      * @param $holiday
      * @param int $numberDay
      * @return array
+     *
      */
     public static function checkUserChangeHoliday($userId, $holiday, $numberDay = 0)
     {

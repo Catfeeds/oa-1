@@ -1,4 +1,4 @@
-@if(Entrust::can(['leave*', 'attendance-all', 'daily-detail-all']))
+@if(Entrust::can(['leave*', 'attendance-all', 'daily-detail-all', 'staff*']))
     <li @if (Route::is(['leave*', 'daily-detail*'])) class="active" @endif >
         <a href="#"><i class="fa fa-newspaper-o"></i> <span class="nav-label">{{ trans('att.考勤功能') }}</span><span
                     class="fa arrow"></span></a>
@@ -28,3 +28,30 @@
         </ul>
     </li>
 @endif
+
+@if(Entrust::can(['staff*', 'entry*', 'firm*']))
+    <li @if (Route::is(['staff*', 'entry*', 'firm*'])) class="active" @endif >
+        <a href="#"><i class="fa fa-newspaper-o"></i> <span class="nav-label">{{ trans('staff.员工管理') }}</span><span
+                    class="fa arrow"></span></a>
+        <ul class="nav nav-second-level">
+            @if(Entrust::can(['staff*']))
+                <li @if (Route::is(['staff*']) ) class="active" @endif>
+                    <a href="{{ route('staff.list') }}">{{ trans('staff.员工列表') }}</a>
+                </li>
+            @endif
+
+            @if(Entrust::can(['entry*']))
+                <li @if (Route::is(['entry*']) ) class="active" @endif>
+                    <a href="{{ route('entry.list') }}">{{ trans('staff.员工入职') }}</a>
+                </li>
+            @endif
+
+            @if(Entrust::can(['firm*']))
+                <li @if (Route::is(['firm*']) ) class="active" @endif>
+                    <a href="{{ route('firm.list') }}">{{ trans('staff.公司配置') }}</a>
+                </li>
+            @endif
+        </ul>
+    </li>
+@endif
+

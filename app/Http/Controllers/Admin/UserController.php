@@ -20,11 +20,7 @@ class UserController extends Controller
     protected $redirectTo = '/admin/user';
 
     private $_validateRule = [
-        'alias' => 'required|max:32|min:2',
-        'password' => 'required|min:8|alpha_num|confirmed',
-        'password_confirmation' => 'min:6',
-        'status' => 'required|in:' . User::STATUS_DISABLE . ',' . User::STATUS_ENABLE,
-        'role_id' => 'required|numeric|exists:roles,id',
+        'sex' => 'required|in:' . UserExt::SEX_BOY . ',' . UserExt::SEX_GIRL,
         'mobile' => 'nullable|phone_number',
     ];
 
@@ -183,18 +179,20 @@ class UserController extends Controller
     {
 
         \Auth::user()->user_id == $id && abort(403, trans('app.不可以编辑自有账号'));
+        $data = $request->all();
 
         $user = User::findOrFail($id);
         $validate = array_merge($this->_validateRule, [
             'email' => 'required|email|unique:users,email,' . $user->user_id . ',user_id|max:32',
         ]);
+
         if (empty($data['password'])) {
-           unset($validate['password'], $validate['password_confirmation']);
+            unset($validate['password'], $validate['password_confirmation']);
         }
 
-        $this->validate($request, $validate);
+        //$this->validate($request, $validate);
 
-        if(!empty($request->dept_id) && !empty($request->is_leader)) {
+        if (!empty($request->dept_id) && !empty($request->is_leader)) {
 
             $checkUser = User::where(['dept_id' => $request->dept_id, 'is_leader' => User::IS_LEADER_TRUE])
                 ->where('user_id', '!=', $user->user_id)->first();
@@ -203,7 +201,6 @@ class UserController extends Controller
             }
         }
 
-        $data = $request->all();
         $pwd = $data['password'];
 
         if (empty($data['password'])) {
@@ -218,22 +215,29 @@ class UserController extends Controller
             $data['remember_token'] = Str::random(60);
         }
 
+        $roleId = json_decode($user->role_id);
         // 权限方面
-        if (!empty($user->role_id) && $data['role_id'] != $user->role_id) {
-            $role = Role::findOrFail($user->role_id);
+        if (!empty($roleId)) {
+            $role = Role::whereIn('id', $roleId)->get();
             // 去除权限角色
-            if ($user->hasRole($role->name)) {
-                $user->detachRole($role);
+            foreach ($role as $k => $r) {
+                if ($user->hasRole($r->name)) {
+                    print_r($r->name);
+                    // 设置权限角色
+                    $user->detachRole($r->id);
+                }
             }
         }
 
+        $data['role_id'] = json_encode($data['role_id']);
         $user->update($data);
 
         if (!empty($user->role_id)) {
-            $role = Role::findOrFail($user->role_id);
-            if (!$user->hasRole($role->name)) {
+            $role = Role::whereIn('id', json_decode($user->role_id))->get();
+            foreach ($role as $k => $r)
+            if (!$user->hasRole($r->name)) {
                 // 设置权限角色
-                $user->attachRole($role);
+                $user->attachRole($r->id);
             }
         }
 
@@ -276,13 +280,15 @@ class UserController extends Controller
         $user = User::findOrFail($id);
 
         $content = '你的诗悦OA系统密码是:' . base64_decode(Redis::get(md5($user->user_id . '_' . $user->username)));
+
         try {
             \Mail::send('emails.user', ['content' => $content, 'user' => $user], function (Message $m) use ($user) {
                 $m->to($user->email)->subject('诗悦OA系统-密码邮件');
             });
         } catch (\Swift_TransportException $e) {
+
             flash(trans('app.发送密码邮件失败'), 'danger');
-            \Log::error('发送测试邮件失败:' . $e->getMessage());
+            //\Log::error('发送测试邮件失败:' . $e->getMessage());
             return redirect($this->redirectTo);
         }
 
