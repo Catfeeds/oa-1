@@ -44,6 +44,20 @@ class Role extends EntrustRole
         return isset($list[$id]) ? $list[$id] : '';
     }
 
+    public static function getRoleName($roles, $id)
+    {
+        $ids = json_decode($id);
+
+        if(empty($ids)) return '';
+        $names = [];
+        foreach ($roles as $k => $v) {
+            if(in_array($k, $ids)) {
+                $names [] = $v;
+            }
+        }
+        return implode(',', $names);
+    }
+
     public function leaveStep()
     {
         return $this->hasMany(RoleLeaveStep::class, 'role_id', 'id');

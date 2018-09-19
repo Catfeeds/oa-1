@@ -60,10 +60,13 @@ class UserController extends Controller
             ->paginate(50);
 
         $role_ids = ['' => trans('app.全部员工')] + Role::getRoleTextList();
+
+        $roles = Role::getRoleTextList();
+
         $job = Job::getJobList();
         $dept = Dept::getDeptList();
         $title = trans('app.账号列表');
-        return view('admin.users.index', compact('title', 'data', 'form', 'role_ids', 'job', 'dept'));
+        return view('admin.users.index', compact('title', 'data', 'form', 'role_ids', 'job', 'dept', 'roles'));
     }
 
     public function isMobile($id, Request $request)
