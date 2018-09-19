@@ -101,4 +101,9 @@ class HolidayConfig extends Model
     {
         return self::where('holiday', 'like', "$name")->first() ?? NULL;
     }
+
+    public static function getHolidayApplyList()
+    {
+        return self::get(['holiday_id', 'apply_type_id'])->pluck('apply_type_id', 'holiday_id')->toArray();
+    }
 }

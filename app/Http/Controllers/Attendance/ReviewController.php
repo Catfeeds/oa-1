@@ -18,6 +18,7 @@ use App\Models\Attendance\ConfirmAttendance;
 use App\Models\Attendance\DailyDetail;
 use App\Models\Attendance\Leave;
 use App\Models\Sys\Calendar;
+use App\Models\Sys\Dept;
 use App\Models\Sys\HolidayConfig;
 use App\Models\Sys\PunchRules;
 use App\Models\UserHoliday;
@@ -25,6 +26,7 @@ use App\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
 
 
 class ReviewController extends AttController
@@ -51,7 +53,7 @@ class ReviewController extends AttController
         return view('attendance.daily-detail.review', compact('title', 'monthData', 'scope'));
     }
 
-    public function dealAttendance($scope)
+    public function dealAttendance($scope, $cache = true)
     {
         //判断配置,返回错误信息
         list($message, $yearHolObj, $visitHolObj, $changeHolObj) = $this->ifConfig();
@@ -61,17 +63,22 @@ class ReviewController extends AttController
 
         list($year, $month) = explode('-', $scope->startDate);
 
+        /*//取缓存
+        if (($info = $this->getFromRedis($year, $month, $cache, $scope))[0] == 'success') {
+            return $info;
+        }*/
+
         //该月应到天数:关联查找类型为正常工作的该月日历
         $shouldCome = Calendar::getShouldComeDays($year, $month);
 
-        //实际到的天数
-        $actuallyCome = DailyDetail::getActuallyCome($year, $month);
+        //实到天数
+        $actuallyCome = DailyDetail::getNormalCome($year, $month);
 
         //迟到总分钟数
         $beLateNum = DailyDetail::getBeLateNum($year, $month);
 
         //合计扣分
-        $deductNum = DailyDetail::getBeLateNum($year, $month);
+        $deductNum = DailyDetail::getDeductNum($year, $month);
 
         //计算带薪假,返回数组
         $hasSalary = Leave::getSalaryLeaves($year, $month);
@@ -79,7 +86,7 @@ class ReviewController extends AttController
         //计算无薪假(请假),返回数组
         $hasNoSalary = Leave::getNoSalaryLeaves($year, $month);
 
-        //申请的假期中 影响全勤的假期数
+        //申请的假期中影响全勤的假期数
         $affectFull = Leave::noFull($year, $month);
 
         //获取用户对通知信息的状态
@@ -120,7 +127,7 @@ class ReviewController extends AttController
             $remainVisit = AttendanceHelper::getUserYearHoliday($user->userExt->entry_time, $user->user_id,
                 $visitHolObj);
 
-            $info[] = [
+            $info["$user->user_id"] = [
                 'date'                => "$year-$month",
                 'user_id'             => $user->user_id,
                 'user_alias'          => $user->alias,
@@ -138,10 +145,13 @@ class ReviewController extends AttController
                 'remain_year_holiday' => $remainYear,
                 'remain_change'       => $remainChange,
                 'remain_visit'        => $remainVisit,
-                'detail'              => '明细',
                 'send'                => $confirmStates[$user->user_id] ?? 0,
             ];
         }
+        /*//将没有筛选的全部用户放入缓存
+        if ($cache === true && $scope->getWhere() == '1 = 1') {
+            Redis::setex("att-$year-$month", 100, serialize($info));
+        }*/
         return ['success', $info];
     }
 
@@ -157,20 +167,26 @@ class ReviewController extends AttController
     //点击发送时的处理
     public function send(Request $request)
     {
-        $userId = str_replace('send_', '', $request->user_id);
+        $userId = ($request->user_id == 'all') ? 'all' : str_replace('send_', '', $request->user_id);
         //OperateLogHelper::sendWXMsg('sy0546', '上月考勤统计已出帐');
+        if ($userId == 'all') {
+            $userList = User::get(['user_id'])->pluck('user_id')->toArray();
+        }else {
+            $userList = [$userId];
+        }
+
+        Redis::del("att-$request->date");
         list($year, $month) = explode('-', $request->date);
-        try {
-            ConfirmAttendance::create([
-                'user_id' => $userId,
+
+        foreach ($userList as $u) {
+            ConfirmAttendance::firstOrCreate([
+                'user_id' => $u,
                 'year'    => $year,
                 'month'   => $month,
                 'confirm' => 1,
             ]);
-        } catch (QueryException $exception) {
-            return "fail";
         }
-        return "success";
+        return $userId == 'all' ? redirect()->back() : 'success';
     }
 
     /**
@@ -195,4 +211,33 @@ class ReviewController extends AttController
         return [$message, $yearHolObj, $visitHolObj, $changeHolObj];
     }
 
+    /**
+     * @param $year
+     * @param $month
+     * @param $cache //为true:取全部用户缓存;为id:取单个用户缓存
+     * @param $scope //筛选缓存
+     * @return array
+     */
+    public function getFromRedis($year, $month, $cache, $scope)
+    {
+        if (($info = unserialize(Redis::get("att-$year-$month")))) {
+            if ($cache === true) {
+                //对缓存进行条件筛选
+                $infoAll = [];
+                var_dump("使用所有用户缓存");
+                foreach ($info as $k => $item) {
+                    if ($item['user_id'] == ($scope->dailyUserId ?: true) &&
+                        $item['user_alias'] == ($scope->dailyAlias ?: true) &&
+                        $item['user_dept'] == (Dept::getDeptList()[$scope->dailyDept ?: 0] ?? true)
+                    ) {
+                        $infoAll[] = $item;
+                    }
+                }
+                return ['success', $infoAll];
+            } elseif (isset($info[$cache])) {
+                var_dump("使用单个用户缓存");
+                return ['success', [$info[$cache]]];
+            }
+        }
+    }
 }

@@ -21,9 +21,9 @@ class CreateAttendanceDailyDetailTable extends Migration
             $table->unsignedInteger('punch_start_time_num')->nullable()->comment = '当天打卡时间，冗余字段用来比较时间';
             $table->string('punch_end_time', 10)->nullable()->comment = '当天结束时间';
             $table->unsignedInteger('punch_end_time_num')->nullable()->comment = '当天结束时间，冗余字段用来比较时间';
-            $table->unsignedInteger('heap_late_num')->defult(0)->comment = '累积迟到分钟数';
-            $table->unsignedInteger('lave_buffer_num')->defult(0)->comment = '剩余缓冲分钟数';
-            $table->unsignedInteger('deduction_num')->defult(0)->comment = '扣分';
+            $table->unsignedInteger('heap_late_num')->default(0)->comment = '累积迟到分钟数';
+            $table->unsignedInteger('lave_buffer_num')->default(0)->comment = '剩余缓冲分钟数';
+            $table->unsignedInteger('deduction_num')->default(0)->comment = '扣分';
             $table->unsignedInteger('leave_id')->nullable()->comment = '假期申请单ID，默认为空';
             $table->timestamps();
 

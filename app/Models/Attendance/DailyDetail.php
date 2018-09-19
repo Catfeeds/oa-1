@@ -10,6 +10,7 @@
 namespace App\Models\Attendance;
 
 use App\Models\Sys\HolidayConfig;
+use App\Models\Sys\PunchRules;
 use App\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -47,28 +48,27 @@ class DailyDetail extends Model
         return self::whereYear('day', $year)->whereMonth('day', $month)->groupBy('user_id');
     }
 
-    //提取实到天数的条件 上下班打卡没有请假,或上下班没打卡但补打卡
-    public static function ActuallyBuilder($year, $month)
+    //提取正常天数的条件 上下班打卡没有请假,或lead_id为补打卡类型
+    public static function normalBuilder($year, $month)
     {
-        return self::where(function ($q) {
-            $q->where([['punch_start_time', '<>', NULL], ['punch_end_time', '<>', NULL], ['leave_id', '=', NULL]])
-                ->orWhere(function ($query) {
-                    $query->whereRaw('(punch_start_time IS NULL OR punch_end_time IS NULL)')
-                        ->whereHas('leave', function ($q1) {
-                            $q1->whereHas('holidayConfig', function ($q2) {
-                                $q2->where('apply_type_id', HolidayConfig::RECHECK);
+        return self::where([['punch_start_time', '<>', NULL], ['punch_end_time', '<>', NULL]])
+            ->where(function ($q1) {
+                $q1->where('leave_id', NULL)
+                    ->orWhere(function ($q2) {
+                        $q2->whereHas('leave', function ($q3) {
+                            $q3->whereHas('holidayConfig', function ($q4) {
+                                $q4->where('apply_type_id', HolidayConfig::RECHECK);
                             });
                         });
-                });
-        })
-            ->whereYear('day', $year)->whereMonth('day', $month)
-            ->groupBy('user_id');
+                    });
+            })
+            ->whereYear('day', $year)->whereMonth('day', $month)->groupBy('user_id');
     }
 
-    //统计实到天数
-    public static function getActuallyCome($year, $month)
+    //统计正常天数
+    public static function getNormalCome($year, $month)
     {
-        return self::ActuallyBuilder($year, $month)->get([DB::raw('count(*) as come'), 'user_id'])
+        return self::normalBuilder($year, $month)->get([DB::raw('count(*) as come'), 'user_id'])
             ->pluck('come', 'user_id')
             ->toArray();
     }

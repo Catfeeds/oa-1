@@ -294,7 +294,7 @@ class AttendanceHelper
 
             DailyDetail::create($startData);
 
-            if($endDay + 43200 > strtotime(date('Y-m-d', $endDay) . ' ' . Leave::$endId[$leave->end_id])) {
+            if($endDay + 43200 >= strtotime(date('Y-m-d', $endDay) . ' ' . Leave::$endId[$leave->end_id])) {
                 $endData = [
                     'user_id' => $leave->user_id,
                     'day' => date('Y-m-d', $endDay),
@@ -468,9 +468,9 @@ class AttendanceHelper
         //获取部门批量调休或者加班的申请单ID
         $leaves = self::getMyChangeLeaveId(\Auth::user()->dept_id);
         //查询加班的所有记录天数
-        $userWorkChangeDay = self::selectChangeInfo($userId, $changeHoliday->holiday_id, $leaves['leave_work_ids']);
+        $userWorkChangeDay = self::selectChangeInfo($userId, $changeHoliday->holiday_id, $leaves['leave_work_ids'] ?? []);
         //查询已经调休过的天数
-        $userUseChangeDay = self::selectChangeInfo($userId, $holiday->holiday_id ?? '', $leaves['leave_work_ids']);
+        $userUseChangeDay = self::selectChangeInfo($userId, $holiday->holiday_id, $leaves['leave_change_ids'] ?? []);
 
         return ['change_work_day' => $userWorkChangeDay, 'change_use_day' => $userUseChangeDay];
     }

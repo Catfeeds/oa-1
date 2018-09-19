@@ -80,7 +80,7 @@
                                     <td>{{ $v['created_at'] }}</td>
                                     <td>{{ \App\Models\Attendance\Leave::$status[$v['status']] }}</td>
                                     <td>
-                                        {!! BaseHtml::tooltip(trans('att.请假详情'), route('leave.review.optInfo', ['id' => $v['leave_id']]), 'cog fa fa-newspaper-o') !!}
+                                        {!! BaseHtml::tooltip(trans('att.请假详情'), route('leave.review.optInfo', ['id' => $v['leave_id'], 'type' => 1]), 'cog fa fa-newspaper-o') !!}
                                     </td>
                                 </tr>
                             @endforeach

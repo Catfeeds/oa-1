@@ -16,6 +16,8 @@ use App\Models\Attendance\DailyDetail;
 use App\Models\Sys\HolidayConfig;
 use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redis;
 
 class DailyDetailController extends AttController
 {
@@ -64,13 +66,14 @@ class DailyDetailController extends AttController
         $param = $this->setScopeParams();
         $param['daily_user_id'] = $id;
         $this->scope = new $this->scopeClass($param, null);
-        return $this->review->dealAttendance($this->scope);
+        return $this->review->dealAttendance($this->scope, $id);
     }
 
     //用户确认考勤通知
     public function confirm(Request $request)
     {
         list($year, $month) = explode('-', $request->date);
+        Redis::del("att-".$request->date);
         $a = ConfirmAttendance::where(['user_id' => $request->id, 'year' => $year, 'month' => $month])
             ->update(['confirm' => ConfirmAttendance::CONFIRM]);
         if ($a) {

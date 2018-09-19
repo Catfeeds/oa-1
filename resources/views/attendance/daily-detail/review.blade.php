@@ -20,7 +20,7 @@
     @include('flash::message')
 
     <div class="row">
-        @include('widget.scope-date', ['scope' => $scope])
+        @include('widget.scope-month', ['scope' => $scope])
         <div class="col-lg-12">
             <div class="ibox float-e-margins">
                 <div class="ibox-title">
