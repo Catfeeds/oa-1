@@ -7,7 +7,7 @@
  * Time: 9:54
  * 员工入职数据库模型
  */
-namespace App\Models\StaffMange;
+namespace App\Models\StaffManage;
 
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
