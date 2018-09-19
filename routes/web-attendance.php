@@ -57,14 +57,28 @@ Route::group([
             'uses' => 'LeaveController@reviewBatchOptStatus'])->name('leave.review.batchOptStatus');
 
         #考勤每日明细管理
+        Route::get('daily-detail/userId/{id}', [
+            'middleware' => ['permission:attendance-all|daily-detail-all|daily-detail'],
+            'uses' => 'DailyDetailController@detail'])->name('daily-detail.review.user');
         Route::get('daily-detail', [
             'middleware' => ['permission:attendance-all|daily-detail-all|daily-detail'],
             'uses' => 'DailyDetailController@index'])->name('daily-detail.info');
 
-        //每日考勤管理
+        //用户点击考勤确认
+        Route::get('daily-detail/confirm', [
+            'middleware' => ['permission:attendance-all|daily-detail-all|daily-detail'],
+            'uses' => 'DailyDetailController@confirm'])->name('daily-detail.confirm');
+
+
+        //考勤管理
         Route::get('daily-detail/review/', [
             'middleware' => ['permission:attendance-all|daily-detail-all|daily-detail.review'],
             'uses' => 'ReviewController@index'])->name('daily-detail.review.info');
+        //发布用户考勤确认信息
+        Route::get('daily-detail/review/send', [
+            'middleware' => ['permission:attendance-all|daily-detail-all|daily-detail.review'],
+            'uses' => 'ReviewController@send'])->name('daily-detail.review.send');
+
         #考勤导入功能
         Route::get('daily-detail/review/import/info', [
             'middleware' => ['permission:attendance-all|daily-detail-all|daily-detail.review'],

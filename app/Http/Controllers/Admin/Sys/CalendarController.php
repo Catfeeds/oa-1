@@ -108,14 +108,13 @@ class CalendarController extends Controller
 
     //判断单双周
     public function ifSingleWeek($arg_date){
-        $date = '2018-8-1';//这个以后待设置
-        $isSingle = date('W', strtotime($date));//假如这周开始是单周
+        $date = '2018-7-30';//已知改天为单周 且星期一
+        $timeDiff = strtotime($arg_date) - strtotime($date);
 
-        //相减取余为1 则为双周
-        if (abs(date('W', strtotime($arg_date)) -$isSingle) % 2 == 1){
-            return false;
+        if (intval($timeDiff/24/3600/7) % 2 == 1){
+            return false;//双周
         }else{
-            return true;
+            return true;//单周
         }
     }
 }

@@ -20,37 +20,13 @@
     @include('flash::message')
 
     <div class="row">
+        @include('widget.scope-month', ['scope' => $scope])
         <div class="col-lg-12">
             <div class="ibox float-e-margins">
                 <div class="ibox-title">
                     <h5>{{ $title }}</h5>
                 </div>
-                <div class="ibox-content">
-                    <div class="table-responsive">
-                        <table class="table table-striped table-striped tooltip-demo">
-                            <thead>
-                            <tr>
-                                <th>{{ trans('att.基础信息') }}</th>
-                                <th>{{ trans('att.考勤天数') }}</th>
-                                <th>{{ trans('att.扣分统计') }}</th>
-                                <th>{{ trans('att.剩余假期') }}</th>
-                                <th>{{ trans('att.操作') }}</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            @foreach($data as $v)
-                                <tr>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
-                            @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                @include('attendance.show-month')
             </div>
         </div>
     </div>
