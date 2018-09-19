@@ -351,11 +351,15 @@ class ReconciliationAuditController extends Controller
             'backstage_channel' => $data['backstage_channel'], 'product_id' => $data['product_id'], 'rec_id' => $data['id']]));
 
         flash(trans('app.编辑成功', ['value' => trans('crm.对账审核')]), 'success');
-        return redirect()->route('reconciliationAudit', ['source' => $source, 'product_id' => $data['product_id'], 'scope[startDate]' => $data['billing_cycle_start'], 'scope[endDate]' => $data['billing_cycle_end']]);
+        return redirect()->route('reconciliationAudit', ['source' => $source, 'product_id' => $data['product_id']]);
     }
 
     public function transformName($source, $data, $request, $time, $rate)
     {
+        if (empty($request['adjustment'])) {
+            $request['adjustment'] = 0;
+            $request['type'] = 0;
+        }
         if ($time) {
             switch ($source) {
                 case $source == Reconciliation::UNRD:
@@ -640,7 +644,7 @@ class ReconciliationAuditController extends Controller
         if ($source == Reconciliation::UNRD && $p1 && in_array(Principal::OPS, $limitPost) && $data['review_type'] == Reconciliation::UNRD) {
             $tmp .= '<a href="' . $url['edit'] . '" target="_self"> <i class="fa fa-cog fa-lg" data-toggle="tooltip" data-placement="top" title="" data-original-title="编辑"></i> </a>';
         }
-        if ($source == Reconciliation::OPD && $p1 && in_array(Principal::OPD, $limitPost) && $data['review_type'] == Reconciliation::OPD) {
+        if ($source == Reconciliation::OPD && $p1 && in_array(Principal::FAC, $limitPost) && $data['review_type'] == Reconciliation::OPD) {
             $tmp .= '<a href="' . $url['edit'] . '" target="_self"> <i class="fa fa-cog fa-lg" data-toggle="tooltip" data-placement="top" title="" data-original-title="编辑"></i> </a>';
         }
         if ($source == Reconciliation::TREASURER && $p1 && in_array(Principal::FRC, $limitPost) && $data['review_type'] == Reconciliation::TREASURER) {
@@ -744,10 +748,10 @@ class ReconciliationAuditController extends Controller
         foreach ($merge as $v) {
             $createData[$v] = $data->$v;
             if (in_array($v, $water)) {
-                if (strstr($v, 'other')){
+                if (strstr($v, 'other')) {
                     $createData[$v] = $data->$v - $request->num;
                     $update[$v] = (int)$request->num;
-                }else{
+                } else {
                     $num = $request->num * $rate[$data->reconciliation_currency];
                     $createData[$v] = $data->$v - $num;
                     $update[$v] = $num;

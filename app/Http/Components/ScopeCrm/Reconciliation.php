@@ -15,11 +15,13 @@ class Reconciliation extends GeneralScope
     public $os;
     public $backstage_channel;
     public $unified_channel;
+    public $client;
     public function __construct(array $params, $user = null)
     {
         $this->os = $params['os'] ?? '';
         $this->backstage_channel = $params['backstage_channel'] ?? '';
         $this->unified_channel = $params['unified_channel'] ?? '';
+        $this->client = $params['client'] ?? '';
         parent::__construct($params, $user);
     }
 
@@ -32,6 +34,10 @@ class Reconciliation extends GeneralScope
 
         if(!empty($this->backstage_channel)) {
             $where[] = sprintf("%sbackstage_channel like '%s%s%s'", $tableAlias,'%', $this->backstage_channel, '%');
+        }
+
+        if(!empty($this->client)) {
+            $where[] = sprintf("%sclient like '%s%s%s'", $tableAlias,'%', $this->client, '%');
         }
 
         if(!empty($this->unified_channel)) {
