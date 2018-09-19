@@ -71,14 +71,14 @@
                     <div class="form-group">
                         {!! Form::label('nature_id', trans('staff.工作性质'), ['class' => 'col-sm-4 control-label']) !!}
                         <div class="col-sm-3">
-                            {!! Form::text('nature_id', \App\Models\StaffMange\Entry::$nature[$entry->nature_id] ?? '' ,['class' => 'form-control', 'disabled']) !!}
+                            {!! Form::text('nature_id', \App\Models\StaffManage\Entry::$nature[$entry->nature_id] ?? '' ,['class' => 'form-control', 'disabled']) !!}
                         </div>
                     </div>
 
                     <div class="form-group">
                         {!! Form::label('hire_id', '招聘类型', ['class' => 'col-sm-4 control-label']) !!}
                         <div class="col-sm-3">
-                            {!! Form::text('hire_id', \App\Models\StaffMange\Entry::$hireTYpe[$entry->hire_id] ?? '' ,['class' => 'form-control', 'disabled']) !!}
+                            {!! Form::text('hire_id', \App\Models\StaffManage\Entry::$hireTYpe[$entry->hire_id] ?? '' ,['class' => 'form-control', 'disabled']) !!}
                         </div>
                     </div>
 
@@ -337,7 +337,7 @@
 
                     <div class="form-group">
                         <div class="col-sm-4 col-sm-offset-5">
-                            @if(Entrust::can(['entry.review']) && in_array($entry->status, [\App\Models\StaffMange\Entry::FILL_END]))
+                            @if(Entrust::can(['entry.review']) && in_array($entry->status, [\App\Models\StaffManage\Entry::FILL_END]))
                                 <a id="pass" class="btn btn-success">{{ trans('staff.确认入职') }}</a>
                             @endif
                             <a href="{{ route('entry.list') }}"

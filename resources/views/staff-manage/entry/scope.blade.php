@@ -8,7 +8,7 @@
     <div class="col-xs-2">
         <select class="js-select2-single form-control" name="scope[status]" >
             <option value="">申请状态</option>
-            @foreach( \App\Models\StaffMange\Entry::$status as $k => $v)
+            @foreach( \App\Models\StaffManage\Entry::$status as $k => $v)
                 <option value="{{ $k }}" @if($k == ($a = $scope->statusId ?? old("scope[status]")) && $a !== NULL) selected="selected" @endif>{{ $v }}</option>
             @endforeach
         </select>

@@ -95,7 +95,7 @@
                     <div class="form-group @if (!empty($errors->first('nature_id'))) has-error @endif">
                         {!! Form::label('nature_id', trans('staff.工作性质'), ['class' => 'col-sm-4 control-label']) !!}
                         <div class="col-sm-3">
-                            {!! Form::select('nature_id', \App\Models\StaffMange\Entry::$nature, isset($entry->nature_id) ? $entry->nature_id: old('nature_id'), [
+                            {!! Form::select('nature_id', \App\Models\StaffManage\Entry::$nature, isset($entry->nature_id) ? $entry->nature_id: old('nature_id'), [
                             'class' => 'form-control',
                             'placeholder' => trans('app.请选择', ['value' => trans('staff.所属公司')]),
                             'required' => true,
@@ -109,7 +109,7 @@
                         {!! Form::label('hire_id ', trans('staff.招聘类型'), ['class' => 'col-sm-4 control-label']) !!}
 
                         <div class="col-sm-3">
-                            {!! Form::select('hire_id', \App\Models\StaffMange\Entry::$hireTYpe, isset($entry->hire_id) ? $entry->hire_id: old('hire_id'), [
+                            {!! Form::select('hire_id', \App\Models\StaffManage\Entry::$hireTYpe, isset($entry->hire_id) ? $entry->hire_id: old('hire_id'), [
                             'class' => 'form-control',
                             'placeholder' => trans('app.请选择', ['value' => trans('staff.招聘类型')]),
                             'required' => true,

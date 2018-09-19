@@ -48,26 +48,26 @@
                                     <td>{{ $dept[$v['dept_id']] ?? '--' }}</td>
                                     <td>{{ $job[$v['job_id']] ?? '--' }}</td>
                                     <td>{{ $v['entry_time'] }}</td>
-                                    <td>{{ \App\Models\StaffMange\Entry::$status[$v['status']] ?? '--' }}</td>
+                                    <td>{{ \App\Models\StaffManage\Entry::$status[$v['status']] ?? '--' }}</td>
                                     <td>
                                         @if(Entrust::can(['entry.review']))
                                             {!! BaseHtml::tooltip(trans('staff.入职信息确认'), route('entry.showInfo', ['id' => $v['entry_id']]), ' fa-check-square-o text-primary fa-lg') !!}
                                         @endif
 
-                                        @if(Entrust::can(['entry.review']) && !in_array($v['status'], [\App\Models\StaffMange\Entry::REVIEW_PASS, \App\Models\StaffMange\Entry::REVIEW_REFUSE]))
+                                        @if(Entrust::can(['entry.review']) && !in_array($v['status'], [\App\Models\StaffManage\Entry::REVIEW_PASS, \App\Models\StaffManage\Entry::REVIEW_REFUSE]))
                                             {!! BaseHtml::tooltip(trans('staff.放弃入职'), route('entry.refuse', ['id' => $v['entry_id']]), ' fa-times-circle-o text-danger fa-lg confirmation', ['data-confirm' => trans('staff.确认放弃办理入职?')]) !!}
                                         @endif
                                     </td>
                                     <td>
-                                        @if(Entrust::can(['entry.sendMail']) && !in_array($v['status'], [\App\Models\StaffMange\Entry::REVIEW_PASS, \App\Models\StaffMange\Entry::REVIEW_REFUSE]))
+                                        @if(Entrust::can(['entry.sendMail']) && !in_array($v['status'], [\App\Models\StaffManage\Entry::REVIEW_PASS, \App\Models\StaffManage\Entry::REVIEW_REFUSE]))
                                             {!! BaseHtml::tooltip(trans('staff.发送入职邀请'), route('entry.createSendInfo', ['id' => $v['entry_id']]), ' fa-send-o text-info fa-lg confirmation', ['data-confirm' => trans('staff.确认发送入职邀请?')]) !!}
                                         @endif
 
-                                        @if(Entrust::can(['entry.edit']) && !in_array($v['status'], [\App\Models\StaffMange\Entry::REVIEW_PASS, \App\Models\StaffMange\Entry::REVIEW_REFUSE]))
+                                        @if(Entrust::can(['entry.edit']) && !in_array($v['status'], [\App\Models\StaffManage\Entry::REVIEW_PASS, \App\Models\StaffManage\Entry::REVIEW_REFUSE]))
                                             {!! BaseHtml::tooltip(trans('staff.调整入职信息'), route('entry.edit', ['id' => $v['entry_id']]), ' fa-cog text-success fa-lg') !!}
                                         @endif
 
-                                        @if(Entrust::can(['entry.del']) && !in_array($v['status'], [\App\Models\StaffMange\Entry::REVIEW_PASS]))
+                                        @if(Entrust::can(['entry.del']) && !in_array($v['status'], [\App\Models\StaffManage\Entry::REVIEW_PASS]))
                                             {!! BaseHtml::tooltip(trans('staff.删除'), route('entry.del', ['id' => $v['entry_id']]), ' fa-times text-danger fa-lg confirmation', ['data-confirm' => trans('staff.确认删除该员工入职信息?')]) !!}
                                         @endif
                                     </td>

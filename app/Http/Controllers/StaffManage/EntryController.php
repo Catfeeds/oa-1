@@ -13,7 +13,7 @@ use App\Http\Components\Helpers\OperateLogHelper;
 use App\Http\Components\ScopeStaff\EntryScope;
 use App\Http\Controllers\Attendance\AttController;
 use App\Models\StaffManage\Firm;
-use App\Models\StaffMange\Entry;
+use App\Models\StaffManage\Entry;
 use App\Models\Sys\Dept;
 use App\Models\Sys\Job;
 use App\Models\Sys\School;
@@ -21,7 +21,6 @@ use App\Models\UserExt;
 use App\User;
 use EasyWeChat\Kernel\Support\Str;
 use Illuminate\Http\Request;
-use Illuminate\Mail\Message;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 
