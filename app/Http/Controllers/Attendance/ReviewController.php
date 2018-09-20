@@ -237,7 +237,7 @@ class ReviewController extends AttController
 
     /**
      * @param $monthInfo
-     * @return bool
+     * @return bool //有权限则跳转到假期配置页,没有则在页面判断,显示联系管理员
      */
     public function errorRedirect($monthInfo)
     {

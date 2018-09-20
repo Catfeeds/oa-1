@@ -9,7 +9,7 @@
 @section('content')
 
     @include('flash::message')
-    @if(isset($scope))
+    @if(isset($scope) && Entrust::can(['daily-detail-notice', 'daily-detail-all']))
         @include('attendance.daily-detail.notice')
     @endif
 

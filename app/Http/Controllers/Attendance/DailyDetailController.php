@@ -67,7 +67,7 @@ class DailyDetailController extends AttController
     public function confirm(Request $request)
     {
         list($year, $month) = explode('-', $request->date);
-        Redis::del("att-".$request->date);
+        Redis::del("att-" . $request->date);
         $a = ConfirmAttendance::where(['user_id' => $request->id, 'year' => $year, 'month' => $month])
             ->update(['confirm' => ConfirmAttendance::CONFIRM]);
         if ($a) {

@@ -12,7 +12,7 @@
 </div>
 
 <div class="ibox-content" style="margin-bottom: 20px">
-    @if(Entrust::can(['daily-detail-notice', 'daily-detail-all']) && $monthInfo[0] == 'success')
+    @if($monthInfo[0] == 'success')
         <div class="table-responsive">
             <table class="table tooltip-demo table-bordered" id="example" width="100%">
                 <thead>
