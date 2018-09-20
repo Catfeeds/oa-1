@@ -183,7 +183,6 @@ class EntryController extends AttController
 
         flash(trans('staff.发送员工入职邮件成功'), 'success');
         return redirect()->route('entry.list');
-
     }
 
     /**
@@ -354,7 +353,6 @@ class EntryController extends AttController
             \Mail::send('emails.entry', ['content' => $content, 'entry' => $entry], function (Message $m) use ($entry) {
                 $m->to($entry->email)->subject('诗悦OA系统-帐号信息');
             });*/
-
 
         } catch (\Exception $e) {
             //事务回滚

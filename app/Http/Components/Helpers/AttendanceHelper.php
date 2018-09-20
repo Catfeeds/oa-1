@@ -508,6 +508,8 @@ class AttendanceHelper
      */
     public static function getUserYearHoliday($entryTime, $userId, $holiday)
     {
+        //入职未满一年，年假周期类型 天数为0
+        if(empty($entryTime) || strtotime($entryTime) + 31536000 > time()) return 0;
         //默认为上一年的入职月份的开始时间
         $startDay= date("Y", strtotime("-1 year")) . '-' . date('m-d', strtotime($entryTime));
         //当年的员工年假到期时间
