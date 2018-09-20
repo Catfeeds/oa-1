@@ -221,7 +221,6 @@
                             {!! Form::text('place', isset($entry->place) ? $entry->place : old('place'), [
                             'class' => 'form-control',
                             'placeholder' => trans('app.请输入', ['value' => trans('staff.工作位置')]),
-                            'required' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('place') }}</span>
                         </div>
