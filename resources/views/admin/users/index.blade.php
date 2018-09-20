@@ -52,8 +52,7 @@
                                         <th>{{ trans('app.状态') }}</th>
                                         <th>验证登录</th>
                                         <th>{{ trans('app.部门') }}</th>
-                                        <th>{{ trans('app.职务') }}</th>
-                                        <th>{{ trans('app.岗位') }}</th>
+                                        <th>{{ trans('app.权限列表') }}</th>
                                         <th>{{ trans('app.创建时间') }}</th>
                                         <th>{{ trans('app.更新时间') }}</th>
                                         <th>{{ trans('app.操作') }}</th>
@@ -69,8 +68,7 @@
                                             <td>{!! \App\User::getStatusText($v['status']) !!}</td>
                                             <td>{!! \App\User::getIsMobileTest($v) !!}</td>
                                             <td>{{ $dept[$v['dept_id']] ?? '' }}</td>
-                                            <td>{{ \App\Models\Role::getRoleText($v['role_id']) }}</td>
-                                            <td>{{ $job[$v['job_id']] ?? '' }}</td>
+                                            <td>{!! \App\Models\Role::getRoleName($roles, $v['role_id']) !!}</td>
                                             <td>{{ $v['created_at'] }}</td>
                                             <td>{{ $v['updated_at'] }}</td>
                                             <td>

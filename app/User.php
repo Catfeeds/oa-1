@@ -157,6 +157,7 @@ class User extends Authenticatable
 
     public static function getIsMobileTest($user)
     {
+
         $value = $user->is_mobile == self::IS_MOBILE_TRUE ? self::IS_MOBILE_TRUE : self::IS_MOBILE_FALSE;
         $list = [
             self::IS_MOBILE_TRUE => 'success',
