@@ -300,9 +300,7 @@ class AttendanceHelper
                     'day' => date('Y-m-d', $endDay),
                     'leave_id' => $leave->leave_id,
                     'punch_start_time' => Leave::$startId[1],
-                    'punch_start_time_num' => strtotime(date('Y-m-d', $endDay) . ' ' . Leave::$startId[1]),
-                    'punch_end_time' => 0,
-                    'punch_end_time_num' => 0,
+                    'punch_start_time_num' => strtotime(date('Y-m-d', $endDay) . ' ' . Leave::$startId[1])
                 ];
 
                 DailyDetail::create($endData);
