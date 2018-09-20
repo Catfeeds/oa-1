@@ -40,17 +40,11 @@ class ReviewController extends AttController
         $scope = $this->scope;
         $scope->block = 'attendance.leave.monthscope';
 
-        $month = $this->dealAttendance($scope);
-        if ($month[0] == 'error') {
-            foreach ($month[1] as $message) {
-                flash($message['message'], $message['sign']);
-            }
-            return redirect()->route('holiday-config');
-        }
-        $monthData = $month[1];
+        $monthInfo = $this->dealAttendance($scope);
+        if ($this->errorRedirect($monthInfo)) return redirect()->route('holiday-config');
 
         $title = trans('att.考勤管理');
-        return view('attendance.daily-detail.review', compact('title', 'monthData', 'scope'));
+        return view('attendance.daily-detail.review', compact('title', 'monthInfo', 'scope'));
     }
 
     public function dealAttendance($scope, $cache = true)
@@ -171,7 +165,7 @@ class ReviewController extends AttController
         //OperateLogHelper::sendWXMsg('sy0546', '上月考勤统计已出帐');
         if ($userId == 'all') {
             $userList = User::get(['user_id'])->pluck('user_id')->toArray();
-        }else {
+        } else {
             $userList = [$userId];
         }
 
@@ -239,5 +233,20 @@ class ReviewController extends AttController
                 return ['success', [$info[$cache]]];
             }
         }
+    }
+
+    /**
+     * @param $monthInfo
+     * @return bool
+     */
+    public function errorRedirect($monthInfo)
+    {
+        if ($monthInfo[0] == 'error' && \Entrust::can(['holiday-config', 'holiday-config-all'])) {
+            foreach ($monthInfo[1] as $message) {
+                flash($message['message'], $message['sign']);
+            }
+            return true;
+        }
+        return false;
     }
 }

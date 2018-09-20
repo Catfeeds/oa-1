@@ -4,22 +4,14 @@
 
 @section('page-head')
     @parent
-    <div class="col-sm-8">
-        <div class="title-action">
-            @if(Entrust::can(['attendance-all', 'daily-detail.all', 'daily-detail.review']))
-                <a href="{{ route('daily-detail.review.import.info') }}" class="btn btn-primary btn-sm">{{ trans('导入打卡记录') }}</a>
-                <a href="javascript:history.back()" class="btn btn-success btn-sm">{{ trans('返回') }}</a>
-            @endif
-
-        </div>
-    </div>
-
 @endsection
 
 @section('content')
 
     @include('flash::message')
-    @include('attendance.show-month')
+    @if(isset($scope))
+        @include('attendance.daily-detail.notice')
+    @endif
 
     <div class="row">
         <div class="col-lg-12">

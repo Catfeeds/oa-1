@@ -36,18 +36,12 @@ class DailyDetailController extends AttController
         $userInfo['username'] = \Auth::user()->username;
         $userInfo['alias'] = \Auth::user()->alias;
 
-        $month = $this->getMonthAttendance(\Auth::user()->user_id);
-        if ($month[0] == 'error') {
-            foreach ($month[1] as $message) {
-                flash($message['message'], $message['sign']);
-            }
-            return redirect()->route('holiday-config');
-        }
-        $monthData = $month[1];
+        $monthInfo = $this->getMonthAttendance(\Auth::user()->user_id);
+        if ($this->review->errorRedirect($monthInfo)) return redirect()->route('holiday-config');
 
         $scope = $this->scope;
         $title = trans('att.我的每日考勤详情');
-        return view('attendance.daily-detail.index', compact('title', 'data', 'scope', 'userInfo', 'monthData', 'scope'));
+        return view('attendance.daily-detail.index', compact('title', 'data', 'scope', 'userInfo', 'monthInfo', 'scope'));
     }
 
     //明细

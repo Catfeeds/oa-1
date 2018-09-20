@@ -8,7 +8,6 @@
         <div class="title-action">
             @if(Entrust::can(['attendance-all', 'daily-detail.all', 'daily-detail.review']))
                 <a href="{{ route('daily-detail.review.import.info') }}" class="btn btn-success btn-sm">{{ trans('导入打卡记录列表') }}</a>
-                <a href="{{ route('daily-detail.review.import') }}" class="btn btn-primary btn-sm">{{ trans('导入打卡记录') }}</a>
             @endif
         </div>
     </div>
@@ -18,7 +17,6 @@
 @section('content')
 
     @include('flash::message')
-
     <div class="row">
         @include('widget.scope-month', ['scope' => $scope])
         <div class="col-lg-12">
@@ -26,7 +24,7 @@
                 <div class="ibox-title">
                     <h5>{{ $title }}</h5>
                 </div>
-                @include('attendance.show-month')
+                @include('attendance.review.show-month')
             </div>
         </div>
     </div>
