@@ -45,14 +45,12 @@ class Leave extends Model
         1 => '09:00',
         2 => '13:45',
         3 => '19:00',
-        0 => ''
     ];
 
     public static $endId = [
         1 => '12:00',
         2 => '18:00',
         3 => '20:00',
-        0 => ''
     ];
 
     /**
@@ -60,11 +58,11 @@ class Leave extends Model
      * @var array
      */
     public static $status = [
-        0 => '待审核',
-        1 => '审核中',
-        2 => '已拒绝',
-        3 => '已通过',
-        4 => '已取消',
+        self::WAIT_REVIEW => '待审核',
+        self::ON_REVIEW => '审核中',
+        self::REFUSE_REVIEW => '已拒绝',
+        self::PASS_REVIEW => '已通过',
+        self::CANCEL_REVIEW => '已取消',
     ];
 
     protected $fillable = [

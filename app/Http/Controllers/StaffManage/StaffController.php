@@ -24,7 +24,6 @@ class StaffController extends AttController
     private $_validateRule = [
         'alias' => 'required|max:32|min:2',
         'mobile' => 'required|phone_number|max:11',
-        'email' => 'required|unique:users,email|max:32',
         'entry_time' => 'required|date',
         'nature_id' => 'required|integer',
         'hire_id' => 'required|integer',
@@ -92,8 +91,9 @@ class StaffController extends AttController
 
     public function update(Request $request, $id)
     {
-
-        $this->validate($request, $this->_validateRule);
+        $this->validate($request, array_merge($this->_validateRule, [
+            'email' => 'required|email|max:32|unique:users,email,' . $id.',user_id',
+        ]));
 
         $data = $request->all();
         $user = User::with('userExt')->findOrFail($id);

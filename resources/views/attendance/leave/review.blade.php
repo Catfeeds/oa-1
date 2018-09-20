@@ -59,8 +59,8 @@
                                                 {{ '上班补打卡:' }}<br>{{  date('Y-m-d H:i:s', strtotime($v['start_time'])) }}
                                         @endif
                                         @else
-                                            {{  date('Y-m-d', strtotime($v['start_time'])).' '.
-                                            \App\Models\Attendance\Leave::$startId[$v['start_id']] }}
+                                            {{ date('Y-m-d', strtotime($v['start_time'])).' '.
+                                            \App\Models\Attendance\Leave::$startId[$v['start_id']] ?? '' }}
                                         @endif
                                     </td>
                                     <td>
@@ -72,10 +72,10 @@
                                             @endif
                                         @else
                                             {{  date('Y-m-d', strtotime($v['end_time'])).' '.
-                                            \App\Models\Attendance\Leave::$endId[$v['end_id']] }}
+                                            \App\Models\Attendance\Leave::$endId[$v['end_id']]  ?? ''}}
                                         @endif
                                     </td>
-                                    <td>{{ App\Components\Helper\DataHelper::diffTime(date('Y-m-d', strtotime($v['start_time'])) . ' ' . \App\Models\Attendance\Leave::$startId[$v['start_id']], date('Y-m-d', strtotime($v['end_time'])) . ' ' . \App\Models\Attendance\Leave::$endId[$v['end_id']]) .'天'}}</td>
+                                    <td>{{$v['number_day'] . trans('att.天')}}</td>
                                     <td><pre style="height: 5em;width: 20em">{{ $v['reason'] }}</pre></td>
                                     <td>{{ $v['created_at'] }}</td>
                                     <td>{{ \App\Models\Attendance\Leave::$status[$v['status']] }}</td>
