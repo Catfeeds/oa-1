@@ -10,7 +10,6 @@
             @if(Entrust::can(['entry-all', 'entry.edit', 'entry.create']))
                 <a href="{{ route('entry.create') }}" class="btn btn-primary btn-sm">{{ trans('staff.添加待入职') }}</a>
             @endif
-
         </div>
     </div>
 
