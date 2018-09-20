@@ -113,6 +113,7 @@
                             'class' => 'form-control',
                             'placeholder' => trans('app.请选择', ['value' => trans('staff.招聘类型')]),
                             'required' => true,
+                            'id' => 'hire_id'
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('hire_id') }}</span>
                         </div>
@@ -266,6 +267,8 @@
 @section('scripts-last')
     <script>
         $(function() {
+            $('#sex').select2();
+            $('#hire_id').select2();
             $('#firm_id').select2();
             $('#dept_id').select2();
             $('#job_id').select2();
