@@ -265,7 +265,7 @@ class EntryController extends AttController
 
         $entry = Entry::where(['remember_token' => $token])->first();
 
-        if (empty($entry->entry_id) || $entry->status === Entry::FILL_END || time() >= (strtotime($entry->send_time) + self::EXPIRED_TIME)) {
+        if (empty($entry->entry_id) || in_array($entry->status, [Entry::FILL_END, Entry::REVIEW_PASS, Entry::REVIEW_REFUSE]) || time() >= (strtotime($entry->send_time) + self::EXPIRED_TIME)) {
             return '';
         }
 
