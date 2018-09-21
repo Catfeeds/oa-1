@@ -48,31 +48,6 @@ class DailyDetail extends Model
         return self::whereYear('day', $year)->whereMonth('day', $month)->groupBy('user_id');
     }
 
-    //提取正常天数的条件 上下班打卡没有请假,或lead_id为补打卡类型
-    public static function normalBuilder($year, $month)
-    {
-        return self::where([['punch_start_time', '<>', NULL], ['punch_end_time', '<>', NULL]])
-            ->where(function ($q1) {
-                $q1->where('leave_id', NULL)
-                    ->orWhere(function ($q2) {
-                        $q2->whereHas('leave', function ($q3) {
-                            $q3->whereHas('holidayConfig', function ($q4) {
-                                $q4->where('apply_type_id', HolidayConfig::RECHECK);
-                            });
-                        });
-                    });
-            })
-            ->whereYear('day', $year)->whereMonth('day', $month)->groupBy('user_id');
-    }
-
-    //统计正常天数
-    public static function getNormalCome($year, $month)
-    {
-        return self::normalBuilder($year, $month)->get([DB::raw('count(*) as come'), 'user_id'])
-            ->pluck('come', 'user_id')
-            ->toArray();
-    }
-
     public static function getBeLateNum($year, $month)
     {
         return self::builder($year, $month)->get([DB::raw('sum(heap_late_num) as late'), 'user_id'])
@@ -87,4 +62,23 @@ class DailyDetail extends Model
             ->toArray();
     }
 
+    //获取不用上班与没打卡的天数之和
+    public static function getNoComeDays($year, $month)
+    {
+        $arr = [];
+
+        $startArr = self::builder($year, $month)->where('punch_start_time', '=', NULL)
+            ->get([DB::raw('count(day) as start'), 'user_id'])
+            ->pluck('start', 'user_id')->toArray();
+        $endArr = self::builder($year, $month)->where('punch_end_time', '=', NULL)
+            ->get([DB::raw('count(day) as end'), 'user_id'])
+            ->pluck('end', 'user_id')->toArray();
+
+        $arrKeys = array_merge(array_keys($startArr), array_keys($endArr));
+
+        foreach ($arrKeys as $arrKey) {
+            $arr[$arrKey] = ($startArr[$arrKey] ?? 0) + ($endArr[$arrKey] ?? 0) * 0.5;
+        }
+        return $arr;
+    }
 }

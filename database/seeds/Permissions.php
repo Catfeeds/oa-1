@@ -120,7 +120,11 @@ class Permissions extends Seeder
             'daily-detail.edit' => '考勤功能/每日考勤管理/我的明细/「管理员编辑」',
             'daily-detail.review' => '考勤功能/每日考勤管理/明细管理/「管理员操作」',
 
-            'daily-detail.action' => '考勤功能/考勤管理/「操作」'
+            'daily-detail.review.detail' => '考勤功能/考勤管理/「查看明细」',
+            'daily-detail.review.send' => '考勤功能/考勤管理/「发布考勤通知」',
+            'daily-detail.review.send-batch' => '考勤功能/考勤管理/「批量发布考勤通知」',
+            'daily-detail.review.export' => '考勤功能/考勤管理/「选择导出excel」',
+            'daily-detail.review.export-batch' => '考勤功能/考勤管理/「批量导出excel」',
         ];
     }
 

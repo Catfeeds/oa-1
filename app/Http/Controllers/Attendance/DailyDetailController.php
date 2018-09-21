@@ -44,16 +44,6 @@ class DailyDetailController extends AttController
         return view('attendance.daily-detail.index', compact('title', 'data', 'scope', 'userInfo', 'monthInfo', 'scope'));
     }
 
-    //明细
-    public function detail($id)
-    {
-        $data = DailyDetail::where('user_id', $id)->orderBy('created_at', 'desc')->paginate(30);
-        $userInfo['username'] = User::where('user_id', $id)->first()->username;
-        $userInfo['alias'] = User::where('user_id', $id)->first()->alias;
-        $title = "用户{$id}的考勤详情";
-        return view('attendance.daily-detail.index', compact('title', 'data', 'userInfo'));
-    }
-
     //重新初始化scope,调用review控制器的方法
     public function getMonthAttendance($id)
     {

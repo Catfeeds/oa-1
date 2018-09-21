@@ -4,15 +4,15 @@
 
 @section('page-head')
     @parent
+    <div class="col-sm-8">
+        <div class="title-action">
+            <a href="javascript:history.back()" class="btn btn-success btn-sm">{{ trans('返回') }}</a>
+        </div>
+    </div>
 @endsection
 
 @section('content')
-
     @include('flash::message')
-    @if(Entrust::can(['daily-detail-notice']))
-        @include('attendance.daily-detail.notice')
-    @endif
-
     <div class="row">
         <div class="col-lg-12">
             <div class="ibox float-e-margins">
@@ -33,7 +33,6 @@
                                 <th>{{ trans('att.剩余缓冲时间') }}</th>
                                 <th>{{ trans('att.扣分') }}</th>
                                 <th>{{ trans('att.类型') }}</th>
-                                <th>{{ trans('att.操作') }}</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -56,12 +55,6 @@
                                     <td>{{ $v['lave_buffer_num'] ? $v['heap_late_num']  : '--'  }}</td>
                                     <td>{{ $v['deduction_num'] ? $v['heap_late_num']  : '--'  }}</td>
                                     <td>{{ \App\Models\Sys\HolidayConfig::getHolidayList()[\App\Models\Attendance\Leave::getHolidayIdList()[$v['leave_id']] ?? 0] ?? '--' }}</td>
-                                    <td>
-                                        @if(empty($v['punch_start_time']) || empty($v['punch_end_time']))
-                                            <a href="{{route('leave.create', ['id' => \App\Models\Sys\HolidayConfig::RECHECK])}}">{{ trans('att.补打卡') }}</a>
-                                            <a href="{{route('leave.create', ['id' => \App\Models\Sys\HolidayConfig::LEAVEID])}}">{{ trans('att.补假') }}</a>
-                                        @endif
-                                    </td>
                                 </tr>
                             @endforeach
                             </tbody>

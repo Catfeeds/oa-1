@@ -65,8 +65,8 @@ class ReviewController extends AttController
         //该月应到天数:关联查找类型为正常工作的该月日历
         $shouldCome = Calendar::getShouldComeDays($year, $month);
 
-        //实到天数
-        $actuallyCome = DailyDetail::getNormalCome($year, $month);
+        //没有打卡的天数(含周末)
+        $noComeDays = DailyDetail::getNoComeDays($year, $month);
 
         //迟到总分钟数
         $beLateNum = DailyDetail::getBeLateNum($year, $month);
@@ -100,6 +100,11 @@ class ReviewController extends AttController
         $info = [];
 
         foreach ($users as $user) {
+
+            //实际天数 = 当月天数 - 带薪假 - 无薪假 - (周末与无打卡天数之和)
+            $actuallyCome = date('t', strtotime("$year-$month-1")) - ($hasNoSalary[$user->user_id] ?? 0)
+                - ($hasNoSalary[$user->user_id] ?? 0) - ($noComeDays[$user->user_id] ?? 0);
+
             //计算加班
             $overDays = AttendanceHelper::selectChangeInfo('', '', explode(',', $overLeaIds[$user->user_id] ?? ''));
 
@@ -123,11 +128,12 @@ class ReviewController extends AttController
 
             $info["$user->user_id"] = [
                 'date'                => "$year-$month",
+                'user_name'           => $user->username,
                 'user_id'             => $user->user_id,
                 'user_alias'          => $user->alias,
                 'user_dept'           => $user->dept->dept ?? '无',
                 'should_come'         => empty($shouldCome) ? '请配置日历' : $shouldCome,
-                'actually_come'       => $actuallyCome[$user->user_id] ?? 0,
+                'actually_come'       => $actuallyCome,
                 'overtime'            => $overDays,
                 'change_time'         => $changeDays,
                 'no_salary_leave'     => $hasNoSalary[$user->user_id] ?? 0,
@@ -152,7 +158,7 @@ class ReviewController extends AttController
     //是否全勤:应到天数等于实到 无影响全勤 迟到分钟数合计为0
     public function ifPresentAllDay($shouldCome, $actuallyCome, $affectFull, $user, $beLateNum)
     {
-        $isFullWork = ($shouldCome <= ($actuallyCome[$user->user_id] ?? '') &&
+        $isFullWork = ($shouldCome <= $actuallyCome &&
             !isset($affectFull[$user->user_id]) &&
             ($beLateNum[$user->user_id] ?? '') === '0') ? '是' : '否';
         return $isFullWork;
@@ -173,12 +179,15 @@ class ReviewController extends AttController
         list($year, $month) = explode('-', $request->date);
 
         foreach ($userList as $u) {
-            ConfirmAttendance::firstOrCreate([
+            $obj = ConfirmAttendance::firstOrCreate([
                 'user_id' => $u,
                 'year'    => $year,
                 'month'   => $month,
-                'confirm' => 1,
             ]);
+            if ($obj->confirm == 0) {
+                $obj->confirm = 1;
+                $obj->save();
+            }
         }
         return $userId == 'all' ? redirect()->back() : 'success';
     }
@@ -248,5 +257,15 @@ class ReviewController extends AttController
             return true;
         }
         return false;
+    }
+
+    //明细
+    public function reviewDetail($id)
+    {
+        $data = DailyDetail::where('user_id', $id)->orderBy('created_at', 'desc')->paginate(30);
+        $userInfo['username'] = User::where('user_id', $id)->first()->username;
+        $userInfo['alias'] = User::where('user_id', $id)->first()->alias;
+        $title = "{$userInfo['username']}的考勤详情";
+        return view('attendance.review.review-detail', compact('title', 'data', 'userInfo'));
     }
 }

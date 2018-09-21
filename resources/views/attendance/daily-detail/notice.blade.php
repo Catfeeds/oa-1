@@ -21,8 +21,7 @@
                     <th colspan="7" style="text-align: center">{{ trans('att.考勤天数') }}</th>
                     <th colspan="3" style="text-align: center">{{ trans('att.扣分统计') }}</th>
                     <th colspan="3" style="text-align: center">{{ trans('att.剩余假期') }}</th>
-                    <th colspan="{{ $title == trans('att.考勤管理') ? 3 : 1 }}"
-                        style="text-align: center">{{ trans('att.操作') }}</th>
+                    <th colspan="1" style="text-align: center">{{ trans('att.操作') }}</th>
                 </tr>
                 <tr>
                     <th>{{ trans('att.月份') }}</th>
@@ -50,7 +49,7 @@
                 @foreach($monthInfo[1] as $k => $v)
                     <tr id="{{ $i }}">
                         <td>{{ $v['date'] }}</td>
-                        <td>{{ $v['user_id'] }}</td>
+                        <td>{{ $v['user_name'] }}</td>
                         <td>{{ $v['user_alias'] }}</td>
                         <td>{{ $v['user_dept'] }}</td>
                         <td>{{ $v['should_come'] }}</td>
