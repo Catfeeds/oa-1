@@ -25,7 +25,8 @@
         "doctrine/common": "2.7.0",
         "fideloper/proxy": "~3.3",
         "laravel/tinker": "~1.0",
-        "overtrue/laravel-wechat": "~4.0"
+        "overtrue/laravel-wechat": "~4.0",
+        "doctrine/annotations": "1.4.0"
     },
     "require-dev": {
         "filp/whoops": "~2.0",
