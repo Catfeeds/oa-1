@@ -30,7 +30,7 @@ class CreateCmrReconciliationTables extends Migration
             $table->string('divided_type', 16)->nullable()->comment = '分成类型';
             $table->string('backstage_channel', 32)->nullable()->comment = '后台渠道';
             $table->string('unified_channel', 32)->nullable()->comment = '统一渠道';
-            $table->unsignedBigInteger('review_type')->nullable()->comment = '审核状态 1未审核 2运营专员审核 3运营主管审核 4财务计提专员审核 5财务主管计提审核 6财务对账专员审核 7财务主管对账审核';
+            $table->unsignedTinyInteger('review_type')->nullable()->comment = '审核状态 1未审核 2运营专员审核 3运营主管审核 4财务计提专员审核 5财务主管计提审核 6财务对账专员审核 7财务主管对账审核';
 
             $table->decimal('backstage_water_other', 12, 2)->default(0)->comment = '后台流水对账币';
             $table->decimal('backstage_water_rmb', 12, 2)->default(0)->comment = '后台流水人民币';

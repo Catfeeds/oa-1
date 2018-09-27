@@ -88,6 +88,7 @@
                                     ['frc-submit-btn', '提交审核', 'btn-info', in_array(\App\Models\Crm\Principal::FRC, $limitPost) && $status == \App\Models\Crm\Reconciliation::TREASURER],
                                     ['frc-invoice-btn', '确认开票', 'btn-primary', in_array(\App\Models\Crm\Principal::FRC, $limitPost)],
                                     ['frc-pay-btn', '确认回款', 'btn-success', in_array(\App\Models\Crm\Principal::FRC, $limitPost)],
+                                    ['frc-wipe-btn', '一键抹零', 'btn-danger', in_array(\App\Models\Crm\Principal::FRC, $limitPost)],
                                     ], 'isCheck' => true])
                             @elseif($source == \App\Models\Crm\Reconciliation::FRC)
                                 @include('widget.button',['btn' => [
@@ -156,6 +157,35 @@
             </div>
         </div>
     </div>
+    <div class="modal inmodal" id="confirm-modal" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content animated fadeIn">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span
+                                class="sr-only">Close</span></button>
+                    <h4 class="modal-title">{{ trans('crm.调整明细') }}</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped results">
+                            <thead>
+                            <tr>
+                                <th>{{ trans('crm.调整类型') }}</th>
+                                <th>{{ trans('crm.调整') }}</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">{{ trans('crm.关闭') }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 @include('widget.icheck')
 @include('widget.select2')
@@ -198,6 +228,13 @@
             selector: '.i-checks:checked',
             type: '4',
             alert_confirm: '确定要批量确认回款吗？'
+        });
+
+        $('#frc-wipe-btn').batch({
+            url: '{!! route('reconciliationAudit.wipe') !!}',
+            selector: '.i-checks:checked',
+            type: '1',
+            alert_confirm: '确定要批量一键抹零吗？'
         });
 
         //审核按键
@@ -292,6 +329,19 @@
                         }
                     }
                 }
+            });
+        });
+
+        $(document).on('click', '.eye', function(){
+            var url = $(this).data('url');
+            console.log(url);
+            $.getJSON(url, function (res) {
+                var html = '';
+                $.each(res, function (k, v) {
+                    html += '<tr><td>' + v.type + '</td><td>' + v.adjustment + '</td></tr>';
+                });
+                $('.results > tbody').html(html);
+                $('#confirm-modal').modal('show');
             });
         });
     </script>

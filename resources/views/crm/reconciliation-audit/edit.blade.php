@@ -15,24 +15,27 @@
                 <div class="ibox-content">
                     {!! Form::open(['class' => 'form-horizontal', 'enctype' => 'multipart/form-data']) !!}
 
-                    <div class="form-group @if (!empty($errors->first('adjustment'))) has-error @endif">
-                        {!! Form::label('adjustment', trans('crm.调整'), ['class' => 'col-sm-2 control-label']) !!}
+                    <div class="form-group @if (!empty($errors->first('choose'))) has-error @endif">
+                        {!! Form::label('choose', trans('crm.调整类型'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-5">
-                            {!! Form::number('adjustment', $data['adjustment'] ?? old('adjustment'), [
-                                'class' => 'form-control',
-                                'placeholder' => trans('app.请输入', ['value' => trans('crm.调整')]),
-                            ]) !!}
-                            <span class="help-block m-b-none">{{ $errors->first('adjustment') }}</span>
+                            @include('widget.select-single', ['name' => 'choose', 'lists' => \App\Models\Crm\Difference::getList(), 'selected' => ''])
+                            <span class="help-block m-b-none">{{ $errors->first('choose') }}</span>
+                        </div>
+                        <div class="col-sm-3">
+                            <button class="btn btn-info btn-rounded btn-xs" id="add" type="button">添加</button>
                         </div>
                     </div>
 
                     <div class="hr-line-dashed"></div>
 
-                    <div class="form-group @if (!empty($errors->first('type'))) has-error @endif">
-                        {!! Form::label('type', trans('crm.调整类型'), ['class' => 'col-sm-2 control-label']) !!}
-                        <div class="col-sm-5">
-                            @include('widget.select-single', ['name' => 'type', 'lists' => $type, 'selected' => $data['type']])
-                            <span class="help-block m-b-none">{{ $errors->first('type') }}</span>
+                    <div class="form-group @if (!empty($errors->first('remark'))) has-error @endif">
+                        {!! Form::label('adjustment', trans('crm.调整'), ['class' => 'col-sm-2 control-label']) !!}
+                        <div class="col-sm-9" id="show">
+                            @if($data['adjustment'])
+                                @foreach(json_decode($data['adjustment'], true) as $k => $v)
+                                    <div id="{{ json_decode($data['type'], true)[$k] }}"><span>{{ \App\Models\Crm\Difference::getList()[json_decode($data['type'], true)[$k]] }}：</span><input name="adjustment[]" value="{{ $v }}"><input hidden name="type[]" value="{{ json_decode($data['type'], true)[$k] }}">　<button class="btn btn-danger btn-rounded btn-xs" onclick="del({{ json_decode($data['type'], true)[$k] }})" type="button">删除</button></div>
+                                @endforeach
+                            @endif
                         </div>
                     </div>
 
@@ -67,4 +70,23 @@
     </div>
 
 @endsection
+@include('widget.bootbox')
 @include('widget.select2')
+@push('scripts')
+    <script>
+        $('#add').click(function () {
+            var type = {!! json_encode(\App\Models\Crm\Difference::getList()) !!};
+            var text = type[$('#choose').val()];
+            var val = $('#choose').val();
+            if ($('#' + val).length > 0) {
+                bootbox.alert('已经添加该调整，请勿重复添加');
+            } else {
+                $('#show').append('<div id="' + val + '"><span>' + text + '：</span><input name="adjustment[]"><input hidden name="type[]" value="' + val + '">　<button class="btn btn-danger btn-rounded btn-xs" onclick="del(' + val + ')" type="button">删除</button></div>');
+            }
+        });
+
+        function del(val) {
+            $('#' + val).remove();
+        }
+    </script>
+@endpush

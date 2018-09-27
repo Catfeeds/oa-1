@@ -134,6 +134,8 @@ class Permissions extends Seeder
             'reconciliation-reconciliationAudit.invoice' => 'CRM功能/对账功能/对账审核/「开票确认」',
             'reconciliation-reconciliationAudit.payback' => 'CRM功能/对账功能/对账审核/「回款确认」',
             'reconciliation-reconciliationAudit.revision' => 'CRM功能/对账功能/对账审核/「调整流水」',
+            'reconciliation-reconciliationAudit.wipe' => 'CRM功能/对账功能/对账审核/「一键抹零」',
+            'reconciliation-reconciliationAudit.detail' => 'CRM功能/对账功能/对账审核/「调整查看详细」',
 
             'reconciliation-reconciliationProduct' => 'CRM功能/对账功能/游戏列表/「所有」',
             'reconciliation-reconciliationProduct.create' => 'CRM功能/对账功能/游戏列表/「添加」',
