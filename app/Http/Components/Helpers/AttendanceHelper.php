@@ -294,15 +294,13 @@ class AttendanceHelper
 
             DailyDetail::create($startData);
 
-            if($endDay + 43200 > strtotime(date('Y-m-d', $endDay) . ' ' . Leave::$endId[$leave->end_id])) {
+            if($endDay + 43200 >= strtotime(date('Y-m-d', $endDay) . ' ' . Leave::$endId[$leave->end_id])) {
                 $endData = [
                     'user_id' => $leave->user_id,
                     'day' => date('Y-m-d', $endDay),
                     'leave_id' => $leave->leave_id,
                     'punch_start_time' => Leave::$startId[1],
-                    'punch_start_time_num' => strtotime(date('Y-m-d', $endDay) . ' ' . Leave::$startId[1]),
-                    'punch_end_time' => 0,
-                    'punch_end_time_num' => 0,
+                    'punch_start_time_num' => strtotime(date('Y-m-d', $endDay) . ' ' . Leave::$startId[1])
                 ];
 
                 DailyDetail::create($endData);
@@ -421,11 +419,11 @@ class AttendanceHelper
 
     /**
      * 检验 员工申请单为调休类型
-     * @param $request
      * @param $userId
      * @param $holiday
      * @param int $numberDay
      * @return array
+     *
      */
     public static function checkUserChangeHoliday($userId, $holiday, $numberDay = 0)
     {
@@ -468,9 +466,9 @@ class AttendanceHelper
         //获取部门批量调休或者加班的申请单ID
         $leaves = self::getMyChangeLeaveId(\Auth::user()->dept_id);
         //查询加班的所有记录天数
-        $userWorkChangeDay = self::selectChangeInfo($userId, $changeHoliday->holiday_id, $leaves['leave_work_ids']);
+        $userWorkChangeDay = self::selectChangeInfo($userId, $changeHoliday->holiday_id, $leaves['leave_work_ids'] ?? []);
         //查询已经调休过的天数
-        $userUseChangeDay = self::selectChangeInfo($userId, $holiday->holiday_id, $leaves['leave_work_ids']);
+        $userUseChangeDay = self::selectChangeInfo($userId, $holiday->holiday_id, $leaves['leave_change_ids'] ?? []);
 
         return ['change_work_day' => $userWorkChangeDay, 'change_use_day' => $userUseChangeDay];
     }
@@ -502,14 +500,16 @@ class AttendanceHelper
     }
 
 
-    /**
-     * 获取员工 年假类型 记录信息
+    /** 获取员工 年假类型 记录信息
      * @param $entryTime
      * @param $userId
-     * @param $holidayId
+     * @param $holiday
+     * @return mixed 返回天数
      */
     public static function getUserYearHoliday($entryTime, $userId, $holiday)
     {
+        //入职未满一年，年假周期类型 天数为0
+        if(empty($entryTime) || strtotime($entryTime) + 31536000 > time()) return 0;
         //默认为上一年的入职月份的开始时间
         $startDay= date("Y", strtotime("-1 year")) . '-' . date('m-d', strtotime($entryTime));
         //当年的员工年假到期时间

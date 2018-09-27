@@ -42,12 +42,12 @@
                 </div>
 
                 {!! Form::close() !!}
-
             </div>
         </div>
+
     </div>
 
-    <div class="col-xs-6">
+    <div class="col-xs-5">
         <div class="ibox float-e-margins">
             <div class="ibox-title">
                 <h5>工作日历</h5>
@@ -64,7 +64,6 @@
 <script type='text/javascript' src={{ asset('fullcalendar/fullcalendar.js') }}></script>
 <script type="text/javascript" src={{ asset('fullcalendar/locale/zh-cn.js') }}></script>
 
-
 <script type="text/javascript">
     $("[data-toggle='popover']").popover();
     $(function() {
@@ -74,6 +73,7 @@
                 center: 'title',
                 right: 'today'
             },
+
             weekends: true,
             themeSystem: 'bootstrap3',
             events: function (start, end, a, callback) {

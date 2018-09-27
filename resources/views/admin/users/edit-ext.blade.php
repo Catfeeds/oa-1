@@ -441,7 +441,6 @@
     <script>
         $(function() {
             $('.js-select2-single').select2();
-
         });
     </script>
 @endsection

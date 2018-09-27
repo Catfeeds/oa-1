@@ -9,6 +9,7 @@ namespace App\Models\Attendance;
 
 use App\Models\Sys\HolidayConfig;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class Leave extends Model
@@ -44,14 +45,12 @@ class Leave extends Model
         1 => '09:00',
         2 => '13:45',
         3 => '19:00',
-        0 => ''
     ];
 
     public static $endId = [
         1 => '12:00',
         2 => '18:00',
         3 => '20:00',
-        0 => ''
     ];
 
     /**
@@ -59,11 +58,11 @@ class Leave extends Model
      * @var array
      */
     public static $status = [
-        0 => '待审核',
-        1 => '审核中',
-        2 => '已拒绝',
-        3 => '已通过',
-        4 => '已取消',
+        self::WAIT_REVIEW => '待审核',
+        self::ON_REVIEW => '审核中',
+        self::REFUSE_REVIEW => '已拒绝',
+        self::PASS_REVIEW => '已通过',
+        self::CANCEL_REVIEW => '已取消',
     ];
 
     protected $fillable = [
@@ -91,6 +90,57 @@ class Leave extends Model
     public static function getHolidayIdList()
     {
         return self::get(['holiday_id', 'leave_id'])->pluck('holiday_id', 'leave_id')->toArray();
+    }
+
+    //提取统计条件
+    public static function leaveBuilder($year, $month)
+    {
+        return self::where('status', self::PASS_REVIEW)
+            ->whereYear('start_time', $year)
+            ->whereMonth('start_time', $month);
+    }
+
+    //带薪假:关联假期配置表 找出状态为已通过 且是福利假的假期
+    public static function getSalaryLeaves($year, $month)
+    {
+        return self::leaveBuilder($year, $month)
+            ->whereHas('holidayConfig', function ($query) {
+                $query->where('is_boon', 1);
+            })
+            ->groupBy('user_id')
+            ->get([DB::raw('sum(number_day) as s'), 'user_id'])->pluck('s', 'user_id')->toArray();
+    }
+
+    public static function noFull($year, $month)
+    {
+        return self::leaveBuilder($year, $month)
+            ->whereHas('holidayConfig', function ($query) {
+                $query->where('is_full', 1);
+            })
+            ->groupBy('user_id')
+            ->get([DB::raw('count(user_id) as a'), 'user_id'])
+            ->pluck('a', 'user_id')->toArray();
+    }
+
+    public static function getNoSalaryLeaves($year, $month)
+    {
+        return self::leaveBuilder($year, $month)
+            ->whereHas('holidayConfig', function ($query1) {
+                $query1->where([['is_boon', '<>', 1], ['apply_type_id', '=', HolidayConfig::LEAVEID]]);
+            })
+            ->groupBy('user_id')
+            ->get([DB::raw('sum(number_day) as s'), 'user_id'])->pluck('s', 'user_id')->toArray();
+    }
+
+    //通过加班调休类型返回请假的id
+    public static function getLeavesIdByChangeTypes($changeTypes, $year, $month)
+    {
+        return self::leaveBuilder($year, $month)
+            ->whereHas('holidayConfig', function ($query) use ($changeTypes) {
+                $query->where('apply_type_id', HolidayConfig::CHANGE)->whereIn('change_type', $changeTypes);
+            })
+            ->groupBy('user_id')
+            ->get([DB::raw('group_concat(leave_id) as ls'), 'user_id'])->pluck('ls', 'user_id')->toArray();
     }
 
 }

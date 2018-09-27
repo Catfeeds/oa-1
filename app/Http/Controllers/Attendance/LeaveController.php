@@ -29,15 +29,18 @@ class LeaveController extends AttController
     {
         $scope = $this->scope;
         $scope->block = 'attendance.leave.scope';
+
         $types = Leave::$types;
         $type = \Request::get('type', key($types));
 
         $userIds = [];
         switch ($type) {
+            //调休
             case Leave::DEPT_LEAVE :
                 $where = AttendanceHelper::setChangeList($type)['where'];
                 $userIds = AttendanceHelper::setChangeList($type)['user_ids'];
                 break;
+            //抄送
             case Leave::COPY_LEAVE :
                 $where = AttendanceHelper::setChangeList($type)['where'];
                 $userIds = AttendanceHelper::setChangeList($type)['user_ids'];
@@ -176,7 +179,7 @@ class LeaveController extends AttController
         $userIds = AttendanceHelper::setChangeList($userDept->dept_id)['user_ids'];
         if((in_array(\Auth::user()->user_id, $logUserIds) || in_array(\Auth::user()->user_id, $userIds)) && !empty($leave->leave_id) ) {
             $reviewUserId = $leave->review_user_id;
-            $user = User::with(['role', 'dept'])->where(['user_id' => $reviewUserId])->first();
+            $user = User::with(['dept'])->where(['user_id' => $reviewUserId])->first();
             $logs = OperateLog::where(['type_id' => 1, 'info_id' => $leave->leave_id])->get();
             $dept = Dept::getDeptList();
             $title = trans('att.假期详情');
@@ -220,7 +223,7 @@ class LeaveController extends AttController
     {
         $status = $request->get('status');
 
-        if(!in_array($status, [2, 3, 4]) || empty($id)) return response()->json(['status' => -1, 'msg' => '操作失败']);
+        if(!in_array($status, [Leave::REFUSE_REVIEW, Leave::PASS_REVIEW, Leave::CANCEL_REVIEW]) || empty($id)) return response()->json(['status' => -1, 'msg' => '操作失败']);
 
         $optStatus = self::OptStatus($id, $status);
 
@@ -241,7 +244,7 @@ class LeaveController extends AttController
     {
         $leaveIds = $request->get('leaveIds');
 
-        if(!in_array($status, [2, 3, 4]) || empty($status) || empty($leaveIds) || !is_array($leaveIds)){
+        if(!in_array($status, [Leave::REFUSE_REVIEW, Leave::PASS_REVIEW, Leave::CANCEL_REVIEW]) || empty($status) || empty($leaveIds) || !is_array($leaveIds)){
             flash(trans('att.审核失败', ['value' => trans('att.假期申请')]), 'danger');
             return redirect()->route('leave.review.info');
         }
@@ -275,14 +278,14 @@ class LeaveController extends AttController
         try {
             switch ($status) {
                 //拒绝通过状态
-                case 2 :
+                case Leave::REFUSE_REVIEW:
                     $msg = '拒绝通过';
-                    $leave->update(['status' => 2, 'review_user_id' => 0]);
+                    $leave->update(['status' => Leave::REFUSE_REVIEW, 'review_user_id' => 0]);
                     //假期天数回退
                     AttendanceHelper::leaveNumBack($leave);
                     break;
                 //审核通过状态
-                case 3 :
+                case Leave::PASS_REVIEW:
                     $msg = '审核通过';
                     //申请单状态操作
                     AttendanceHelper::leaveReviewPass($leave);
@@ -297,9 +300,9 @@ class LeaveController extends AttController
                             break;
                     }
                     break;
-                case 4 :
+                case Leave::CANCEL_REVIEW:
                     $msg = '取消申请';
-                    $leave->update(['status' => 4, 'review_user_id' => 0]);
+                    $leave->update(['status' => Leave::CANCEL_REVIEW, 'review_user_id' => 0]);
                     //假期天数回退
                     AttendanceHelper::leaveNumBack($leave);
                     break;

@@ -4,19 +4,14 @@
 
 @section('page-head')
     @parent
-    <div class="col-sm-8">
-        <div class="title-action">
-            @if(Entrust::can(['daily-detail.all', 'daily-detail.import']))
-                <a href="{{ route('leave.create') }}" class="btn btn-primary btn-sm">{{ trans('导入打卡记录') }}</a>
-            @endif
-        </div>
-    </div>
-
 @endsection
 
 @section('content')
 
     @include('flash::message')
+    @if(Entrust::can(['daily-detail-notice']))
+        @include('attendance.daily-detail.notice')
+    @endif
 
     <div class="row">
         <div class="col-lg-12">
@@ -45,8 +40,8 @@
                             @foreach($data as $v)
                                 <tr>
                                     <td>{{ $v['day'] }}</td>
-                                    <td>{{ \Auth::user()->username}}</td>
-                                    <td>{{ \Auth::user()->alias}}</td>
+                                    <td>{{ $userInfo['username'] }}</td>
+                                    <td>{{ $userInfo['alias'] }}</td>
                                     @if(empty($v['punch_start_time']))
                                         <td style="color: red">--</td>
                                     @else

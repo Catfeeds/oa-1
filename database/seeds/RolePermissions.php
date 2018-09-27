@@ -49,6 +49,9 @@ class RolePermissions extends Seeder
                 'calendar-all',
                 'holiday-config-all',
                 'approval-step-all',
+                'staff-all',
+                'entry-all',
+                'firm-all',
             ],
         ];
     }

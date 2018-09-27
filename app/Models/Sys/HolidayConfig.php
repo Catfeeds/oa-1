@@ -9,6 +9,7 @@
 
 namespace App\Models\Sys;
 
+use App\Http\Components\Helpers\AttendanceHelper;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -96,12 +97,13 @@ class HolidayConfig extends Model
         return self::whereIn('restrict_sex', [\Auth::user()->userExt->sex, 2])->orderBy('sort', 'desc')->get(['holiday_id', 'holiday'])->pluck('holiday', 'holiday_id')->toArray();
     }
 
+    public static function getObjByName($name)
+    {
+        return self::where('holiday', 'like', "$name")->first() ?? NULL;
+    }
+
     public static function getHolidayApplyList()
     {
         return self::get(['holiday_id', 'apply_type_id'])->pluck('apply_type_id', 'holiday_id')->toArray();
-    }
-
-    public static function getHolidayListExceptRecheck(){
-        return self::where('apply_type_id', '<>', self::RECHECK)->get(['holiday_id', 'holiday'])->pluck('holiday', 'holiday_id')->toArray();
     }
 }

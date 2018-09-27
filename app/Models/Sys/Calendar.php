@@ -43,4 +43,13 @@ class Calendar extends Model
     {
         return $this->hasOne(PunchRules::class, 'id', 'punch_rules_id');
     }
+
+    public static function getShouldComeDays($year, $month)
+    {
+        return self::whereHas('punchRules', function ($query) {
+            $query->where('punch_type_id', PunchRules::NORMALWORK);
+        })
+            ->where(['year' => $year, 'month' => $month])
+            ->count();
+    }
 }

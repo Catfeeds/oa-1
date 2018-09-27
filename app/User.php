@@ -111,7 +111,7 @@ class User extends Authenticatable
 
     public function role()
     {
-        return $this->hasOne(Role::class, 'id', 'role_id');
+        return $this->hasMany(Role::class, 'id', 'role_id');
     }
 
     public function dept()
@@ -138,6 +138,18 @@ class User extends Authenticatable
         return self::get(['user_id', 'alias'])->pluck('alias', 'user_id')->toArray();
     }
 
+    public static function getUsernameAliasList()
+    {
+        $users = self::get(['user_id', 'alias', 'username'])->toArray();
+
+        $res = [];
+        foreach ($users as $k => $v) {
+            $res[$v['user_id']] = $v['alias'] . '('. $v['username'] . ')';
+        }
+
+        return $res;
+    }
+
     public static function getStatusText($status)
     {
         return sprintf('<span class="label label-%s">%s</span>', self::$statusClass[$status], self::$statusList[$status]);
@@ -145,6 +157,7 @@ class User extends Authenticatable
 
     public static function getIsMobileTest($user)
     {
+
         $value = $user->is_mobile == self::IS_MOBILE_TRUE ? self::IS_MOBILE_TRUE : self::IS_MOBILE_FALSE;
         $list = [
             self::IS_MOBILE_TRUE => 'success',

@@ -26,6 +26,9 @@ class UserExt extends Model
     const STATUS_DISABLE = 0;
     const STATUS_ENABLE = 1;
 
+    const SEX_BOY = 0;
+    const SEX_GIRL = 1;
+
     //学历
     public static $education = [
         1 => '小学',
@@ -58,10 +61,26 @@ class UserExt extends Model
         4 => 'O型'
     ];
 
+    //属相
+    public static $genus = [
+        1 => '鼠',
+        2 => '牛',
+        3 => '虎',
+        4 => '兔',
+        5 => '龙',
+        6 => '蛇',
+        7 => '马',
+        8 => '羊',
+        9 => '猴',
+        10 => '鸡',
+        11 => '狗',
+        12 => '猪',
+    ];
+
     //性别
     public static $sex = [
-        0 => '男',
-        1 => '女',
+        self::SEX_BOY => '男',
+        self::SEX_GIRL => '女',
     ];
 
     //婚姻
@@ -71,7 +90,6 @@ class UserExt extends Model
     ];
 
     //是否公司挂靠
-
     public static $firmCall = [
         0 => '否',
         1 => '是',
@@ -105,7 +123,22 @@ class UserExt extends Model
         'urgent_name',
         'urgent_tel',
         'salary_card',
-        'is_confirm',
+        'height',
+        'weight',
+        'specialty',
+        'degree',
+        'genus_id',
+        'job_name',
+        'leader_id',
+        'tutor_id',
+        'friend_id',
+        'nature_id',
+        'hire_id',
+        'firm_id',
+        'place',
+        'political',
+        'urgent_bind',
+        'ethnic',
     ];
 
     public static function checkIsConfirm($userId)

@@ -105,6 +105,22 @@ class DataHelper
 
         return in_array($code, [200, 301, 302]) ? true : false;
     }
+    /**
+     * 产生一个随机字串
+     * @param int $len 指定随机字串的长度
+     * @param string $scope 随机字符的取值范围
+     * @return string
+     */
+    public static function randString($len)
+    {
+        $scope = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+        $strLen = strlen($scope) - 1;
+        $string = '';
+        for($i = 0; $i < $len; $i ++){
+            $string .= substr($scope, mt_rand(0, $strLen), 1);
+        }
+        return $string;
+    }
 
     /**
      * 请假天数
