@@ -251,6 +251,8 @@ class ReconciliationAuditController extends Controller
                     $tmp2['second_division_condition'] = $v['second_division_condition'];
                     $tmp2['accrual_water_other'] = $v['accrual_water_other'];
                     $tmp2['accrual_water_rmb'] = $v['accrual_water_rmb'];
+                    $tmp2['accrual_divide_other'] = $v['accrual_divide_other'];
+                    $tmp2['accrual_divide_rmb'] = $v['accrual_divide_rmb'];
                     $tmp2['reconciliation_adjustment'] = is_numeric($v['reconciliation_adjustment']) ? $v['reconciliation_adjustment'] : array_sum(json_decode($v['reconciliation_adjustment']));
                     $tmp2['reconciliation_rmb_adjustment'] = $v['reconciliation_rmb_adjustment'];
                     $tmp2['reconciliation_type'] = is_numeric($v['reconciliation_adjustment']) ? ($diff[$v['reconciliation_type']] ?? '--') : sprintf('<a class="eye" data-url="%s">%s</a>', route('reconciliationAudit.detail', ['id' => $v['id'], 'source' => Reconciliation::RECONCILIATION]), $diff[$this->pop($v['reconciliation_type'])]);
@@ -612,7 +614,7 @@ class ReconciliationAuditController extends Controller
             case in_array($source, [Reconciliation::TREASURER, Reconciliation::FRC, Reconciliation::OOR]):
                 $header = ['#', '序号', '结算周期', '收入类型', '我方', '客户', '游戏', '上线名称', '业务线',
                     '地区', '对账币', '系统', '分成类型', '诗悦后台渠道', '统一渠道名称', '信期类型', '信期', '开票状态', '开票号', '开票时间', '开票人', '回款状态', '回款时间', '回款确认人',
-                    '渠道费率', '一级分成', '二级分成', '二级分成条件', '对账币', '人民币',
+                    '渠道费率', '一级分成', '二级分成', '二级分成条件', '对账币', '人民币', '对账币-费率分成', '人民币-费率分成',
                     '调整', '转化rmb调整', '类型', '备注', '调整人', '调整时间', '对账币', '人民币', '对账币-费率分成', '人民币-费率分成', '操作'];
                 break;
             default:

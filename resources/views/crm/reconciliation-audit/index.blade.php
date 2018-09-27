@@ -128,7 +128,7 @@
                                         <th colspan="4" class="blue-color">开票信息</th>
                                         <th colspan="3" class="red-color">回款信息</th>
                                         <th colspan="4" class="orange-color">分成费率</th>
-                                        <th colspan="2" class="yellow-color">计提流水</th>
+                                        <th colspan="4" class="yellow-color">计提流水</th>
                                         <th colspan="6" class="green-color">对账调整</th>
                                         <th colspan="4" class="blue-color">对账流水分成</th>
                                         <th colspan="1">--</th>
