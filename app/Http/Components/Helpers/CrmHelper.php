@@ -36,6 +36,6 @@ class CrmHelper
             $divided = $water * (1 - $channel_rate) * $first_division;
         }
 
-        return $divided;
+        return round($divided,2);
     }
 }
