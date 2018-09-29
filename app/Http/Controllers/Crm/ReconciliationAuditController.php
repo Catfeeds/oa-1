@@ -365,36 +365,36 @@ class ReconciliationAuditController extends Controller
             switch ($source) {
                 case $source == Reconciliation::UNRD:
                     $tmp['operation_adjustment'] = json_encode($request['adjustment']);
-                    $tmp['operation_rmb_adjustment'] = (int)array_sum($request['adjustment']) * $rate;
+                    $tmp['operation_rmb_adjustment'] = (float)array_sum($request['adjustment']) * $rate;
                     $tmp['operation_type'] = json_encode($request['type']);
                     $tmp['operation_remark'] = $request['remark'];
                     $tmp['operation_user_name'] = \Auth::user()->alias;
                     $tmp['operation_time'] = $time;
-                    $tmp['operation_water_other'] = $data['backstage_water_other'] + (int)array_sum($request['adjustment']);
+                    $tmp['operation_water_other'] = $data['backstage_water_other'] + (float)array_sum($request['adjustment']);
                     $tmp['operation_water_rmb'] = $data['backstage_water_rmb'] + $tmp['operation_rmb_adjustment'];
                     $tmp['operation_divide_other'] = CrmHelper::dividedInto($data['channel_rate'], $data['first_division'], $data['second_division'], $data['second_division_condition'], $tmp['operation_water_other']);
                     $tmp['operation_divide_rmb'] = CrmHelper::dividedInto($data['channel_rate'], $data['first_division'], $data['second_division'], $data['second_division_condition'], $tmp['operation_water_rmb']);
                     break;
                 case $source == Reconciliation::OPD:
                     $tmp['accrual_adjustment'] = json_encode($request['adjustment']);
-                    $tmp['accrual_rmb_adjustment'] = (int)array_sum($request['adjustment']) * $rate;
+                    $tmp['accrual_rmb_adjustment'] = (float)array_sum($request['adjustment']) * $rate;
                     $tmp['accrual_type'] = json_encode($request['type']);
                     $tmp['accrual_remark'] = $request['remark'];
                     $tmp['accrual_user_name'] = \Auth::user()->alias;
                     $tmp['accrual_time'] = $time;
-                    $tmp['accrual_water_other'] = $data['operation_water_other'] + (int)array_sum($request['adjustment']);
+                    $tmp['accrual_water_other'] = $data['operation_water_other'] + (float)array_sum($request['adjustment']);
                     $tmp['accrual_water_rmb'] = $data['operation_water_rmb'] + $tmp['accrual_rmb_adjustment'];
                     $tmp['accrual_divide_other'] = CrmHelper::dividedInto($data['channel_rate'], $data['first_division'], $data['second_division'], $data['second_division_condition'], $tmp['accrual_water_other']);
                     $tmp['accrual_divide_rmb'] = CrmHelper::dividedInto($data['channel_rate'], $data['first_division'], $data['second_division'], $data['second_division_condition'], $tmp['accrual_water_rmb']);
                     break;
                 case $source == Reconciliation::TREASURER:
                     $tmp['reconciliation_adjustment'] = json_encode($request['adjustment']);
-                    $tmp['reconciliation_rmb_adjustment'] = (int)array_sum($request['adjustment']) * $rate;
+                    $tmp['reconciliation_rmb_adjustment'] = (float)array_sum($request['adjustment']) * $rate;
                     $tmp['reconciliation_type'] = json_encode($request['type']);
                     $tmp['reconciliation_remark'] = $request['remark'];
                     $tmp['reconciliation_user_name'] = \Auth::user()->alias;
                     $tmp['reconciliation_time'] = $time;
-                    $tmp['reconciliation_water_other'] = $data['accrual_water_other'] + (int)array_sum($request['adjustment']);
+                    $tmp['reconciliation_water_other'] = $data['accrual_water_other'] + (float)array_sum($request['adjustment']);
                     $tmp['reconciliation_water_rmb'] = $data['accrual_water_rmb'] + $tmp['reconciliation_rmb_adjustment'];
                     break;
             }
