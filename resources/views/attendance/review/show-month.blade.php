@@ -186,11 +186,13 @@
 
         //调整表头样式
         var num = $('input[name=permissions]').val();
-        $('tr').first().children().last().attr('colspan', num);
+        var action = $('tr').first().children().last();
+        action.text() == '操作' ? action.attr('colspan', num) : '';
 
         //发送考勤统计及确认考勤统计
         $('.send, .confirm').each(function (index, ele) {
             var id = $(ele).attr('id');
+            var id_s = '#' + id;
             var date = $(ele).attr('date');
 
             switch ($(ele).attr('con_state')) {
@@ -199,11 +201,11 @@
                         sendTo(id, date);
                     });
                     break;
-                case ("{{ \App\Models\Attendance\ConfirmAttendance:: SENT}}"):
-                    $('#' + id).css({'color': '#1ab394', 'cursor': 'default'});
+                case ("{{ \App\Models\Attendance\ConfirmAttendance:: SENT }}"):
+                    $(id_s).css({'color': '#1ab394', 'cursor': 'default'});
                     break;
                 case ("{{ \App\Models\Attendance\ConfirmAttendance::CONFIRM }}"):
-                    $('#' + id).css({'color': '#ed5565', 'cursor': 'default'});
+                    $(id_s).css({'color': '#ed5565', 'cursor': 'default'});
                     break;
             }
         });

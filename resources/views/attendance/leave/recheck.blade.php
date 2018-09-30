@@ -130,7 +130,6 @@
                 readURL(this, '#show_mobile_header_image');
             });
 
-
             if($('#check_box').val() != '') {
                 var arr = $('#check_box').val().split('$$');
 
@@ -166,6 +165,21 @@
                 }
 
             });
+
+            @if(!empty($daily))
+                @if(empty($daily->punch_start_time))
+                    $('#recheck_1').iCheck('check');
+                    $('#recheck_2').parents('.checkbox').remove();
+                    $('#start_time').val("{{ $daily->day }}" + " 09:00:00");
+                    $('#onwork_div').show();
+                @endif
+                @if(empty($daily->punch_end_time))
+                    $('#recheck_2').iCheck('check');
+                    $('#recheck_1').parents('.checkbox').remove();
+                    $('#end_time').val("{{ $daily->day }}" + " 20:00:00");
+                    $('#offwork_div').show();
+                @endif
+            @endif
 
         });
     </script>

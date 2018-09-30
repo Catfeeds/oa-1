@@ -40,7 +40,7 @@ class EventServiceProvider extends ServiceProvider
 
         //当以下数据表发生添加或修改时,触发删除redis缓存的操作
         Leave::saved(function ($a) {
-            list($y, $m) = explode('-', $a->start_time);
+            list($y, $m) = explode('-', $a->start_time ?? $a->end_time);
             $this->delRedis("att-$y-$m");
         });
 

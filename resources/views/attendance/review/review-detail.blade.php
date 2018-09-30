@@ -54,7 +54,9 @@
                                     <td>{{ $v['heap_late_num'] ? $v['heap_late_num']  : '--' }}</td>
                                     <td>{{ $v['lave_buffer_num'] ? $v['heap_late_num']  : '--'  }}</td>
                                     <td>{{ $v['deduction_num'] ? $v['heap_late_num']  : '--'  }}</td>
-                                    <td>{{ \App\Models\Sys\HolidayConfig::getHolidayList()[\App\Models\Attendance\Leave::getHolidayIdList()[$v['leave_id']] ?? 0] ?? '--' }}</td>
+                                    <td>
+                                        {{ \App\Http\Components\Helpers\AttendanceHelper::showLeaveIds($v['leave_id']) }}
+                                    </td>
                                 </tr>
                             @endforeach
                             </tbody>

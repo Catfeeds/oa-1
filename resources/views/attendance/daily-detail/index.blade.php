@@ -9,9 +9,7 @@
 @section('content')
 
     @include('flash::message')
-    @if(Entrust::can(['daily-detail-notice']))
-        @include('attendance.daily-detail.notice')
-    @endif
+    @include('attendance.daily-detail.notice')
 
     <div class="row">
         <div class="col-lg-12">
@@ -55,11 +53,24 @@
                                     <td>{{ $v['heap_late_num'] ? $v['heap_late_num']  : '--' }}</td>
                                     <td>{{ $v['lave_buffer_num'] ? $v['heap_late_num']  : '--'  }}</td>
                                     <td>{{ $v['deduction_num'] ? $v['heap_late_num']  : '--'  }}</td>
-                                    <td>{{ \App\Models\Sys\HolidayConfig::getHolidayList()[\App\Models\Attendance\Leave::getHolidayIdList()[$v['leave_id']] ?? 0] ?? '--' }}</td>
                                     <td>
-                                        @if(empty($v['punch_start_time']) || empty($v['punch_end_time']))
-                                            <a href="{{route('leave.create', ['id' => \App\Models\Sys\HolidayConfig::RECHECK])}}">{{ trans('att.补打卡') }}</a>
-                                            <a href="{{route('leave.create', ['id' => \App\Models\Sys\HolidayConfig::LEAVEID])}}">{{ trans('att.补假') }}</a>
+                                        {{ \App\Http\Components\Helpers\AttendanceHelper::showLeaveIds($v['leave_id']) }}
+                                    </td>
+                                    <td>
+                                        {{--节日加班不需要补打卡与补假操作--}}
+                                        @if((empty($v['punch_start_time']) || empty($v['punch_end_time'])) &&
+                                            !in_array(\App\Models\Sys\HolidayConfig::WEEK_WORK,
+                                            \App\Models\Attendance\Leave::getAttrByLeaveIds(json_decode($v['leave_id']) ?? [], 'change_type'))
+                                        )
+                                            <a href="{{route('leave.create', [
+                                                'id' => \App\Models\Sys\HolidayConfig::RECHECK,
+                                                'day' => $v['day']
+                                            ])}}">
+                                                {{ trans('att.补打卡') }}
+                                            </a>
+                                            <a href="{{route('leave.create', ['id' => \App\Models\Sys\HolidayConfig::LEAVEID])}}">
+                                                {{ trans('att.补假') }}
+                                            </a>
                                         @endif
                                     </td>
                                 </tr>

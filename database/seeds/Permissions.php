@@ -114,7 +114,6 @@ class Permissions extends Seeder
             'leave.review' => '考勤功能/假期管理/假期审核/「审核」',
 
             'daily-detail-all' => '考勤功能/每日考勤管理/「所有」',
-            'daily-detail-notice' => '考勤功能/每日考勤管理/「通知」',
             'daily-detail' => '考勤功能/每日考勤管理/我的明细/ 「列表」',
 
             'daily-detail.edit' => '考勤功能/每日考勤管理/我的明细/「管理员编辑」',

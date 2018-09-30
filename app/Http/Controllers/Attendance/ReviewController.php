@@ -65,9 +65,6 @@ class ReviewController extends AttController
         //该月应到天数:关联查找类型为正常工作的该月日历
         $shouldCome = Calendar::getShouldComeDays($year, $month);
 
-        //没有打卡的天数(含周末)
-        $noComeDays = DailyDetail::getNoComeDays($year, $month);
-
         //迟到总分钟数
         $beLateNum = DailyDetail::getBeLateNum($year, $month);
 
@@ -99,17 +96,19 @@ class ReviewController extends AttController
         $users = User::whereRaw($scope->getwhere())->get();
         $info = [];
 
-        foreach ($users as $user) {
+        //计算实到天数要用的条件
+        list($punch, $remain) = DailyDetail::calculateCome($year, $month);
 
-            //实际天数 = 当月天数 - 带薪假 - 无薪假 - (周末与无打卡天数之和)
-            $actuallyCome = date('t', strtotime("$year-$month-1")) - ($hasNoSalary[$user->user_id] ?? 0)
-                - ($hasNoSalary[$user->user_id] ?? 0) - ($noComeDays[$user->user_id] ?? 0);
+        foreach ($users as $user) {
 
             //计算加班
             $overDays = AttendanceHelper::selectChangeInfo('', '', explode(',', $overLeaIds[$user->user_id] ?? ''));
 
             //计算调休
             $changeDays = AttendanceHelper::selectChangeInfo('', '', explode(',', $changeLeaIds[$user->user_id] ?? ''));
+
+            //计算实到天数
+            $actuallyCome = ($punch[$user->user_id] ?? 0) + ($remain[$user->user_id] ?? 0) + $overDays;
 
             //判断全勤
             $isFullWork = $this->ifPresentAllDay($shouldCome, $actuallyCome, $affectFull, $user, $beLateNum);
@@ -217,8 +216,8 @@ class ReviewController extends AttController
     /**
      * @param $year
      * @param $month
-     * @param $cache //为true:取全部用户缓存;为id:取单个用户缓存
-     * @param $scope //筛选缓存
+     * @param $cache `为true:取全部用户缓存;为id:取单个用户缓存
+     * @param $scope `筛选缓存
      * @return array
      */
     public function getFromRedis($year, $month, $cache, $scope)
@@ -245,8 +244,9 @@ class ReviewController extends AttController
     }
 
     /**
+     * 有权限则跳转到假期配置页,没有则在页面判断,显示联系管理员
      * @param $monthInfo
-     * @return bool //有权限则跳转到假期配置页,没有则在页面判断,显示联系管理员
+     * @return bool
      */
     public function errorRedirect($monthInfo)
     {
@@ -262,7 +262,7 @@ class ReviewController extends AttController
     //明细
     public function reviewDetail($id)
     {
-        $data = DailyDetail::where('user_id', $id)->orderBy('created_at', 'desc')->paginate(30);
+        $data = DailyDetail::where('user_id', $id)->orderBy('day', 'desc')->paginate(30);
         $userInfo['username'] = User::where('user_id', $id)->first()->username;
         $userInfo['alias'] = User::where('user_id', $id)->first()->alias;
         $title = "{$userInfo['username']}的考勤详情";
