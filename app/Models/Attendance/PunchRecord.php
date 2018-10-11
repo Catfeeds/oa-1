@@ -32,6 +32,7 @@ class PunchRecord extends Model
         'annex',
         'log_file',
         'status',
+        'memo',
     ];
 
 }

@@ -20,7 +20,7 @@ use Illuminate\Http\Request;
 class PunchRecordController extends Controller
 {
     private $_validateRule = [
-        'name' => 'required|unique:punch_record,name|max:32',
+        'memo' => 'unique:punch_record,memo|max:32',
     ];
 
     public function index()
@@ -47,15 +47,13 @@ class PunchRecordController extends Controller
     public function store(Request $request)
     {
         $this->validate($request, $this->_validateRule);
-        $p = $request->all();
-
         $file = 'annex';
         $filePath = self::setPunchRecordFile($request, $file);
 
         $data = [
-            'name'   => $p['name'],
-            'annex'  => $filePath ?? '',
-            'status' => 0,
+            'memo' => $request->get('memo'),
+            'name' => $request->file($file)->getClientOriginalName() ?? '',
+            'annex' => $filePath ?? ''
         ];
 
         PunchRecord::create($data);
@@ -68,7 +66,7 @@ class PunchRecordController extends Controller
         $punchRecord = PunchRecord::findOrFail($id);
 
         $this->validate($request, array_merge($this->_validateRule, [
-            'name' => 'required|max:255|unique:punch_record,name,' . $punchRecord->id,
+            'memo' => 'required|max:255|unique:punch_record,memo,' . $punchRecord->id,
         ]));
 
         $p = $request->all();
@@ -76,7 +74,7 @@ class PunchRecordController extends Controller
         $filePath = self::setPunchRecordFile($request, $file);
 
         $data = [
-            'name' => $p['name'],
+            'memo' => $p['memo'],
         ];
         if (!empty($filePath)) $data['annex'] = $filePath;
         $punchRecord->update($data);
@@ -89,6 +87,7 @@ class PunchRecordController extends Controller
     public function setPunchRecordFile($request, $file)
     {
         $filePath = $fileName = '';
+
         if ($request->hasFile($file) && $request->file($file)->isValid()) {
             $time = date('Ymd', time());
             $uploadPath = 'app/punch-record/' . $time;
@@ -227,12 +226,12 @@ class PunchRecordController extends Controller
         return redirect()->route('daily-detail.review.import.info');
     }
 
-
     public function log($id)
     {
         $punchRecord = PunchRecord::findOrFail($id);
 
         if (empty($punchRecord->status) || $punchRecord->status != 3 || empty($punchRecord->log_file)) {
+
             return redirect()->route('daily-detail.review.import.info');
         }
 

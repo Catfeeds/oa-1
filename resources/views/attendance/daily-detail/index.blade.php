@@ -9,7 +9,10 @@
 @section('content')
 
     @include('flash::message')
-    @include('attendance.daily-detail.notice')
+    @if(Entrust::can(['daily-detail.confirm']))
+        @include('attendance.daily-detail.notice')
+    @endif
+
 
     <div class="row">
         <div class="col-lg-12">
@@ -56,18 +59,22 @@
                                     <td>
                                         {{ \App\Http\Components\Helpers\AttendanceHelper::showLeaveIds($v['leave_id']) }}
                                     </td>
+
                                     <td>
                                         {{--节日加班不需要补打卡与补假操作--}}
+
                                         @if((empty($v['punch_start_time']) || empty($v['punch_end_time'])) &&
                                             !in_array(\App\Models\Sys\HolidayConfig::WEEK_WORK,
                                             \App\Models\Attendance\Leave::getAttrByLeaveIds(json_decode($v['leave_id']) ?? [], 'change_type'))
                                         )
+
                                             <a href="{{route('leave.create', [
                                                 'id' => \App\Models\Sys\HolidayConfig::RECHECK,
                                                 'day' => $v['day']
                                             ])}}">
                                                 {{ trans('att.补打卡') }}
                                             </a>
+
                                             <a href="{{route('leave.create', ['id' => \App\Models\Sys\HolidayConfig::LEAVEID])}}">
                                                 {{ trans('att.补假') }}
                                             </a>

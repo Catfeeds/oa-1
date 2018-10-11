@@ -65,22 +65,5 @@ Route::group([
             'middleware' => ['permission:entry-all|entry.review'],
             'uses' => 'EntryController@refuse'])->name('entry.refuse');
 
-        # 公司配置
-        Route::get('firm', [
-            'middleware' => ['permission:firm-all|firm'],
-            'uses' => 'FirmController@index'])->name('firm.list');
-        Route::get('firm/create', [
-            'middleware' => ['permission:firm-all|firm.create'],
-            'uses' => 'FirmController@create'])->name('firm.create');
-        Route::post('firm/create', [
-            'middleware' => ['permission:firm-all|firm.create'],
-            'uses' => 'FirmController@store']);
-        Route::get('firm/edit/{id}', [
-            'middleware' => ['permission:firm-all|firm.edit'],
-            'uses' => 'FirmController@edit'])->name('firm.edit');
-        Route::post('firm/edit/{id}', [
-            'middleware' => ['permission:firm-all|firm.edit'],
-            'uses' => 'FirmController@update']);
-
     });
 });

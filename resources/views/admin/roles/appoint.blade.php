@@ -34,7 +34,7 @@
                                 <div class="col-lg-12">
                                     <div class="form-group">
                                         <div class="col-sm-4">
-                                            <button class="btn btn-primary btn-sm" type="submit">提交</button>
+                                            <button class="btn btn-primary btn-sm" id="didClick" type="button">提交</button>
                                             <button class="btn btn-white btn-sm" type="reset">取消</button>
                                         </div>
                                     </div>
@@ -45,79 +45,19 @@
                                         <div class="panel-heading">
                                             <i class="fa fa-info-circle"></i> 权限列表
 
-                                            <div class="ibox-tools">
-                                                <a class="btn btn-xs btn-primary disable-check-all"> 全选 </a>
-                                                <a class="btn btn-xs btn-primary disable-un-check-all"> 全不选 </a>
-                                            </div>
-
                                         </div>
                                         <div class="panel-body">
                                             <div class="form-group">
                                                 <div class="col-sm-12 disabled-item">
-                                                    @foreach($permissionsGroup as $group => $permission)
-                                                        <div class="panel panel-default">
-                                                            <div class="panel-heading">
-                                                                {{ $group }}
-                                                            </div>
-                                                            <div class="panel-body">
-                                                                @foreach($permission as $p)
-                                                                <div class="checkbox col-sm-3">
-                                                                    <label>
-                                                                        <input type="checkbox" name="ps[]"
-                                                                               @if(in_array($p['id'], array_keys($enables)))
-                                                                                       checked
-                                                                                       @endif
-                                                                               value="{{ $p['id'] }}"> {{ $p['display_name'] }}
-                                                                    </label>
-                                                                </div>
-                                                                @endforeach
-                                                            </div>
-
-                                                        </div>
-                                                    @endforeach
-
+                                                    <div id="tree" class="ztree"> </div>
                                                 </div>
 
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                {{--<div class="col-lg-6">
-                                    <div class="panel panel-info">
-                                        <div class="panel-heading">
-                                            <i class="fa fa-info-circle"></i> 已有权限
-
-                                            <div class="ibox-tools">
-                                                <a class="btn btn-xs btn-primary enable-check-all"> 全选 </a>
-                                                <a class="btn btn-xs btn-primary enable-un-check-all"> 全不选 </a>
-                                            </div>
-
-                                        </div>
-                                        <div class="panel-body">
-                                            <div class="form-group">
-                                                <div class="col-sm-10 enable-item">
-
-                                                    @foreach($enables as $p)
-
-                                                        <div class="checkbox"><label> <input type="checkbox"
-                                                                                             name="ps[]"
-                                                                                             value="{{ $p->id }}"
-                                                                                             checked> {{ $p->display_name }}
-                                                            </label></div>
-
-                                                    @endforeach
-
-                                                </div>
-
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>--}}
-
                                 {!! Form::close() !!}
-
                             </div>
-
                         </div>
                     </div>
                 </div>
@@ -126,30 +66,86 @@
     </div>
 
 @endsection
+@include('widget.ztree')
 
 @section('scripts-last')
     <script>
+        var chkNodeArr;
+        var chkNodeStr = "";
+
         $(function() {
-            $('.disable-check-all').click(function() {
-                $('.disabled-item').find("input[type=checkbox]").each(function() {
-                    $(this).prop("checked", 'checked');
-                })
+            createTree('#tree');
+            $('#didClick').click(function () {
+                 $.ajax({
+                       url: '{{ route('role.appointUpdate', ['id' => $id])}}',
+                    type: 'GET',
+                    async: true,
+                        data: {
+                            PostMethod : "checkedBox",
+                            nodesJson: chkNodeStr
+                         },
+                   dataType: 'json',
+                    success: function (data) {
+                        if(data.status >= 1) {
+                            window.location.href = data.url;
+                        } else {
+                            window.location.href = data.url;
+                        }
+
+                         },
+                    error: function (err) {
+                        alert('错误的修改数据')
+                    }
+                 });
+              });
             });
-            $('.disable-un-check-all').click(function() {
-                $('.disabled-item').find("input[type=checkbox]").each(function() {
-                    $(this).prop("checked", false);
-                })
+
+        function createTree(treeId) {
+            var zTree; //用于保存创建的树节点
+            var setting = { //设置
+                check: {
+                    enable: true
+                },
+                view: {
+                    showLine: true, //显示辅助线
+                    dblClickExpand: true
+                },
+                data: {
+                    simpleData: {
+                        enable: true,
+                        idKey: "id",
+                        pIdKey: "pid",
+                        rootPId: 0
+                    }
+                },
+                callback: {
+                    onCheck: onCheckNode  //回调函数,获取选节点
+                }
+            };
+            $.ajax({ //请求数据,创建树
+                type: 'GET',
+                url: '{{ route('role.getAppoint', ['id' => $id])}}',
+                dataType: "json", //返回的结果为json
+                success: function(data) {
+                    zTree = $.fn.zTree.init($(treeId), setting, data); //创建树
+                },
+                error: function(data) {
+                    alert("创建树失败!");
+                }
             });
-            $('.enable-check-all').click(function() {
-                $('.enable-item').find("input[type=checkbox]").each(function() {
-                    $(this).prop("checked", 'checked');
-                })
-            });
-            $('.enable-un-check-all').click(function() {
-                $('.enable-item').find("input[type=checkbox]").each(function() {
-                    $(this).prop("checked", false);
-                })
-            });
-        });
+        }
+
+        function onCheckNode()
+        {
+            var treenode = $.fn.zTree.getZTreeObj("tree");
+            chkNodeArr = treenode.getCheckedNodes(true);
+            //true获取选中节点,false未选中节点,默认为true
+            nodeJson = [];
+            for (var i = 0; i < chkNodeArr.length; i++) {
+                    nodeJson[i] = { "name": chkNodeArr[i].name, "id": chkNodeArr[i].id };
+                }
+            chkNodeStr = JSON.stringify(nodeJson);
+         }
+
     </script>
 @endsection

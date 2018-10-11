@@ -9,15 +9,19 @@
 namespace App\Http\Controllers\Admin\Sys;
 
 
+use App\Http\Components\ScopeAtt\CalendarScope;
+use App\Http\Controllers\Attendance\AttController;
+use App\Models\Attendance\DailyDetail;
 use App\Models\Sys\Calendar;
 use App\Models\Sys\PunchRules;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
-class CalendarController extends Controller
+class CalendarController extends AttController
 {
     protected $redirectTo = '/admin/sys/calendar';
+    protected $scopeClass = CalendarScope::class;
 
     private $_validateRule = [
         'year'  => 'required|max:11',
@@ -30,7 +34,8 @@ class CalendarController extends Controller
     {
         $data = Calendar::orderByRaw('year desc, month desc, day desc')->paginate(31);
         $title = trans('app.日历表');
-        return view('admin.sys.calendar', compact('title', 'data'));
+        $scope = $this->scope;
+        return view('admin.sys.calendar', compact('title', 'data', 'scope'));
     }
 
     public function create()
