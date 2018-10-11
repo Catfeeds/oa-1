@@ -15,9 +15,7 @@
                             </div>
                         </div>
                         <div class="ibox-content">
-
                             @include('flash::message')
-
                             <div class="panel-heading">
                                 <div class="panel blank-panel">
                                     <div class="panel-options">
@@ -30,17 +28,36 @@
 
                             <div class="panel-body">
                                 {{--收索区域--}}
-                                <div>
-                                    {!! Form::open([ 'class' => 'form-inline', 'method' => 'post']) !!}
-                                    <div class="col-sm-2">
-                                        <select class="js-select2-single form-control" name="punch_rules_id" >
-                                            <option value="">请选择排班规则</option>
-                                            @foreach(\App\Models\Sys\PunchRules::getPunchRulesList() as $k => $v)
-                                                <option value="{{ $k }}" >{{ $v }}</option>
-                                            @endforeach
-                                        </select>
+                                @include('widget.scope-month', ['scope' => $scope])
+                                <div class="container">
+                                    {!! Form::open([ 'class' => 'form-horizontal', 'method' => 'post', 'route' => 'calendar.storeMonth']) !!}
+                                    <div class="form-group">
+                                        {!! Form::label('week_num', trans('att.请选择批量生成星期'), ['class' => 'col-sm-2 control-label']) !!}
+                                        @foreach(\App\Models\Sys\Calendar::$week as $k => $value)
+                                            <div class="checkbox-inline col-xs-1">
+                                                <label>
+                                                    <input name="week_num" type="checkbox" class="i-checks" value="{{ $k }}" id="{{ "week_$k" }}">{{ $value }}
+                                                </label>
+                                            </div>
+                                        @endforeach
                                     </div>
-                                    {!! Form::submit(trans('app.一键生成当月日历'), ['class' => 'btn btn-primary']) !!}
+
+                                    <div class="form-group">
+                                        {!! Form::label('punch_rules_id', trans('att.请选择排班规则'), ['class' => 'col-sm-2 control-label']) !!}
+                                        <div class="col-sm-2">
+                                            <select class="js-select2-single form-control" name="punch_rules_id" >
+                                                @foreach(\App\Models\Sys\PunchRules::getPunchRulesList() as $k => $v)
+                                                    <option value="{{ $k }}" >{{ $v }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-sm-2">
+                                            {!! Form::submit(trans('app.点击生成'), ['class' => 'btn btn-primary', 'style' => 'float: right']) !!}
+                                        </div>
+                                    </div>
                                     {!! Form::close() !!}
                                 </div>
 
@@ -48,6 +65,13 @@
                                     <div class="tab-pane active">
                                         <div class="ibox-content profile-content">
                                             <div class="table-responsive">
+                                                @if(($sm = date('m', strtotime($scope->startDate))) < ($em = date('m', strtotime($scope->endDate))))
+                                                    @for($i = $sm; $i <=  $em; $i ++)
+                                                        <div class="col-xs-4" style="margin-bottom: 5%">
+                                                        @include('widget.calendar', ['date' => '2018-'.$i])
+                                                        </div>
+                                                    @endfor
+                                                @endif
                                                 <table class="table table-hover table-striped tooltip-demo">
                                                     <thead>
                                                     <tr>
@@ -57,6 +81,7 @@
                                                         <th>{{ trans('app.周') }}</th>
                                                         <th>{{ trans('app.排班规则') }}</th>
                                                         <th>{{ trans('app.备注') }}</th>
+                                                        <th>{{ trans('app.创建时间') }}</th>
                                                         <th>{{ trans('app.操作') }}</th>
                                                     </tr>
                                                     </thead>
@@ -94,3 +119,4 @@
 
 @endsection
 @include('widget.select2')
+@include('widget.icheck')
