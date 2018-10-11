@@ -1,10 +1,10 @@
-@extends('layouts.top-nav')
+@extends('attendance.side-nav')
 
 @section('title', $title ?? trans('app.系统设置'))
-@section('body-class', 'top-navigation')
+@section('page-head')
+    @parent
+@endsection
 
-@section('top-nav')
-
+@section('content')
     @yield('content')
-
 @endsection

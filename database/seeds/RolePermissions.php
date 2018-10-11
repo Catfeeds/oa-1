@@ -14,7 +14,6 @@ class RolePermissions extends Seeder
     public function run()
     {
         $rolePerms = $this->_getRolePerms();
-
         foreach ($rolePerms as $role => $perms) {
             $r = Role::whereName($role)->first();
             if ($r) {
@@ -30,29 +29,6 @@ class RolePermissions extends Seeder
 
     private function _getRolePerms()
     {
-        return [
-            'admin' => [
-                'user-all',
-                'role-all',
-                'permission-all',
-                'version-all',
-                'stat-cron-all',
-                'profile.password',
-                'attendance-all',
-                'leave-all',
-                'daily-detail-all',
-                'dept-all',
-                'job-all',
-                'school-all',
-                'crm-all',
-                'punch-rules-all',
-                'calendar-all',
-                'holiday-config-all',
-                'approval-step-all',
-                'staff-all',
-                'entry-all',
-                'firm-all',
-            ],
-        ];
+        return ['admin' => Permission::getPemNameNoAll()];
     }
 }

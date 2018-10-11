@@ -20,20 +20,20 @@
                             <a aria-expanded="false" role="button" href="{{ route('home') }}">{{ trans('app.首页') }}</a>
                         </li>
 
-                        @if(Entrust::can(['user-all', 'user']))
+                        @if(Entrust::can(['user']))
                         <li @if(Route::is('user*')) class="active" @endif>
                             <a aria-expanded="false" role="button" href="{{ route('user') }}">{{ trans('app.员工管理') }}</a>
                         </li>
                         @endif
 
-                        @if(Entrust::can(['role-all', 'role']))
-                        <li @if(Route::is('role*')) class="active" @endif>
-                            <a aria-expanded="false" role="button" href="{{ route('role') }}">{{ trans('app.职务管理') }}</a>
-                        </li>
+                        @if(Entrust::can(['role']))
+                            <li @if(Route::is('role*')) class="active" @endif>
+                                <a aria-expanded="false" role="button" href="{{ route('role') }}">{{ trans('app.职务管理') }}</a>
+                            </li>
                         @endif
 
-                        @if(Entrust::can(['job-all', 'job', 'dept-all', 'dept', 'school-all', 'school',
-                        'holiday-config-all', 'holiday-config','approval-step-all', 'approval-step', 'punch-rules-all', 'punch-rules']))
+                        @if(Entrust::can(['job', 'dept', 'school',
+                            'holiday-config', 'approval-step', 'punch-rules']))
                             <li @if(Route::is(['job*', 'dept*', 'school*', 'holiday-config' , 'approval-step*', 'punch-rules*', 'calendar*'])) class="active" @endif>
                                 <a aria-expanded="false" role="button" href="{{ route('dept') }}">{{ trans('app.系统配置') }}</a>
                             </li>

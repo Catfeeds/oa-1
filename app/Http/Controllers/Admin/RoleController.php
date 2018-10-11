@@ -83,16 +83,26 @@ class RoleController extends Controller
         }
         \Cache::tags(\Config::get('entrust.permission_role_table'))->flush();
         $title = trans('app.职务权限指派');
-        return view('admin.roles.appoint', compact('role', 'permissionsGroup', 'enables', 'title'));
+        return view('admin.roles.appoint', compact('role', 'permissionsGroup', 'enables', 'title', 'id'));
     }
 
     public function appointUpdate($id, Request $request)
     {
+        $data = $request->all();
+        if(empty($data['nodesJson'])) {
+            return response()->json(['status' => -1, 'url' => $this->redirectTo]);
+        }
+
+        $nodesJson = json_decode($data['nodesJson']);
+        $ps = [];
+        $except = Permission::getPemAllName();
+        foreach ($nodesJson as $k => $v) {
+            if(in_array($v->id, $except)) continue;
+            $ps[] = $v->id;
+        }
         $role = Role::findOrFail($id);
-        $ps = $request->get('ps');
 
         $olds = $role->perms()->get();
-
         if (!$ps) {
             $enables = [];
             $disables = $olds;
@@ -105,7 +115,60 @@ class RoleController extends Controller
         $role->attachPermissions($enables);
         $role->detachPermissions($disables);
 
-        return redirect()->back();
+        flash(trans('app.编辑成功', ['value' => trans('app.权限')]), 'success');
+        return response()->json(['status' => 1, 'url' => $this->redirectTo]);
     }
 
+    public function getAppoint($id)
+    {
+        $role = Role::findOrFail($id)->perms()->get(['id'])->pluck('id')->toArray();
+        $roleDesc = Role::findOrFail($id)->perms()->get(['display_name'])->pluck('display_name')->toArray();
+        $permissions = Permission::orderBy('id', 'asc')->get();
+        $desc = Permission::getPemDesc();
+
+        $pemDisDesc = Permission::getPemDisDesc();
+
+        $permissionsGroup = $checkDesc = [];
+        foreach ($roleDesc as $k => $v) {
+            $checkDesc[] = $pemDisDesc[$v];
+            unset($pemDisDesc[$v]);
+        }
+
+        $checkDesc = array_unique($checkDesc);
+        $checkDisAll = $checkDesc;
+
+        while (!empty($checkDesc)) {
+            $ext = [];
+            foreach ($checkDesc as $ck => $cv) {
+                if(!empty($pemDisDesc[$cv])) {
+                    $checkDisAll[] = $pemDisDesc[$cv];
+                    $ext[] = $pemDisDesc[$cv];
+                    unset($checkDesc[$ck], $pemDisDesc[$cv]);
+                }
+            }
+            $checkDesc = $ext;
+        }
+        $checkDisAll = array_unique($checkDisAll);
+
+        if(empty($checkDisAll)) $checkDisAll[] = '所有权限';
+        foreach ($permissions as $v) {
+            if(in_array($v->display_name, $checkDisAll) || in_array($v->id, $role)) {
+                $checked = true;
+                $open = true;
+            } else {
+                $checked = false;
+                $open = false;
+            }
+
+            $permissionsGroup[] = [
+                'id' => $v->id,
+                'pid' => $desc[$v->description] ?? '',
+                'name' => $v->display_name,
+                'open' => $open,
+                'checked' => $checked,
+            ];
+        }
+
+        return response()->json($permissionsGroup);
+    }
 }

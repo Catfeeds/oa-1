@@ -17,12 +17,15 @@ class LeaveScope extends GeneralScope
 {
     public $holidayId;
     public $statusId;
+    public $applyTypeId;
     public $displayLastMonth = false;
 
     public function __construct(array $params, $user = null)
     {
 
         $this->holidayId = $params['holiday_id'] ?? '';
+        $this->applyTypeId = $params['apply_type_id'] ?? '';
+
         $this->statusId = $params['status'] ?? NULL;
         parent::__construct($params, $user);
     }
@@ -37,12 +40,18 @@ class LeaveScope extends GeneralScope
             $this->getDateWhere($tableAlias, 'created_at'),
         ];
 
+        if(!empty($this->applyTypeId)) {
+            $where[] = sprintf("holiday_id in (select holiday_id from users_holiday_config where apply_type_id = %d)", $this->applyTypeId);
+        }
+
         if(!empty($this->holidayId)) {
             $where[] = sprintf("holiday_id = %d", $this->holidayId);
         }
+
         if (!is_null($this->statusId)){
             $where[] = sprintf("status = %d", $this->statusId);
         }
+
         $this->where = empty($where) ? '1 = 1' : implode(' AND ', $where);
     }
 }

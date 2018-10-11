@@ -1,13 +1,11 @@
 @extends('admin.sys.sys')
 
 @section('content')
-    <div class="wrapper wrapper-content">
-        <div class="container">
             <div class="row">
                 <div class="col-lg-12">
                     <div class="ibox float-e-margins">
                         <div class="ibox-title">
-                            <h5>{{ $title ?? trans('app.游戏设置') }}</h5>
+                            <h5>{{ $title ?? trans('app.系统设置') }}</h5>
                         </div>
                         <div class="ibox-content">
 
@@ -17,7 +15,7 @@
                                 <div class="panel blank-panel">
                                     <div class="panel-options">
                                         <ul class="nav nav-tabs">
-                                            @include('admin.sys._link-tabs')
+                                            @include('admin.sys._link-staff-tabs')
                                         </ul>
                                     </div>
                                 </div>
@@ -30,8 +28,8 @@
                                             {!! Form::open(['class' => 'form-horizontal']) !!}
 
                                             <div class="form-group @if (!empty($errors->first('dept'))) has-error @endif">
-                                                {!! Form::label('dept', trans('app.部门名称'), ['class' => 'col-sm-3 control-label']) !!}
-                                                <div class="col-sm-6">
+                                                {!! Form::label('dept', trans('app.部门名称'), ['class' => 'col-sm-4 control-label']) !!}
+                                                <div class="col-sm-3">
                                                     {!! Form::text('dept', isset($dept->dept) ? $dept->dept: old('dept'), [
                                                     'class' => 'form-control',
                                                     'placeholder' => trans('app.请输入', ['value' => trans('app.部门名称')]),
@@ -42,7 +40,7 @@
                                             </div>
 
                                             <div class="form-group">
-                                                <div class="col-sm-6 col-sm-offset-3">
+                                                <div class="col-sm-3 col-sm-offset-4">
                                                     {!! Form::submit(trans('app.提交'), ['class' => 'btn btn-primary']) !!}
                                                 </div>
                                             </div>
@@ -55,7 +53,5 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
 @endsection

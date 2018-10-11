@@ -9,7 +9,7 @@
 @section('content')
 
     @include('flash::message')
-    @if(Entrust::can(['daily-detail-notice']))
+    @if(Entrust::can(['daily-detail.confirm']))
         @include('attendance.daily-detail.notice')
     @endif
 

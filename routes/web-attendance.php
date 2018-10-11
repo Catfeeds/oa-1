@@ -64,10 +64,9 @@ Route::group([
         Route::get('daily-detail/confirm', [
             'middleware' => ['permission:attendance-all|daily-detail-all|daily-detail'],
             'uses' => 'DailyDetailController@confirm'])->name('daily-detail.confirm');
-
         //考勤管理
         Route::get('daily-detail/review/', [
-            'middleware' => ['permission:attendance-all|daily-detail-all|daily-detail.review'],
+            'middleware' => ['permission:daily-detail.review'],
             'uses' => 'ReviewController@index'])->name('daily-detail.review.info');
         //发布用户考勤确认信息
         Route::get('daily-detail/review/send', [
