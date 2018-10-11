@@ -52,27 +52,17 @@
                                     <td>{{ \App\User::getAliasList()[$v['user_id']] ?? '' }}</td>
 
                                     <td>
-                                        @if($v['apply_type_id'] == \App\Models\Sys\HolidayConfig::RECHECK)
-                                            @if(($a = date('Y-m-d', strtotime($v['start_time']))) == \App\Models\Attendance\Leave::HASNOTIME)
-                                                暂无上班补打卡
-                                            @else
-                                                {{ '上班补打卡:' }}<br>{{  date('Y-m-d H:i:s', strtotime($v['start_time'])) }}
-                                        @endif
+                                        @if(\App\Models\Sys\HolidayConfig::getHolidayApplyList()[$v['holiday_id']] === 3)
+                                            {{$v['start_time'] ?? '---'}}
                                         @else
-                                            {{ date('Y-m-d', strtotime($v['start_time'])).' '.
-                                            \App\Models\Attendance\Leave::$startId[$v['start_id']] ?? '' }}
+                                            {{ date('Y-m-d', strtotime($v['start_time'])).' '.\App\Models\Attendance\Leave::$startId[$v['start_id']] }}
                                         @endif
                                     </td>
                                     <td>
-                                        @if($v['apply_type_id'] == \App\Models\Sys\HolidayConfig::RECHECK)
-                                            @if(($a = date('Y-m-d', strtotime($v['end_time']))) == \App\Models\Attendance\Leave::HASNOTIME)
-                                                暂无下班补打卡
-                                            @else
-                                                {{ '下班补打卡:' }}<br>{{  date('Y-m-d H:i:s', strtotime($v['end_time'])) }}
-                                            @endif
+                                        @if(\App\Models\Sys\HolidayConfig::getHolidayApplyList()[$v['holiday_id']] === 3)
+                                            {{$v['end_time'] ?? '---'}}
                                         @else
-                                            {{  date('Y-m-d', strtotime($v['end_time'])).' '.
-                                            \App\Models\Attendance\Leave::$endId[$v['end_id']]  ?? ''}}
+                                            {{ date('Y-m-d', strtotime($v['end_time'])).' '.\App\Models\Attendance\Leave::$endId[$v['end_id']] }}
                                         @endif
                                     </td>
                                     <td>{{$v['number_day'] . trans('att.天')}}</td>

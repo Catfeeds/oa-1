@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Crm;
 use App\Http\Components\Helpers\CrmHelper;
 use App\Http\Controllers\Crm\CrmController AS Controller;
 use App\Models\Crm\Difference;
+use App\Models\Crm\ExchangeRate;
 use App\Models\Crm\Principal;
 use App\Models\Crm\Product;
 use App\Models\Crm\Reconciliation;
@@ -39,14 +40,12 @@ class ReconciliationPoolController extends Controller
                     break;
                 case Principal::TREASURER:
                     $job[$v['product_id']][4] = 4;
-                    $job[$v['product_id']][8] = 8;
                     break;
                 case Principal::FRC:
                     $job[$v['product_id']][5] = 5;
                     break;
                 case Principal::FSR:
                     $job[$v['product_id']][7] = 7;
-                    $job[$v['product_id']][8] = 8;
                     break;
             }
         }
@@ -55,7 +54,6 @@ class ReconciliationPoolController extends Controller
         if (!in_array($pid, array_keys($products))) {
             return redirect()->back()->withInput();
         }
-
         $review = array_intersect_key(Reconciliation::REVIEW_TYPE, $job[$pid]);
         $source = \Request::get('source', key($review));
 
@@ -82,7 +80,7 @@ class ReconciliationPoolController extends Controller
         $scope = $this->scope;
         $billing_cycle = date('Y-m', strtotime($scope->startTimestamp));
         switch (true) {
-            case in_array($source, [Reconciliation::UNRD, Reconciliation::OPS]):
+            case in_array($source, [Reconciliation::UNRD, Reconciliation::OPS, Reconciliation::FRC]):
                 $sql = "
                     SELECT 
                         a.client AS client,
@@ -108,7 +106,7 @@ class ReconciliationPoolController extends Controller
                 ";
                 $ret = \DB::select($sql);
                 break;
-            case in_array($source, [Reconciliation::TREASURER, Reconciliation::FRC, Reconciliation::OOR]):
+            case in_array($source, [Reconciliation::TREASURER, Reconciliation::OOR]):
                 $sql = "
                     SELECT 
                         a.client AS client,
@@ -136,9 +134,9 @@ class ReconciliationPoolController extends Controller
                 $data[$k]['first_rmb'] = $v['first_rmb'];
                 $data[$k]['second_rmb'] = $v['second_rmb'];
                 $data[$k]['diff_amount'] = $v['accrual_water_rmb'] - $v['first_rmb'] - $v['second_rmb'];
-                $data[$k]['diff_rate'] = $data[$k]['diff_amount'] ? CrmHelper::percentage($data[$k]['diff_amount'] / ( $v['accrual_water_rmb'] - $v['first_rmb'])) : '0%';
-                $data[$k]['re_rate'] = $v['first_rmb'] != 0 ? CrmHelper::percentage(1 - $v['first_rmb']/$v['accrual_water_rmb']) : '100%';
-                $data[$k]['billing_rate'] = $v['num'] ? CrmHelper::percentage($v['num']/$v['total']) : '0%';
+                $data[$k]['diff_rate'] = $data[$k]['diff_amount'] ? CrmHelper::percentage($data[$k]['diff_amount'] / ($v['accrual_water_rmb'] - $v['first_rmb'])) : '0%';
+                $data[$k]['re_rate'] = $v['first_rmb'] != 0 ? CrmHelper::percentage(1 - $v['first_rmb'] / $v['accrual_water_rmb']) : '100%';
+                $data[$k]['billing_rate'] = $v['num'] ? CrmHelper::percentage($v['num'] / $v['total']) : '0%';
                 $data[$k]['invoices_rmb'] = $v['invoices_rmb'];
                 $data[$k]['payback_rmb'] = $v['payback_rmb'];
                 $data[$k]['not_payback_rmb'] = $v['invoices_rmb'] - $v['payback_rmb'];
@@ -176,40 +174,62 @@ class ReconciliationPoolController extends Controller
 
     public function detail(Request $request)
     {
-        switch (true){
-            case $request->source == Reconciliation::OPERATION:
-                $adjustment = 'operation_rmb_adjustment';
+        switch (true) {
+            case in_array($request->source, [Reconciliation::UNRD, Reconciliation::OPS, Reconciliation::FRC]):
+                $adjustment = 'operation_adjustment';
                 $type = 'operation_type';
                 break;
-            case $request->source == Reconciliation::ACCRUAL:
-                $adjustment = 'accrual_rmb_adjustment';
+            case in_array($request->source, [Reconciliation::RECONCILIATION, Reconciliation::FAC]):
+                $adjustment = 'accrual_adjustment';
                 $type = 'accrual_type';
                 break;
-            case $request->source == Reconciliation::RECONCILIATION:
-                $adjustment = 'reconciliation_rmb_adjustment';
+            case in_array($request->source, [Reconciliation::TREASURER, Reconciliation::OOR]):
+                $adjustment = 'reconciliation_adjustment';
                 $type = 'reconciliation_type';
                 break;
         }
         $sql = "
             SELECT 
                 {$type},
-                SUM({$adjustment}) AS {$adjustment}
+                {$adjustment},
+                reconciliation_currency         
             FROM cmr_reconciliation AS a 
             WHERE a.product_id = {$request->product_id} AND a.billing_cycle = '{$request->billing_cycle}'
             AND a.client = '{$request->client}' AND a.period_name = '{$request->period_name}'
-            GROUP BY {$type}
         ";
         $ret = \DB::select($sql);
-        $sum = array_sum(array_column($ret, $adjustment));
         $diff = Difference::getList();
+        $rate = ExchangeRate::getList($request->billing_cycle);
 
-        $data = [];
-        foreach ($ret as $k => $v){
+        $data = $tmp = [];
+
+        foreach ($ret as $k => $v) {
             $v = (array)$v;
-            if (isset($diff[$v[$type]])){
-                $data[$k]['type'] = $diff[$v[$type]];
-                $data[$k]['adjustment'] = sprintf('%s|%s',$v[$adjustment], $v[$adjustment] == 0 ? '0%' : CrmHelper::percentage($v[$adjustment]/$sum));
+            if (is_numeric($v['reconciliation_adjustment'])) {
+                if (!isset($tmp[$v['reconciliation_type']])) {
+                    $tmp[$v['reconciliation_type']] = 0;
+                }
+                $tmp[$v['reconciliation_type']] += $v['reconciliation_adjustment'] * $rate[$v['reconciliation_currency']];
+            } else {
+                $type = json_decode($v['reconciliation_type'], true);
+                $adjustment = json_decode($v['reconciliation_adjustment'], true);
+                foreach ($type as $key => $val) {
+                    if (!isset($tmp[$val])) {
+                        $tmp[$val] = 0;
+                    }
+                    $tmp[$val] += $adjustment[$key] * $rate[$v['reconciliation_currency']];
+                }
+                unset($type);
+                unset($adjustment);
             }
+        }
+        $i = 1;
+        foreach ($tmp as $k => $v) {
+            if (isset($diff[$k])){
+                $data[$i]['type'] = $diff[$k];
+                $data[$i]['adjustment'] = sprintf('%s|%s',$v, $v == 0 ? '0%' : CrmHelper::percentage($v/array_sum($tmp)));
+            }
+            $i++;
         }
 
         return $data;

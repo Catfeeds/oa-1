@@ -20,10 +20,10 @@ class CalendarController extends Controller
     protected $redirectTo = '/admin/sys/calendar';
 
     private $_validateRule = [
-        'year' => 'required|max:11',
+        'year'  => 'required|max:11',
         'month' => 'required|max:11',
-        'day' => 'required|max:11',
-        'week' => 'required|max:11',
+        'day'   => 'required|max:11',
+        'week'  => 'required|max:11',
     ];
 
     public function index()
@@ -35,7 +35,7 @@ class CalendarController extends Controller
 
     public function create()
     {
-        $calendar = (object)['punch_rules_id' => '' ,'week' => ''];
+        $calendar = (object)['punch_rules_id' => '', 'week' => ''];
         $title = trans('app.添加日历表');
         return view('admin.sys.calendar-edit', compact('title', 'calendar'));
     }
@@ -70,7 +70,8 @@ class CalendarController extends Controller
     }
 
     //批量添加当月的工作日历
-    public function storeAllMonth(Request $request){
+    public function storeAllMonth(Request $request)
+    {
         $punch_rules_id = $request->input('punch_rules_id');
         $year = date('Y', time());
         $month = date('m', time());
@@ -86,34 +87,35 @@ class CalendarController extends Controller
                 //如果是周日还有双周的周六 ,修改排班规则为周末休息
                 if (($week == 6 && !$this->ifSingleWeek("$year-$month-$day")) || $week == 7) {
                     $prId = $rest->id;
-                }else{
+                } else {
                     $prId = $punch_rules_id;
                 }
 
                 //若日历表已有部分天数已配置则不进行覆盖添加, 没有则添加
                 Calendar::firstOrCreate(
                     [
-                        'year' => $year,
+                        'year'  => $year,
                         'month' => $month,
-                        'day' => $day,
-                        'week' => $week
+                        'day'   => $day,
+                        'week'  => $week,
                     ], ['punch_rules_id' => $prId]);
             }
             flash('批量添加日历成功', 'success');
-        }else{
+        } else {
             flash('请选择批量添加日历的排班规则', 'danger');
         }
         return redirect()->back();
     }
 
     //判断单双周
-    public function ifSingleWeek($arg_date){
+    public function ifSingleWeek($arg_date)
+    {
         $date = '2018-7-30';//已知改天为单周 且星期一
         $timeDiff = strtotime($arg_date) - strtotime($date);
 
-        if (intval($timeDiff/24/3600/7) % 2 == 1){
+        if (intval($timeDiff / 24 / 3600 / 7) % 2 == 1) {
             return false;//双周
-        }else{
+        } else {
             return true;//单周
         }
     }

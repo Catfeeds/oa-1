@@ -31,8 +31,8 @@ class DailyDetailController extends AttController
 
     public function index()
     {
-        $data = DailyDetail::where(['user_id' => \Auth::user()->user_id])->orderBy('created_at', 'desc')
-            ->paginate(30);
+        $data = DailyDetail::where('user_id', Auth::user()->user_id)
+            ->orderBy('day', 'desc')->paginate(30);
         $userInfo['username'] = \Auth::user()->username;
         $userInfo['alias'] = \Auth::user()->alias;
 

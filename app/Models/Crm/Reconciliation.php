@@ -69,8 +69,8 @@ class Reconciliation extends Model
 
     protected $fillable = [
         'id',
-        'product_id',
         'billing_cycle',
+        'product_id',
         'billing_cycle_start',
         'income_type',
         'billing_cycle_end',
@@ -105,6 +105,8 @@ class Reconciliation extends Model
         'operation_time',
         'operation_water_other',
         'operation_water_rmb',
+        'operation_divide_other',
+        'operation_divide_rmb',
         'accrual_adjustment',
         'accrual_rmb_adjustment',
         'accrual_type',
@@ -113,6 +115,8 @@ class Reconciliation extends Model
         'accrual_time',
         'accrual_water_other',
         'accrual_water_rmb',
+        'accrual_divide_other',
+        'accrual_divide_rmb',
         'reconciliation_adjustment',
         'reconciliation_rmb_adjustment',
         'reconciliation_type',
@@ -120,11 +124,11 @@ class Reconciliation extends Model
         'reconciliation_user_name',
         'reconciliation_time',
         'reconciliation_water_other',
-        'reconciliation_water_rmb',
+        'reconciliation_water_rmb'
     ];
 
     public static function getBilling()
     {
-        return self::get()->pluck('billing_cycle','billing_cycle')->toArray();
+        return self::get()->pluck('billing_cycle', 'billing_cycle')->toArray();
     }
 }

@@ -1,8 +1,3 @@
-@push('css')
-<style type="text/css">
-</style>
-@endpush
-
 <div class="ibox-content" style="margin-bottom: 20px">
     @if($monthInfo[0] == 'success')
     <div class="table-responsive">
@@ -121,11 +116,12 @@
         });
     }
 
+    var exportArr = [];//选中的checkbox
+
     /**
      * @param columns //打印表的哪些列
-     * @param exportArr//打印表的哪些行
      */
-    function dataTableAction(columns, exportArr){
+    function dataTableAction(columns){
         $('#example').DataTable({
             language: {
                 url: '{{ asset('js/plugins/dataTables/i18n/Chinese.json') }}'
@@ -139,33 +135,51 @@
             autowidth:true,
             dom: '<"html5buttons"B>lTfgitp',
             buttons: [
-                @if(Entrust::can(['daily-detail.review.send-batch']))
-                    {
-                        text: '批量发送',
-                        action: function () {
-                            if (confirm("确定要批量发送吗?")) {
-                                var date = $('.send').first().attr('date');
-                                $(location).attr('href', "{{ route('daily-detail.review.send', ['user_id' => 'all']) }}" + '&date=' + date);
+                {
+                    text: '全选',
+                    action: function () {
+                        $('[name=export]').each(function (index, ele) {
+                            $(ele).prop('checked', true);
+                            $.inArray($(ele).val(), exportArr) == -1 ? exportArr.push($(ele).val()) : '';
+                        });
+                    }
+                },
+                {
+                    text: '反选',
+                    action: function () {
+                        $('[name=export]').each(function (index, ele) {
+                            if ($(ele).prop('checked') == true) {
+                                $(ele).prop('checked', false);
+                                var i = exportArr.indexOf($(ele).val());
+                                if (i != -1) {
+                                    exportArr.splice(i, 1);
+                                }
+                            }else {
+                                $(ele).prop('checked', true);
+                                $.inArray($(ele).val(), exportArr) == -1 ? exportArr.push($(ele).val()) : '';
                             }
-                        }
-                    },
-                @endif
-
-                @if(Entrust::can(['daily-detail.review.export-batch']))
-                    {
-                        extend: 'excel',
-                        text: '导出全部',
-                        filename: "{{ date('Y年m月-全部用户考勤记录') }}",
-                        exportOptions: {
-                            columns: columns
-                        }
-                    },
-                @endif
-
+                        });
+                    }
+                },
+                {
+                    text: '全部取消',
+                    action: function () {
+                        $('[name=export]:checked').each(function (index, ele) {
+                            $(ele).prop('checked', false);
+                            var i = exportArr.indexOf($(ele).val());
+                            if (i != -1) {
+                                exportArr.splice(i, 1);
+                            }
+                        });
+                    }
+                },
                 @if(Entrust::can(['daily-detail.review.export']))
                     {
                         extend: 'excel',
                         text: '选择导出',
+                        init: function ( dt, node, config ) {
+                            node.css({'background-color':'#1ab394', 'color': 'white'});
+                        },
                         filename: "{{ date('Y年m月-部分用户考勤记录') }}",
                         action: function (e, dt, node, config) {
                             if (exportArr.length == 0) {
@@ -176,7 +190,20 @@
                                 $.fn.dataTable.ext.buttons.excelHtml5.action.call(this, e, dt, node, config);
                             }
                         }
-                    }
+                    },
+                @endif
+                @if(Entrust::can(['daily-detail.review.export-batch']))
+                    {
+                        extend: 'excel',
+                        text: '导出全部',
+                    init: function ( dt, node, config ) {
+                        node.css({'background-color':'#1c84c6', 'color': 'white'});
+                    },
+                        filename: "{{ date('Y年m月-全部用户考勤记录') }}",
+                        exportOptions: {
+                            columns: columns
+                        }
+                    },
                 @endif
             ]
         });
@@ -186,11 +213,13 @@
 
         //调整表头样式
         var num = $('input[name=permissions]').val();
-        $('tr').first().children().last().attr('colspan', num);
+        var action = $('tr').first().children().last();
+        action.text() == '操作' ? action.attr('colspan', num) : '';
 
         //发送考勤统计及确认考勤统计
         $('.send, .confirm').each(function (index, ele) {
             var id = $(ele).attr('id');
+            var id_s = '#' + id;
             var date = $(ele).attr('date');
 
             switch ($(ele).attr('con_state')) {
@@ -199,11 +228,11 @@
                         sendTo(id, date);
                     });
                     break;
-                case ("{{ \App\Models\Attendance\ConfirmAttendance:: SENT}}"):
-                    $('#' + id).css({'color': '#1ab394', 'cursor': 'default'});
+                case ("{{ \App\Models\Attendance\ConfirmAttendance:: SENT }}"):
+                    $(id_s).css({'color': '#1ab394', 'cursor': 'default'});
                     break;
                 case ("{{ \App\Models\Attendance\ConfirmAttendance::CONFIRM }}"):
-                    $('#' + id).css({'color': '#ed5565', 'cursor': 'default'});
+                    $(id_s).css({'color': '#ed5565', 'cursor': 'default'});
                     break;
             }
         });
@@ -214,8 +243,7 @@
         }).remove();
         $('#endDate').remove();
 
-        //dataTable设置
-        var exportArr = [];
+        //勾选添加导出行
         $('input[name=export]').click(function () {
             if ($(this).is(':checked')) {
                 exportArr.push($(this).val());
@@ -228,7 +256,14 @@
         for (var i = 0; i < 17; i++) {
             columns.push(i);
         }
-        dataTableAction(columns, exportArr);
+        dataTableAction(columns);
+
+        $('#send-batch').click(function () {
+            if (confirm("确定要批量发送吗?")) {
+                var date = $('.send').first().attr('date');
+                $(location).attr('href', "{{ route('daily-detail.review.send', ['user_id' => 'all']) }}" + '&date=' + date);
+            }
+        })
     });
 </script>
 @endpush

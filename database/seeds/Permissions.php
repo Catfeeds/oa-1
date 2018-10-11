@@ -125,6 +125,7 @@ class Permissions extends Seeder
             'calendar'                  => '日历表信息管理/日历表信息列表',
             'calendar.create'           => '日历表信息管理/日历表信息添加',
             'calendar.edit'             => '日历表信息管理/日历表信息编辑',
+
         ];
     }
 
@@ -185,8 +186,6 @@ class Permissions extends Seeder
     private function _crm(): array
     {
         return [
-
-
             'crm-all' => '所有权限/CRM管理',
 
             'reconciliation-all' => 'CRM管理/对账管理',

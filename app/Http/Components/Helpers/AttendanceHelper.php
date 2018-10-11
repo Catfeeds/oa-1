@@ -14,6 +14,7 @@ use App\Models\Attendance\DailyDetail;
 use App\Models\Attendance\Leave;
 use App\Models\Role;
 use App\Models\Sys\ApprovalStep;
+use App\Models\Sys\Calendar;
 use App\Models\Sys\HolidayConfig;
 use App\Models\UserHoliday;
 use App\User;
@@ -249,7 +250,7 @@ class AttendanceHelper
                 $data = [
                     'user_id' => $leave->user_id,
                     'day' => date('Y-m-d', $d),
-                    'leave_id' => $leave->leave_id,
+                    'leave_id' => self::addLeaveId($leave->leave_id),
                     'punch_start_time' => Leave::$startId[1],
                     'punch_start_time_num' => strtotime(date('Y-m-d', $d) . ' ' . Leave::$startId[1]),
                     'punch_end_time' => Leave::$endId[3],
@@ -260,65 +261,48 @@ class AttendanceHelper
             }
         }
 
-        $daily = DailyDetail::whereIn('day', [date('Y-m-d', $startDay), date('Y-m-d', $endDay)])
-            ->where(['user_id' => $leave->user_id])
-            ->first();
+        $startDaily = DailyDetail::where(['day' => date('Y-m-d', $startDay), 'user_id' => $leave->user_id])->first();
+        $endDaily = DailyDetail::where(['day' => date('Y-m-d', $endDay), 'user_id' => $leave->user_id])->first();
 
-        if(!empty($daily->day)) return;
+        $punch = self::getPunch($leave, $startDay, $endDay);
 
         if($startDay == $endDay) {
+            //插入或更新所需数据, 更新新的请假打卡也就是为空的字段,将新的请假id存入数组转为json存入数据表
             $startData = [
                 'user_id' => $leave->user_id,
                 'day' => date('Y-m-d', $startDay),
-                'leave_id' => $leave->leave_id,
-                'punch_start_time' => Leave::$startId[$leave->start_id],
-                'punch_start_time_num' => strtotime(date('Y-m-d', $startDay) . ' ' . Leave::$startId[$leave->start_id]),
-                'punch_end_time' => Leave::$endId[$leave->end_id],
-                'punch_end_time_num' => strtotime(date('Y-m-d', $endDay) . ' ' . Leave::$endId[$leave->end_id]),
-
+                'leave_id' => self::addLeaveId($leave->leave_id, $startDaily->leave_id ?? NULL),
+                'punch_start_time' => $startDaily->punch_start_time ?? $punch['punch_start_time'],
+                'punch_start_time_num' => $startDaily->punch_start_time_num ?? $punch['punch_start_time_num'],
+                'punch_end_time' => $startDaily->punch_end_time ?? $punch['punch_end_time'],
+                'punch_end_time_num' => $startDaily->punch_end_time_num ?? $punch['punch_end_time_num'],
             ];
-
-            DailyDetail::create($startData);
+            empty($startDaily->day) ? DailyDetail::create($startData) : $startDaily->update($startData);
         }
 
         if($startDay < $endDay) {
             $startData = [
                 'user_id' => $leave->user_id,
                 'day' => date('Y-m-d', $startDay),
-                'leave_id' => $leave->leave_id,
-                'punch_start_time' => Leave::$startId[$leave->start_id],
-                'punch_start_time_num' => strtotime(date('Y-m-d', $startDay) . ' ' . Leave::$startId[$leave->start_id]),
-                'punch_end_time' => Leave::$endId[3],
-                'punch_end_time_num' => strtotime(date('Y-m-d', $startDay) . ' ' . Leave::$endId[3]),
+                'leave_id' => self::addLeaveId($leave->leave_id, $startDaily->leave_id ?? NULL),
+                'punch_start_time' => $startDaily->punch_start_time ?? $punch['punch_start_time'],
+                'punch_start_time_num' => $startDaily->punch_start_time_num ?? $punch['punch_start_time_num'],
+                'punch_end_time' => $startDaily->punch_end_time ?? Leave::$endId[3],
+                'punch_end_time_num' => $startDaily->punch_end_time_num ?? strtotime(date('Y-m-d', $startDay) . ' ' . Leave::$endId[3]),
             ];
+            empty($startDaily->day) ? DailyDetail::create($startData) : $startDaily->update($startData);
 
-            DailyDetail::create($startData);
-
-            if($endDay + 43200 >= strtotime(date('Y-m-d', $endDay) . ' ' . Leave::$endId[$leave->end_id])) {
-                $endData = [
-                    'user_id' => $leave->user_id,
-                    'day' => date('Y-m-d', $endDay),
-                    'leave_id' => $leave->leave_id,
-                    'punch_start_time' => Leave::$startId[1],
-                    'punch_start_time_num' => strtotime(date('Y-m-d', $endDay) . ' ' . Leave::$startId[1])
-                ];
-
-                DailyDetail::create($endData);
-
-            } else {
-                $endData = [
-                    'user_id' => $leave->user_id,
-                    'day' => date('Y-m-d', $endDay),
-                    'leave_id' => $leave->leave_id,
-                    'punch_start_time' => Leave::$startId[1],
-                    'punch_start_time_num' => strtotime(date('Y-m-d', $endDay) . ' ' . Leave::$startId[1]),
-                    'punch_end_time' => Leave::$endId[$leave->end_id],
-                    'punch_end_time_num' => strtotime(date('Y-m-d', $endDay) . ' ' . Leave::$endId[$leave->end_id]),
-                ];
-
-                DailyDetail::create($endData);
-            }
-
+            $endData = [
+                'user_id' => $leave->user_id,
+                'day' => date('Y-m-d', $endDay),
+                'leave_id' => self::addLeaveId($leave->leave_id, $endDaily->leave_id ?? NULL),
+                'punch_start_time' => $endDaily->punch_start_time ?? Leave::$startId[1],
+                'punch_start_time_num' => $endDaily->punch_start_time_num ??
+                    strtotime(date('Y-m-d', $endDay) . ' ' . Leave::$startId[1]),
+                'punch_end_time' => $endDaily->punch_end_time ?? $punch['punch_end_time'],
+                'punch_end_time_num' => $endDaily->punch_end_time_num ?? $punch['punch_end_time_num'],
+            ];
+            empty($endDaily->day) ? DailyDetail::create($endData) : $endDaily->update($endData);
         }
     }
 
@@ -326,6 +310,24 @@ class AttendanceHelper
     {
         $startDay = strtotime($leave->start_time);
         $endDay = strtotime($leave->end_time);
+
+        //上下班都要补打卡的情况
+        if (date('Y-m-d', $startDay) == date('Y-m-d', $endDay)) {
+            $daily = DailyDetail::whereIn('day', [date('Y-m-d', $startDay)])
+                ->where(['user_id' => $leave->user_id])
+                ->first();
+            $data = [
+                'user_id' => $leave->user_id,
+                'day' => date('Y-m-d', $startDay),
+                'leave_id' => self::addLeaveId($leave->leave_id, $daily->leave_id),
+                'punch_start_time' => date('h:i', $startDay),
+                'punch_start_time_num' => $startDay,
+                'punch_end_time' => date('H:i', $endDay),
+                'punch_end_time_num' => $endDay,
+            ];
+            $daily->update($data);
+            return ;
+        }
 
         //上班补打卡
         if($leave->holidayConfig->punch_type === 1) {
@@ -335,7 +337,7 @@ class AttendanceHelper
             $startData = [
                 'user_id' => $leave->user_id,
                 'day' => date('Y-m-d', $startDay),
-                'leave_id' => $leave->leave_id,
+                'leave_id' => self::addLeaveId($leave->leave_id, $daily->leave_id),
                 'punch_start_time' => date('h:i', $startDay),
                 'punch_start_time_num' => $startDay,
             ];
@@ -343,7 +345,7 @@ class AttendanceHelper
             $daily->update($startData);
         }
 
-        //上班补打卡
+        //下班补打卡
         if($leave->holidayConfig->punch_type === 2) {
             $daily = DailyDetail::whereIn('day', [date('Y-m-d', $endDay)])
                 ->where(['user_id' => $leave->user_id])
@@ -351,7 +353,7 @@ class AttendanceHelper
             $endData = [
                 'user_id' => $leave->user_id,
                 'day' => date('Y-m-d', $endDay),
-                'leave_id' => $leave->leave_id,
+                'leave_id' => self::addLeaveId($leave->leave_id, $daily->leave_id),
                 'punch_end_time' => date('H:i', $endDay),
                 'punch_end_time_num' => $endDay,
             ];
@@ -557,5 +559,51 @@ class AttendanceHelper
             ])->groupBy('user_id')->first('number_day');
 
         return  empty($userLeaveLog->number_day) ? $holiday->num : $holiday->num - $userLeaveLog->number_day;
+    }
+
+    /**
+     * 审核通过后, 上班打卡字段与下班打卡字段的设置
+     * @param $leave
+     * @param $startDay
+     * @param $endDay
+     * @return array
+     */
+    public static function getPunch($leave, $startDay, $endDay)
+    {
+        $ps = (int)str_replace(':', '', Leave::$startId[$leave->start_id]);
+        $pe = (int)str_replace(':', '', Leave::$endId[$leave->end_id]);
+        $arr1 = [
+            //大于13:45,意味下午请假,则上班打卡字段为空,为后面打卡记录导入的上班打卡留位置
+            'punch_start_time' => $ps >= 1345 ? NULL : Leave::$startId[$leave->start_id],
+            //不等于20点,意味晚上还要回来上班,下班打卡字段为空,为后面打卡记录导入的下班打卡留位置
+            'punch_end_time' => $pe != 2000 ? NULL : Leave::$endId[$leave->end_id]
+        ];
+
+        $arr2 = [
+            'punch_start_time_num' => empty($arr1['punch_start_time']) ?
+                NULL : strtotime(date('Y-m-d', $startDay) . ' ' . $arr1['punch_start_time']),
+            'punch_end_time_num' => empty($arr1['punch_end_time']) ?
+                NULL : strtotime(date('Y-m-d', $endDay) . ' ' . $arr1['punch_end_time']),
+        ];
+        return array_merge($arr1, $arr2);
+    }
+
+    public static function addLeaveId($leaveId, $idArr = NULL)
+    {
+        $a = json_decode($idArr);
+        $a[] = $leaveId;
+        return json_encode($a);
+    }
+
+    public static function showLeaveIds($leaveIds)
+    {
+        $show = '';
+        $idList = Leave::getHolidayIdList();
+        $list = HolidayConfig::getHolidayList();
+        foreach (json_decode($leaveIds) ?? [] as $leaveId) {
+            $sep = empty($show) ? '' : ", $show";
+            $show = $list[$idList[$leaveId]].$sep;
+        }
+        return $show ?: '--';
     }
 }

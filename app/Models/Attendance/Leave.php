@@ -143,4 +143,14 @@ class Leave extends Model
             ->get([DB::raw('group_concat(leave_id) as ls'), 'user_id'])->pluck('ls', 'user_id')->toArray();
     }
 
+    public static function getAttrByLeaveIds($leaveIds, $attr)
+    {
+        $arr = [];
+        $leaves = self::whereIn('leave_id', $leaveIds)->with('holidayConfig')->get();
+        foreach ($leaves as $leaf) {
+            $arr[] = $leaf->holidayConfig->$attr;
+        }
+        return $arr;
+    }
+
 }

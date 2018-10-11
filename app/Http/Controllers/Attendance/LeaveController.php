@@ -12,6 +12,7 @@ namespace App\Http\Controllers\Attendance;
 use App\Http\Components\Helpers\AttendanceHelper;
 use App\Http\Components\Helpers\OperateLogHelper;
 use App\Http\Components\ScopeAtt\LeaveScope;
+use App\Models\Attendance\DailyDetail;
 use App\Models\Attendance\Leave;
 use App\Models\Sys\Dept;
 use App\Models\Sys\HolidayConfig;
@@ -95,6 +96,7 @@ class LeaveController extends AttController
                 $holidayList = HolidayConfig::where(['apply_type_id' => HolidayConfig::RECHECK])
                     ->orderBy('sort', 'desc')
                     ->get(['holiday_id', 'holiday', 'punch_type']);
+                $daily = DailyDetail::where(['user_id' => \Auth::user()->user_id, 'day' => request()->day])->first();
                 $models = 'recheck';
                 $title = trans('att.补打卡');
                 break;
@@ -102,7 +104,7 @@ class LeaveController extends AttController
                 return redirect()->route('leave.info');
         }
 
-        return view('attendance.leave.'.$models, compact('title', 'holidayList', 'leave', 'reviewUserId' , 'deptUsersSelected', 'deptUsers', 'allUsers'));
+        return view('attendance.leave.'.$models, compact('title', 'holidayList', 'leave', 'reviewUserId' , 'deptUsersSelected', 'deptUsers', 'allUsers', 'daily'));
     }
 
     /**
