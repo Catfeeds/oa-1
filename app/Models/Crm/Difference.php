@@ -25,7 +25,17 @@ class Difference extends Model
 
     public static function getList()
     {
-        return self::get(['id','type_name'])->pluck('type_name', 'id')->toArray();
+        return self::get(['id', 'type_name'])->pluck('type_name', 'id')->toArray();
+    }
+
+    public static function getListToName($id)
+    {
+        $diff = self::whereIn('id', $id)->get(['id', 'type_name'])->pluck('type_name', 'id')->toArray();
+        $name = '';
+        foreach ($diff as $v) {
+            $name .= $v;
+        }
+        return $name;
     }
 
 }

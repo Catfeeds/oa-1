@@ -9,7 +9,6 @@ use App\Models\Crm\EditLog;
 use App\Models\Crm\ExchangeRate;
 use App\Models\Crm\Principal;
 use App\Models\Crm\Product;
-use App\Models\Crm\Proportion;
 use App\Models\Crm\Reconciliation;
 use App\Http\Components\ScopeCrm\Reconciliation as Scope;
 use App\User;
@@ -210,8 +209,8 @@ class ReconciliationAuditController extends Controller
                     $tmp2['backstage_water_other'] = $v['backstage_water_other'];
                     $tmp2['backstage_water_rmb'] = $v['backstage_water_rmb'];
                     $tmp2['operation_adjustment'] = $v['operation_adjustment'];
-                    $tmp2['operation_rmb_adjustment'] = $v['operation_rmb_adjustment'];
-                    $tmp2['operation_type'] = $diff[$v['operation_type']] ?? '未知' . $v['operation_type'];
+                    $tmp2['operation_rmb_adjustment'] = is_numeric($v['operation_rmb_adjustment']) ? $v['operation_rmb_adjustment'] : array_sum(json_decode($v['operation_rmb_adjustment']));
+                    $tmp2['operation_type'] = is_numeric($v['operation_type']) ? ($diff[$v['operation_type']] ?? '--') : sprintf('<a class="eye" data-url="%s">%s</a>', route('reconciliationAudit.detail', ['id' => $v['id'], 'source' => Reconciliation::OPERATION]), $diff[$this->pop($v['operation_type'])]);
                     $tmp2['operation_remark'] = $v['operation_remark'];
                     $tmp2['operation_user_name'] = $v['operation_user_name'];
                     $tmp2['operation_time'] = $v['operation_time'];
@@ -226,9 +225,9 @@ class ReconciliationAuditController extends Controller
                     $tmp2['second_division_condition'] = $v['second_division_condition'];
                     $tmp2['operation_water_other'] = $v['operation_water_other'];
                     $tmp2['operation_water_rmb'] = $v['operation_water_rmb'];
-                    $tmp2['accrual_adjustment'] = $v['accrual_adjustment'];
+                    $tmp2['accrual_adjustment'] = is_numeric($v['accrual_adjustment']) ? $v['accrual_adjustment'] : array_sum(json_decode($v['accrual_adjustment']));
                     $tmp2['accrual_rmb_adjustment'] = $v['accrual_rmb_adjustment'];
-                    $tmp2['accrual_type'] = $diff[$v['accrual_type']] ?? '未知' . $v['accrual_type'];
+                    $tmp2['accrual_type'] = is_numeric($v['accrual_type']) ? ($diff[$v['accrual_type']] ?? '--') : sprintf('<a class="eye" data-url="%s">%s</a>', route('reconciliationAudit.detail', ['id' => $v['id'], 'source' => Reconciliation::ACCRUAL]), $diff[$this->pop($v['accrual_type'])]);
                     $tmp2['accrual_remark'] = $v['accrual_remark'];
                     $tmp2['accrual_user_name'] = $v['accrual_user_name'];
                     $tmp2['accrual_time'] = $v['accrual_time'];
@@ -252,9 +251,11 @@ class ReconciliationAuditController extends Controller
                     $tmp2['second_division_condition'] = $v['second_division_condition'];
                     $tmp2['accrual_water_other'] = $v['accrual_water_other'];
                     $tmp2['accrual_water_rmb'] = $v['accrual_water_rmb'];
-                    $tmp2['reconciliation_adjustment'] = $v['reconciliation_adjustment'];
+                    $tmp2['accrual_divide_other'] = $v['accrual_divide_other'];
+                    $tmp2['accrual_divide_rmb'] = $v['accrual_divide_rmb'];
+                    $tmp2['reconciliation_adjustment'] = is_numeric($v['reconciliation_adjustment']) ? $v['reconciliation_adjustment'] : array_sum(json_decode($v['reconciliation_adjustment']));
                     $tmp2['reconciliation_rmb_adjustment'] = $v['reconciliation_rmb_adjustment'];
-                    $tmp2['reconciliation_type'] = $diff[$v['reconciliation_type']] ?? '未知' . $v['reconciliation_type'];
+                    $tmp2['reconciliation_type'] = is_numeric($v['reconciliation_adjustment']) ? ($diff[$v['reconciliation_type']] ?? '--') : sprintf('<a class="eye" data-url="%s">%s</a>', route('reconciliationAudit.detail', ['id' => $v['id'], 'source' => Reconciliation::RECONCILIATION]), $diff[$this->pop($v['reconciliation_type'])]);
                     $tmp2['reconciliation_remark'] = $v['reconciliation_remark'];
                     $tmp2['reconciliation_user_name'] = $v['reconciliation_user_name'];
                     $tmp2['reconciliation_time'] = $v['reconciliation_time'];
@@ -273,9 +274,9 @@ class ReconciliationAuditController extends Controller
                     $tmp2['backstage_water_rmb'] = $v['backstage_water_rmb'];
                     $tmp2['backstage_divide_other'] = CrmHelper::dividedInto($v['channel_rate'], $v['first_division'], $v['second_division'], $v['second_division_condition'], $v['backstage_water_other']);
                     $tmp2['backstage_divide_rmb'] = CrmHelper::dividedInto($v['channel_rate'], $v['first_division'], $v['second_division'], $v['second_division_condition'], $v['backstage_water_rmb']);
-                    $tmp2['operation_adjustment'] = $v['operation_adjustment'];
+                    $tmp2['operation_adjustment'] = is_numeric($v['operation_rmb_adjustment']) ? $v['operation_rmb_adjustment'] : array_sum(json_decode($v['operation_rmb_adjustment']));
                     $tmp2['operation_rmb_adjustment'] = $v['operation_rmb_adjustment'];
-                    $tmp2['operation_type'] = $diff[$v['operation_type']] ?? '未知' . $v['operation_type'];
+                    $tmp2['operation_type'] = is_numeric($v['operation_type']) ? ($diff[$v['operation_type']] ?? '--') : sprintf('<a class="eye" data-url="%s">%s</a>', route('reconciliationAudit.detail', ['id' => $v['id'], 'source' => Reconciliation::OPERATION]), $diff[$this->pop($v['operation_type'])]);
                     $tmp2['operation_remark'] = $v['operation_remark'];
                     $tmp2['operation_user_name'] = $v['operation_user_name'];
                     $tmp2['operation_time'] = $v['operation_time'];
@@ -283,9 +284,9 @@ class ReconciliationAuditController extends Controller
                     $tmp2['operation_water_rmb'] = $v['operation_water_rmb'];
                     $tmp2['operation_divide_other'] = $v['operation_divide_other'];
                     $tmp2['operation_divide_rmb'] = $v['operation_divide_rmb'];
-                    $tmp2['accrual_adjustment'] = $v['accrual_adjustment'];
+                    $tmp2['accrual_adjustment'] = is_numeric($v['accrual_adjustment']) ? $v['accrual_adjustment'] : array_sum(json_decode($v['accrual_adjustment']));
                     $tmp2['accrual_rmb_adjustment'] = $v['accrual_rmb_adjustment'];
-                    $tmp2['accrual_type'] = $diff[$v['accrual_type']] ?? '未知' . $v['accrual_type'];
+                    $tmp2['accrual_type'] = is_numeric($v['accrual_type']) ? ($diff[$v['accrual_type']] ?? '--') : sprintf('<a class="eye" data-url="%s">%s</a>', route('reconciliationAudit.detail', ['id' => $v['id'], 'source' => Reconciliation::ACCRUAL]), $diff[$this->pop($v['accrual_type'])]);
                     $tmp2['accrual_remark'] = $v['accrual_remark'];
                     $tmp2['accrual_user_name'] = $v['accrual_user_name'];
                     $tmp2['accrual_time'] = $v['accrual_time'];
@@ -293,9 +294,9 @@ class ReconciliationAuditController extends Controller
                     $tmp2['accrual_water_rmb'] = $v['accrual_water_rmb'];
                     $tmp2['accrual_divide_other'] = $v['accrual_divide_other'];
                     $tmp2['accrual_divide_rmb'] = $v['accrual_divide_rmb'];
-                    $tmp2['reconciliation_adjustment'] = $v['reconciliation_adjustment'];
+                    $tmp2['reconciliation_adjustment'] = is_numeric($v['reconciliation_adjustment']) ? $v['reconciliation_adjustment'] : array_sum(json_decode($v['reconciliation_adjustment']));
                     $tmp2['reconciliation_rmb_adjustment'] = $v['reconciliation_rmb_adjustment'];
-                    $tmp2['reconciliation_type'] = $diff[$v['reconciliation_type']] ?? '未知' . $v['reconciliation_type'];
+                    $tmp2['reconciliation_type'] = is_numeric($v['reconciliation_adjustment']) ? ($diff[$v['reconciliation_type']] ?? '--') : sprintf('<a class="eye" data-url="%s">%s</a>', route('reconciliationAudit.detail', ['id' => $v['id'], 'source' => Reconciliation::RECONCILIATION]), $diff[$this->pop($v['reconciliation_type'])]);
                     $tmp2['reconciliation_remark'] = $v['reconciliation_remark'];
                     $tmp2['reconciliation_user_name'] = $v['reconciliation_user_name'];
                     $tmp2['reconciliation_time'] = $v['reconciliation_time'];
@@ -334,9 +335,8 @@ class ReconciliationAuditController extends Controller
             return redirect()->back()->withInput();
         }
         $data = $this->transformName($source, $tmp, '', '', '');
-        $type = CrmHelper::addEmptyToArray('差异类型', Difference::getList());
         $title = trans('app.编辑', ['value' => trans('crm.对账审核')]);
-        return view('crm.reconciliation-audit.edit', compact('title', 'data', 'type'));
+        return view('crm.reconciliation-audit.edit', compact('title', 'data'));
     }
 
     public function update(Request $request, $id, $source)
@@ -346,9 +346,10 @@ class ReconciliationAuditController extends Controller
         $rate = ExchangeRate::getList($data->billing_cycle);
         $tmp = $this->transformName($source, $data, $request, $time, $rate[$data->reconciliation_currency]);
         $data->update($tmp);
-        EditLog::create(array_merge($request->all(), ['user_name' => \Auth::user()->alias, 'time' => $time,
+        EditLog::create(['user_name' => \Auth::user()->alias, 'time' => $time,
             'billing_cycle_start' => $data['billing_cycle_start'], 'billing_cycle_end' => $data['billing_cycle_end'], 'client' => $data['client'],
-            'backstage_channel' => $data['backstage_channel'], 'product_id' => $data['product_id'], 'rec_id' => $data['id']]));
+            'backstage_channel' => $data['backstage_channel'], 'product_id' => $data['product_id'], 'rec_id' => $data['id'], 'adjustment' => json_encode($request['adjustment'])
+            , 'type' => json_encode($request['type']), 'remark' => $request['remark']]);
 
         flash(trans('app.编辑成功', ['value' => trans('crm.对账审核')]), 'success');
         return redirect()->route('reconciliationAudit', ['source' => $source, 'product_id' => $data['product_id']]);
@@ -363,37 +364,37 @@ class ReconciliationAuditController extends Controller
         if ($time) {
             switch ($source) {
                 case $source == Reconciliation::UNRD:
-                    $tmp['operation_adjustment'] = $request['adjustment'];
-                    $tmp['operation_rmb_adjustment'] = $request['adjustment'] * $rate;
-                    $tmp['operation_type'] = $request['type'];
+                    $tmp['operation_adjustment'] = json_encode($request['adjustment']);
+                    $tmp['operation_rmb_adjustment'] = (float)array_sum($request['adjustment']) * $rate;
+                    $tmp['operation_type'] = json_encode($request['type']);
                     $tmp['operation_remark'] = $request['remark'];
                     $tmp['operation_user_name'] = \Auth::user()->alias;
                     $tmp['operation_time'] = $time;
-                    $tmp['operation_water_other'] = $data['backstage_water_other'] + $request['adjustment'];
+                    $tmp['operation_water_other'] = $data['backstage_water_other'] + (float)array_sum($request['adjustment']);
                     $tmp['operation_water_rmb'] = $data['backstage_water_rmb'] + $tmp['operation_rmb_adjustment'];
                     $tmp['operation_divide_other'] = CrmHelper::dividedInto($data['channel_rate'], $data['first_division'], $data['second_division'], $data['second_division_condition'], $tmp['operation_water_other']);
                     $tmp['operation_divide_rmb'] = CrmHelper::dividedInto($data['channel_rate'], $data['first_division'], $data['second_division'], $data['second_division_condition'], $tmp['operation_water_rmb']);
                     break;
                 case $source == Reconciliation::OPD:
-                    $tmp['accrual_adjustment'] = $request['adjustment'];
-                    $tmp['accrual_rmb_adjustment'] = $request['adjustment'] * $rate;
-                    $tmp['accrual_type'] = $request['type'];
+                    $tmp['accrual_adjustment'] = json_encode($request['adjustment']);
+                    $tmp['accrual_rmb_adjustment'] = (float)array_sum($request['adjustment']) * $rate;
+                    $tmp['accrual_type'] = json_encode($request['type']);
                     $tmp['accrual_remark'] = $request['remark'];
                     $tmp['accrual_user_name'] = \Auth::user()->alias;
                     $tmp['accrual_time'] = $time;
-                    $tmp['accrual_water_other'] = $data['operation_water_other'] + $request['adjustment'];
+                    $tmp['accrual_water_other'] = $data['operation_water_other'] + (float)array_sum($request['adjustment']);
                     $tmp['accrual_water_rmb'] = $data['operation_water_rmb'] + $tmp['accrual_rmb_adjustment'];
                     $tmp['accrual_divide_other'] = CrmHelper::dividedInto($data['channel_rate'], $data['first_division'], $data['second_division'], $data['second_division_condition'], $tmp['accrual_water_other']);
                     $tmp['accrual_divide_rmb'] = CrmHelper::dividedInto($data['channel_rate'], $data['first_division'], $data['second_division'], $data['second_division_condition'], $tmp['accrual_water_rmb']);
                     break;
                 case $source == Reconciliation::TREASURER:
-                    $tmp['reconciliation_adjustment'] = $request['adjustment'];
-                    $tmp['reconciliation_rmb_adjustment'] = $request['adjustment'] * $rate;
-                    $tmp['reconciliation_type'] = $request['type'];
+                    $tmp['reconciliation_adjustment'] = json_encode($request['adjustment']);
+                    $tmp['reconciliation_rmb_adjustment'] = (float)array_sum($request['adjustment']) * $rate;
+                    $tmp['reconciliation_type'] = json_encode($request['type']);
                     $tmp['reconciliation_remark'] = $request['remark'];
                     $tmp['reconciliation_user_name'] = \Auth::user()->alias;
                     $tmp['reconciliation_time'] = $time;
-                    $tmp['reconciliation_water_other'] = $data['accrual_water_other'] + $request['adjustment'];
+                    $tmp['reconciliation_water_other'] = $data['accrual_water_other'] + (float)array_sum($request['adjustment']);
                     $tmp['reconciliation_water_rmb'] = $data['accrual_water_rmb'] + $tmp['reconciliation_rmb_adjustment'];
                     break;
             }
@@ -430,9 +431,6 @@ class ReconciliationAuditController extends Controller
         if ($id) {
             $data = Reconciliation::findOrFail($id);
             foreach ($data as $v) {
-                if ($v['review_type'] > $status) {
-                    continue;
-                }
                 $update = ['review_type' => $status];
                 if ($status == Reconciliation::FRC) {
                     if ($v['reconciliation_water_other'] == 0 && $v['reconciliation_type'] == 0) {
@@ -455,7 +453,7 @@ class ReconciliationAuditController extends Controller
                     ->whereBetween('billing_cycle_start', [$scope->startTimestamp, $scope->endTimestamp])
                     ->get();
                 foreach ($data as $v) {
-                    $update = ['review_type' => $status];
+                    $update = ['review_type' => (int)$status];
                     switch (true) {
                         case $status == Reconciliation::OPS:
                             if ($v['operation_water_other'] == 0 && $v['operation_type'] == 0) {
@@ -616,7 +614,7 @@ class ReconciliationAuditController extends Controller
             case in_array($source, [Reconciliation::TREASURER, Reconciliation::FRC, Reconciliation::OOR]):
                 $header = ['#', '序号', '结算周期', '收入类型', '我方', '客户', '游戏', '上线名称', '业务线',
                     '地区', '对账币', '系统', '分成类型', '诗悦后台渠道', '统一渠道名称', '信期类型', '信期', '开票状态', '开票号', '开票时间', '开票人', '回款状态', '回款时间', '回款确认人',
-                    '渠道费率', '一级分成', '二级分成', '二级分成条件', '对账币', '人民币',
+                    '渠道费率', '一级分成', '二级分成', '二级分成条件', '对账币', '人民币', '对账币-费率分成', '人民币-费率分成',
                     '调整', '转化rmb调整', '类型', '备注', '调整人', '调整时间', '对账币', '人民币', '对账币-费率分成', '人民币-费率分成', '操作'];
                 break;
             default:
@@ -707,6 +705,7 @@ class ReconciliationAuditController extends Controller
     public function revision(Request $request)
     {
         $data = Reconciliation::findOrFail($request->id);
+        $tmp = $data->toArray();
         $rate = ExchangeRate::getList($data->billing_cycle);
         $createData = $update = [];
         $create = [
@@ -744,24 +743,85 @@ class ReconciliationAuditController extends Controller
             'reconciliation_water_other',
             'reconciliation_water_rmb'
         ];
+        if ($tmp['reconciliation_water_other'] == 0 && $tmp['reconciliation_type'] == 0) {
+            $tmp['reconciliation_water_other'] = $data['accrual_water_other'];
+            $tmp['reconciliation_water_rmb'] = $data['accrual_water_rmb'];
+        }
         $merge = array_merge($create, $water);
         foreach ($merge as $v) {
-            $createData[$v] = $data->$v;
             if (in_array($v, $water)) {
                 if (strstr($v, 'other')) {
-                    $createData[$v] = $data->$v - $request->num;
+                    $createData[$v] = $tmp[$v] - $request->num;
                     $update[$v] = (int)$request->num;
                 } else {
                     $num = $request->num * $rate[$data->reconciliation_currency];
-                    $createData[$v] = $data->$v - $num;
+                    $createData[$v] = $tmp[$v] - $num;
                     $update[$v] = $num;
                 }
-
+            } else {
+                $createData[$v] = $tmp[$v];
             }
         }
         Reconciliation::create($createData);
         $data->update($update);
         flash(trans('app.调整成功', ['value' => trans('crm.对账审核')]), 'success');
         return redirect()->route('reconciliationAudit', ['source' => Reconciliation::TREASURER, 'product_id' => $data['product_id'], 'scope[startDate]' => $data['billing_cycle_start'], 'scope[endDate]' => $data['billing_cycle_end']]);
+    }
+
+    public function wipe(Request $request)
+    {
+        $data = Reconciliation::findOrFail($request->id);
+
+        foreach ($data as $v) {
+            $v->update(['reconciliation_adjustment' => sprintf('-%s', $v['accrual_water_other']), 'reconciliation_rmb_adjustment' => sprintf('-%s', $v['accrual_water_rmb']),
+                'reconciliation_type' => 11, 'reconciliation_water_other'  => 0, 'reconciliation_water_rmb' => 0
+            , 'reconciliation_user_name' => \Auth::user()->alias, 'reconciliation_time' => date('Y-m-d H:i:s', time()), 'reconciliation_remark' => '一键抹零']);
+        }
+        flash(trans('crm.抹零成功', ['value' => trans('crm.对账审核')]), 'success');
+        return redirect()->back()->withInput();
+    }
+
+    public function pop($type)
+    {
+        $array = json_decode($type, true);
+        return array_pop($array);
+    }
+
+    public function detail($id, $source)
+    {
+        switch (true) {
+            case $source == Reconciliation::OPERATION:
+                $adjustment = 'operation_adjustment';
+                $type = 'operation_type';
+                break;
+            case $source == Reconciliation::ACCRUAL:
+                $adjustment = 'accrual_adjustment';
+                $type = 'accrual_type';
+                break;
+            case $source == Reconciliation::RECONCILIATION:
+                $adjustment = 'reconciliation_adjustment';
+                $type = 'reconciliation_type';
+                break;
+        }
+        $sql = "
+            SELECT 
+                {$type},
+                {$adjustment}
+            FROM cmr_reconciliation AS a 
+            WHERE a.id = {$id}
+            GROUP BY {$type}
+        ";
+        $ret = \DB::select($sql);
+        $diff = Difference::getList();
+
+        $data = [];
+        $type = json_decode($ret[0]->reconciliation_type, true);
+        $adjustment = json_decode($ret[0]->reconciliation_adjustment, true);
+        foreach ($type as $k => $v) {
+            $data[$k]['type'] = $diff[$v];
+            $data[$k]['adjustment'] = $adjustment[$k];
+        }
+
+        return $data;
     }
 }
