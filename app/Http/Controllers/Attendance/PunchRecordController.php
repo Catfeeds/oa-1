@@ -132,13 +132,13 @@ class PunchRecordController extends Controller
                     }
                     $ts = str_replace('/', '-', $v[0]);
                     $row = [
-                        'ts'         => '20' . $ts,
+                        'ts'         => $ts,
                         'alias'      => $v[3],
                         'start_time' => $startTime,
                         'end_time'   => $endTime,
                     ];
 
-                    $data['20' . $ts][] = $row;
+                    $data[$ts][] = $row;
                 }
 
                 foreach ($data as $dk => $dv) {

@@ -9,6 +9,7 @@
 
 namespace App\Models\Attendance;
 
+use App\Http\Components\Helpers\AttendanceHelper;
 use App\Models\Sys\HolidayConfig;
 use App\Models\Sys\PunchRules;
 use App\User;
@@ -77,33 +78,35 @@ class DailyDetail extends Model
             ->get([DB::raw('(count(punch_start_time) + count(punch_end_time)) * 0.5 as s'), 'user_id'])
             ->pluck('s', 'user_id')->toArray();
 
-        $detail = self::whereYear('day', $year)->whereMonth('day', $month)->where('leave_id', '<>', NULL)->get();
-
-        //计算打卡表中punch_start_time与punch_end_time不为空的个数
-        $leaveAndPunches = [];
-        foreach ($detail as $item) {
-            $leaveAndPunches[$item->user_id] = ($leaveAndPunches[$item->user_id] ?? 0) +
-                isset($item->punch_start_time) + isset($item->punch_end_time);
-        }
-
-        //获取实际请假的天数
         $factLeaves = Leave::leaveBuilder($year, $month)
             ->groupBy('user_id')->get([DB::raw('sum(number_day) as d'), 'user_id'])
             ->pluck('d', 'user_id')->toArray();
 
-        //计算请到18:00的假期id数
-        $clock18 = Leave::leaveBuilder($year, $month)->where(['end_id' => 2])->groupBy('user_id')
-            ->get([DB::raw('count(leave_id) as l'), 'user_id'])->pluck('l', 'user_id')->toArray();
+        $leavePunch = self::builder($year, $month)->where('leave_id', '<>', NULL)
+            ->get([DB::raw('(count(punch_start_time) + count(punch_end_time)) * 0.5 as s'), 'user_id'])
+            ->pluck('s', 'user_id')->toArray();
+
+        //因为请到18:00, 20:00在请假表都算1天,按打卡表计算与请假表计算存在误差, 计算差值,弥补误差
+        $remainClock = [];
+        $clock18s = Leave::leaveBuilder($year, $month)->where(['end_id' => 2])->get();
+        foreach ($clock18s as $clock18) {
+            $ps = (int)str_replace(':', '', Leave::$startId[$clock18->start_id]);
+            $ed = date('j', strtotime($clock18->end_time));
+            $sd = date('j', strtotime($clock18->start_time));
+
+            //重新获得请到下午18:00的假期天数
+            $number_day = ($ed - $sd - 1) + 0.5 + ($ps < 1200 ? 1 : 0.5);
+            //获得18:00请假表与计算的18:00的差值
+            if ($number_day < $clock18->number_day) {
+                $remainClock[$clock18->user_id] = ($clock18->number_day - $number_day) + ($remainClock[$clock18->user_id] ?? 0);
+            }
+        }
 
         $remain = [];
-        foreach ($leaveAndPunches as $user_id => $leaveAndPunch) {
-            /**
-             * 假如请下午半天, 这天的打卡记录为上午正常打卡, 下午请假打卡
-             * 所以计算的办法为:计算打卡表的上下班打卡个数(为2) * 0.5 - 请假天数(为0.5) = 0.5
-             * 但请到18:00时, 请假表显示的天数为1天, 请到20:00的请假天数也为1天 存在误差 补充误差天数
-             */
-            $remain[$user_id] = $leaveAndPunch * 0.5 + ($clock18[$user_id] ?? 0) * 0.5 - ($factLeaves[$user_id] ?? 0);
+        foreach (User::all() as $user) {
+            $remain[$user->user_id] = ($leavePunch[$user->user_id] ?? 0) - ($factLeaves[$user->user_id] ?? 0) + ($remainClock[$user->user_id] ?? 0);
         }
+
         return [$punch, $remain];
     }
 
