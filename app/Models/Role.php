@@ -46,7 +46,7 @@ class Role extends EntrustRole
 
     public static function getRoleName($roles, $id)
     {
-        $ids = json_decode($id);
+        $ids = json_decode($id, true);
 
         if(empty($ids)) return '';
         $names = [];

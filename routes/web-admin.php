@@ -222,6 +222,4 @@ Route::group([
     Route::post('sys/firm/edit/{id}', [
         'middleware' => ['permission:firm.edit'],
         'uses' => 'Sys\FirmController@update']);
-
-
 });

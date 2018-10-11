@@ -59,14 +59,14 @@ class UserController extends Controller
             ->orderBy('updated_at', 'desc')
             ->paginate(50);
 
-        $role_ids = ['' => trans('app.全部员工')] + Role::getRoleTextList();
+        $roleIds = ['' => trans('app.权限列表')] + Role::getRoleTextList();
 
         $roles = Role::getRoleTextList();
 
         $job = Job::getJobList();
         $dept = Dept::getDeptList();
         $title = trans('app.账号列表');
-        return view('admin.users.index', compact('title', 'data', 'form', 'role_ids', 'job', 'dept', 'roles'));
+        return view('admin.users.index', compact('title', 'data', 'form', 'roleIds', 'job', 'dept', 'roles'));
     }
 
     public function isMobile($id, Request $request)
@@ -193,8 +193,6 @@ class UserController extends Controller
             unset($validate['password'], $validate['password_confirmation']);
         }
 
-        //$this->validate($request, $validate);
-
         if (!empty($request->dept_id) && !empty($request->is_leader)) {
 
             $checkUser = User::where(['dept_id' => $request->dept_id, 'is_leader' => User::IS_LEADER_TRUE])
@@ -218,25 +216,28 @@ class UserController extends Controller
             $data['remember_token'] = Str::random(60);
         }
 
-        $roleId = json_decode($user->role_id);
+        $roleId = json_decode($user->role_id, true);
         // 权限方面
         if (!empty($roleId)) {
-            $role = Role::whereIn('id', $roleId)->get();
+            $role = Role::whereIn('id', array_values($roleId))->get();
             // 去除权限角色
             foreach ($role as $k => $r) {
                 if ($user->hasRole($r->name)) {
-                    print_r($r->name);
                     // 设置权限角色
                     $user->detachRole($r->id);
                 }
             }
         }
-
-        $data['role_id'] = json_encode($data['role_id']);
+        $roleIds = [];
+        foreach ($data['role_id'] as $d => $v) {
+            $roleIds['id_' . $v] = $v;
+        }
+        $data['role_id'] = json_encode($roleIds);
         $user->update($data);
 
-        if (!empty($user->role_id)) {
-            $role = Role::whereIn('id', json_decode($user->role_id))->get();
+        $roleId = json_decode($user->role_id, true);
+        if (!empty($roleId)) {
+            $role = Role::whereIn('id', array_values($roleId))->get();
             foreach ($role as $k => $r)
             if (!$user->hasRole($r->name)) {
                 // 设置权限角色
@@ -272,7 +273,7 @@ class UserController extends Controller
         }
 
         if ($form['role_id']) {
-            $where[] = sprintf('role_id = %d', $form['role_id']);
+            $where[] = sprintf('JSON_EXTRACT(role_id, "$.id_%d") = "%d"', $form['role_id'], $form['role_id']);
         }
 
         return empty($where) ? $default : sprintf('%s AND %s', $default, implode(' AND ', $where));

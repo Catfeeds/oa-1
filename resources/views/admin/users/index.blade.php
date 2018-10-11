@@ -33,7 +33,7 @@
                                         {!! Form::text('alias', $form['alias'], [ 'class' => 'form-control m-b-xs', 'placeholder' => trans('app.名称') ]) !!}
                                     </div>
                                     <div class="form-group">
-                                        @include('widget.select-single', ['name' => 'role_id', 'lists' => $role_ids, 'selected' => $form['role_id']])
+                                        @include('widget.select-single', ['name' => 'role_id', 'lists' => $roleIds, 'selected' => $form['role_id']])
                                     </div>
                                     {!! Form::submit(trans('app.提交'), ['class' => 'btn btn-primary btn-sm m-l-md']) !!}
                                     {!! Form::close() !!}

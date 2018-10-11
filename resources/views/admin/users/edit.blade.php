@@ -117,7 +117,7 @@
                                     <select name="role_id[]" multiple="multiple" class="js-select2-multiple form-control">
                                         @foreach($roleList as $key => $val)
                                             <option value="{{ $key}}"
-                                                    @if (in_array($key, json_decode($user->role_id) ?: old('dept_users') ?? [])) selected @endif>{{ $val}}</option>
+                                                    @if (in_array($key, json_decode($user->role_id, true) ?: old('dept_users') ?? [])) selected @endif>{{ $val}}</option>
                                         @endforeach
                                     </select>
                                     <span class="help-block m-b-none">{{ $errors->first('role_id') }}</span>
