@@ -29,8 +29,8 @@
     </li>
 @endif
 
-@if(Entrust::can(['staff*', 'entry*', 'firm*']))
-    <li @if (Route::is(['staff*', 'entry*', 'firm*'])) class="active" @endif >
+@if(Entrust::can(['staff*', 'entry*']))
+    <li @if (Route::is(['staff*', 'entry*'])) class="active" @endif >
         <a href="#"><i class="fa fa-newspaper-o"></i> <span class="nav-label">{{ trans('staff.员工管理') }}</span><span
                     class="fa arrow"></span></a>
         <ul class="nav nav-second-level">
@@ -46,19 +46,14 @@
                 </li>
             @endif
 
-            @if(Entrust::can(['firm*']))
-                <li @if (Route::is(['firm*']) ) class="active" @endif>
-                    <a href="{{ route('firm.list') }}">{{ trans('staff.公司配置') }}</a>
-                </li>
-            @endif
         </ul>
     </li>
 @endif
 
 @if(Entrust::can(['holiday-config', 'approval-step', 'punch-rules', 'calendar', 'dept',
-                'job', 'school']))
+                'job', 'school', 'firm']))
     <li @if (Route::is(['holiday-config*', 'approval-step*', 'punch-rules*', 'calendar*', 'dept*',
-                'job*', 'school*'])) class="active" @endif >
+                'job*', 'school*', 'firm*'])) class="active" @endif >
         <a href="#"><i class="fa fa-newspaper-o"></i> <span class="nav-label">{{ trans('staff.系统配置') }}</span><span
                     class="fa arrow"></span></a>
         <ul class="nav nav-second-level">
@@ -67,7 +62,7 @@
                 <a href="{{ route('holiday-config') }}">{{ trans('staff.考勤信息配置') }}</a>
             </li>
 
-            <li @if (Route::is(['dept*', 'job*', 'school*']) ) class="active" @endif>
+            <li @if (Route::is(['dept*', 'job*', 'school*', 'firm*']) ) class="active" @endif>
                 <a href="{{ route('dept') }}">{{ trans('staff.员工信息配置') }}</a>
             </li>
 

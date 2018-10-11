@@ -15,3 +15,9 @@
         <a href="{{ route('school') }}">{{ trans('app.学校') }}</a>
     </li>
 @endif
+
+@if(Entrust::can(['firm']))
+    <li @if (Route::is(['firm*']) ) class="active" @endif>
+        <a href="{{ route('firm') }}">{{ trans('staff.公司配置') }}</a>
+    </li>
+@endif

@@ -27,17 +27,33 @@
                                 <div class="ibox-content profile-content">
                                     {!! Form::open(['class' => 'form-horizontal']) !!}
 
-                                    <div class="form-group @if (!empty($errors->first('dept'))) has-error @endif">
-                                        {!! Form::label('dept', trans('app.部门名称'), ['class' => 'col-sm-4 control-label']) !!}
+                                    <div class="form-group @if (!empty($errors->first('firm'))) has-error @endif">
+                                        {!! Form::label('firm', trans('staff.公司名称'), ['class' => 'col-sm-3 control-label']) !!}
                                         <div class="col-sm-3">
-                                            {!! Form::text('dept', isset($dept->dept) ? $dept->dept: old('dept'), [
+                                            {!! Form::text('firm', isset($firm->firm) ? $firm->firm: old('firm'), [
                                             'class' => 'form-control',
-                                            'placeholder' => trans('app.请输入', ['value' => trans('app.部门名称')]),
+                                            'placeholder' => trans('app.请输入', ['value' => trans('staff.公司名称')]),
                                             'required' => true,
                                             ]) !!}
-                                            <span class="help-block m-b-none">{{ $errors->first('dept') }}</span>
+                                            <span class="help-block m-b-none">{{ $errors->first('firm') }}</span>
                                         </div>
                                     </div>
+
+                                    <div class="hr-line-dashed"></div>
+
+                                    <div class="form-group @if (!empty($errors->first('alias'))) has-error @endif">
+                                        {!! Form::label('alias', trans('staff.公司别名'), ['class' => 'col-sm-3 control-label']) !!}
+                                        <div class="col-sm-3">
+                                            {!! Form::text('alias', isset($firm->alias) ? $firm->alias: old('alias'), [
+                                            'class' => 'form-control',
+                                            'placeholder' => trans('app.请输入', ['value' => trans('staff.公司别名')]),
+                                            'required' => true,
+                                            ]) !!}
+                                            <span class="help-block m-b-none">{{ $errors->first('alias') }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="hr-line-dashed"></div>
 
                                     <div class="form-group">
                                         <div class="col-sm-3 col-sm-offset-4">

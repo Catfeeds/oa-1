@@ -597,13 +597,17 @@ class AttendanceHelper
 
     public static function showLeaveIds($leaveIds)
     {
+        if(empty($leaveIds) || !json_decode($leaveIds)) return '--';
+
+
         $show = '';
         $idList = Leave::getHolidayIdList();
         $list = HolidayConfig::getHolidayList();
+
         foreach (json_decode($leaveIds) ?? [] as $leaveId) {
             $sep = empty($show) ? '' : ", $show";
             $show = $list[$idList[$leaveId]].$sep;
         }
-        return $show ?: '--';
+        return $show;
     }
 }

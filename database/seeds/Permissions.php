@@ -88,6 +88,7 @@ class Permissions extends Seeder
 
             'daily-detail-all'                  => '考勤管理/员工明细管理',
             'daily-detail'                      => '员工明细管理/考勤明细列表',
+            'daily-detail.notice'               => '员工明细管理/月度考勤确认',
             'daily-detail.confirm'              => '员工明细管理/月度考勤确认',
             'daily-detail.edit'                 => '员工明细管理/员工考勤编辑',
 

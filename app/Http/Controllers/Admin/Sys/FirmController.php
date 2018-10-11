@@ -6,7 +6,7 @@
  * Time: 9:48
  */
 
-namespace App\Http\Controllers\StaffManage;
+namespace App\Http\Controllers\Admin\Sys;
 
 use App\Models\StaffManage\Firm;
 use App\Http\Controllers\Controller;
@@ -22,20 +22,20 @@ class FirmController extends Controller
     {
         $data = Firm::paginate();
         $title = trans('staff.公司列表');
-        return view('staff-manage.firm.index', compact('title', 'data'));
+        return view('admin.sys.firm', compact('title', 'data'));
     }
 
     public function create()
     {
         $title = trans('app.添加', ['value' => trans('staff.公司')]);
-        return view('staff-manage.firm.edit', compact('title'));
+        return view('admin.sys.firm-edit', compact('title'));
     }
 
     public function edit($id)
     {
         $firm = Firm::findOrFail($id);
         $title = trans('app.编辑', ['value' => trans('staff.公司配置')]);
-        return view('staff-manage.firm.edit', compact('title', 'firm'));
+        return view('admin.sys.firm-edit', compact('title', 'firm'));
     }
 
     public function store(Request $request)
@@ -45,7 +45,7 @@ class FirmController extends Controller
         Firm::create($request->all());
         flash(trans('app.添加成功', ['value' => trans('staff.公司')]), 'success');
 
-        return redirect()->route('firm.list');
+        return redirect()->route('firm');
     }
 
     public function update(Request $request, $id)
@@ -59,7 +59,7 @@ class FirmController extends Controller
         $firm->update($request->all());
 
         flash(trans('app.编辑成功', ['value' => trans('staff.公司配置')]), 'success');
-        return redirect()->route('firm.list');
+        return redirect()->route('firm');
     }
 
 }
