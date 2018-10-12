@@ -155,6 +155,7 @@ class ReconciliationAuditController extends Controller
             LEFT JOIN cmr_reconciliation_proportion AS p ON (
                 a.product_id = p.product_id
                 AND a.backstage_channel = p.backstage_channel
+                AND a.billing_cycle_end = p.billing_cycle
             )
             WHERE a.product_id = {$pid} AND a.billing_cycle = '{$billing_cycle}'{$where} AND {$scope->getWhere()}
         ";
@@ -647,7 +648,6 @@ class ReconciliationAuditController extends Controller
         }
         if ($source == Reconciliation::TREASURER && $p1 && in_array(Principal::FRC, $limitPost) && $data['review_type'] == Reconciliation::TREASURER) {
             $tmp .= '<a href="' . $url['edit'] . '" target="_self"> <i class="fa fa-cog fa-lg" data-toggle="tooltip" data-placement="top" title="" data-original-title="编辑"></i> </a>
-<a href="' . $url['revision'] . '" class="generate"> <i class="fa fa-edit fa-lg" data-toggle="tooltip" data-placement="top" title="" data-original-title="调整流水"></i> </a>
 <a href="' . $url['review'] . '" target="_self"> <i class="fa fa-level-up fa-lg confirmation" data-toggle="tooltip" data-placement="top" title="" data-original-title="提交审核" data-confirm="确认提交审核?"></i> </a>';
         }
         if ($source == Reconciliation::FRC && $p2 && in_array(Principal::OPS, $limitPost) && $data['review_type'] == Reconciliation::FRC) {
@@ -657,6 +657,9 @@ class ReconciliationAuditController extends Controller
         if ($source == Reconciliation::OOR && $p2 && in_array(Principal::FSR, $limitPost) && $data['review_type'] == Reconciliation::OOR) {
             $tmp .= '<a href="' . $url['review'] . '" target="_self"> <i class="fa fa-check fa-lg confirmation" data-toggle="tooltip" data-placement="top" title="" data-original-title="审核" data-confirm="确认提交审核?"></i> </a>
 <a href="' . $url['refuse'] . '" target="_self"> <i class="fa fa-times fa-lg confirmation" data-toggle="tooltip" data-placement="top" title="" data-original-title="拒绝" data-confirm="确认拒绝?"></i> </a>';
+        }
+        if ($source == Reconciliation::TREASURER && $p1 && in_array(Principal::FRC, $limitPost)){
+            $tmp .= '<a href="' . $url['revision'] . '" class="generate"> <i class="fa fa-edit fa-lg" data-toggle="tooltip" data-placement="top" title="" data-original-title="调整流水"></i> </a>';
         }
         return $tmp;
     }
