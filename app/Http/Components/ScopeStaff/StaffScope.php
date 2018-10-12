@@ -17,6 +17,8 @@ class StaffScope extends GeneralScope
     public $sex;
     public $statusId;
     public $displayLastMonth = false;
+    public $showDate = true;
+    public $defaultDateRange = 3600;
 
     public function __construct(array $params, $user = null)
     {
@@ -26,12 +28,16 @@ class StaffScope extends GeneralScope
         $this->sex = $params['sex'] ?? NULL;
         $this->statusId = $params['status'] ?? NULL;
 
+
         parent::__construct($params, $user);
     }
 
     public function setWhere($tableAlias = null)
     {
-        $where = [];
+
+        $where = [
+            $this->getDateWhere($tableAlias, 'entry_time'),
+        ];
 
         if(!empty($this->userId)) {
             $where[] = sprintf("users.user_id = %d", $this->userId);
@@ -49,6 +55,5 @@ class StaffScope extends GeneralScope
         }
 
         $this->where = empty($where) ? '1 = 1' : implode(' AND ', $where);
-       // dd($this->where);
     }
 }

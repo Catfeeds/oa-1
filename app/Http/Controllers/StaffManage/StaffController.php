@@ -106,4 +106,44 @@ class StaffController extends AttController
         return redirect()->route('staff.list');
     }
 
+    public function export(Request $request)
+    {
+        $data = $request->all();
+
+        $users = User::with('userExt')->whereIn('user_id', $data['user_id'])->get()->toArray();
+
+        self::downExport($users);
+    }
+
+    public function exportAll()
+    {
+        $users = User::with('userExt')->get()->toArray();
+        self::downExport($users);
+    }
+
+    public function downExport($params)
+    {
+        $fileName = '员工信息';
+        $type = 'user';
+
+        $headers[] = ['员工ID', '员工工号', '员工姓名'];
+
+        $data = [];
+        foreach ($params as $k => $v) {
+            $data[$k] = [
+                $v['user_id'],
+                $v['username'],
+                $v['alias']
+            ];
+        }
+
+        $cellData = array_merge($headers, $data);
+
+        return \Excel::create($fileName, function ($excel) use ($cellData, $type) {
+            $excel->sheet($type, function ($sheet) use ($cellData) {
+                $sheet->rows($cellData);
+            });
+        })->export('xls');
+    }
+
 }

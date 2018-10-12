@@ -142,6 +142,7 @@ class Permissions extends Seeder
             'staff'            => '员工管理/员工列表',
             'staff.edit'       => '员工管理/员工编辑',
             'staff.info'       => '员工管理/员工查看',
+            'staff.export'     => '员工管理/员工信息导出',
 
             'entry-all'        => '员工管理/员工入职管理',
             'entry'            => '员工入职管理/入职信息列表',

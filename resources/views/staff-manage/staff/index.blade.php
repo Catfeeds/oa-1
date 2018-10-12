@@ -19,13 +19,16 @@
                     <h5>{{ $title }}</h5>
                 </div>
                 <div class="ibox-content">
-                    @include('widget.review-batch-operation-btn', ['btn' => [['review-btn-ok', '批量导出', 'btn-success'],['review-btn-no', '导出全部', 'btn-info']]])
-
+                    @if( Entrust::can(['staff.export']))
+                        @include('widget.review-batch-operation-btn', ['btn' => [['export-btn-list', '批量导出', 'btn-success'],['export-btn-all', '导出全部', 'btn-info']]])
+                    @endif
                     <div class="table-responsive">
                         <table class="table table-striped table-striped tooltip-demo">
                             <thead>
                             <tr>
-                                <th>-</th>
+                                @if( Entrust::can(['staff.export']))
+                                    <th>-</th>
+                                @endif
                                 <th>{{ trans('staff.员工工号') }}</th>
                                 <th>{{ trans('att.姓名') }}</th>
                                 <th>{{ trans('staff.部门') }}</th>
@@ -39,9 +42,11 @@
                             <tbody>
                             @foreach($data as $v)
                                 <tr>
-                                    <td>
-                                        <input id="text_box" type="checkbox" class="i-checks" name="user_id[]" value="{{ $v['user_id'] }}">
-                                    </td>
+                                    @if( Entrust::can(['staff.export']))
+                                        <td>
+                                            <input id="text_box" type="checkbox" class="i-checks" name="user_id[]" value="{{ $v['user_id'] }}">
+                                        </td>
+                                    @endif
                                     <td>{{$v['username']}}</td>
                                     <td>{{$v['alias']}}</td>
                                     <td>{{$dept[$v['dept_id']] ?? ''}}</td>
@@ -50,7 +55,7 @@
                                     <td>{{$v['mobile']}}</td>
                                     <td>{!! \App\User::getStatusText($v['status']) !!}</td>
                                     <td>
-                                        @if(Auth::user()->user_id != $v['user_id'] && Entrust::can(['staff-all', 'staff.edit']))
+                                        @if(Auth::user()->user_id != $v['user_id'] && Entrust::can(['staff.edit']))
                                             {!! BaseHtml::tooltip(trans('app.设置'), route('staff.edit', ['id' => $v['user_id']]), 'cog fa fa-lg') !!}
                                         @endif
                                     </td>
@@ -72,18 +77,16 @@
 <script>
     $(function () {
 
-        $('#review-btn-ok').batch({
-            url: '{{ route('leave.review.batchOptStatus', ['status' => 3]) }}',
+        $('#export-btn-list').batch({
+            url: '{{ route('staff.export') }}',
             selector: '.i-checks:checked',
             type: '0',
-            alert_confirm: '确定要批量通过审核吗？'
+            alert_confirm: '确定要批量导出员工信息吗？'
         });
 
-        $('#review-btn-no').batch({
-            url: '{{ route('leave.review.batchOptStatus', ['status' => 2]) }}',
-            selector: '.i-checks:checked',
-            type: '0',
-            alert_confirm: '确定要批量拒绝审核吗？'
+        $('#export-btn-all').batchAll({
+            url: '{{ route('staff.exportAll') }}',
+            alert_confirm: '确定导出全部员工信息？'
         });
 
     });

@@ -12,6 +12,18 @@
                         @include($scope->block)
                     @endif
 
+                    @if($scope->displayDates)
+                        <div class="form-group">
+                            <div class="input-group date col-xs-5">
+                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                <input title="{{ trans('staff.入职时间') }}" type="text" id="date-range" class="form-control" style="width: 230px;">
+                            </div>
+                        </div>
+                    @endif
+
+                    {!! Form::hidden('scope[startDate]', $scope->startDate, ['id' => 'scope-start-date']) !!}
+                    {!! Form::hidden('scope[endDate]', $scope->endDate, ['id' => 'scope-end-date']) !!}
+
                     <input type="submit" class="btn btn-primary btn-submit" value="{{ trans('app.提交') }}">
 
                     {!! Form::close() !!}
