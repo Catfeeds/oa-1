@@ -24,7 +24,7 @@
                         </div>
                         <div class="ibox-content profile-content">
                             <div class="row">
-                                <div class="col-md-12">
+                                <div class="col-md-16">
                                     {!! Form::open([ 'class' => 'form-inline', 'method' => 'get' ]) !!}
                                     <div class="form-group">
                                         {!! Form::text('username', $form['username'], [ 'class' => 'form-control m-b-xs', 'placeholder' => trans('app.账号') ]) !!}
