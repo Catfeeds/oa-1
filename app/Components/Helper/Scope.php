@@ -20,7 +20,7 @@ class Scope
 
     public $displayLastMonth = true;
 
-    public $showDate = true;
+    public $showDate = false;
 
     public $displayDates = true;
 
