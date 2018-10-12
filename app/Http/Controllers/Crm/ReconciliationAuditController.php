@@ -155,7 +155,7 @@ class ReconciliationAuditController extends Controller
             LEFT JOIN cmr_reconciliation_proportion AS p ON (
                 a.product_id = p.product_id
                 AND a.backstage_channel = p.backstage_channel
-                AND a.billing_cycle_end = p.billing_cycle_end
+                AND a.billing_cycle_end = p.billing_cycle
             )
             WHERE a.product_id = {$pid} AND a.billing_cycle = '{$billing_cycle}'{$where} AND {$scope->getWhere()}
         ";
