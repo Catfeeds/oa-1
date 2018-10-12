@@ -229,10 +229,12 @@ class UserController extends Controller
             }
         }
         $roleIds = [];
-        foreach ($data['role_id'] as $d => $v) {
-            $roleIds['id_' . $v] = $v;
+        if(!empty($data['role_id'])) {
+            foreach ($data['role_id'] as $d => $v) {
+                $roleIds['id_' . $v] = $v;
+            }
+            $data['role_id'] = json_encode($roleIds);
         }
-        $data['role_id'] = json_encode($roleIds);
         $user->update($data);
 
         $roleId = json_decode($user->role_id, true);
