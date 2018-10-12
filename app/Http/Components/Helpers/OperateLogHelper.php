@@ -79,7 +79,5 @@ class OperateLogHelper
         ];
         //微信通知推送消息接口
         \BackstageApi::sendWXMsg($pushData, 'push');
-        \BackstageApi::sendWXMsg($pushData, 'push');
-
     }
 }
