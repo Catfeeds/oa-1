@@ -53,7 +53,8 @@ class PunchRecordController extends Controller
         $data = [
             'memo' => $request->get('memo'),
             'name' => $request->file($file)->getClientOriginalName() ?? '',
-            'annex' => $filePath ?? ''
+            'annex' => $filePath ?? '',
+            'status' => 0,
         ];
 
         PunchRecord::create($data);
