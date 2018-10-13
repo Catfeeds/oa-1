@@ -135,7 +135,7 @@ class PunchRecordController extends Controller
                         $endTime = NULL;
                     }
                     $ts = str_replace('/', '-', $v[0]);
-
+                    print_r($ts);
                     list($year, $month, $day) = explode('-', $ts);
                     $calendar = Calendar::with('punchRules')
                         ->where(['year' => $year, 'month' => $month, 'day' => $day])
