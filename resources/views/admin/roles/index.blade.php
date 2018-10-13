@@ -16,7 +16,7 @@
                             @if(Entrust::can(['role.create']))
                                 <div class="ibox-tools">
                                     <a class="btn btn-xs btn-primary" href="{{ route('role.create') }}">
-                                        {{ trans('app.添加', ['value' => trans('app.职务')]) }}
+                                        {{ trans('app.添加', ['value' => trans('app.权限')]) }}
                                     </a>
                                 </div>
                             @endif
@@ -30,7 +30,7 @@
                                 <table class="table table-hover table-striped tooltip-demo">
                                     <thead>
                                     <tr>
-                                        <th>{{ trans('app.职务') }}</th>
+                                        <th>{{ trans('app.权限') }}</th>
                                         <th>{{ trans('app.名称') }}</th>
                                         <th>{{ trans('app.备注') }}</th>
                                         <th>{{ trans('app.操作') }}</th>

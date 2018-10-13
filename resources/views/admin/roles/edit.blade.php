@@ -16,7 +16,7 @@
                             @if(Entrust::can(['role-all', 'role']))
                             <div class="ibox-tools">
                                 <a class="btn btn-xs btn-primary" href="{{ route('role') }}">
-                                    {{ trans('app.列表', ['value' => trans('app.职务')]) }}
+                                    {{ trans('app.列表', ['value' => trans('app.权限')]) }}
                                 </a>
                             </div>
                             @endif
@@ -27,11 +27,11 @@
                             {!! Form::open(['class' => 'form-horizontal']) !!}
 
                             <div class="form-group @if (!empty($errors->first('name'))) has-error @endif">
-                                {!! Form::label('name', trans('app.职务'), ['class' => 'col-sm-3 control-label']) !!}
+                                {!! Form::label('name', trans('app.权限'), ['class' => 'col-sm-3 control-label']) !!}
                                 <div class="col-sm-6">
                                     {!! Form::text('name', isset($role->name) ? $role->name : old('name'), [
                                     'class' => 'form-control',
-                                    'placeholder' => trans('app.请输入', ['value' => trans('app.职务')]),
+                                    'placeholder' => trans('app.请输入', ['value' => trans('app.权限')]),
                                     'required' => true,
                                     ]) !!}
                                     <span class="help-block m-b-none">{{ $errors->first('name') }}</span>

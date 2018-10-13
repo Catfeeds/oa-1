@@ -22,13 +22,13 @@ class RoleController extends Controller
     public function index()
     {
         $data = Role::paginate();
-        $title = trans('app.职务列表');
+        $title = trans('app.权限列表');
         return view('admin.roles.index', compact('title', 'data'));
     }
 
     public function create()
     {
-        $title = trans('app.添加', ['value' => trans('app.职务')]);
+        $title = trans('app.添加', ['value' => trans('app.权限')]);
         return view('admin.roles.edit', compact('title'));
     }
 
@@ -38,7 +38,7 @@ class RoleController extends Controller
 
         Role::create($request->all());
 
-        flash(trans('app.添加成功', ['value' => trans('app.职务')]), 'success');
+        flash(trans('app.添加成功', ['value' => trans('app.权限')]), 'success');
 
         return redirect($this->redirectTo);
     }
@@ -46,7 +46,7 @@ class RoleController extends Controller
     public function edit($id)
     {
         $role = Role::findOrFail($id);
-        $title = trans('app.编辑', ['value' => trans('app.职务')]);
+        $title = trans('app.编辑', ['value' => trans('app.权限')]);
         return view('admin.roles.edit', compact('title', 'role'));
     }
 
@@ -60,7 +60,7 @@ class RoleController extends Controller
 
         $role->update($request->all());
 
-        flash(trans('app.编辑成功', ['value' => trans('app.职务')]), 'success');
+        flash(trans('app.编辑成功', ['value' => trans('app.权限')]), 'success');
         return redirect($this->redirectTo);
     }
 
@@ -82,7 +82,7 @@ class RoleController extends Controller
             ];
         }
         \Cache::tags(\Config::get('entrust.permission_role_table'))->flush();
-        $title = trans('app.职务权限指派');
+        $title = trans('app.权限指派');
         return view('admin.roles.appoint', compact('role', 'permissionsGroup', 'enables', 'title', 'id'));
     }
 
