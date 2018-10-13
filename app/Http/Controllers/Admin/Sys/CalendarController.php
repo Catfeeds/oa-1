@@ -78,50 +78,20 @@ class CalendarController extends AttController
     public function storeAllMonth(Request $request)
     {
         $punch_rules_id = $request->input('punch_rules_id');
-        $year = date('Y', time());
-        $month = date('m', time());
+        $selectDates = json_decode($request->input('select_date'));
+        array_shift($selectDates);
 
-        if (isset($punch_rules_id)) {
-            //一键生成日历需要休息这一项, 没有的话自动创建
-            $rest = PunchRules::firstOrCreate(['punch_type_id' => 2, 'name' => '周末休息']);
+        collect($selectDates)->flatten()->Map(function ($date) use ($punch_rules_id) {
+            $arrDate = explode('-', $date);
+            Calendar::firstOrCreate(
+                [
+                    'year'  => $arrDate[0],
+                    'month' => $arrDate[1],
+                    'day'   => $arrDate[2],
+                    'week'  => date('N', strtotime($date)),
+                ], ['punch_rules_id' => $punch_rules_id]);
+        });
 
-            for ($day = 1; $day <= (int)date('t', time()); $day++) {
-                //星期几
-                $week = date('N', strtotime("$year-$month-$day"));
-
-                //如果是周日还有双周的周六 ,修改排班规则为周末休息
-                if (($week == 6 && !$this->ifSingleWeek("$year-$month-$day")) || $week == 7) {
-                    $prId = $rest->id;
-                } else {
-                    $prId = $punch_rules_id;
-                }
-
-                //若日历表已有部分天数已配置则不进行覆盖添加, 没有则添加
-                Calendar::firstOrCreate(
-                    [
-                        'year'  => $year,
-                        'month' => $month,
-                        'day'   => $day,
-                        'week'  => $week,
-                    ], ['punch_rules_id' => $prId]);
-            }
-            flash('批量添加日历成功', 'success');
-        } else {
-            flash('请选择批量添加日历的排班规则', 'danger');
-        }
         return redirect()->back();
-    }
-
-    //判断单双周
-    public function ifSingleWeek($arg_date)
-    {
-        $date = '2018-7-30';//已知改天为单周 且星期一
-        $timeDiff = strtotime($arg_date) - strtotime($date);
-
-        if (intval($timeDiff / 24 / 3600 / 7) % 2 == 1) {
-            return false;//双周
-        } else {
-            return true;//单周
-        }
     }
 }

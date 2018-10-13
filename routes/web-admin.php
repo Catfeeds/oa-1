@@ -203,9 +203,9 @@ Route::group([
         'middleware' => ['permission:calendar.edit'],
         'uses' => 'Sys\CalendarController@update']);
 
-    Route::post('sys/calendar', [
-        'middleware' => ['permission:calendar'],
-        'uses' => 'Sys\CalendarController@storeAllMonth']);
+    Route::post('sys/calendar/store-month', [
+        'middleware' => ['permission:punch-rules-all|calendar'],
+        'uses' => 'Sys\CalendarController@storeAllMonth'])->name('calendar.storeMonth');
 
     # 公司配置
     Route::get('sys/firm', [

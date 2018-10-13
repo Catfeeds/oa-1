@@ -37,7 +37,8 @@ class IndexController extends Controller
                 'event' => $punchRules->name,
                 'color' => PunchRules::$punchTypeColor[$punchRules->punch_type_id],
                 'content' => "上班准备时间:" . $punchRules->ready_time . '<br>上班时间:' . $punchRules->work_start_time .
-                    '<br>下班时间:' . $punchRules->work_end_time . '<br>备注:'.($v->memo ?? '暂无')
+                    '<br>下班时间:' . $punchRules->work_end_time . '<br>备注:'.($v->memo ?? '暂无'),
+                'data_id' => $v->id,
             ];
         }
         return $info;
