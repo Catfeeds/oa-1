@@ -112,7 +112,7 @@ class PunchRecordController extends Controller
         $isOK = true;
        //事务开启
         DB::beginTransaction();
-/*        try {*/
+        try {
             //reader读取excel内容
             \Excel::load(storage_path($punchRecord->annex), function ($reader) use ($punchRecord, $isOK) {
 
@@ -134,10 +134,12 @@ class PunchRecordController extends Controller
                     } elseif (count($v) <= 6 && (int)str_replace(':', '', $v[5]) <= 1400) {
                         $endTime = NULL;
                     }
-                    print_r($v[0]);
+
                     $ts = str_replace('/', '-', $v[0]);
-                    print_r($ts);
-                    list($year, $month, $day) = explode('-', $ts);
+                    //本地环境格式
+                    //list($year, $month, $day) = explode('-', $ts);
+                    //线上环境格式
+                    list($month, $day, $year) = explode('-', $ts);
                     $calendar = Calendar::with('punchRules')
                         ->where(['year' => $year, 'month' => $month, 'day' => $day])
                         ->first();
@@ -158,7 +160,6 @@ class PunchRecordController extends Controller
 
                     $data[$ts][] = $row;
                 }
-                dd($data);
                 if(!$isOK){
                     //信息记录
                     $strArr = '<?php return ' . var_export($msgArr, true) . ';';
@@ -235,16 +236,15 @@ class PunchRecordController extends Controller
                 $punchRecord->update(['log_file' => $logFile, 'status' => 3]);
 
             });
-/*      } catch (\Exception $e) {
+      } catch (\Exception $e) {
             //事务回滚
             DB::rollBack();
             $punchRecord->update(['status' => 2]);
 
             flash('生成失败，生成文件有误，无法解析!', 'danger');
             return redirect()->route('daily-detail.review.import.info');
-        }*/
+        }
         //事务提交
-        dd('a');
         DB::commit();
         flash(trans('att.生成成功员工每日打卡明细'), 'success');
         return redirect()->route('daily-detail.review.import.info');
