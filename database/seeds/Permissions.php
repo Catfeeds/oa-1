@@ -93,6 +93,9 @@ class Permissions extends Seeder
 
             'daily-detail-review-all'           => '考勤管理/员工考勤管理',
             'daily-detail.review'               => '员工考勤管理/员工考勤列表',
+            'daily-detail.review.import'        => '员工考勤管理/员工考勤信息导入',
+            'daily-detail.review.edit'          => '员工考勤管理/员工考勤信息编辑',
+            'daily-detail.review.create'        => '员工考勤管理/员工考勤信息生成',
             'daily-detail.review.detail'        => '员工考勤管理/员工考勤明细',
             'daily-detail.review.send'          => '员工考勤管理/发布考勤通知',
             'daily-detail.review.send-batch'    => '员工考勤管理/批量发布考勤通知',
