@@ -138,11 +138,14 @@ class PunchRecordController extends Controller
                     $ts = str_replace('/', '-', $v[0]);
                     //本地环境格式
                     //list($year, $month, $day) = explode('-', $ts);
+
                     //线上环境格式
                     list($month, $day, $year) = explode('-', $ts);
                     $year = '20'. $year;
                     $day = (int)$day;
                     $month = (int)$month;
+                    //线上环境end
+
                     $calendar = Calendar::with('punchRules')
                         ->where(['year' => $year, 'month' => $month, 'day' => $day])
                         ->first();
@@ -152,7 +155,9 @@ class PunchRecordController extends Controller
                         $msgArr[] = '未匹配到[' . $year . '-' . $month . '-' . $day . ']日期考勤规则设置,导入失败!';
                         break;
                     }
-
+                    //线上环境
+                    $ts = $year . '-' . $month . '-' . $day;
+                    //线上环境end
                     $row = [
                         'ts'         => $ts,
                         'alias'      => $v[3],
