@@ -112,7 +112,7 @@ class PunchRecordController extends Controller
         $isOK = true;
        //事务开启
         DB::beginTransaction();
-        //try {
+        try {
             //reader读取excel内容
             \Excel::load(storage_path($punchRecord->annex), function ($reader) use ($punchRecord, $isOK) {
 
@@ -140,11 +140,11 @@ class PunchRecordController extends Controller
                     //list($year, $month, $day) = explode('-', $ts);
                     //线上环境格式
                     list($month, $day, $year) = explode('-', $ts);
+                    $year = '20'. $year;
                     $calendar = Calendar::with('punchRules')
                         ->where(['year1' => $year, 'month' => $month, 'day' => $day])
                         ->first();
 
-                    dump($calendar);
                     if (empty($calendar->punch_rules_id)) {
                         $isOK = false;
                         $msgArr[] = '未匹配到[' . $year . '-' . $month . '-' . $day . ']日期考勤规则设置,导入失败!';
@@ -236,14 +236,14 @@ class PunchRecordController extends Controller
                 $punchRecord->update(['log_file' => $logFile, 'status' => 3]);
 
             });
-/*      } catch (\Exception $e) {
+      } catch (\Exception $e) {
             //事务回滚
             DB::rollBack();
             $punchRecord->update(['status' => 2]);
 
             flash('生成失败，生成文件有误，无法解析!', 'danger');
             return redirect()->route('daily-detail.review.import.info');
-        }*/
+        }
         //事务提交
         DB::commit();
         flash(trans('att.生成成功员工每日打卡明细'), 'success');
