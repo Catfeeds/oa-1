@@ -144,6 +144,7 @@ class PunchRecordController extends Controller
                         ->where(['year' => $year, 'month' => $month, 'day' => $day])
                         ->first();
                     print_r($year . '-' . $month . '-' . $day);
+                    print_r(strtotime($year . '-' . $month . '-' . $day));
                     dump($calendar);
                     if (empty($calendar->punch_rules_id)) {
                         $isOK = false;
