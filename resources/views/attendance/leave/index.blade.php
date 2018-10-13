@@ -6,15 +6,9 @@
     @parent
     <div class="col-sm-8">
         <div class="title-action">
-            @if(Entrust::can(['attendance-all', 'leave.all', 'leave.edit', 'leave.create']))
+            @if(Entrust::can(['leave.create']))
                 <a href="{{ route('leave.create', ['id' => \App\Models\Sys\HolidayConfig::LEAVEID]) }}" class="btn btn-primary btn-sm">{{ trans('请假申请') }}</a>
-            @endif
-
-            @if(Entrust::can(['attendance-all', 'leave.all', 'leave.edit', 'leave.create']))
                 <a href="{{ route('leave.create', ['id' => \App\Models\Sys\HolidayConfig::CHANGE]) }}" class="btn btn-success btn-sm">{{ trans('调休申请') }}</a>
-            @endif
-
-            @if(Entrust::can(['attendance-all', 'leave.all', 'leave.edit', 'leave.create']))
                 <a href="{{ route('leave.create', ['id' => \App\Models\Sys\HolidayConfig::RECHECK]) }}" class="btn btn-danger btn-sm">{{ trans('补打卡') }}</a>
             @endif
         </div>
@@ -100,7 +94,7 @@
                                         {{--@if(Entrust::can(['leave-all', 'leave.edit']))--}}
                                             {{--{!! BaseHtml::tooltip(trans('app.设置'), route('leave.edit', ['id' => $v['leave_id']]), 'cog fa-lg') !!}--}}
                                         {{--@endif--}}
-                                        @if(($v['user_id'] == \Auth::user()->user_id || $v['review_user_id'] == \Auth::user()->user_id || in_array(\Auth::user()->user_id, $userIds)) && Entrust::can(['attendance-all', 'leave-all', 'leave.edit', 'leave.review']))
+                                        @if(($v['user_id'] == \Auth::user()->user_id || $v['review_user_id'] == \Auth::user()->user_id || in_array(\Auth::user()->user_id, $userIds)) && Entrust::can(['leave.edit', 'leave.review']))
                                             {!! BaseHtml::tooltip(trans('att.请假详情'), route('leave.optInfo', ['id' => $v['leave_id'], 'type' => \App\Models\Attendance\Leave::LOGIN_INFO]), 'cog fa fa-newspaper-o') !!}
                                         @endif
 

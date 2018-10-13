@@ -70,6 +70,27 @@
                 });
 
             });
+        },
+        batchAll: function (opt) {
+            var defaults = {
+                url: null,
+                alert_confirm: null
+            };
+            opt = $.extend(defaults, opt);
+            if (opt.url === null) return false;
+
+            this.click(function () {
+                // 组织参数
+                bootbox.confirm(opt.alert_confirm, function (result) {
+                    if (result) {
+                        window.location = opt.url;
+                    }
+                });
+
+            });
+
         }
+
     });
+
 })(jQuery);

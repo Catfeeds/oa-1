@@ -322,6 +322,8 @@ class EntryController extends AttController
                 'remember_token' => Str::random(60),
                 'dept_id' => $entry->dept_id,
                 'job_id' => $entry->job_id,
+                'is_leader' => 0,
+                'is_mobile' => 0,
                 'creater_id' => \Auth::user()->user_id,
             ];
 

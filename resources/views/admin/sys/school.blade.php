@@ -2,14 +2,32 @@
 
 @section('content')
     <div class="row">
+        {{--收索区域--}}
+        <div class="row m-b-md">
+            <div class="col-xs-10">
+                <div class="col-md-12">
+                    <div class="form-inline">
+                        {!! Form::open([ 'class' => 'form-inline', 'method' => 'get' ]) !!}
+                        <div class="form-group">
+                            {!! Form::text('school', $form['school'], [ 'class' => 'form-control m-b-xs', 'placeholder' => trans('app.学校名称') ]) !!}
+                        </div>
+                        {!! Form::submit(trans('app.提交'), ['class' => 'btn btn-primary btn-sm m-l-md']) !!}
+                        {!! Form::close() !!}
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="col-lg-12">
             <div class="ibox float-e-margins">
                 <div class="ibox-title">
                     <h5>{{ $title ?? trans('app.游戏设置') }}</h5>
                     <div class="ibox-tools">
-                        <a class="btn btn-xs btn-primary" href="{{ route('school.create') }}">
-                            {{ trans('app.添加', ['value' => trans('app.学校')]) }}
-                        </a>
+                        @if(Entrust::can(['school.create']))
+                            <a class="btn btn-xs btn-primary" href="{{ route('school.create') }}">
+                                {{ trans('app.添加', ['value' => trans('app.学校')]) }}
+                            </a>
+                        @endif
                     </div>
                 </div>
                 <div class="ibox-content">
@@ -47,9 +65,11 @@
                                                     <td>{{ $v['school'] }}</td>
                                                     <td>{{ $v['created_at'] }}</td>
                                                     <td>
-                                                        {!!
-                                                            BaseHtml::tooltip(trans('app.设置'), route('school.edit', ['id' => $v['school_id']]))
-                                                        !!}
+                                                        @if(Entrust::can(['school.edit']))
+                                                            {!!
+                                                                BaseHtml::tooltip(trans('app.设置'), route('school.edit', ['id' => $v['school_id']]))
+                                                            !!}
+                                                        @endif
                                                     </td>
                                                 </tr>
                                             @endforeach

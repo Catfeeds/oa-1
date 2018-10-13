@@ -13,10 +13,10 @@
                         <div class="ibox-title">
                             <h5>{{ $title }}</h5>
 
-                            @if(Entrust::can(['role-all', 'role']))
+                            @if(Entrust::can(['role']))
                             <div class="ibox-tools">
                                 <a class="btn btn-xs btn-primary" href="{{ route('role') }}">
-                                    {{ trans('app.列表', ['value' => trans('app.职务')]) }}
+                                    {{ trans('app.列表', ['value' => trans('app.权限')]) }}
                                 </a>
                             </div>
                             @endif

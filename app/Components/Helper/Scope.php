@@ -16,7 +16,11 @@ class Scope
     public $startTimestamp;
     public $endTimestamp;
 
+    public $defaultDateRange = 7;
+
     public $displayLastMonth = true;
+
+    public $showDate = false;
 
     public $displayDates = true;
 
@@ -39,6 +43,11 @@ class Scope
 
             $this->endDate = isset($params['endDate']) ? $params['endDate'] : date('Y-m-t', time());
             $this->startDate = isset($params['startDate']) ? $params['startDate'] : date('Y-m-01', time());
+        }
+
+        if($this->showDate) {
+            $this->endDate = isset($params['endDate']) ? $params['endDate'] : DataHelper::asDate();
+            $this->startDate = isset($params['startDate']) ? $params['startDate'] : date('Y-m-d', strtotime($this->endDate) - $this->defaultDateRange * 86400);
         }
     }
 

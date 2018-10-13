@@ -17,52 +17,57 @@ Route::group([
     Route::group(['namespace' => 'StaffManage', 'prefix' => 'staff'], function () {
         # 员工列表
         Route::get('list', [
-            'middleware' => ['permission:staff-all|staff'],
+            'middleware' => ['permission:staff'],
             'uses' => 'StaffController@index'])->name('staff.list');
         Route::get('edit/{id}', [
-            'middleware' => ['permission:staff-all|staff.edit'],
+            'middleware' => ['permission:staff.edit'],
             'uses' => 'StaffController@edit'])->name('staff.edit');
         Route::post('edit/{id}', [
-            'middleware' => ['permission:staff-all|staff.edit'],
+            'middleware' => ['permission:staff.edit'],
             'uses' => 'StaffController@update']);
-        Route::get('info/{id}', [
-            'middleware' => ['permission:staff-all|staff.info'],
-            'uses' => 'StaffController@info'])->name('staff.info');
+        Route::get('export', [
+            'middleware' => ['permission:staff.export'],
+            'uses' => 'StaffController@export'])->name('staff.export');
+        Route::get('exportAll', [
+            'middleware' => ['permission:staff.export'],
+            'uses' => 'StaffController@exportAll'])->name('staff.exportAll');
+
+
 
         # 员工入职
         Route::get('entry', [
-            'middleware' => ['permission:entry-all|entry'],
+            'middleware' => ['permission:entry'],
             'uses' => 'EntryController@index'])->name('entry.list');
         Route::get('entry/create', [
-            'middleware' => ['permission:entry-all|entry.create'],
+            'middleware' => ['permission:entry.create'],
             'uses' => 'EntryController@create'])->name('entry.create');
         Route::post('entry/create', [
-            'middleware' => ['permission:entry-all|entry.create'],
+            'middleware' => ['permission:entry.create'],
             'uses' => 'EntryController@store']);
         Route::get('entry/edit/{id}', [
-            'middleware' => ['permission:entry-all|entry.edit'],
+            'middleware' => ['permission:entry.edit'],
             'uses' => 'EntryController@edit'])->name('entry.edit');
         Route::post('entry/edit/{id}', [
-            'middleware' => ['permission:entry-all|entry.edit'],
+            'middleware' => ['permission:entry.edit'],
             'uses' => 'EntryController@update']);
 
         Route::get('entry/create-send-info/{id}', [
-            'middleware' => ['permission:entry-all|entry.edit|entry.create|entry.sendMail'],
+            'middleware' => ['permission:entry.edit|entry.create|entry.sendMail'],
             'uses' => 'EntryController@createSendInfo'])->name('entry.createSendInfo');
 
         Route::get('entry/show-info/{id}', [
-            'middleware' => ['permission:entry-all|entry.edit|entry.create|entry.showInfo'],
+            'middleware' => ['permission:entry.edit|entry.create|entry.showInfo'],
             'uses' => 'EntryController@showInfo'])->name('entry.showInfo');
 
         Route::get('entry/del/{id}', [
-            'middleware' => ['permission:entry-all|entry.del'],
+            'middleware' => ['permission:entry.del'],
             'uses' => 'EntryController@del'])->name('entry.del');
 
         Route::get('entry/pass/{id}', [
-            'middleware' => ['permission:entry-all|entry.review'],
+            'middleware' => ['permission:entry.review'],
             'uses' => 'EntryController@pass'])->name('entry.pass');
         Route::get('entry/refuse/{id}', [
-            'middleware' => ['permission:entry-all|entry.review'],
+            'middleware' => ['permission:entry.review'],
             'uses' => 'EntryController@refuse'])->name('entry.refuse');
 
     });

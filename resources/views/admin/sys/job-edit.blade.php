@@ -28,11 +28,11 @@
                                     {!! Form::open(['class' => 'form-horizontal']) !!}
 
                                     <div class="form-group @if (!empty($errors->first('job'))) has-error @endif">
-                                        {!! Form::label('dept', trans('app.岗位名称'), ['class' => 'col-sm-4 control-label']) !!}
+                                        {!! Form::label('dept', trans('app.岗位类型名称'), ['class' => 'col-sm-4 control-label']) !!}
                                         <div class="col-sm-3">
                                             {!! Form::text('job', isset($job->job) ? $job->job: old('job'), [
                                             'class' => 'form-control',
-                                            'placeholder' => trans('app.请输入', ['value' => trans('app.岗位名称')]),
+                                            'placeholder' => trans('app.请输入', ['value' => trans('app.岗位类型名称')]),
                                             'required' => true,
                                             ]) !!}
                                             <span class="help-block m-b-none">{{ $errors->first('job') }}</span>

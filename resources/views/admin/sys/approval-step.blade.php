@@ -7,9 +7,11 @@
                 <div class="ibox-title">
                     <h5>{{ $title ?? trans('app.系统设置') }}</h5>
                     <div class="ibox-tools">
-                        <a class="btn btn-xs btn-primary" href="{{ route('approval-step.create') }}">
-                            {{ trans('app.添加', ['value' => trans('app.审核流程配置')]) }}
-                        </a>
+                        @if(Entrust::can(['approval-step.create']))
+                            <a class="btn btn-xs btn-primary" href="{{ route('approval-step.create') }}">
+                                {{ trans('app.添加', ['value' => trans('app.审核流程配置')]) }}
+                            </a>
+                        @endif
                     </div>
                 </div>
                 <div class="ibox-content">
@@ -51,9 +53,11 @@
                                                     <td>{{ \App\Http\Components\Helpers\AttendanceHelper::showApprovalStep($v['step_id']) }}</td>
                                                     <td>{{ $v['created_at'] }}</td>
                                                     <td>
-                                                        {!!
-                                                            BaseHtml::tooltip(trans('app.设置'), route('approval-step.edit', ['id' => $v['step_id']]))
-                                                        !!}
+                                                        @if(Entrust::can(['approval-step.edit']))
+                                                            {!!
+                                                                BaseHtml::tooltip(trans('app.设置'), route('approval-step.edit', ['id' => $v['step_id']]))
+                                                            !!}
+                                                        @endif
                                                     </td>
                                                 </tr>
                                             @endforeach

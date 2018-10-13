@@ -20,9 +20,10 @@ class FirmController extends Controller
 
     public function index()
     {
-        $data = Firm::paginate();
+        $form['firm'] = \Request::get('firm');
+        $data = Firm::where('firm', 'LIKE', "%{$form['firm']}%")->paginate();
         $title = trans('staff.公司列表');
-        return view('admin.sys.firm', compact('title', 'data'));
+        return view('admin.sys.firm', compact('title', 'data', 'form'));
     }
 
     public function create()

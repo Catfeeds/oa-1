@@ -22,36 +22,18 @@
 
                         @if(Entrust::can(['user']))
                         <li @if(Route::is('user*')) class="active" @endif>
-                            <a aria-expanded="false" role="button" href="{{ route('user') }}">{{ trans('app.员工管理') }}</a>
+                            <a aria-expanded="false" role="button" href="{{ route('user') }}">{{ trans('app.账号管理') }}</a>
                         </li>
                         @endif
 
                         @if(Entrust::can(['role']))
                             <li @if(Route::is('role*')) class="active" @endif>
-                                <a aria-expanded="false" role="button" href="{{ route('role') }}">{{ trans('app.职务管理') }}</a>
+                                <a aria-expanded="false" role="button" href="{{ route('role') }}">{{ trans('app.权限管理') }}</a>
                             </li>
                         @endif
-
-                        @if(Entrust::can(['job', 'dept', 'school',
-                            'holiday-config', 'approval-step', 'punch-rules']))
-                            <li @if(Route::is(['job*', 'dept*', 'school*', 'holiday-config' , 'approval-step*', 'punch-rules*', 'calendar*'])) class="active" @endif>
-                                <a aria-expanded="false" role="button" href="{{ route('dept') }}">{{ trans('app.系统配置') }}</a>
-                            </li>
-                        @endif
-
                     </ul>
 
                     <ul class="nav navbar-nav navbar-right">
-
-                        <li class="dropdown">
-                            @if(!\App\Models\UserExt::checkIsConfirm(Auth::user()->user_id))
-                                <a class="dropdown-toggle count-info"
-                                   href="{{ route('profile.confirmEdit') }}">
-                                    <i class="fa fa-warning"></i>
-                                        <span class="label red-bg label-warning">{{ trans('app.信息待完善') }}</span>
-                                </a>
-                            @endif
-                        </li>
 
                         <li class="dropdown">
                             <a aria-expanded="false" role="button" href="#" class="dropdown-toggle" data-toggle="dropdown">

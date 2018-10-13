@@ -6,7 +6,7 @@
     @parent
     <div class="col-sm-8">
         <div class="title-action">
-            @if(Entrust::can(['attendance-all', 'daily-detail.all', 'daily-detail.review']))
+            @if(Entrust::can(['daily-detail.review']))
                 <a href="{{ route('daily-detail.review.import') }}" class="btn btn-primary btn-sm">{{ trans('导入打卡记录') }}</a>
                 <a href="{{ route('daily-detail.review.info') }}" class="btn btn-success btn-sm">{{ trans('返回') }}</a>
             @endif
