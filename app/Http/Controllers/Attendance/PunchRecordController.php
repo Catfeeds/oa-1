@@ -134,6 +134,7 @@ class PunchRecordController extends Controller
                     } elseif (count($v) <= 6 && (int)str_replace(':', '', $v[5]) <= 1400) {
                         $endTime = NULL;
                     }
+                    print_r($v[0]);
                     $ts = str_replace('/', '-', $v[0]);
                     print_r($ts);
                     list($year, $month, $day) = explode('-', $ts);
