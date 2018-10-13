@@ -141,6 +141,8 @@ class PunchRecordController extends Controller
                     //线上环境格式
                     list($month, $day, $year) = explode('-', $ts);
                     $year = '20'. $year;
+                    $day = (int)$day;
+                    $month = (int)$month;
                     $calendar = Calendar::with('punchRules')
                         ->where(['year1' => $year, 'month' => $month, 'day' => $day])
                         ->first();
