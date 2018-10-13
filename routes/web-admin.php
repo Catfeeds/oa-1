@@ -112,7 +112,7 @@ Route::group([
         'middleware' => ['permission:job.create'],
         'uses' => 'Sys\JobController@store']);
     Route::get('sys/job/edit/{id}', [
-        'middleware' => ['permission:ajob.edit'],
+        'middleware' => ['permission:job.edit'],
         'uses' => 'Sys\JobController@edit'])->name('job.edit');
     Route::post('sys/job/edit/{id}', [
         'middleware' => ['permission:job.edit'],

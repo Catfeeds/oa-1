@@ -8,9 +8,11 @@
                 <div class="ibox-title">
                     <h5>{{ $title ?? trans('app.系统设置') }}</h5>
                     <div class="ibox-tools">
-                        <a class="btn btn-xs btn-primary" href="{{ route('holiday-config.create') }}">
-                            {{ trans('app.添加', ['value' => trans('app.申请配置')]) }}
-                        </a>
+                        @if(Entrust::can(['holiday-config.create']))
+                            <a class="btn btn-xs btn-primary" href="{{ route('holiday-config.create') }}">
+                                {{ trans('app.添加', ['value' => trans('app.申请配置')]) }}
+                            </a>
+                        @endif
                     </div>
                 </div>
                 <div class="ibox-content">
@@ -56,9 +58,11 @@
                                                     <td><pre style="width: 15em; height: 10em" >{{ $v['memo'] }}</pre></td>
                                                     <td>{{ $v['created_at'] }}</td>
                                                     <td>
-                                                        {!!
-                                                            BaseHtml::tooltip(trans('app.设置'), route('holiday-config.edit', ['id' => $v['holiday_id']]))
-                                                        !!}
+                                                        @if(Entrust::can(['holiday-config.edit']))
+                                                            {!!
+                                                                BaseHtml::tooltip(trans('app.设置'), route('holiday-config.edit', ['id' => $v['holiday_id']]))
+                                                            !!}
+                                                        @endif
                                                     </td>
                                                 </tr>
                                             @endforeach

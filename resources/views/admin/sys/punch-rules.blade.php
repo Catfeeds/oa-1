@@ -7,9 +7,11 @@
                 <div class="ibox-title">
                     <h5>{{ $title ?? trans('app.系统设置') }}</h5>
                     <div class="ibox-tools">
-                        <a class="btn btn-xs btn-primary" href="{{ route('punch-rules.create') }}">
-                            {{ trans('app.添加', ['value' => trans('app.上下班时间规则配置')]) }}
-                        </a>
+                        @if(Entrust::can(['punch-rules.create']))
+                            <a class="btn btn-xs btn-primary" href="{{ route('punch-rules.create') }}">
+                                {{ trans('app.添加', ['value' => trans('app.上下班时间规则配置')]) }}
+                            </a>
+                        @endif
                     </div>
                 </div>
                 <div class="ibox-content">
@@ -55,9 +57,11 @@
                                                     <td>{{ $v['work_end_time'] }}</td>
                                                     <td>{{ $v['created_at'] }}</td>
                                                     <td>
-                                                        {!!
-                                                            BaseHtml::tooltip(trans('app.设置'), route('punch-rules.edit', ['id' => $v['id']]))
-                                                        !!}
+                                                        @if(Entrust::can(['punch-rules.edit']))
+                                                            {!!
+                                                                BaseHtml::tooltip(trans('app.设置'), route('punch-rules.edit', ['id' => $v['id']]))
+                                                            !!}
+                                                        @endif
                                                     </td>
                                                 </tr>
                                             @endforeach
