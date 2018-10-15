@@ -33,7 +33,18 @@
                         <div class="col-sm-9" id="show">
                             @if(!is_numeric($data['adjustment']) && is_array(json_decode($data['adjustment'], true)))
                                 @foreach(json_decode($data['adjustment'], true) as $k => $v)
-                                    <div id="{{ json_decode($data['type'], true)[$k] }}"><span>{{ \App\Models\Crm\Difference::getList()[json_decode($data['type'], true)[$k]] }}：</span><input name="adjustment[]" value="{{ $v }}"><input hidden name="type[]" value="{{ json_decode($data['type'], true)[$k] }}">　<button class="btn btn-danger btn-rounded btn-xs" onclick="del({{ json_decode($data['type'], true)[$k] }})" type="button">删除</button></div>
+                                    @if($v != 0)
+                                        <div id="{{ json_decode($data['type'], true)[$k] }}"><span>{{ \App\Models\Crm\Difference::getList()[json_decode($data['type'], true)[$k]] }}
+                                                ：</span><input name="adjustment[]" value="{{ $v }}"><input hidden
+                                                                                                           name="type[]"
+                                                                                                           value="{{ json_decode($data['type'], true)[$k] }}">　
+                                            <button class="btn btn-danger btn-rounded btn-xs"
+                                                    onclick="del({{ json_decode($data['type'], true)[$k] }})"
+                                                    type="button">
+                                                删除
+                                            </button>
+                                        </div>
+                                    @endif
                                 @endforeach
                             @endif
                         </div>
