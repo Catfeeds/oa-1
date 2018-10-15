@@ -363,11 +363,10 @@ class ReconciliationAuditController extends Controller
             $request['type'] = [0];
         }
         if ($time) {
-
             switch ($source) {
                 case $source == Reconciliation::UNRD:
                     $tmp['operation_adjustment'] = json_encode($request['adjustment']);
-                    $tmp['operation_rmb_adjustment'] = (float)array_sum($request['adjustment']) * $rate;
+                    $tmp['operation_rmb_adjustment'] = round((float)array_sum($request['adjustment']) * $rate);
                     $tmp['operation_type'] = json_encode($request['type']);
                     $tmp['operation_remark'] = $request['remark'];
                     $tmp['operation_user_name'] = \Auth::user()->alias;
@@ -379,7 +378,7 @@ class ReconciliationAuditController extends Controller
                     break;
                 case $source == Reconciliation::OPD:
                     $tmp['accrual_adjustment'] = json_encode($request['adjustment']);
-                    $tmp['accrual_rmb_adjustment'] = (float)array_sum($request['adjustment']) * $rate;
+                    $tmp['accrual_rmb_adjustment'] = round((float)array_sum($request['adjustment']) * $rate);
                     $tmp['accrual_type'] = json_encode($request['type']);
                     $tmp['accrual_remark'] = $request['remark'];
                     $tmp['accrual_user_name'] = \Auth::user()->alias;
@@ -391,7 +390,7 @@ class ReconciliationAuditController extends Controller
                     break;
                 case $source == Reconciliation::TREASURER:
                     $tmp['reconciliation_adjustment'] = json_encode($request['adjustment']);
-                    $tmp['reconciliation_rmb_adjustment'] = (float)array_sum($request['adjustment']) * $rate;
+                    $tmp['reconciliation_rmb_adjustment'] = round((float)array_sum($request['adjustment']) * $rate);
                     $tmp['reconciliation_type'] = json_encode($request['type']);
                     $tmp['reconciliation_remark'] = $request['remark'];
                     $tmp['reconciliation_user_name'] = \Auth::user()->alias;

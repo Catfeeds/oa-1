@@ -71,7 +71,7 @@ class ReconciliationExchangeRateController extends Controller
         $rate = ExchangeRate::getList($request->billing);
         try{
             foreach ($ret as $v){
-                $v->update(['backstage_water_rmb' => $v['backstage_water_other'] / $rate[$v['reconciliation_currency']]]);
+                $v->update(['backstage_water_rmb' => $v['backstage_water_other'] * $rate[$v['reconciliation_currency']]]);
             }
             return ['message' => '货币汇率转化成功！'];
         }catch (\Exception $e){
