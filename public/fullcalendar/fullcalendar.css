@@ -1291,3 +1291,59 @@ be a descendant of the grid when it is being dragged.
 .fc-unthemed .fc-list-empty {
   /* theme will provide own background */
   background-color: #eee; }
+
+/* 改造 */
+
+
+/*.fc-toolbar .fc-left{
+  position: absolute;
+  top: 0;
+  left: 0;
+  float: none;
+}*/
+
+/*.fc table > thead > tr > th div{
+  font-weight: bold;
+  color: #25992E;
+  font-size:14px;
+}*/
+
+.fc-sat span,.fc-sun div{
+  color: #ED6D23 !important;
+}
+
+.fc-ltr .fc-basic-view .fc-day-top .fc-day-number{
+  width: 100%;
+  text-align: right;
+  display: block;
+  font-size: 20px;
+  font-family: Arial;
+  font-weight: 600;
+  padding: 12px 12px 0 12px;
+  line-height: 23px;
+  height: 23px;
+  color: #555;
+}
+
+.fc-day-cnTerm{
+  text-align: right;
+  padding: 12px 12px 0 12px;
+  color: #d82121;
+  font-size: 12px;
+}
+
+.fc-day-cnDate{
+  text-align: right;
+  padding: 12px 12px 0 12px;
+  color: #999;
+  font-size: 12px;
+}
+
+.fc-event-container > a > .fc-content{
+  text-align: center;
+}
+
+.fc-today{
+  background-color: #f9dfd0;
+}
+

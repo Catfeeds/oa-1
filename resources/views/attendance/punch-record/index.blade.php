@@ -6,7 +6,7 @@
     @parent
     <div class="col-sm-8">
         <div class="title-action">
-            @if(Entrust::can(['attendance-all', 'daily-detail.all', 'daily-detail.review']))
+            @if(Entrust::can(['daily-detail.review.import']))
                 <a href="{{ route('daily-detail.review.import') }}" class="btn btn-primary btn-sm">{{ trans('导入打卡记录') }}</a>
                 <a href="{{ route('daily-detail.review.info') }}" class="btn btn-success btn-sm">{{ trans('返回') }}</a>
             @endif
@@ -45,13 +45,16 @@
                                     <td>{{ \App\Models\Attendance\PunchRecord::$status[$v['status']] ?? '未知状态' }}</td>
                                     <td>{{ $v['memo'] }}</td>
                                     <td>
-                                        @if(Entrust::can(['attendance-all', 'daily-detail.all', 'daily-detail.review']))
+                                        @if(Entrust::can(['daily-detail.review.create']))
                                             {!! BaseHtml::tooltip(trans('att.生成员工每日打卡信息'), route('daily-detail.review.import.generate', ['id' => $v['id']]), 'cog fa fa-newspaper-o') !!}
-                                            {!! BaseHtml::tooltip(trans('app.设置'), route('daily-detail.review.import.edit', ['id' => $v['id']]), 'cog fa fa-search') !!}
-                                            @if($v['status'] == 3)
-                                                {!! BaseHtml::tooltip(trans('att.查看生成日志'), route('daily-detail.review.import.generate.log', ['id' => $v['id']]), 'cog fa fa-info-circle') !!}
-                                            @endif
                                         @endif
+                                        @if(Entrust::can(['daily-detail.review.edit']))
+                                            {!! BaseHtml::tooltip(trans('app.设置'), route('daily-detail.review.import.edit', ['id' => $v['id']]), 'cog fa fa-search') !!}
+                                        @endif
+                                        @if(!empty($v['log_file']))
+                                            {!! BaseHtml::tooltip(trans('att.查看生成日志'), route('daily-detail.review.import.generate.log', ['id' => $v['id']]), 'cog fa fa-info-circle') !!}
+                                        @endif
+
                                     </td>
                                 </tr>
                             @endforeach

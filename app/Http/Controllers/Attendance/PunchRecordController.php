@@ -14,13 +14,14 @@ use App\Models\Attendance\DailyDetail;
 use App\Models\Attendance\PunchRecord;
 use App\Models\Sys\Calendar;
 use App\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 
 class PunchRecordController extends Controller
 {
     private $_validateRule = [
-        'memo' => 'unique:punch_record,memo|max:32',
+        'memo' => 'max:32',
     ];
 
     public function index()
@@ -53,7 +54,8 @@ class PunchRecordController extends Controller
         $data = [
             'memo' => $request->get('memo'),
             'name' => $request->file($file)->getClientOriginalName() ?? '',
-            'annex' => $filePath ?? ''
+            'annex' => $filePath ?? '',
+            'status' => 0,
         ];
 
         PunchRecord::create($data);
@@ -107,9 +109,12 @@ class PunchRecordController extends Controller
             flash('生成失败，未找到打卡记录文件!', 'danger');
             return redirect()->route('daily-detail.review.info');
         }
+        $isOK = true;
+       //事务开启
+        DB::beginTransaction();
         try {
             //reader读取excel内容
-            \Excel::load(storage_path($punchRecord->annex), function ($reader) use ($punchRecord) {
+            \Excel::load(storage_path($punchRecord->annex), function ($reader) use ($punchRecord, $isOK) {
 
                 $reader = $reader->getSheet(0);
                 $reader = $reader->toarray();
@@ -129,7 +134,30 @@ class PunchRecordController extends Controller
                     } elseif (count($v) <= 6 && (int)str_replace(':', '', $v[5]) <= 1400) {
                         $endTime = NULL;
                     }
+
                     $ts = str_replace('/', '-', $v[0]);
+                    //本地环境格式
+                    //list($year, $month, $day) = explode('-', $ts);
+
+                    //线上环境格式
+                    list($month, $day, $year) = explode('-', $ts);
+                    $year = '20'. $year;
+                    $day = (int)$day;
+                    $month = (int)$month;
+                    //线上环境end
+
+                    $calendar = Calendar::with('punchRules')
+                        ->where(['year' => $year, 'month' => $month, 'day' => $day])
+                        ->first();
+
+                    if (empty($calendar->punch_rules_id)) {
+                        $isOK = false;
+                        $msgArr[] = '未匹配到[' . $year . '-' . $month . '-' . $day . ']日期考勤规则设置,导入失败!';
+                        break;
+                    }
+                    //线上环境
+                    $ts = $year . '-' . $month . '-' . $day;
+                    //线上环境end
                     $row = [
                         'ts'         => $ts,
                         'alias'      => $v[3],
@@ -139,16 +167,15 @@ class PunchRecordController extends Controller
 
                     $data[$ts][] = $row;
                 }
+                if(!$isOK){
+                    //信息记录
+                    $strArr = '<?php return ' . var_export($msgArr, true) . ';';
+                    $logFile = storage_path('app/punch-record/' . date('Ymd', time()) . '/' . $punchRecord->id . '_punch_log.txt');
+                    file_put_contents($logFile, $strArr, LOCK_EX);
+                    throw new \Exception('信息错误');
+                }
 
                 foreach ($data as $dk => $dv) {
-                    list($year, $month, $day) = explode('-', $dk);
-                    $calendar = Calendar::with('punchRules')
-                        ->where(['year' => $year, 'month' => $month, 'day' => $day])
-                        ->first();
-                    if (empty($calendar->punch_rules_id)) {
-                        $msgArr[] = '未匹配到[' . $year . '-' . $month . '-' . $day . ']日期考勤规则设置,导入失败!';
-                        continue;
-                    }
 
                     $punchRuleStartTime = strtotime($dk . ' ' . $calendar->punchRules->work_start_time);
                     $punchRuleEndTime = strtotime($dk . ' ' . $calendar->punchRules->work_end_time);
@@ -216,12 +243,16 @@ class PunchRecordController extends Controller
                 $punchRecord->update(['log_file' => $logFile, 'status' => 3]);
 
             });
-        } catch (\Exception $e) {
+      } catch (\Exception $e) {
+            //事务回滚
+            DB::rollBack();
             $punchRecord->update(['status' => 2]);
-            flash('生成失败，打卡文件有误，无法解析!', 'danger');
+
+            flash('生成失败，生成文件有误，无法解析!', 'danger');
             return redirect()->route('daily-detail.review.import.info');
         }
-
+        //事务提交
+        DB::commit();
         flash(trans('att.生成成功员工每日打卡明细'), 'success');
         return redirect()->route('daily-detail.review.import.info');
     }
@@ -230,7 +261,7 @@ class PunchRecordController extends Controller
     {
         $punchRecord = PunchRecord::findOrFail($id);
 
-        if (empty($punchRecord->status) || $punchRecord->status != 3 || empty($punchRecord->log_file)) {
+        if (empty($punchRecord->status)|| empty($punchRecord->log_file)) {
 
             return redirect()->route('daily-detail.review.import.info');
         }

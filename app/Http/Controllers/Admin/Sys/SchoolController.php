@@ -23,9 +23,10 @@ class SchoolController extends Controller
 
     public function index()
     {
-        $data = School::paginate();
+        $form['school'] = \Request::get('school');
+        $data = School::where('school', 'LIKE', "%{$form['school']}%")->paginate();
         $title = trans('app.学校列表');
-        return view('admin.sys.school', compact('title', 'data'));
+        return view('admin.sys.school', compact('title', 'data', 'form'));
     }
 
     public function create()

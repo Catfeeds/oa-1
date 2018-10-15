@@ -38,7 +38,6 @@
                             {!! Form::text('memo', isset($punchRecord->memo) ? $punchRecord->memo: old('memo'), [
                             'class' => 'form-control',
                             'placeholder' => trans('app.请输入', ['value' => trans('att.打卡记录备注')]),
-                            'required' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('memo') }}</span>
                         </div>

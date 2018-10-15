@@ -23,9 +23,10 @@ class JobController extends Controller
 
     public function index()
     {
-        $data = Job::paginate();
+        $form['job'] = \Request::get('job');
+        $data = Job::where('job', 'LIKE', "%{$form['job']}%")->paginate();
         $title = trans('app.岗位列表');
-        return view('admin.sys.job', compact('title', 'data'));
+        return view('admin.sys.job', compact('title', 'data', 'form'));
     }
 
     public function create()

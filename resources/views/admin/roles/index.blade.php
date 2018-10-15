@@ -13,12 +13,12 @@
                         <div class="ibox-title">
                             <h5>{{ $title }}</h5>
 
-                            @if(Entrust::can(['role-all', 'role.create']))
-                            <div class="ibox-tools">
-                                <a class="btn btn-xs btn-primary" href="{{ route('role.create') }}">
-                                    {{ trans('app.添加', ['value' => trans('app.职务')]) }}
-                                </a>
-                            </div>
+                            @if(Entrust::can(['role.create']))
+                                <div class="ibox-tools">
+                                    <a class="btn btn-xs btn-primary" href="{{ route('role.create') }}">
+                                        {{ trans('app.添加', ['value' => trans('app.权限')]) }}
+                                    </a>
+                                </div>
                             @endif
 
                         </div>
@@ -30,7 +30,7 @@
                                 <table class="table table-hover table-striped tooltip-demo">
                                     <thead>
                                     <tr>
-                                        <th>{{ trans('app.职务') }}</th>
+                                        <th>{{ trans('app.权限') }}</th>
                                         <th>{{ trans('app.名称') }}</th>
                                         <th>{{ trans('app.备注') }}</th>
                                         <th>{{ trans('app.操作') }}</th>
@@ -43,11 +43,17 @@
                                         <td>{{ $v['name'] }}</td>
                                         <td>{{ $v['display_name'] }}</td>
                                         <td>{{ $v['description'] }}</td>
-                                        <td>{!!
-                                        BaseHtml::tooltip(trans('app.设置'), route('role.edit', ['id' => $v['id']]))
-                                        .
-                                        BaseHtml::tooltip('权限', route('role.appoint', ['id' => $v['id']]), 'paper-plane')
-                                        !!}
+                                        <td>
+                                            @if(Entrust::can(['role.edit']))
+                                                {!!
+                                                    BaseHtml::tooltip(trans('app.设置'), route('role.edit', ['id' => $v['id']]))
+                                                !!}
+                                            @endif
+                                            @if(Entrust::can(['role.appoint']))
+                                                {!!
+                                                    BaseHtml::tooltip('权限', route('role.appoint', ['id' => $v['id']]), 'paper-plane')
+                                                !!}
+                                            @endif
 
                                         </td>
                                     </tr>
