@@ -40,6 +40,15 @@ class HolidayConfig extends Model
     const YEAR_RESET = 1;
     const MONTH_RESET = 2;
 
+    const RELIEF_GO_WORK = 1;
+    const RELIEF_OFF_WORK = 2;
+
+    const CYPHER_UNPAID = 1;
+    const CYPHER_PAID = 2;
+    const CYPHER_CHANGE = 3;
+    const CYPHER_OVERTIME = 4;
+    const CYPHER_RECHECK = 5;
+
     public static $applyType = [
         self::LEAVEID => '请假',
         self::CHANGE => '加班调休',
@@ -52,7 +61,7 @@ class HolidayConfig extends Model
         self::RECHECK => 'recheck',
     ];
 
-    public static $isBoon = [
+    public static $isShow = [
         self::STATUS_DISABLE => '否',
         self::STATUS_ENABLE => '是',
 
@@ -64,9 +73,14 @@ class HolidayConfig extends Model
     ];
 
     public static $punchType = [
-        self::NO_SETTING => '不设置',
         self::GO_WORK => '上班补卡',
         self::OFF_WORK => '下班补卡'
+    ];
+
+    public static $reliefType = [
+        self::NO_SETTING => '不设置',
+        self::RELIEF_GO_WORK => '上班',
+        self::RELIEF_OFF_WORK => '下班'
     ];
 
     public static $changeType = [
@@ -76,20 +90,46 @@ class HolidayConfig extends Model
         self::WORK_CHANGE => '调休'
     ];
 
+    public static $cypherType = [
+        self::CYPHER_UNPAID => '无薪假',
+        self::CYPHER_PAID => '带薪假',
+        self::CYPHER_CHANGE => '调休假',
+        self::CYPHER_OVERTIME => '加班',
+        self::CYPHER_RECHECK => '打卡',
+    ];
+
     protected $fillable = [
         'holiday',
         'change_type',
         'apply_type_id',
         'memo',
-        'is_boon',
         'is_full',
         'sort',
         'is_annex',
         'condition_id',
         'restrict_sex',
         'punch_type',
-        'change_type',
+        'show_name',
+        'cypher_type',
+        'work_relief_formula',
+        'work_relief_type',
+        'work_relief_cycle_num',
+        'add_pop',
+        'up_day',
+        'under_day',
+        'cycle_num',
+        'payable',
+        'payable_reset_formula',
+        'payable_claim_formula',
+        'payable_self_growth',
+        'exceed_change_id',
+        'is_show',
+        'is_before_after',
+
+
         'num',
+        'is_boon',
+        'change_type',
     ];
 
     public static function getHolidayList()
