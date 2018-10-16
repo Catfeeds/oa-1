@@ -211,7 +211,7 @@ class ReconciliationAuditController extends Controller
                     $tmp2['backstage_water_rmb'] = $v['backstage_water_rmb'];
                     $tmp2['operation_adjustment'] = $v['operation_adjustment'];
                     $tmp2['operation_rmb_adjustment'] = is_numeric($v['operation_rmb_adjustment']) ? $v['operation_rmb_adjustment'] : array_sum(json_decode($v['operation_rmb_adjustment']));
-                    $tmp2['operation_type'] = is_numeric($v['operation_type']) ? ($diff[$v['operation_type']] ?? '--') : sprintf('<a class="eye" data-url="%s">%s</a>', route('reconciliationAudit.detail', ['id' => $v['id'], 'source' => Reconciliation::OPERATION]), $diff[$this->pop($v['operation_type'])]);
+                    $tmp2['operation_type'] = is_numeric($v['operation_type']) ? ($diff[$v['operation_type']] ?? '--') : sprintf('<a class="eye" data-url="%s">%s</a>', route('reconciliationAudit.detail', ['id' => $v['id'], 'source' => Reconciliation::OPERATION]), $diff[$this->pop($v['operation_type'])] ?? '--');
                     $tmp2['operation_remark'] = $v['operation_remark'];
                     $tmp2['operation_user_name'] = $v['operation_user_name'];
                     $tmp2['operation_time'] = $v['operation_time'];
@@ -228,7 +228,7 @@ class ReconciliationAuditController extends Controller
                     $tmp2['operation_water_rmb'] = $v['operation_water_rmb'];
                     $tmp2['accrual_adjustment'] = is_numeric($v['accrual_adjustment']) ? $v['accrual_adjustment'] : array_sum(json_decode($v['accrual_adjustment']));
                     $tmp2['accrual_rmb_adjustment'] = $v['accrual_rmb_adjustment'];
-                    $tmp2['accrual_type'] = is_numeric($v['accrual_type']) ? ($diff[$v['accrual_type']] ?? '--') : sprintf('<a class="eye" data-url="%s">%s</a>', route('reconciliationAudit.detail', ['id' => $v['id'], 'source' => Reconciliation::ACCRUAL]), $diff[$this->pop($v['accrual_type'])]);
+                    $tmp2['accrual_type'] = is_numeric($v['accrual_type']) ? ($diff[$v['accrual_type']] ?? '--') : sprintf('<a class="eye" data-url="%s">%s</a>', route('reconciliationAudit.detail', ['id' => $v['id'], 'source' => Reconciliation::ACCRUAL]), $diff[$this->pop($v['accrual_type'])] ?? '--');
                     $tmp2['accrual_remark'] = $v['accrual_remark'];
                     $tmp2['accrual_user_name'] = $v['accrual_user_name'];
                     $tmp2['accrual_time'] = $v['accrual_time'];
@@ -256,7 +256,7 @@ class ReconciliationAuditController extends Controller
                     $tmp2['accrual_divide_rmb'] = $v['accrual_divide_rmb'];
                     $tmp2['reconciliation_adjustment'] = is_numeric($v['reconciliation_adjustment']) ? $v['reconciliation_adjustment'] : array_sum(json_decode($v['reconciliation_adjustment']));
                     $tmp2['reconciliation_rmb_adjustment'] = $v['reconciliation_rmb_adjustment'];
-                    $tmp2['reconciliation_type'] = is_numeric($v['reconciliation_adjustment']) ? ($diff[$v['reconciliation_type']] ?? '--') : sprintf('<a class="eye" data-url="%s">%s</a>', route('reconciliationAudit.detail', ['id' => $v['id'], 'source' => Reconciliation::RECONCILIATION]), $diff[$this->pop($v['reconciliation_type'])]);
+                    $tmp2['reconciliation_type'] = is_numeric($v['reconciliation_adjustment']) ? ($diff[$v['reconciliation_type']] ?? '--') : sprintf('<a class="eye" data-url="%s">%s</a>', route('reconciliationAudit.detail', ['id' => $v['id'], 'source' => Reconciliation::RECONCILIATION]), $diff[$this->pop($v['reconciliation_type'])] ?? '--');
                     $tmp2['reconciliation_remark'] = $v['reconciliation_remark'];
                     $tmp2['reconciliation_user_name'] = $v['reconciliation_user_name'];
                     $tmp2['reconciliation_time'] = $v['reconciliation_time'];
@@ -277,7 +277,7 @@ class ReconciliationAuditController extends Controller
                     $tmp2['backstage_divide_rmb'] = CrmHelper::dividedInto($v['channel_rate'], $v['first_division'], $v['second_division'], $v['second_division_condition'], $v['backstage_water_rmb']);
                     $tmp2['operation_adjustment'] = is_numeric($v['operation_rmb_adjustment']) ? $v['operation_rmb_adjustment'] : array_sum(json_decode($v['operation_rmb_adjustment']));
                     $tmp2['operation_rmb_adjustment'] = $v['operation_rmb_adjustment'];
-                    $tmp2['operation_type'] = is_numeric($v['operation_type']) ? ($diff[$v['operation_type']] ?? '--') : sprintf('<a class="eye" data-url="%s">%s</a>', route('reconciliationAudit.detail', ['id' => $v['id'], 'source' => Reconciliation::OPERATION]), $diff[$this->pop($v['operation_type'])]);
+                    $tmp2['operation_type'] = is_numeric($v['operation_type']) ? ($diff[$v['operation_type']] ?? '--') : sprintf('<a class="eye" data-url="%s">%s</a>', route('reconciliationAudit.detail', ['id' => $v['id'], 'source' => Reconciliation::OPERATION]), $diff[$this->pop($v['operation_type'])] ?? '--');
                     $tmp2['operation_remark'] = $v['operation_remark'];
                     $tmp2['operation_user_name'] = $v['operation_user_name'];
                     $tmp2['operation_time'] = $v['operation_time'];
@@ -287,7 +287,7 @@ class ReconciliationAuditController extends Controller
                     $tmp2['operation_divide_rmb'] = $v['operation_divide_rmb'];
                     $tmp2['accrual_adjustment'] = is_numeric($v['accrual_adjustment']) ? $v['accrual_adjustment'] : array_sum(json_decode($v['accrual_adjustment']));
                     $tmp2['accrual_rmb_adjustment'] = $v['accrual_rmb_adjustment'];
-                    $tmp2['accrual_type'] = is_numeric($v['accrual_type']) ? ($diff[$v['accrual_type']] ?? '--') : sprintf('<a class="eye" data-url="%s">%s</a>', route('reconciliationAudit.detail', ['id' => $v['id'], 'source' => Reconciliation::ACCRUAL]), $diff[$this->pop($v['accrual_type'])]);
+                    $tmp2['accrual_type'] = is_numeric($v['accrual_type']) ? ($diff[$v['accrual_type']] ?? '--') : sprintf('<a class="eye" data-url="%s">%s</a>', route('reconciliationAudit.detail', ['id' => $v['id'], 'source' => Reconciliation::ACCRUAL]), $diff[$this->pop($v['accrual_type']) ?? '--']);
                     $tmp2['accrual_remark'] = $v['accrual_remark'];
                     $tmp2['accrual_user_name'] = $v['accrual_user_name'];
                     $tmp2['accrual_time'] = $v['accrual_time'];
@@ -297,7 +297,7 @@ class ReconciliationAuditController extends Controller
                     $tmp2['accrual_divide_rmb'] = $v['accrual_divide_rmb'];
                     $tmp2['reconciliation_adjustment'] = is_numeric($v['reconciliation_adjustment']) ? $v['reconciliation_adjustment'] : array_sum(json_decode($v['reconciliation_adjustment']));
                     $tmp2['reconciliation_rmb_adjustment'] = $v['reconciliation_rmb_adjustment'];
-                    $tmp2['reconciliation_type'] = is_numeric($v['reconciliation_adjustment']) ? ($diff[$v['reconciliation_type']] ?? '--') : sprintf('<a class="eye" data-url="%s">%s</a>', route('reconciliationAudit.detail', ['id' => $v['id'], 'source' => Reconciliation::RECONCILIATION]), $diff[$this->pop($v['reconciliation_type'])]);
+                    $tmp2['reconciliation_type'] = is_numeric($v['reconciliation_adjustment']) ? ($diff[$v['reconciliation_type']] ?? '--') : sprintf('<a class="eye" data-url="%s">%s</a>', route('reconciliationAudit.detail', ['id' => $v['id'], 'source' => Reconciliation::RECONCILIATION]), $diff[$this->pop($v['reconciliation_type']) ?? '--']);
                     $tmp2['reconciliation_remark'] = $v['reconciliation_remark'];
                     $tmp2['reconciliation_user_name'] = $v['reconciliation_user_name'];
                     $tmp2['reconciliation_time'] = $v['reconciliation_time'];
@@ -359,14 +359,14 @@ class ReconciliationAuditController extends Controller
     public function transformName($source, $data, $request, $time, $rate)
     {
         if (empty($request['adjustment'])) {
-            $request['adjustment'] = 0;
-            $request['type'] = 0;
+            $request['adjustment'] = [0];
+            $request['type'] = [0];
         }
         if ($time) {
             switch ($source) {
                 case $source == Reconciliation::UNRD:
                     $tmp['operation_adjustment'] = json_encode($request['adjustment']);
-                    $tmp['operation_rmb_adjustment'] = (float)array_sum($request['adjustment']) * $rate;
+                    $tmp['operation_rmb_adjustment'] = round((float)array_sum($request['adjustment']) * $rate, 2);
                     $tmp['operation_type'] = json_encode($request['type']);
                     $tmp['operation_remark'] = $request['remark'];
                     $tmp['operation_user_name'] = \Auth::user()->alias;
@@ -378,7 +378,7 @@ class ReconciliationAuditController extends Controller
                     break;
                 case $source == Reconciliation::OPD:
                     $tmp['accrual_adjustment'] = json_encode($request['adjustment']);
-                    $tmp['accrual_rmb_adjustment'] = (float)array_sum($request['adjustment']) * $rate;
+                    $tmp['accrual_rmb_adjustment'] = round((float)array_sum($request['adjustment']) * $rate, 2);
                     $tmp['accrual_type'] = json_encode($request['type']);
                     $tmp['accrual_remark'] = $request['remark'];
                     $tmp['accrual_user_name'] = \Auth::user()->alias;
@@ -390,7 +390,7 @@ class ReconciliationAuditController extends Controller
                     break;
                 case $source == Reconciliation::TREASURER:
                     $tmp['reconciliation_adjustment'] = json_encode($request['adjustment']);
-                    $tmp['reconciliation_rmb_adjustment'] = (float)array_sum($request['adjustment']) * $rate;
+                    $tmp['reconciliation_rmb_adjustment'] = round((float)array_sum($request['adjustment']) * $rate, 2);
                     $tmp['reconciliation_type'] = json_encode($request['type']);
                     $tmp['reconciliation_remark'] = $request['remark'];
                     $tmp['reconciliation_user_name'] = \Auth::user()->alias;
