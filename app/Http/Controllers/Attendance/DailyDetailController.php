@@ -31,15 +31,14 @@ class DailyDetailController extends AttController
 
     public function index()
     {
-        $data = DailyDetail::where('user_id', Auth::user()->user_id)
-            ->orderBy('day', 'desc')->paginate(30);
-        $userInfo['username'] = \Auth::user()->username;
-        $userInfo['alias'] = \Auth::user()->alias;
-
         $monthInfo = $this->getMonthAttendance(\Auth::user()->user_id);
         if ($this->review->errorRedirect($monthInfo)) return redirect()->route('holiday-config');
 
         $scope = $this->scope;
+        $data = DailyDetail::where([['user_id', '=', Auth::user()->user_id], [\DB::raw('month(day)'), '=', date('m', strtotime($scope->startDate))]])
+            ->orderBy('day', 'desc')->paginate(30);
+        $userInfo['username'] = \Auth::user()->username;
+        $userInfo['alias'] = \Auth::user()->alias;
         $title = trans('att.我的每日考勤详情');
         return view('attendance.daily-detail.index', compact('title', 'data', 'scope', 'userInfo', 'monthInfo', 'scope'));
     }

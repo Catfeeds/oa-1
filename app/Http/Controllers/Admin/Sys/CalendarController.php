@@ -32,10 +32,23 @@ class CalendarController extends AttController
 
     public function index()
     {
-        $data = Calendar::orderByRaw('year desc, month desc, day desc')->paginate(31);
+        //$data = Calendar::orderByRaw('year desc, month desc, day desc')->paginate(31);
         $title = trans('app.日历表');
         $scope = $this->scope;
-        return view('admin.sys.calendar', compact('title', 'data', 'scope'));
+        $startMonth = date('m', strtotime($scope->startDate));
+        $endMonth = date('m', strtotime($scope->endDate));
+        return view('admin.sys.calendar', compact('title', 'data', 'scope', 'startMonth', 'endMonth'));
+    }
+
+    public function list(Request $request)
+    {
+        $title = trans('app.日历表');
+        $scope = $this->scope;
+        $startMonth = date('m', strtotime($scope->startDate));
+        $endMonth = date('m', strtotime($scope->endDate));
+        $year = date('Y', strtotime($scope->startDate));
+        $data = Calendar::where([['year', '=', $year], ['month', '<=', $endMonth], ['month', '>=', $startMonth]])->get();
+        return view('admin.sys.calendar-list', compact('title', 'data', 'scope', 'startMonth', 'endMonth'));
     }
 
     public function create()
@@ -68,9 +81,13 @@ class CalendarController extends AttController
 
         $this->validate($request, $this->_validateRule);
 
-        $calendar->update($request->all());
+        $calendar->update($request->except('back'));
 
         flash(trans('app.编辑成功', ['value' => trans('app.日历表')]), 'success');
+
+        if ($request->input('back') !== 0) {
+            return redirect(urldecode($request->input('back')));
+        }
         return redirect($this->redirectTo);
     }
 
@@ -83,13 +100,25 @@ class CalendarController extends AttController
 
         collect($selectDates)->flatten()->Map(function ($date) use ($punch_rules_id) {
             $arrDate = explode('-', $date);
-            Calendar::firstOrCreate(
-                [
+            $cal = Calendar::where([
+                'year'  => $arrDate[0],
+                'month' => $arrDate[1],
+                'day'   => $arrDate[2],
+                'week'  => date('N', strtotime($date))
+            ])->first();
+
+            if (isset($cal)) {
+                $cal->punch_rules_id = $punch_rules_id;
+                $cal->save();
+            }else {
+                Calendar::create([
                     'year'  => $arrDate[0],
                     'month' => $arrDate[1],
                     'day'   => $arrDate[2],
                     'week'  => date('N', strtotime($date)),
-                ], ['punch_rules_id' => $punch_rules_id]);
+                    'punch_rules_id' => $punch_rules_id
+                ]);
+            }
         });
 
         return redirect()->back();

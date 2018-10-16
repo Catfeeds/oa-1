@@ -84,9 +84,17 @@
                     }
                 });
             },
-            eventClick: function (event, jsEvent, view) {
+            eventClick: function (event) {
                 /*alert(event.data_id);*/
-                $(location).attr('href', '{{ url('admin/sys/calendar/edit') }}' + '/' + event.data_id);
+                $(location).attr('href', '{{ url('admin/sys/calendar/edit') }}' + '/' + event.data_id +
+                    '{{ '?back='.urlencode(request()->fullUrl()) }}');
+            },
+            eventMouseover: function () {
+                $(this).attr('color_', $(this).css('background-color'));
+                $(this).css('background-color', '#636567');
+            },
+            eventMouseout: function () {
+                $(this).css('background-color', $(this).attr('color_'));
             },
             eventRender: function (event, element) {
                 element.attr('id', event.id).popover({

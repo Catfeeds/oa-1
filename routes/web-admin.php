@@ -207,6 +207,10 @@ Route::group([
         'middleware' => ['permission:punch-rules-all|calendar'],
         'uses' => 'Sys\CalendarController@storeAllMonth'])->name('calendar.storeMonth');
 
+    Route::get('sys/calendar/show-list', [
+        'middleware' => ['permission:calendar'],
+        'uses' => 'Sys\CalendarController@list'])->name('calendar.list');
+
     # 公司配置
     Route::get('sys/firm', [
         'middleware' => ['permission:firm'],

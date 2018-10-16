@@ -102,7 +102,9 @@
 
                                     <div class="form-group">
                                         <div class="col-sm-6 col-sm-offset-3">
+                                            {!! Form::hidden('back', request()->input('back') ?? 0) !!}
                                             {!! Form::submit(trans('app.提交'), ['class' => 'btn btn-primary']) !!}
+                                            <a class="btn btn-danger" onclick="history.back(-1);"> 返回</a>
                                         </div>
                                     </div>
                                     {!! Form::close() !!}
