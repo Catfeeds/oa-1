@@ -11,6 +11,7 @@ namespace App\Http\Controllers\Attendance;
 use App\Components\Helper\DataHelper;
 use App\Http\Components\Helpers\AttendanceHelper;
 use App\Http\Components\Helpers\OperateLogHelper;
+use App\Http\Components\Helpers\ReviewHelper;
 use App\Http\Components\ScopeAtt\DailyScope;
 use App\Http\Components\ScopeAtt\LeaveScope;
 use App\Http\Controllers\Controller;
@@ -32,8 +33,12 @@ use Illuminate\Support\Facades\Redis;
 class ReviewController extends AttController
 {
     protected $scopeClass = DailyScope::class;
-    public $yearName = '年假';
-    public $visitName = '探亲假';
+    public $reviewHelper;
+
+    public function __construct(ReviewHelper $reviewHelper)
+    {
+        $this->reviewHelper = $reviewHelper;
+    }
 
     public function index()
     {
@@ -41,16 +46,23 @@ class ReviewController extends AttController
         $scope->block = 'attendance.leave.monthscope';
 
         $monthInfo = $this->dealAttendance($scope);
-        if ($this->errorRedirect($monthInfo)) return redirect()->route('holiday-config');
+        if ($this->reviewHelper->errorRedirect($monthInfo)) return redirect()->route('holiday-config');
 
         $title = trans('att.考勤管理');
         return view('attendance.daily-detail.review', compact('title', 'monthInfo', 'scope'));
     }
 
+    /**
+     * 返回查询后的信息
+     * ['success', 数据的数组]或['error', '错误信息']
+     * @param $scope
+     * @param bool $cache
+     * @return array
+     */
     public function dealAttendance($scope, $cache = true)
     {
         //判断配置,返回错误信息
-        list($message, $yearHolObj, $visitHolObj, $changeHolObj) = $this->ifConfig();
+        list($message, $yearHolObj, $visitHolObj, $changeHolObj) = $this->reviewHelper->ifConfig();
         if (!empty($message)) {
             return ['error', $message];
         }
@@ -111,19 +123,11 @@ class ReviewController extends AttController
             $actuallyCome = ($punch[$user->user_id] ?? 0) + ($remain[$user->user_id] ?? 0) + $overDays;
 
             //判断全勤
-            $isFullWork = $this->ifPresentAllDay($shouldCome, $actuallyCome, $affectFull, $user, $beLateNum);
+            $isFullWork = $this->reviewHelper->ifPresentAllDay($shouldCome, $actuallyCome, $affectFull, $user, $beLateNum);
 
-            //剩余年假
-            $remainYear = AttendanceHelper::getUserYearHoliday($user->userExt->entry_time, $user->user_id,
-                $yearHolObj);
-
-            //剩余节日调休假
-            $arr = AttendanceHelper::getUserChangeHoliday($user->user_id, $changeHolObj);
-            $remainChange = $arr['change_work_day'] - $arr['change_use_day'];
-
-            //剩余探亲假
-            $remainVisit = AttendanceHelper::getUserYearHoliday($user->userExt->entry_time, $user->user_id,
-                $visitHolObj);
+            $remainWelfare = $this->reviewHelper->countWelfare($user, [
+                'year' => $yearHolObj, 'change' => $changeHolObj, 'visit' => $visitHolObj
+            ]);
 
             $info["$user->user_id"] = [
                 'date'                => "$year-$month",
@@ -141,9 +145,9 @@ class ReviewController extends AttController
                 'late_num'            => $beLateNum[$user->user_id] ?? 0,
                 'other'               => '--',
                 'deduct_num'          => $deductNum[$user->user_id] ?? 0,
-                'remain_year_holiday' => $remainYear,
-                'remain_change'       => $remainChange,
-                'remain_visit'        => $remainVisit,
+                'remain_year_holiday' => $remainWelfare['year'],
+                'remain_change'       => $remainWelfare['change'],
+                'remain_visit'        => $remainWelfare['visit'],
                 'send'                => $confirmStates[$user->user_id] ?? 0,
             ];
         }
@@ -152,15 +156,6 @@ class ReviewController extends AttController
             Redis::setex("att-$year-$month", 100, serialize($info));
         }*/
         return ['success', $info];
-    }
-
-    //是否全勤:应到天数等于实到 无影响全勤 迟到分钟数合计为0
-    public function ifPresentAllDay($shouldCome, $actuallyCome, $affectFull, $user, $beLateNum)
-    {
-        $isFullWork = ($shouldCome <= $actuallyCome &&
-            !isset($affectFull[$user->user_id]) &&
-            ($beLateNum[$user->user_id] ?? '') === '0') ? '是' : '否';
-        return $isFullWork;
     }
 
     //点击发送时的处理
@@ -192,28 +187,6 @@ class ReviewController extends AttController
     }
 
     /**
-     * @return array
-     */
-    public function ifConfig(): array
-    {
-        $message = [];
-        if (!$yearHolObj = HolidayConfig::getObjByName($this->yearName)) {
-            $message['年假'] = ['message' => "请添加或修改假期配置名称成: '$this->yearName'后再进行", 'sign' => 'danger'];
-        }
-        if (!$visitHolObj = HolidayConfig::getObjByName($this->visitName)) {
-            $message['探亲'] = ['message' => "请添加或修改假期配置名称成: '$this->visitName'后再进行", 'sign' => 'danger'];
-        }
-        if (!HolidayConfig::where(['change_type' => HolidayConfig::WEEK_WORK])->first()) {
-            $message['节假加班'] = ['message' => '请配置或修改"节假日加班",并勾选节假日加班选项', 'sign' => 'danger'];
-        }
-        if (!$changeHolObj = HolidayConfig::where(['change_type' => HolidayConfig::WORK_CHANGE])->first()) {
-            $message['调休'] = ['message' => '请配置或修改"调休假",并勾选调休选项', 'sign' => 'danger'];
-            return [$message, $yearHolObj, $visitHolObj, $changeHolObj];
-        }
-        return [$message, $yearHolObj, $visitHolObj, $changeHolObj];
-    }
-
-    /**
      * @param $year
      * @param $month
      * @param $cache `为true:取全部用户缓存;为id:取单个用户缓存
@@ -241,22 +214,6 @@ class ReviewController extends AttController
                 return ['success', [$info[$cache]]];
             }
         }
-    }
-
-    /**
-     * 有权限则跳转到假期配置页,没有则在页面判断,显示联系管理员
-     * @param $monthInfo
-     * @return bool
-     */
-    public function errorRedirect($monthInfo)
-    {
-        if ($monthInfo[0] == 'error' && \Entrust::can(['holiday-config', 'holiday-config-all'])) {
-            foreach ($monthInfo[1] as $message) {
-                flash($message['message'], $message['sign']);
-            }
-            return true;
-        }
-        return false;
     }
 
     //明细

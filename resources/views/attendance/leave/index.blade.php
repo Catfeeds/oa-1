@@ -1,5 +1,26 @@
 @extends('attendance.side-nav')
 
+@push('css')
+<style type="text/css">
+    .pre-scrollable {
+        max-height: 650px;
+        overflow-y: scroll;
+    }
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+    /* Track */
+    ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    /* Handle */
+    ::-webkit-scrollbar-thumb {
+        background: #888;
+    }
+</style>
+@endpush
+
 @section('title', $title)
 
 @section('page-head')
@@ -46,7 +67,13 @@
                     <h5>{{ $title }}</h5>
                 </div>
                 <div class="ibox-content">
-                    <div class="table-responsive">
+                    <div class="col-md-2 list-group">
+                        <div class="list-group-item"><h4 class="list-group-item-heading">剩余可申请的福利假</h4></div>
+                        <p class="list-group-item">剩余年假: {{ $remainWelfare['year'] ?? '尚未配置该福利假' }}</p>
+                        <p class="list-group-item">剩余节假日调休: {{ $remainWelfare['change'] ?? '尚未配置该福利假' }}</p>
+                        <p class="list-group-item">剩余探亲假: {{ $remainWelfare['visit'] ?? '尚未配置该福利假' }}</p>
+                    </div>
+                    <div class="table-responsive pre-scrollable"{{-- style="padding-left: 10px; border-left: 1px solid #e7eaec;"--}}>
                         <table class="table table-striped table-striped tooltip-demo">
                             <thead>
                             <tr>

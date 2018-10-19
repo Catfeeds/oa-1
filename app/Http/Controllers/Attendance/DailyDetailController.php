@@ -32,7 +32,7 @@ class DailyDetailController extends AttController
     public function index()
     {
         $monthInfo = $this->getMonthAttendance(\Auth::user()->user_id);
-        if ($this->review->errorRedirect($monthInfo)) return redirect()->route('holiday-config');
+        if ($this->review->reviewHelper->errorRedirect($monthInfo)) return redirect()->route('holiday-config');
 
         $scope = $this->scope;
         $data = DailyDetail::where([['user_id', '=', Auth::user()->user_id], [\DB::raw('month(day)'), '=', date('m', strtotime($scope->startDate))]])

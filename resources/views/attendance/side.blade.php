@@ -30,10 +30,16 @@
 @endif
 
 @if(Entrust::can(['staff*', 'entry*']))
-    <li @if (Route::is(['staff*', 'entry*'])) class="active" @endif >
+    <li @if (Route::is(['staff*', 'entry*', 'manage*'])) class="active" @endif >
         <a href="#"><i class="fa fa-newspaper-o"></i> <span class="nav-label">{{ trans('staff.员工管理') }}</span><span
                     class="fa arrow"></span></a>
         <ul class="nav nav-second-level">
+            @if(Entrust::can(['staff*']))
+                <li @if (Route::is(['manage.index']) ) class="active" @endif>
+                    <a href="{{ route('manage.index') }}">{{ trans('staff.员工工作台') }}</a>
+                </li>
+            @endif
+
             @if(Entrust::can(['staff*']))
                 <li @if (Route::is(['staff*']) ) class="active" @endif>
                     <a href="{{ route('staff.list') }}">{{ trans('staff.员工列表') }}</a>

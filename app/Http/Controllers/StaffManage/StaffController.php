@@ -146,4 +146,10 @@ class StaffController extends AttController
         })->export('xls');
     }
 
+    public function staffManageIndex()
+    {
+        $title = '员工工作台';
+        return view('staff-manage.index', compact('title'));
+    }
+
 }
