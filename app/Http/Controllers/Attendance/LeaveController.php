@@ -11,6 +11,7 @@ namespace App\Http\Controllers\Attendance;
 
 use App\Http\Components\Helpers\AttendanceHelper;
 use App\Http\Components\Helpers\OperateLogHelper;
+use App\Http\Components\Helpers\ReviewHelper;
 use App\Http\Components\ScopeAtt\LeaveScope;
 use App\Models\Attendance\DailyDetail;
 use App\Models\Attendance\Leave;
@@ -25,6 +26,12 @@ use Illuminate\Http\Request;
 class LeaveController extends AttController
 {
     protected $scopeClass = LeaveScope::class;
+    public $reviewHelper;
+
+    public function __construct(ReviewHelper $reviewHelper)
+    {
+        $this->reviewHelper = $reviewHelper;
+    }
 
     public function index()
     {
@@ -54,8 +61,15 @@ class LeaveController extends AttController
             ->orderBy('created_at', 'desc')
             ->paginate(30);
 
+        list($message, $yearHolObj, $visitHolObj, $changeHolObj) = $this->reviewHelper->ifConfig();
+        $remainWelfare = $this->reviewHelper->countWelfare(\Auth::user(), [
+            'year' => $yearHolObj ?? NULL,
+            'change' => $changeHolObj ?? NULL,
+            'visit' => $visitHolObj ?? NULL,
+        ]);
+
         $title = trans('att.我的假期详情');
-        return view('attendance.leave.index', compact('title', 'data', 'scope', 'holidayList', 'userIds', 'types', 'type'));
+        return view('attendance.leave.index', compact('title', 'data', 'scope', 'holidayList', 'userIds', 'types', 'type', 'remainWelfare'));
     }
 
     public function create($applyTypeId)

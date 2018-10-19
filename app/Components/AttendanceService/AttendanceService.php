@@ -19,10 +19,10 @@ class AttendanceService
      * @param string $driver 驱动类型
      * @return // Operate\Leave
      */
-    public function driver(string $driver)
+    public function driver(string $driver, $file = 'operate')
     {
         //获取游戏后端语言，目前只支持erl，后期考虑动态支持其他语言
-        $lang = ucfirst(strtolower('operate'));
+        $lang = ucfirst(strtolower($file));
         $driver = ucfirst(strtolower($driver));
 
         $className = __NAMESPACE__ . "\\" . $lang . "\\" . $driver;

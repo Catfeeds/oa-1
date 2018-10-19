@@ -17,14 +17,22 @@
                     <div class="form-group @if (!empty($errors->first('holiday_id'))) has-error @endif">
                         {!! Form::label('holiday_id', trans('att.请假类型'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-2">
-                            <select class="js-select2-single form-control" name="holiday_id" >
+                            <select onchange="func()" class="js-select2-single form-control" id="holiday_id" name="holiday_id" >
+                                <option value="">请选择</option>
                                 @foreach($holidayList as $k => $v)
                                     <option value="{{ $k }}" @if($k === (int)old('holiday_id')) selected="selected" @endif>{{ $v }}</option>
                                 @endforeach
                             </select>
                             <span class="help-block m-b-none">{{ $errors->first('holiday_id') }}</span>
                         </div>
+                        <div class="col-sm-2">
+                            <span id="show_memo" style="display: none"  style="color: red" class="help-block m-b-none">
+                                <p style="color: red" id="show_p"></p>
+                                <pre id="show_pre"></pre>
+                            </span>
+                        </div>
                     </div>
+
 
                     <div class="hr-line-dashed"></div>
 
@@ -159,5 +167,28 @@
                 readURL(this, '#show_mobile_header_image');
             });
         });
+
+
+        function func(){
+
+            var val = $('#holiday_id').children('option:selected').val();
+            if(val != "") {
+                $('#show_pre').html('');
+                $.get('{{ route('leave.showMemo')}}', {id: val}, function ($data) {
+                    if ($data.status == 1) {
+                        $('#show_pre').html($data.memo);
+                        $('#show_p').html($data.day);
+                        $('#show_memo').show();
+
+                    } else {
+                        bootbox.alert($data.msg);
+                    }
+                })
+            } else {
+                $('#show_pre').html('');
+                $('#show_memo').hide();
+            }
+
+        }
     </script>
 @endsection

@@ -386,7 +386,7 @@ class AttendanceHelper
     {
         $useExt = \Auth::user()->UserExt;
 
-        switch($holiday->condition_id) {
+/*        switch($holiday->condition_id) {
             //申请单为年周期类型判断
             case HolidayConfig::YEAR_RESET:
                 //判断入职时间是否满一年
@@ -416,7 +416,8 @@ class AttendanceHelper
             default :
                 return self::backUserHolidayInfo(true);
                 break;
-        }
+        }*/
+
     }
 
     /**
@@ -501,15 +502,57 @@ class AttendanceHelper
         return empty($userChangeLog->number_day) ? 0 :  $userChangeLog->number_day;
     }
 
+    /**
+     * 解析 申请配置公式格式
+     * @param string $formula 公式格式 [0,0,0,0,0,0] | [年,月,日,时,分,秒]
+     */
+    public static function resolveConfigFormula($formula)
+    {
+        $format = json_decode($formula, true);
 
-    /** 获取员工 年假类型 记录信息
+        $date = [];
+        foreach ($format as $k => $v) {
+            if(empty($v)) continue;
+            switch ($k) {
+                case 0 :
+                    $date['y'] = $v . 'year';
+                    break;
+                case 1 :
+                    $date['m'] = $v . 'month';
+                    break;
+                case 2 :
+                    $date['d'] = $v . 'day';
+                    break;
+                case 3 :
+                    $date['h'] = $v . 'hour';
+                    break;
+                case 4 :
+                    $date['i'] = $v . 'minute';
+                    break;
+                case 5 :
+                    $date['m'] = $v . 'second';
+                    break;
+            }
+        }
+
+        return $date;
+    }
+
+    public static function checkPayableClaim($date, $entryTime)
+    {
+
+
+    }
+
+    /** 获取员工带薪假期
      * @param $entryTime
      * @param $userId
      * @param $holiday
      * @return mixed 返回天数
      */
-    public static function getUserYearHoliday($entryTime, $userId, $holiday)
+    public static function getUserPayableDayToEntryTime($userId, $holiday)
     {
+
         //入职未满一年，年假周期类型 天数为0
         if(empty($entryTime) || strtotime($entryTime) + 31536000 > time()) return 0;
         //默认为上一年的入职月份的开始时间
@@ -598,7 +641,6 @@ class AttendanceHelper
     public static function showLeaveIds($leaveIds)
     {
         if(empty($leaveIds) || !json_decode($leaveIds)) return '--';
-
 
         $show = '';
         $idList = Leave::getHolidayIdList();

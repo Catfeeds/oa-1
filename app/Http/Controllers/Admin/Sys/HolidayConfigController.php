@@ -23,7 +23,13 @@ class HolidayConfigController extends Controller
     private $_validateRule = [
         'holiday' => 'required|unique:users_holiday_config,holiday|max:20',
         'memo' => 'required',
-        'num' => 'numeric'
+        'add_pop' => 'nullable',
+        'up_day' => 'nullable',
+        'under_day' => 'nullable',
+        'cycle_num' => 'nullable',
+        'payable' => 'nullable',
+        'payable_self_growth' => 'nullable',
+        'work_relief_cycle_num' => 'nullable',
     ];
 
     public function index()
@@ -38,9 +44,9 @@ class HolidayConfigController extends Controller
         $holiday = (object)[
             'exceed_change_id' => '',
             'cypher_type' => '',
-            'work_relief_formula' => '{0,0,0,0,0,0}',
-            'payable_reset_formula' => '{0,0,0,0,0,0}',
-            'payable_claim_formula' => '{0,0,0,0,0,0}',
+            'work_relief_formula' => '[0,0,0,0,0,0]',
+            'payable_reset_formula' => '[0,0,0,0,0,0]',
+            'payable_claim_formula' => '[0,0,0,0,0,0]',
 
         ];
         $title = trans('app.添加申请类型配置');
@@ -66,8 +72,6 @@ class HolidayConfigController extends Controller
 
         HolidayConfig::create($p);
 
-       //self::setUserHoliday($p, $holidayConfig->holiday_id);
-
         flash(trans('app.添加成功', ['value' => trans('app.申请类型配置')]), 'success');
 
         return redirect($this->redirectTo);
@@ -84,43 +88,8 @@ class HolidayConfigController extends Controller
         $p = $request->all();
         $holidayConfig->update($p);
 
-        //self::setUserHoliday($p, $holidayConfig->holiday_id);
-
         flash(trans('app.编辑成功', ['value' => trans('app.申请配置')]), 'success');
         return redirect($this->redirectTo);
-    }
-
-    public function setUserHoliday($params, $holidayId)
-    {
-        //如果是福利假,每个员工加入假期
-        if($params['is_boon'] == 1) {
-            $where = [];
-            switch ($params['restrict_sex']) {
-                case 0:
-                    $where[] = 'sex = 0';
-                    break;
-                case 1:
-                    $where[] = 'sex = 1';
-                    break;
-            }
-
-            $where = empty($where) ? '1 = 1' : implode(' AND ', $where);
-            $userExt= UserExt::whereRaw($where)->get();
-
-            foreach ($userExt as $k => $v) {
-                if(empty($v->user_id)) continue;
-                $data = [
-                    'user_id' => $v->user_id,
-                    'holiday_id' => $holidayId
-                ];
-                $userHoliday = UserHoliday::where($data)->first();
-                if(!empty($userHoliday->holiday_id)) continue;
-                $data['num'] = $params['num'];
-                UserHoliday::create($data);
-            }
-        } else {
-            UserHoliday::where(['holiday_id' => $holidayId])->delete();
-        }
     }
 
 }

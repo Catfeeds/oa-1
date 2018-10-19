@@ -10,6 +10,7 @@
 namespace App\Models\Sys;
 
 use App\Http\Components\Helpers\AttendanceHelper;
+use App\Models\UserExt;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -43,11 +44,21 @@ class HolidayConfig extends Model
     const RELIEF_GO_WORK = 1;
     const RELIEF_OFF_WORK = 2;
 
+    const CYPHER_NO_RESTRICT = -1;
     const CYPHER_UNPAID = 1;
     const CYPHER_PAID = 2;
     const CYPHER_CHANGE = 3;
     const CYPHER_OVERTIME = 4;
     const CYPHER_RECHECK = 5;
+
+    const RESET_ENTRY_TIME = 1;
+    const RESET_NATURAL_CYCLE = 2;
+
+    public static $resetType = [
+        self::NO_SETTING => '不设置',
+        self::RESET_ENTRY_TIME => '按入职时间',
+        self::RESET_NATURAL_CYCLE => '按自然周期',
+    ];
 
     public static $applyType = [
         self::LEAVEID => '请假',
@@ -91,11 +102,20 @@ class HolidayConfig extends Model
     ];
 
     public static $cypherType = [
+        self::CYPHER_NO_RESTRICT => '不限制',
         self::CYPHER_UNPAID => '无薪假',
         self::CYPHER_PAID => '带薪假',
         self::CYPHER_CHANGE => '调休假',
         self::CYPHER_OVERTIME => '加班',
         self::CYPHER_RECHECK => '打卡',
+    ];
+
+    public static $cypherTypeChar = [
+        self::CYPHER_UNPAID => 'unpaid',
+        self::CYPHER_PAID => 'paid',
+        self::CYPHER_CHANGE => 'change',
+        self::CYPHER_OVERTIME => 'overtime',
+        self::CYPHER_RECHECK => 'recheck',
     ];
 
     protected $fillable = [
@@ -134,7 +154,12 @@ class HolidayConfig extends Model
 
     public static function getHolidayList()
     {
-        return self::whereIn('restrict_sex', [\Auth::user()->userExt->sex, 2])->orderBy('sort', 'desc')->get(['holiday_id', 'holiday'])->pluck('holiday', 'holiday_id')->toArray();
+        return self::whereIn('restrict_sex', [\Auth::user()->userExt->sex, UserExt::SEX_NO_RESTRICT])
+            ->where(['is_show' => self::STATUS_ENABLE])
+            ->orderBy('sort', 'desc')
+            ->get(['holiday_id', 'holiday'])
+            ->pluck('holiday', 'holiday_id')
+            ->toArray();
     }
 
     public static function getObjByName($name)

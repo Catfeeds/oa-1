@@ -15,7 +15,7 @@ class DelIsRenewUsersHolidayConfigTable extends Migration
     {
         Schema::table('users_holiday_config', function (Blueprint $table) {
             $table->dropColumn('is_renew');
-            $table->unsignedTinyInteger('is_full')->defult(0)->after('num')->comment = '是否影响全勤 默认0 0:否 1:是';
+            $table->unsignedTinyInteger('is_full')->defult(1)->after('num')->comment = '是否影响全勤 默认0 0:否 1:是';
         });
     }
 

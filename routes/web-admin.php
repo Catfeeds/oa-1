@@ -49,6 +49,10 @@ Route::group([
         'middleware' => ['permission:user.edit'],
         'uses' => 'UserController@updateExt']);
 
+    Route::get('user/get-info', [
+        'middleware' => ['permission:user'],
+        'uses' => 'UserController@getInfoByCalendar'])->name('user.getInfo');
+
     // 职务管理
     Route::get('role', [
         'middleware' => ['permission:role'],

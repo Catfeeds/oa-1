@@ -115,5 +115,20 @@ class Operate
        return ['success' => $success, 'message' => $message , 'data' => $data];
     }
 
+    /**
+     * 申请配置计算类型驱动
+     * @param string $driver
+     * @return mixed
+     */
+    public function driver(string $driver)
+    {
+
+        $lang = ucfirst(strtolower('cypher'));
+        $driver = ucfirst(strtolower($driver));
+        $nameSpace = str_replace('\Operate', '', __NAMESPACE__);
+
+        $className = $nameSpace . "\\" . $lang . "\\" . $driver;
+        return new $className();
+    }
 
 }

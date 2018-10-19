@@ -7339,20 +7339,21 @@ var DayGrid = /** @class */ (function (_super) {
             );
             // 增加节气显示
             var cTerm = lunar(date).term;
+            var lun = lunar(date).lMonth + "月" + lunar(date).lDate;
             /*if (cTerm) {
                 html += "<div class='fc-day-cnTerm'>" + cTerm + "</div>"
             }*/
             // 增加节日显示
             var fes = lunar(date).festival();
             if (fes && fes.length > 0) {
-                html += "<div class='fc-day-cnTerm'>" + $.trim(fes[0].desc) + "</div>";
+                html += "\<div class='fc-day-cnTerm' lunar_date="+ lun +"\>" + $.trim(fes[0].desc) + "\</div\>";
             }
             // 无节日时显示农历
             if ((!fes || fes.length == 0)) {
                 if (lunar(date).lDate == '初一')
-                    html += "<div class='fc-day-cnDate' style='color: #00B83F'>" + lunar(date).lMonth + "月" + lunar(date).lDate + "</div>";
+                    html += "\<div class='fc-day-cnDate' style='color: #00B83F' lunar_date=" + lun + "\>" + lun + "\</div\>";
                 else
-                    html += "<div class='fc-day-cnDate'>" + lunar(date).lDate + "</div>";
+                    html += "\<div class='fc-day-cnDate' lunar_date=" + lun + "\>" + lunar(date).lDate + "\</div\>";
             }
         }
         html += '</td>';

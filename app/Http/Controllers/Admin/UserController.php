@@ -301,4 +301,18 @@ class UserController extends Controller
         flash(trans('app.发送密码邮件成功'), 'success');
         return redirect($this->redirectTo);
     }
+
+    public function getInfoByCalendar(Request $request)
+    {
+//        echo $request->date;
+        $birthdayUsers = User::whereHas('userExt', function ($query) use ($request) {
+            $query->where(\DB::raw("DATE_FORMAT(born, '%m-%d')"), date('m-d', strtotime($request->date)));
+        })->with('dept')->get()->toArray();
+
+        $entryUsers = User::whereHas('userExt', function ($query) use ($request) {
+            $query->where(\DB::raw("DATE_FORMAT(entry_time, '%Y-%m-%d')"), $request->date);
+        })->with('dept')->get()->toArray();
+
+        return json_encode(['birthday' => $birthdayUsers, 'entry' => $entryUsers]);
+    }
 }
