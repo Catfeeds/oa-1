@@ -41,7 +41,9 @@
                                                 <th>{{ trans('app.排序值') }}</th>
                                                 <th>{{ trans('app.配置类型') }}</th>
                                                 <th>{{ trans('app.配置名称') }}</th>
-                                                <th>{{ trans('app.配置天数') }}</th>
+                                                <th>{{ trans('app.是否显示') }}</th>
+                                                <th>{{ trans('app.请假下限天数') }}</th>
+                                                <th>{{ trans('app.请假计薪上限天数') }}</th>
                                                 <th>{{ trans('app.配置描述') }}</th>
                                                 <th>{{ trans('app.提交时间') }}</th>
                                                 <th>{{ trans('app.操作') }}</th>
@@ -54,7 +56,9 @@
                                                     <td>{{ $v['sort'] }}</td>
                                                     <td>{{ \App\Models\Sys\HolidayConfig::$applyType[$v['apply_type_id']] ?? '' }}</td>
                                                     <td>{{ $v['holiday'] }}</td>
-                                                    <td>{{ $v['num'] }}</td>
+                                                    <td>{{ \App\Models\Sys\HolidayConfig::$isShow[$v['is_show']] ?? '' }}</td>
+                                                    <td>{{ $v['under_day'] }}</td>
+                                                    <td>{{ $v['up_day'] }}</td>
                                                     <td><pre style="width: 15em; height: 10em" >{{ $v['memo'] }}</pre></td>
                                                     <td>{{ $v['created_at'] }}</td>
                                                     <td>
