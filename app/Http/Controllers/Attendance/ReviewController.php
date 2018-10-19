@@ -114,7 +114,7 @@ class ReviewController extends AttController
             $isFullWork = $this->ifPresentAllDay($shouldCome, $actuallyCome, $affectFull, $user, $beLateNum);
 
             //剩余年假
-            $remainYear = AttendanceHelper::getUserYearHoliday($user->userExt->entry_time, $user->user_id,
+            $remainYear = AttendanceHelper::getUserPayableDayToEntryTime($user->user_id,
                 $yearHolObj);
 
             //剩余节日调休假
@@ -122,7 +122,7 @@ class ReviewController extends AttController
             $remainChange = $arr['change_work_day'] - $arr['change_use_day'];
 
             //剩余探亲假
-            $remainVisit = AttendanceHelper::getUserYearHoliday($user->userExt->entry_time, $user->user_id,
+            $remainVisit = AttendanceHelper::getUserPayableDayToEntryTime($user->user_id,
                 $visitHolObj);
 
             $info["$user->user_id"] = [
