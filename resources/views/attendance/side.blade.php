@@ -72,6 +72,10 @@
                 <a href="{{ route('dept') }}">{{ trans('staff.员工信息配置') }}</a>
             </li>
 
+            <li @if (Route::is(['bulletin*']) ) class="active" @endif>
+                <a href="{{ route('bulletin.index') }}">{{ trans('staff.公告栏信息配置') }}</a>
+            </li>
+
         </ul>
     </li>
 @endif

@@ -231,4 +231,23 @@ Route::group([
     Route::post('sys/firm/edit/{id}', [
         'middleware' => ['permission:firm.edit'],
         'uses' => 'Sys\FirmController@update']);
+
+    #公告栏配置
+    Route::get('sys/bulletin', [
+        //'middleware' => ['permission:bulletin.index'],
+        'uses' => 'Sys\BulletinController@index'])->name('bulletin.index');
+
+    Route::get('sys/bulletin/create', [
+        //'middleware' => ['permission:bulletin.create'],
+        'uses' => 'Sys\BulletinController@create'])->name('bulletin.create');
+    Route::post('sys/bulletin/create', [
+        //'middleware' => ['permission:bulletin.store'],
+        'uses' => 'Sys\BulletinController@store']);
+
+    Route::get('sys/bulletin/edit/{id}', [
+        //'middleware' => ['permission:bulletin.edit'],
+        'uses' => 'Sys\BulletinController@edit'])->name('bulletin.edit');
+    Route::post('sys/bulletin/edit/{id}', [
+        //'middleware' => ['permission:bulletin.edit'],
+        'uses' => 'Sys\BulletinController@update']);
 });

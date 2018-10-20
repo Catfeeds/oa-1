@@ -599,7 +599,6 @@ class AttendanceHelper
     {
         if(empty($leaveIds) || !json_decode($leaveIds)) return '--';
 
-
         $show = '';
         $idList = Leave::getHolidayIdList();
         $list = HolidayConfig::getHolidayList();

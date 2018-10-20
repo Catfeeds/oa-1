@@ -189,10 +189,9 @@
                             <h2>公告</h2>
                         </div>
                         <div class="ibox-content">
-                            <div  class="jumbotron" style="height: 500px; margin-bottom: 0">
+                            <div  class="jumbotron" style="height: 500px; margin-bottom: 0" id="content">
                                 <h1>诗悦OA</h1>
-                                <p>This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>
-                                <p>This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>
+                                <div id="bulletContent"></div>
                             </div>
                         </div>
                     </div>
@@ -302,6 +301,7 @@
 @endsection
 
 @push('scripts')
+<script src="{{ asset('ueditor/ueditor.parse.js') }}"></script>
 <script>
     $(document).ready(function () {
         $('.contact-box').each(function () {
