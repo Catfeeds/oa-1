@@ -197,19 +197,6 @@
                                             </div>
                                         </div>
 
-                                        <div class="form-group">
-                                            {!! Form::label('reset_type', trans('app.周期类型'), ['class' => 'col-sm-3 control-label']) !!}
-                                            <div class="col-sm-6">
-
-                                                @foreach(\App\Models\Sys\HolidayConfig::$resetType as $k => $v)
-                                                    <label class="radio-inline i-checks">
-                                                        {!! Form::radio('reset_type', $k, $k === ($holiday->reset_type ?? old('reset_type') ?? \App\Models\Sys\HolidayConfig::NO_SETTING), [
-                                                    ]) !!} {{ $v }}
-                                                    </label>
-                                                @endforeach
-                                            </div>
-                                        </div>
-
                                         <div class="form-group @if (!empty($errors->first('payable'))) has-error @endif">
                                             {!! Form::label('payable', trans('app.计薪比例'), ['class' => 'col-sm-3 control-label']) !!}
                                             <div class="col-sm-3">
@@ -226,6 +213,20 @@
                                             </div>
                                         </div>
 
+                                        <div class="form-group">
+                                            {!! Form::label('reset_type', trans('app.周期类型'), ['class' => 'col-sm-3 control-label']) !!}
+                                            <div class="col-sm-6">
+
+                                                @foreach(\App\Models\Sys\HolidayConfig::$resetType as $k => $v)
+                                                    <label class="radio-inline i-checks">
+                                                        {!! Form::radio('reset_type', $k, $k === ($holiday->reset_type ?? old('reset_type') ?? \App\Models\Sys\HolidayConfig::NO_SETTING), ['id'
+                                                        => 'reset_type'
+                                                    ]) !!} {{ $v }}
+                                                    </label>
+                                                @endforeach
+                                            </div>
+                                        </div>
+
                                         <div class="form-group @if (!empty($errors->first('payable_reset_formula'))) has-error @endif">
                                             {!! Form::label('payable_reset_formula', trans('app.计薪天数重置周期'), ['class' => 'col-sm-3 control-label']) !!}
                                             <div class="col-sm-3">
@@ -235,7 +236,7 @@
                                                 <span class="help-block m-b-none">{{ $errors->first('payable_reset_formula') }}</span>
                                             </div>
                                             <div class="col-sm-2">
-                                                <span class="help-block m-b-none">
+                                                <span id="show_i" class="help-block m-b-none">
                                                     <i class="fa fa-info-circle"></i> {{ trans('公式:[年,月,日,时,分,秒]') }}
                                                 </span>
                                             </div>
@@ -395,6 +396,19 @@
 <script>
     $(function () {
         $("#cypher_type").trigger('onchange');
+
+
+        $('input[name="reset_type"]').on('ifChecked', function () {
+
+            if ($(this).val() == "2") {
+                $('#payable_reset_formula').val('[0,0,0,0,0]');
+                $('#show_i').html(' <i class="fa fa-info-circle"></i> {{ trans('公式:[月,日,时,分,秒]') }}')
+            } else {
+                $('#payable_reset_formula').val('[0,0,0,0,0,0]');
+                $('#show_i').html(' <i class="fa fa-info-circle"></i> {{ trans('公式:[年,月,日,时,分,秒]') }}')
+            }
+        });
+
     });
 
     function func(){

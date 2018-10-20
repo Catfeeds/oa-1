@@ -343,12 +343,12 @@ class LeaveController extends AttController
             ->where(['is_show' => HolidayConfig::STATUS_ENABLE])
             ->first();
 
+        if(empty($holidayConfig->holiday_id))  return response()->json(['status' => -1, 'memo' => '', 'day' => 0]);
+
         $driver = HolidayConfig::$cypherTypeChar[$holidayConfig->cypher_type];
-        $day = \AttendanceService::driver($driver, 'cypher')->getDay($holidayConfig);
+        $ret = \AttendanceService::driver($driver, 'cypher')->getUserHoliday(\Auth::user()->user_id, $holidayConfig);
 
-        $day = '<i class="fa fa-info-circle"></i>剩余假期天数:.'.$p['id'].'天';
-
-        return response()->json(['status' => 1, 'memo' => $holidayConfig->memo, 'day' => $day]);
+        return response()->json($ret);
     }
 
 }

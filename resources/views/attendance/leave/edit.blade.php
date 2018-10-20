@@ -126,7 +126,7 @@
                     <div class="form-group">
                         <div class="col-sm-4 col-sm-offset-2">
                             {!! Form::submit(trans('app.提交'), ['class' => 'btn btn-primary']) !!}
-                            <a href="javascript:history.go(-1);"
+                            <a href="{{route('leave.info')}}"
                                class="btn btn-info">{{ trans('att.返回列表') }}</a>
                         </div>
                     </div>
@@ -166,22 +166,32 @@
             $("#select-mobile-header-file").change(function(){
                 readURL(this, '#show_mobile_header_image');
             });
+
+
         });
 
-
-        function func(){
-
+        function func() {
             var val = $('#holiday_id').children('option:selected').val();
             if(val != "") {
                 $('#show_pre').html('');
                 $.get('{{ route('leave.showMemo')}}', {id: val}, function ($data) {
                     if ($data.status == 1) {
-                        $('#show_pre').html($data.memo);
-                        $('#show_p').html($data.day);
-                        $('#show_memo').show();
+
+                        if($data.show_memo){
+                            $('#show_pre').html($data.memo);
+                            $('#show_memo').show();
+                        }
+                        if($data.show_day){
+                            $('#show_p').show();
+                            $('#show_p').html($data.msg);
+                        } else {
+                            $('#show_p').hide();
+                        }
 
                     } else {
-                        bootbox.alert($data.msg);
+                        $('#show_memo').hide();
+                        $('#show_p').hide();
+                        $('#show_pre').html('');
                     }
                 })
             } else {

@@ -69,7 +69,7 @@ class ReviewHelper
     public function countWelfare($user, array $obj)
     {
         //剩余年假
-        $remainYear = isset($obj['year']) ? AttendanceHelper::getUserYearHoliday($user->userExt->entry_time, $user->user_id,
+        $remainYear = isset($obj['year']) ? AttendanceHelper::getUserPayableDayToEntryTime($user->userExt->entry_time, $user->user_id,
             $obj['year']) : NULL;
 
         //剩余节日调休假
@@ -77,7 +77,7 @@ class ReviewHelper
         $remainChange = isset($arr) ? $arr['change_work_day'] - $arr['change_use_day'] : NULL;
 
         //剩余探亲假
-        $remainVisit = isset($obj['visit']) ? AttendanceHelper::getUserYearHoliday($user->userExt->entry_time, $user->user_id, $obj['visit'])
+        $remainVisit = isset($obj['visit']) ? AttendanceHelper::getUserPayableDayToEntryTime($user->userExt->entry_time, $user->user_id, $obj['visit'])
         : NULL;
 
         return [

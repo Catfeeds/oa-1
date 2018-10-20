@@ -50,6 +50,7 @@ class HolidayConfig extends Model
     const CYPHER_CHANGE = 3;
     const CYPHER_OVERTIME = 4;
     const CYPHER_RECHECK = 5;
+    const CYPHER_HOUR = 6;
 
     const RESET_ENTRY_TIME = 1;
     const RESET_NATURAL_CYCLE = 2;
@@ -108,6 +109,7 @@ class HolidayConfig extends Model
         self::CYPHER_CHANGE => '调休假',
         self::CYPHER_OVERTIME => '加班',
         self::CYPHER_RECHECK => '打卡',
+        self::CYPHER_HOUR => '小时假',
     ];
 
     public static $cypherTypeChar = [
@@ -116,6 +118,7 @@ class HolidayConfig extends Model
         self::CYPHER_CHANGE => 'change',
         self::CYPHER_OVERTIME => 'overtime',
         self::CYPHER_RECHECK => 'recheck',
+        self::CYPHER_HOUR => 'hour',
     ];
 
     protected $fillable = [
@@ -145,6 +148,7 @@ class HolidayConfig extends Model
         'exceed_change_id',
         'is_show',
         'is_before_after',
+        'reset_type',
 
 
         'num',
