@@ -28,7 +28,7 @@
                         <div class="col-sm-2">
                             <span id="show_memo" style="display: none"  style="color: red" class="help-block m-b-none">
                                 <p style="color: red" id="show_p"></p>
-                                <pre id="show_pre"></pre>
+                                <pre style="width: 30em; height: 10em"  id="show_pre"></pre>
                             </span>
                         </div>
                     </div>
