@@ -32,13 +32,13 @@ class Paid extends Cypher
         switch ($holidayConfig->reset_type) {
          case HolidayConfig::RESET_ENTRY_TIME:
              $numberDay = AttendanceHelper::getUserPayableDayToEntryTime($entryTime, $userId, $holidayConfig);
-             $msg = $day = '<i class="fa fa-info-circle"></i>剩余假期天数:.' . $numberDay . '天';
-             return ['status' => 1, 'show_day' => $numberDay ? true : false, 'show_memo' => true, 'memo' => $holidayConfig->memo, 'number_day' => $numberDay, 'msg' => $msg];
+             $msg = $day = '<i class="fa fa-info-circle"></i>剩余假期天数:' . $numberDay . '天';
+             return ['status' => 1, 'show_day' => true, 'show_memo' => true, 'memo' => $holidayConfig->memo, 'number_day' => $numberDay, 'msg' => $msg];
              break;
          case HolidayConfig::RESET_NATURAL_CYCLE:
              $numberDay = AttendanceHelper::getUserPayableDayToNaturalCycleTime($entryTime, $userId, $holidayConfig);
-             $msg = $day = '<i class="fa fa-info-circle"></i>剩余假期天数:.' . $numberDay . '天';
-             return ['status' => 1, 'show_day' => $numberDay ? false : true, 'show_memo' => true, 'memo' => $holidayConfig->memo, 'number_day' => $numberDay, 'msg' => $msg];
+             $msg = $day = '<i class="fa fa-info-circle"></i>剩余假期天数:' . $numberDay . '天';
+             return ['status' => 1, 'show_day' => true, 'show_memo' => true, 'memo' => $holidayConfig->memo, 'number_day' => $numberDay, 'msg' => $msg];
              break;
          default:
              return ['status' => 1, 'show_memo' => true, 'memo' => $holidayConfig->memo];
