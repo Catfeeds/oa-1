@@ -28,15 +28,17 @@
                         </tr>
                     </thead>
                     <tbody>
+                        @foreach($data as $v)
                         <tr>
-                            <td>xxx</td>
-                            <td>xxx</td>
-                            <td>xxx</td>
-                            <td>xxx</td>
-                            <td>xxx</td>
-                            <td>xxx</td>
-                            <td>{!! BaseHtml::tooltip(trans('app.设置'), route('bulletin.edit', ['id' => 1])) !!}</td>
+                            <td>{{ $v->id }}</td>
+                            <td>{{ $v->send_user }}</td>
+                            <td>{{ $v->title }}</td>
+                            <td>{{ $v->created_at }}</td>
+                            <td>{{ $v->valid_time }}</td>
+                            <td>{{ $v->weight }}</td>
+                            <td>{!! BaseHtml::tooltip(trans('app.设置'), route('bulletin.edit', ['id' => $v->id])) !!}</td>
                         </tr>
+                        @endforeach
                     </tbody>
                 </table>
             </div>

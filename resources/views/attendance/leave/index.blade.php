@@ -18,6 +18,9 @@
     ::-webkit-scrollbar-thumb {
         background: #888;
     }
+    .panel-heading {
+        padding: 0;
+    }
 </style>
 @endpush
 
@@ -43,29 +46,29 @@
     @include('widget.scope-leave', ['scope' => $scope])
 
     <div class="row">
-        <div class="col-lg-10">
-            <div class="panel blank-panel">
-                <div class="panel-heading">
-                    <div class="panel-options">
-                        <ul class="nav nav-tabs">
-                            @foreach($types as $k => $v)
-                                <li @if($k == $type) class="active" @endif>
-                                    <a  class="dropdown-toggle count-info" href="{{ route('leave.info', ['type' => $k]) }}">{{ $v }}</a>
-                                </li>
-                            @endforeach
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
         <div class="ibox float-e-margins">
             <div class="ibox-title">
                 <h5>{{ $title }}</h5>
             </div>
             <div class="ibox-content">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="panel blank-panel">
+                            <div class="panel-heading">
+                                <div class="panel-options">
+                                    <ul class="nav nav-tabs">
+                                        @foreach($types as $k => $v)
+                                            <li @if($k == $type) class="active" @endif>
+                                                <a  class="dropdown-toggle count-info" href="{{ route('leave.info', ['type' => $k]) }}">{{ $v }}</a>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="row">
                     <div class="col-md-2 list-group" style="padding: 10px">
                         <div class="list-group-item"><h4 class="list-group-item-heading">剩余可申请的福利假</h4></div>
@@ -74,7 +77,7 @@
                         <p class="list-group-item">剩余探亲假: {{ $remainWelfare['visit'] ?? '尚未配置该福利假' }}</p>
                     </div>
                     <div class="col-md-10 table-responsive pre-scrollable" style="padding-left: 10px; border-left: 1px solid #e7eaec;">
-                    <table class="table table-striped tooltip-demo">
+                        <table class="table table-striped tooltip-demo">
                         <thead>
                         <tr>
                             <th>{{ trans('att.申请类型') }}</th>
@@ -85,12 +88,12 @@
                             <th>{{ trans('att.申请事由') }}</th>
                             <th>{{ trans('att.申请时间') }}</th>
                             <th>{{ trans('att.申请状态') }}</th>
-                            <th>{{ trans('att.操作') }}</th>{{--
-                            <th>{{ trans('att.对假期有疑问') }}</th>--}}
+                            <th>{{ trans('att.操作') }}</th>
+                            <th>{{ trans('att.对假期有疑问?') }}</th>
                         </tr>
                         </thead>
                         <tbody>
-                        @foreach($data as $v)
+                        @foreach($data as $k => $v)
                             <tr>
                                 <td>{{ \App\Models\Sys\HolidayConfig::$applyType[\App\Models\Sys\HolidayConfig::getHolidayApplyList()[$v['holiday_id']]] }}</td>
                                 <td>{{ \App\Models\Sys\HolidayConfig::getHolidayList()[$v['holiday_id']] }}</td>
@@ -124,17 +127,27 @@
                                     @if(($v['user_id'] == \Auth::user()->user_id || $v['review_user_id'] == \Auth::user()->user_id || in_array(\Auth::user()->user_id, $userIds)) && Entrust::can(['leave.edit', 'leave.review']))
                                         {!! BaseHtml::tooltip(trans('att.请假详情'), route('leave.optInfo', ['id' => $v['leave_id'], 'type' => \App\Models\Attendance\Leave::LOGIN_INFO]), 'cog fa fa-newspaper-o') !!}
                                     @endif
-
                                 </td>
-                                <td></td>
+                                <td>
+                                    @if(!isset($appealData[$v['leave_id']]))
+                                        <a data-toggle="modal" data-target="#exampleModal" data-whatever="{{
+                                           serialize(['holiday_id' => $v['holiday_id'], 'leave_id' => $v['leave_id'],
+                                           'appeal_type' => \App\Models\Attendance\Appeal::APPEAL_LEAVE])
+                                           }}">申诉</a>
+                                    @else
+                                        <span>{{ \App\Models\Attendance\Appeal::getTextArr()[$appealData[$v['leave_id']]] }}</span>
+                                    @endif
+                                </td>
                             </tr>
                         @endforeach
                         </tbody>
                     </table>
-                </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+    @include('widget.appeal-modal')
+
 @endsection
 @include('widget.select2')

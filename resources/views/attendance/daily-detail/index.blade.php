@@ -35,6 +35,7 @@
                                 <th>{{ trans('att.扣分') }}</th>
                                 <th>{{ trans('att.类型') }}</th>
                                 <th>{{ trans('att.操作') }}</th>
+                                <th>{{ trans('att.对考勤有疑问?') }}</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -80,6 +81,16 @@
                                             </a>
                                         @endif
                                     </td>
+                                    <td>
+                                        @if(!isset($appealData[$v['id']]))
+                                            <a data-toggle="modal" data-target="#exampleModal"
+                                               data-whatever="{{serialize([
+                                               'daily_id' => $v['id'], 'appeal_type' => \App\Models\Attendance\Appeal::APPEAL_DAILY
+                                               ])}}">申诉</a>
+                                        @else
+                                            <span>{{ \App\Models\Attendance\Appeal::getTextArr()[$appealData[$v['id']]] }}</span>
+                                        @endif
+                                    </td>
                                 </tr>
                             @endforeach
                             </tbody>
@@ -89,4 +100,5 @@
             </div>
         </div>
     </div>
+    @include('widget.appeal-modal')
 @endsection

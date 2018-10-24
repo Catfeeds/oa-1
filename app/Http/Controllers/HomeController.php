@@ -14,7 +14,11 @@ class HomeController extends Controller
      */
     public function index()
     {
-        $bulletContent = Bulletin::where([[\DB::raw("DATE_FORMAT(created_at, '%Y-%m-%d')"), '=', date('Y-m-d', time())]])->first(['content']);
+        $bulletContent = Bulletin::where([
+            [\DB::raw("created_at + valid_time * 3600 * 24"), '>=', time()]
+        ])
+            ->orderBy('weight', 'desc')
+            ->first(['content']);
         return view('home', compact('bulletContent'));
     }
 }

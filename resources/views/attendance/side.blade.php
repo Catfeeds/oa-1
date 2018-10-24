@@ -1,5 +1,5 @@
 @if(Entrust::can(['leave*', 'staff*']))
-    <li @if (Route::is(['leave*', 'daily-detail*'])) class="active" @endif >
+    <li @if (Route::is(['leave*', 'daily-detail*', 'appeal*'])) class="active" @endif >
         <a href="#"><i class="fa fa-newspaper-o"></i> <span class="nav-label">{{ trans('att.考勤功能') }}</span><span
                     class="fa arrow"></span></a>
         <ul class="nav nav-second-level">
@@ -25,6 +25,12 @@
                     <a href="{{ route('daily-detail.review.info') }}">{{ trans('att.考勤管理') }}</a>
                 </li>
             @endif
+
+            {{--@if(Entrust::can(['appeal.*']))--}}
+                <li @if (Route::is(['appeal.review.*']) ) class="active" @endif>
+                    <a href="{{ route('appeal.review.info') }}">{{ trans('att.申诉管理') }}</a>
+                </li>
+            {{--@endif--}}
         </ul>
     </li>
 @endif
@@ -59,7 +65,7 @@
 @if(Entrust::can(['holiday-config', 'approval-step', 'punch-rules', 'calendar', 'dept',
                 'job', 'school', 'firm']))
     <li @if (Route::is(['holiday-config*', 'approval-step*', 'punch-rules*', 'calendar*', 'dept*',
-                'job*', 'school*', 'firm*'])) class="active" @endif >
+                'job*', 'school*', 'firm*', 'bulletin*'])) class="active" @endif >
         <a href="#"><i class="fa fa-newspaper-o"></i> <span class="nav-label">{{ trans('staff.系统配置') }}</span><span
                     class="fa arrow"></span></a>
         <ul class="nav nav-second-level">

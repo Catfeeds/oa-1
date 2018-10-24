@@ -6,43 +6,67 @@
     .wrapper .row .col-xs-5, .col-xs-3 {
         padding-left: 0;
     }
+    .form-horizontal .control-label {
+        text-align: left;
+        padding-right: 0;
+    }
+    .form-horizontal .form-control {
+        margin-left: -10px;
+    }
 </style>
 @endpush
 @section('content')
+
     <div class="wrapper wrapper-content">
         <div class="row">
             <div class="col-md-8 col-md-offset-2">
                 {!! Form::open(['method' => 'post', 'class' => 'form-horizontal']) !!}
-                <div class="form-group">
+                <div class="row">
                     <div class="col-xs-5">
-                        {!! Form::label('title', '标题:', ['class' => 'col-xs-3']) !!}
-                        {!! Form::text('title') !!}
+                        <div class="form-group">
+                            {!! Form::label('title', '标题:', ['class' => 'col-xs-3 control-label']) !!}
+                            <div class="col-xs-5">
+                                {!! Form::text('title', $data->title ?? old('title'), [
+                                'placeholder' => '输入公告标题', 'required' => true, 'class' => 'form-control']) !!}
+                            </div>
+                        </div>
+
+                        <div class="form-group @if (!empty($errors->first('valid_time'))) has-error @endif">
+                            {!! Form::label('valid_time', '有效时间:', ['class' => 'col-xs-3 control-label']) !!}
+                            <div class="col-xs-5">
+                                {!! Form::text('valid_time', $data->valid_time ?? old('valid_time'), [
+                                'placeholder' => '输入持续显示天数', 'required' => true, 'class' => 'form-control'
+                            ]) !!}
+                            </div>
+                            <span class="text-danger">{{ $errors->first('valid_time') }}</span>
+                        </div>
+
+                        <div class="form-group @if (!empty($errors->first('weight'))) has-error @endif">
+                            {!! Form::label('weight', '权重:', ['class' => 'col-xs-3 control-label']) !!}
+                            <div class="col-xs-5">
+                                {!! Form::text('weight', $data->weight ?? old('weight'), [
+                                'placeholder' => '权重越大越靠前', 'required' => true, 'class' => 'form-control']) !!}
+                            </div>
+                            <span class="text-danger">{{ $errors->first('weight') }}</span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <div class="col-xs-5">
-                        {!! Form::label('valid_time', '有效时间:', ['class' => 'col-xs-3']) !!}
-                        {!! Form::text('valid_time') !!}
+                <div class="row">
+                    <div class="form-group">
+                            <span>可点击<img src="http://xiumi.us/connect/ue/xiumi-connect-icon.png">进行编辑.之后可点击顶部对勾，复制，
+                            就会退回并复制内容到编辑器里面</span>
+                        <span class="text-danger">{{ $errors->first('content') }}</span>
                     </div>
-                </div>
-
-                <div class="form-group">
-                    <div class="col-xs-5">
-                        {!! Form::label('weight', '权重:', ['class' => 'col-xs-3']) !!}
-                        {!! Form::text('weight') !!}
+                    <div class="form-group">
+                        @include('flash::message')
+                        <script id="container" name="content" type="text/plain" style="height:360px;">
+                            {!! $data->content ?? old('content') !!}
+                        </script>
                     </div>
-                </div>
-
-                <div class="form-group">
-                    <span>可点击<img src="http://xiumi.us/connect/ue/xiumi-connect-icon.png">进行编辑.之后可点击顶部对勾，复制，
-                        就会退回并复制内容到编辑器里面</span>
-                </div>
-                <div class="form-group">
-                    <script id="container" name="content" type="text/plain"></script>
-                </div>
-                <div class="form-group">
-                    {!! Form::submit('提交', ['class' => 'btn btn-success']) !!}
+                    <div class="form-group">
+                        {!! Form::submit('提交', ['class' => 'btn btn-success']) !!}
+                    </div>
                 </div>
                 {!! Form::close() !!}
             </div>

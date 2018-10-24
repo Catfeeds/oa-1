@@ -9,6 +9,6 @@ class Bulletin extends Model
     protected $table = "bulletin";
     public $primaryKey = 'id';
     protected $fillable = [
-        'send_user', 'title', 'content', 'valid_time'
+        'send_user', 'title', 'content', 'valid_time', 'weight'
     ];
 }
