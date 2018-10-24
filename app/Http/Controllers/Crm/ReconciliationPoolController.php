@@ -50,6 +50,21 @@ class ReconciliationPoolController extends Controller
             }
         }
         $products = Product::getList($limitProduct);
+        if (\Entrust::can(['reconciliation-reconciliationAudit.global'])) {
+            unset($job);
+            unset($products);
+            $products = Product::getList();
+            foreach ($products as $k => $v) {
+                $job[$k][1] = 1;
+                $job[$k][2] = 2;
+                $job[$k][3] = 3;
+                $job[$k][4] = 4;
+                $job[$k][5] = 5;
+                $job[$k][6] = 6;
+                $job[$k][7] = 7;
+                $job[$k][8] = 8;
+            }
+        }
         $pid = \Request::get('product_id', key($products));
         if (!in_array($pid, array_keys($products))) {
             return redirect()->back()->withInput();
