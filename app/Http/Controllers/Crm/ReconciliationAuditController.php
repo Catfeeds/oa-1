@@ -852,9 +852,13 @@ class ReconciliationAuditController extends Controller
                 $water = '对账流水';
                 $jobId = Principal::OPS;
                 break;
-            default:
+            case Reconciliation::FRC:
                 $water = '运营复核';
                 $jobId = Principal::FSR;
+                break;
+            default:
+                $water = '可以开票了！';
+                $jobId = Principal::FRC;
                 break;
         }
         $scope = $this->scope;
@@ -863,7 +867,7 @@ class ReconciliationAuditController extends Controller
         $user = User::where(['user_id' => $userId->principal_id])->first();
 
         try {
-            OperateLogHelper::sendWXMsg($user->username, sprintf('你好！%s,%s%s月的%s审计已已提交，请及时处理:%s', $user->username, $product[$pid],
+            OperateLogHelper::sendWXMsg($user->username, sprintf('你好！%s,%s%s月的%s审计已提交，请及时处理:%s', $user->username, $product[$pid],
                 date('m', strtotime($scope->startTimestamp)), $water, route('reconciliationAudit',
                     ['source' => $source, 'product_id' => $pid])));
             return ['message' => '通知成功！'];

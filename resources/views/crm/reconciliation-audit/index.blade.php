@@ -7,7 +7,7 @@
     @parent
     <div class="col-sm-8">
         <div class="title-action">
-            @if(Entrust::can(['reconciliationAudit.notice']) && in_array($source, [\App\Models\Crm\Reconciliation::TREASURER,\App\Models\Crm\Reconciliation::FRC]))
+            @if(Entrust::can(['reconciliationAudit.notice']) && in_array($source, [\App\Models\Crm\Reconciliation::TREASURER,\App\Models\Crm\Reconciliation::FRC,\App\Models\Crm\Reconciliation::OOR]))
                 <a id="notice" class="btn btn-primary btn-sm">一键通知</a>
             @endif
         </div>
