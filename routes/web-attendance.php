@@ -40,6 +40,10 @@ Route::group([
         Route::get('leave/optInfo/{id}/{type}', [
             'middleware' => ['permission:leave.edit|leave.create'],
             'uses' => 'LeaveController@optInfo'])->name('leave.optInfo');
+        Route::get('leave/show-memo', [
+            'middleware' => ['permission:leave.create'],
+            'uses' => 'LeaveController@showMemo'])->name('leave.showMemo');
+
 
         #申请单管理
         Route::get('leave/review/', [

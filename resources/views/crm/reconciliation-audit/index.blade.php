@@ -5,6 +5,13 @@
 @section('page-head')
 
     @parent
+    <div class="col-sm-8">
+        <div class="title-action">
+            @if(Entrust::can(['reconciliationAudit.notice']) && in_array($source, [\App\Models\Crm\Reconciliation::TREASURER,\App\Models\Crm\Reconciliation::FRC]))
+                <a id="notice" class="btn btn-primary btn-sm">一键通知</a>
+            @endif
+        </div>
+    </div>
 
 @endsection
 
@@ -332,7 +339,7 @@
             });
         });
 
-        $(document).on('click', '.eye', function(){
+        $(document).on('click', '.eye', function () {
             var url = $(this).data('url');
             console.log(url);
             $.getJSON(url, function (res) {
@@ -342,6 +349,13 @@
                 });
                 $('.results > tbody').html(html);
                 $('#confirm-modal').modal('show');
+            });
+        });
+        $(function () {
+            $("#notice").click(function () {
+                $.get("{{ route('reconciliationAudit.notice', ['pid' => $pid, 'source' => $source]) }}", function (result) {
+                    bootbox.alert(result.message);
+                });
             });
         });
     </script>

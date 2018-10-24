@@ -7,6 +7,10 @@
 </div>
 
 <div class="form-group">
+    @include('widget.select-single', ['name' => 'scope[review_type]', 'lists' => \App\Http\Components\Helpers\CrmHelper::addEmptyToArray('审核状态', \App\Models\Crm\Reconciliation::REVIEW_TYPE), 'selected' => $scope->review_type])
+</div>
+
+<div class="form-group">
     <input type="text" name="scope[backstage_channel]" value="{{ $scope->backstage_channel }}" class="form-control col-xs-6"
            placeholder="{{ trans('crm.诗悦后台渠道') }}">
 </div>

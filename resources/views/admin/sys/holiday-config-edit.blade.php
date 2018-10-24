@@ -89,7 +89,7 @@
                                         <div class="col-sm-6">
                                             @foreach(\App\Models\Sys\HolidayConfig::$isShow as $k => $v)
                                                 <label class="radio-inline i-checks">
-                                                    {!! Form::radio('is_show', $k, $k === ($holiday->is_show ?? old('is_show') ?? \App\Models\Sys\HolidayConfig::STATUS_DISABLE), [
+                                                    {!! Form::radio('is_show', $k, $k === ($holiday->is_show ?? old('is_show') ?? \App\Models\Sys\HolidayConfig::STATUS_ENABLE), [
                                                 ]) !!} {{ $v }}
                                                 </label>
                                             @endforeach
@@ -101,7 +101,7 @@
                                         <div class="col-sm-6">
                                             @foreach(\App\Models\Sys\HolidayConfig::$isShow as $k => $v)
                                                 <label class="radio-inline i-checks">
-                                                    {!! Form::radio('is_full', $k, $k === ($holiday->is_full ?? old('is_full') ?? \App\Models\Sys\HolidayConfig::STATUS_DISABLE), [
+                                                    {!! Form::radio('is_full', $k, $k === ($holiday->is_full ?? old('is_full') ?? \App\Models\Sys\HolidayConfig::STATUS_ENABLE), [
                                                 ]) !!} {{ $v }}
                                                 </label>
                                             @endforeach
@@ -198,13 +198,32 @@
                                         </div>
 
                                         <div class="form-group @if (!empty($errors->first('payable'))) has-error @endif">
-                                            {!! Form::label('holiday', trans('app.计薪比例'), ['class' => 'col-sm-3 control-label']) !!}
+                                            {!! Form::label('payable', trans('app.计薪比例'), ['class' => 'col-sm-3 control-label']) !!}
                                             <div class="col-sm-3">
                                                 {!! Form::text('payable', isset($holiday->payable) ? $holiday->payable: old('payable'), [
                                                 'class' => 'form-control',
                                                 'placeholder' => trans('app.请输入', ['value' => trans('app.计薪比例')]),
                                                 ]) !!}
                                                 <span class="help-block m-b-none">{{ $errors->first('payable') }}</span>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <span class="help-block m-b-none">
+                                                    <i class="fa fa-info-circle"></i> {{ trans('每日计薪百分比') }}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            {!! Form::label('reset_type', trans('app.周期类型'), ['class' => 'col-sm-3 control-label']) !!}
+                                            <div class="col-sm-6">
+
+                                                @foreach(\App\Models\Sys\HolidayConfig::$resetType as $k => $v)
+                                                    <label class="radio-inline i-checks">
+                                                        {!! Form::radio('reset_type', $k, $k === ($holiday->reset_type ?? old('reset_type') ?? \App\Models\Sys\HolidayConfig::NO_SETTING), ['id'
+                                                        => 'reset_type'
+                                                    ]) !!} {{ $v }}
+                                                    </label>
+                                                @endforeach
                                             </div>
                                         </div>
 
@@ -217,8 +236,8 @@
                                                 <span class="help-block m-b-none">{{ $errors->first('payable_reset_formula') }}</span>
                                             </div>
                                             <div class="col-sm-2">
-                                                <span class="help-block m-b-none">
-                                                    <i class="fa fa-info-circle"></i> {{ trans('公式:{年,月,日,时,分,秒}') }}
+                                                <span id="show_i" class="help-block m-b-none">
+                                                    <i class="fa fa-info-circle"></i> {{ trans('公式:[年,月,日,时,分,秒]') }}
                                                 </span>
                                             </div>
                                         </div>
@@ -234,7 +253,7 @@
                                             </div>
                                             <div class="col-sm-2">
                                                 <span class="help-block m-b-none">
-                                                    <i class="fa fa-info-circle"></i> {{ trans('公式:{年,月,日,时,分,秒}') }}
+                                                    <i class="fa fa-info-circle"></i> {{ trans('公式:[年,月,日,时,分,秒]') }}
                                                 </span>
                                             </div>
                                         </div>
@@ -244,7 +263,7 @@
                                             <div class="col-sm-3">
                                                 {!! Form::text('payable_self_growth', isset($holiday->payable_self_growth) ? $holiday->payable_self_growth: old('payable_self_growth'), [
                                                 'class' => 'form-control',
-                                                'placeholder' => trans('app.请输入', ['value' => trans('app.计薪天数自增长')]),
+                                                'placeholder' => trans('app.请输入', ['value' => trans('app.每个循环周期增长的计薪天数')]),
                                                 ]) !!}
                                                 <span class="help-block m-b-none">{{ $errors->first('payable_self_growth') }}</span>
                                             </div>
@@ -253,9 +272,10 @@
                                         <div class="form-group">
                                             {!! Form::label('restrict_sex', trans('app.限制男女'), ['class' => 'col-sm-3 control-label']) !!}
                                             <div class="col-sm-6">
-                                                @foreach(\App\Models\UserExt::$sex + [ 2 => '不限'] as $k => $v)
+
+                                                @foreach(array_merge(\App\Models\UserExt::$sex, ['不限'])  as $k => $v)
                                                     <label class="radio-inline i-checks">
-                                                        {!! Form::radio('restrict_sex', $k, $k === ($holiday->restrict_sex ?? old('restrict_sex') ?? 2), [
+                                                        {!! Form::radio('restrict_sex', $k, $k === ($holiday->restrict_sex ?? old('restrict_sex') ?? \App\Models\UserExt::SEX_NO_RESTRICT), [
                                                     ]) !!} {{ $v }}
                                                     </label>
                                                 @endforeach
@@ -274,7 +294,6 @@
                                                 <span class="help-block m-b-none">{{ $errors->first('exceed_change_id') }}</span>
                                             </div>
                                         </div>
-
                                     </div>
                                     {{--带薪显示end--}}
 
@@ -291,7 +310,7 @@
                                             </div>
                                             <div class="col-sm-2">
                                                 <span class="help-block m-b-none">
-                                                    <i class="fa fa-info-circle"></i> {{ trans('公式:{年,月,日,时,分,秒}') }}
+                                                    <i class="fa fa-info-circle"></i> {{ trans('公式:[年,月,日,时,分,秒]') }}
                                                 </span>
                                             </div>
                                         </div>
@@ -327,6 +346,12 @@
                                                 'placeholder' => trans('app.请输入', ['value' => trans('app.加班换算调休假比例')]),
                                                 ]) !!}
                                                 <span class="help-block m-b-none">{{ $errors->first('add_pop') }}</span>
+                                            </div>
+
+                                            <div class="col-sm-2">
+                                                <span class="help-block m-b-none">
+                                                    <i class="fa fa-info-circle"></i> {{ trans('单位:百分比') }}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -371,11 +396,24 @@
 <script>
     $(function () {
         $("#cypher_type").trigger('onchange');
+
+
+        $('input[name="reset_type"]').on('ifChecked', function () {
+
+            if ($(this).val() == "2") {
+                $('#payable_reset_formula').val('[0,0,0,0,0]');
+                $('#show_i').html(' <i class="fa fa-info-circle"></i> {{ trans('公式:[月,日,时,分,秒]') }}')
+            } else {
+                $('#payable_reset_formula').val('[0,0,0,0,0,0]');
+                $('#show_i').html(' <i class="fa fa-info-circle"></i> {{ trans('公式:[年,月,日,时,分,秒]') }}')
+            }
+        });
+
     });
 
     function func(){
-        var ss = $('#cypher_type').children('option:selected').val();
-        switch (ss) {
+        var val = $('#cypher_type').children('option:selected').val();
+        switch (val) {
             case '1':
                 $("#unpaid").show();
                 $("#paid").hide();
@@ -389,8 +427,13 @@
                 $("#change").hide();
                 break;
             case '3':
-            case '4':
                 $("#work").show();
+                $("#unpaid").hide();
+                $("#paid").hide();
+                $("#change").hide();
+                break;
+            case '4':
+                $("#work").hide();
                 $("#unpaid").hide();
                 $("#paid").hide();
                 $("#change").hide();

@@ -28,7 +28,7 @@ class AddFieldUsersHolidayConfigTable extends Migration
             $table->string('payable_claim_formula', 32)->nullable()->comment = '计薪天数起始要求, {年,月,日,时,分,秒}';
             $table->unsignedInteger('payable_self_growth')->nullable()->comment = '计薪天数自增长';
             $table->unsignedInteger('exceed_change_id')->nullable()->comment = '超出天数转换';
-            $table->unsignedTinyInteger('is_show')->default(0)->comment = '是否显示事件,默认0，0:否 1:是 ,具体查看数据库模型配置';
+            $table->unsignedTinyInteger('is_show')->default(1)->comment = '是否显示事件,默认0，0:否 1:是 ,具体查看数据库模型配置';
             $table->unsignedTinyInteger('is_before_after')->default(0)->comment = '是否允许节假日前后申请,默认0，0:否 1: 是,具体查看数据库模型配置';
         });
     }

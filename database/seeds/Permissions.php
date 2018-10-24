@@ -193,6 +193,7 @@ class Permissions extends Seeder
             'crm-all' => '所有权限/CRM管理',
 
             'reconciliation-all' => 'CRM管理/对账管理',
+            'reconciliation-reconciliationAudit.global'                    => '对账管理/全局查看权限',
             'reconciliation-reconciliationAudit'                    => '对账管理/对账列表',
             'reconciliation-reconciliationAudit.edit'               => '对账管理/对账编辑',
             'reconciliation-reconciliationAudit.review'             => '对账管理/对账审核',
@@ -200,6 +201,7 @@ class Permissions extends Seeder
             'reconciliation-reconciliationAudit.invoice'            => '对账管理/对账开票确认',
             'reconciliation-reconciliationAudit.payback'            => '对账管理/对账回款确认',
             'reconciliation-reconciliationAudit.revision'           => '对账管理/对账调整流水',
+            'reconciliationAudit.notice'                            => '对账管理/一键通知',
 
             'reconciliation-reconciliationPrincipal-all'            => 'CRM管理/负责人管理',
             'reconciliation-reconciliationPrincipal'                => '负责人管理/负责人信息列表',

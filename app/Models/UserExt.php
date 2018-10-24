@@ -28,6 +28,7 @@ class UserExt extends Model
 
     const SEX_BOY = 0;
     const SEX_GIRL = 1;
+    const SEX_NO_RESTRICT = 2;
 
     //学历
     public static $education = [

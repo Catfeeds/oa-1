@@ -5,7 +5,7 @@
  * User: weiming Email: 329403630@qq.com
  * Date: 2018/9/3
  * Time: 19:52]
- * 申请请假
+ * 申请请假配置类型
  */
 namespace App\Components\AttendanceService\Operate;
 
@@ -13,7 +13,9 @@ use App\Components\AttendanceService\AttendanceInterface;
 use App\Components\Helper\DataHelper;
 use App\Http\Components\Helpers\AttendanceHelper;
 use App\Models\Attendance\Leave;
+use App\Models\Sys\Calendar;
 use App\Models\Sys\HolidayConfig;
+use App\Models\Sys\PunchRules;
 
 
 class Leaved extends Operate implements AttendanceInterface
@@ -46,35 +48,54 @@ class Leaved extends Operate implements AttendanceInterface
         //时间天数分配
         $numberDay = DataHelper::diffTime($startTimeS, $endTimeS);
         if(empty($numberDay)) {
-            return $this->backLeaveData(false, ['end_time' => trans('申请失败,时间跨度最长为一周，有疑问请联系人事')]);
+            return $this->backLeaveData(false, ['end_time' => trans('申请失败,时间跨度异常，有疑问请联系人事')]);
         }
 
         //验证是否已经有再提交的请假单,排除已拒绝的请假单
         $isLeaves = Leave::whereRaw("
-                    status != 2 and 
-                    `start_time` BETWEEN '{$startTime}' and '{$endTime}'
-                        or 
-                    `end_time` BETWEEN '{$startTime}' and '{$endTime}'
-                ")->get();
+            status != 2 and 
+            `start_time` BETWEEN '{$startTime}' and '{$endTime}'
+                or 
+            `end_time` BETWEEN '{$startTime}' and '{$endTime}'
+        ")->get();
 
         foreach ($isLeaves as $lk => $lv) {
             if(empty($lv->user_id)) continue;
             $diffEndTime = strtotime(AttendanceHelper::getLeaveEndTime($lv->end_time, $lv->end_id));
             if($diffEndTime >= strtotime($startTimeS)) {
-                return $this->backLeaveData(false, ['end_time' => trans('已经有该时间段请假单')]);
+                return $this->backLeaveData(false, ['end_time' => trans('已经有该时间段申请单')]);
             }
         }
-        //查询假期配置和员工剩余假期
-        $holidayConfig = HolidayConfig::where(['holiday_id' => $holidayId])->first();
-        $userHoliday = AttendanceHelper::checkUserLeaveHoliday($p, \Auth::user()->user_id, $holidayConfig, $numberDay);
 
+        //渠道配置计算类型配置判断
+        $holidayConfig = HolidayConfig::where(['holiday_id' => $holidayId])->first();
+        $driver = HolidayConfig::$cypherTypeChar[$holidayConfig->cypher_type];
+        $userHoliday = $this->driver($driver)->check($holidayConfig, $numberDay, count($isLeaves->toArray()));
         //验证是否要上次附件
         if($holidayConfig->is_annex === HolidayConfig::STATUS_ENABLE && empty($p['annex'])) {
             return $this->backLeaveData(false, ['annex' => trans('请上传附件')]);
         }
+        //验证是否允许再节日前后申请
+        if($holidayConfig->is_before_after === HolidayConfig::STATUS_ENABLE ) {
+            $st =  strtotime(date('Y-m-d', strtotime('-1day', strtotime($startTimeS))));
+            $et =  strtotime(date('Y-m-d', strtotime('+1day', strtotime($endTimeS))));
+            $st = date('Y', $st) .'-'. (int)date('m', $st) .'-'. (int)date('d', $st);
+            $et = date('Y', $et) .'-'. (int)date('m', $et) .'-'. (int)date('d', $et);
+
+            $calendar= Calendar::with('punchRules')
+                ->whereRaw('CONCAT(year,"-",month,"-",day)>='. (int)$st .' and CONCAT(year,"-",month,"-",day) <= '. (int)$et)
+                ->get();
+
+            foreach ($calendar as $ck => $cv) {
+                if($cv->punchRules->punch_type_id === PunchRules::HOLIDAY) {
+                    return $this->backLeaveData(false, ['end_time' => trans($cv->year.'-'.$cv->month.'-'.$cv->day.'有节假日，不允许连休!')]);
+                }
+            }
+        }
+
         //员工剩余假期判断和假期使用完是否可在提交请假单
         if(!$userHoliday['success']) {
-            return $this->backLeaveData(false, $userHoliday['msg']);
+            return $this->backLeaveData(false, $userHoliday['message']);
         }
 
         //返回数据
@@ -93,8 +114,14 @@ class Leaved extends Operate implements AttendanceInterface
         return  $this->backLeaveData(true, [], $data);
     }
 
+    /**
+     * 创建申请单
+     * @param array $leave
+     * @return array
+     */
     public function createLeave(array $leave): array
     {
         return parent::createLeave($leave);
     }
+
 }

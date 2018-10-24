@@ -386,7 +386,7 @@ class AttendanceHelper
     {
         $useExt = \Auth::user()->UserExt;
 
-        switch($holiday->condition_id) {
+/*        switch($holiday->condition_id) {
             //申请单为年周期类型判断
             case HolidayConfig::YEAR_RESET:
                 //判断入职时间是否满一年
@@ -416,7 +416,8 @@ class AttendanceHelper
             default :
                 return self::backUserHolidayInfo(true);
                 break;
-        }
+        }*/
+
     }
 
     /**
@@ -501,32 +502,145 @@ class AttendanceHelper
         return empty($userChangeLog->number_day) ? 0 :  $userChangeLog->number_day;
     }
 
+    /**
+     * 解析 申请配置公式格式
+     * @param string $formula 公式格式 [0,0,0,0,0,0] | [年,月,日,时,分,秒]
+     */
+    public static function resolveConfigFormula($formula)
+    {
+        $format = json_decode($formula, true);
+        if(empty($format)) return [];
 
-    /** 获取员工 年假类型 记录信息
+        $date = [];
+        foreach ($format as $k => $v) {
+            if(empty($v)) continue;
+            switch ($k) {
+                case 0 :
+                    $date['y'] = $v . 'year';
+                    break;
+                case 1 :
+                    $date['m'] = $v . 'month';
+                    break;
+                case 2 :
+                    $date['d'] = $v . 'day';
+                    break;
+                case 3 :
+                    $date['h'] = $v . 'hour';
+                    break;
+                case 4 :
+                    $date['i'] = $v . 'minute';
+                    break;
+                case 5 :
+                    $date['s'] = $v . 'second';
+                    break;
+            }
+        }
+
+        return $date;
+    }
+
+
+    public static function resolveCycleConfigFormula($formula)
+    {
+        $format = json_decode($formula, true);
+        if(empty($format)) return [];
+
+        $date = [];
+        foreach ($format as $k => $v) {
+            if(empty($v)) continue;
+            switch ($k) {
+                case 0 :
+                    $date['m'] = $v;
+                    break;
+                case 1 :
+                    $date['d'] = $v ;
+                    break;
+                case 2 :
+                    $date['h'] = $v ;
+                    break;
+                case 3 :
+                    $date['i'] = $v ;
+                    break;
+                case 4 :
+                    $date['s'] = $v;
+                    break;
+            }
+        }
+
+        return $date;
+    }
+
+
+
+    /**
+     * 按员工入职时间维度获取带薪假期
      * @param $entryTime
      * @param $userId
      * @param $holiday
      * @return mixed 返回天数
      */
-    public static function getUserYearHoliday($entryTime, $userId, $holiday)
+    public static function getUserPayableDayToEntryTime($entryTime, $userId, $holiday)
     {
-        //入职未满一年，年假周期类型 天数为0
-        if(empty($entryTime) || strtotime($entryTime) + 31536000 > time()) return 0;
-        //默认为上一年的入职月份的开始时间
-        $startDay= date("Y", strtotime("-1 year")) . '-' . date('m-d', strtotime($entryTime));
-        //当年的员工年假到期时间
-        $endDay = date("Y", time()) . '-' . date('m-d', strtotime($entryTime));
+        //获得带薪假期配置信息
+        $claimDate = self::resolveConfigFormula($holiday->payable_claim_formula);
+        $claimTime = date('Y-m-d H:i:s', strtotime('+'. implode(' ', $claimDate), strtotime($entryTime)));
 
-        //年假到期时间之后，重置年假的开始时间和到期时间
-        if(strtotime($endDay) < time()) {
-            $startDay = date("Y", time()) . '-' . date('m-d', strtotime($entryTime));
-            $endDay = date("Y", time()) + 1 . '-' . date('m-d', strtotime($entryTime));
+        //入职未满配置时间范围，返回天数为0
+        if(empty($entryTime) || strtotime($claimTime) > time()) return 0;
+
+        //获取带薪假期重置配置信息
+        $resetDate = self::resolveConfigFormula($holiday->payable_reset_formula);
+        $resetTime = date('Y-m-d H:i:s', strtotime('+'. implode(' ', $resetDate), strtotime($claimTime)));
+
+        //开始默认为带薪起效时间
+        $startTime= $claimTime;
+        //结束默认为带薪重置时间
+        $endTime = $resetTime;
+
+        //到期时间之后，重置开始时间和到期时间
+        if(strtotime($endTime) < time()) {
+            $startTime = date('Y', time()) . '-' . date('m-d H:i:s', strtotime($startTime));
+            $endTime = date('Y-m-d H:i:s', strtotime('+'. implode(' ', $resetDate), strtotime($startTime)));
         }
-
-        return self::selectLeaveInfo($startDay, $endDay, $userId, $holiday);
+        return self::selectLeaveInfo($startTime, $endTime, $userId, $holiday);
     }
 
-    /** 获取员工 月类型 记录信息
+    /**
+     * 按自然周期时间维度获取带薪假期
+     * @param $userId
+     * @param $holiday
+     * @return mixed
+     */
+    public static function getUserPayableDayToNaturalCycleTime($entryTime, $userId, $holiday)
+    {
+        $claimDate = self::resolveConfigFormula($holiday->payable_claim_formula);
+
+        $claimTime = date('Y-m-d H:i:s', strtotime('+'. implode(' ', $claimDate), strtotime($entryTime)));
+        //入职未满配置时间范围，返回天数为0
+        if(empty($entryTime) || strtotime($claimTime) > time()) return 0;
+
+        $resetDate = self::resolveCycleConfigFormula($holiday->payable_reset_formula);
+
+        $resetTime = sprintf('%d %s:%s:%s', $resetDate['d'] ?? date('d', time()), $resetDate['h'] ?? '00', $resetDate['i'] ?? '00', $resetDate['s'] ?? '00');
+        if(array_key_exists('m', $resetDate)) {
+            $startTime = date('Y-m-d H:i:s', strtotime(date('Y', time()) .'-'. $resetDate['m'] . '-' . $resetTime));
+            $endTime = date('Y-m-d H:i:s', strtotime('+1year', strtotime($startTime)));
+        } elseif(empty($resetDate['m']) && !empty($resetDate['d'])) {
+            $startTime = date('Y-m-d H:i:s', strtotime(date('Y', time()) .'-'. date('m', time()) . '-' . $resetTime));;
+            $endTime = date('Y-m-d H:i:s', strtotime('+1month', strtotime($startTime)));
+        } elseif(empty($resetDate['m']) && empty($resetDate['d']) && !empty($resetDate['h'])) {
+            $startTime = date('Y-m-d H:i:s', strtotime(date('Y', time()) .'-'. date('m', time()) . '-' . $resetTime));;
+            $endTime = date('Y-m-d H:i:s', strtotime('+1day', strtotime($startTime)));
+        } else {
+            $startTime = date('Y-m-d H:i:s', strtotime(date('Y', time()) .'-'. date('m', time()) . '-' . $resetTime));;
+            $endTime = date('Y-m-d H:i:s', strtotime('+1hour', strtotime($startTime)));
+        }
+
+        return self::selectLeaveInfo($startTime, $endTime, $userId, $holiday);
+    }
+
+    /**
+     * 获取员工 月类型 记录信息
      * @param $userId
      * @param $holiday
      * @return mixed
@@ -549,7 +663,9 @@ class AttendanceHelper
      */
     public static function selectLeaveInfo($startDay, $endDay, $userId, $holiday)
     {
-        $userLeaveLog = Leave::select(\DB::raw('SUM(number_day) number_day'))
+        $userLeaveLog = Leave::select([
+            \DB::raw('SUM(number_day) number_day')
+            ])
             ->where('start_time', '>', $startDay)
             ->where('end_time', '<=', $endDay)
             ->whereIn('status', [Leave::PASS_REVIEW, Leave::WAIT_REVIEW, Leave::ON_REVIEW])
@@ -558,7 +674,7 @@ class AttendanceHelper
                 'holiday_id' => $holiday->holiday_id,
             ])->groupBy('user_id')->first('number_day');
 
-        return  empty($userLeaveLog->number_day) ? $holiday->num : $holiday->num - $userLeaveLog->number_day;
+        return empty($userLeaveLog->number_day) ? $holiday->up_day : $holiday->up_day - $userLeaveLog->number_day;
     }
 
     /**

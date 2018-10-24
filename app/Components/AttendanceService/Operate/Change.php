@@ -63,9 +63,10 @@ class Change extends Operate implements AttendanceInterface
                 return $this->backLeaveData(false, ['end_time' => trans('已经有该时间段请假单')]);
             }
         }
-        //查询假期配置和员工剩余假期
+        //渠道配置计算类型配置判断
         $holidayConfig = HolidayConfig::where(['holiday_id' => $holidayId])->first();
-        $userHoliday = AttendanceHelper::checkUserChangeHoliday(\Auth::user()->user_id, $holidayConfig, $numberDay);
+        $driver = HolidayConfig::$cypherTypeChar[$holidayConfig->cypher_type];
+        $userHoliday = $this->driver($driver)->check($holidayConfig, $numberDay, count($isLeaves->toArray()));
 
         //验证是否要上次附件
         if($holidayConfig->is_annex === HolidayConfig::STATUS_ENABLE && empty($p['annex'])) {

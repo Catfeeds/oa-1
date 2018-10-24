@@ -41,6 +41,9 @@ Route::group([
     Route::get('reconciliation-audit/detail/{id}/{source}', [
         'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationAudit|reconciliation-reconciliationAudit.detail'],
         'uses' => 'ReconciliationAuditController@detail'])->name('reconciliationAudit.detail');
+    Route::get('reconciliation-audit/notice/{pid}/{source}', [
+        'middleware' => ['permission:crm-all|reconciliation-all|reconciliation-reconciliationAudit|reconciliation-reconciliationAudit.notice'],
+        'uses' => 'ReconciliationAuditController@notice'])->name('reconciliationAudit.notice');
 
     //负责人
     Route::get('reconciliation-principal', [

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class DelIsRenewUsersHolidayConfigTable extends Migration
+class AddResetTypeUsersHolidayConfigTable extends Migration
 {
     /**
      * Run the migrations.
@@ -14,8 +14,7 @@ class DelIsRenewUsersHolidayConfigTable extends Migration
     public function up()
     {
         Schema::table('users_holiday_config', function (Blueprint $table) {
-            $table->dropColumn('is_renew');
-            $table->unsignedTinyInteger('is_full')->defult(1)->after('num')->comment = '是否影响全勤 默认0 0:否 1:是';
+            $table->unsignedTinyInteger('reset_type')->default(0)->comment = '周期类型,默认0，0:不设置 1: 按入职时间 2:按自然周期 ,具体查看数据库模型配置';
         });
     }
 
@@ -27,7 +26,7 @@ class DelIsRenewUsersHolidayConfigTable extends Migration
     public function down()
     {
         Schema::table('users_holiday_config', function (Blueprint $table) {
-            $table->dropColumn('is_full');
+            $table->dropColumn('reset_type');
         });
     }
 }

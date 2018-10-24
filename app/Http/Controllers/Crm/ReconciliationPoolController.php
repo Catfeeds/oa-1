@@ -50,6 +50,21 @@ class ReconciliationPoolController extends Controller
             }
         }
         $products = Product::getList($limitProduct);
+        if (\Entrust::can(['reconciliation-reconciliationAudit.global'])) {
+            unset($job);
+            unset($products);
+            $products = Product::getList();
+            foreach ($products as $k => $v) {
+                $job[$k][1] = 1;
+                $job[$k][2] = 2;
+                $job[$k][3] = 3;
+                $job[$k][4] = 4;
+                $job[$k][5] = 5;
+                $job[$k][6] = 6;
+                $job[$k][7] = 7;
+                $job[$k][8] = 8;
+            }
+        }
         $pid = \Request::get('product_id', key($products));
         if (!in_array($pid, array_keys($products))) {
             return redirect()->back()->withInput();
@@ -190,8 +205,8 @@ class ReconciliationPoolController extends Controller
         }
         $sql = "
             SELECT 
-                {$type},
-                {$adjustment},
+                {$type} as type,
+                {$adjustment} as adjustment,
                 reconciliation_currency         
             FROM cmr_reconciliation AS a 
             WHERE a.product_id = {$request->product_id} AND a.billing_cycle = '{$request->billing_cycle}'
@@ -200,19 +215,17 @@ class ReconciliationPoolController extends Controller
         $ret = \DB::select($sql);
         $diff = Difference::getList();
         $rate = ExchangeRate::getList($request->billing_cycle);
-
         $data = $tmp = [];
-
         foreach ($ret as $k => $v) {
             $v = (array)$v;
-            if (is_numeric($v['reconciliation_adjustment'])) {
-                if (!isset($tmp[$v['reconciliation_type']])) {
-                    $tmp[$v['reconciliation_type']] = 0;
+            if (is_numeric($v['adjustment'])) {
+                if (!isset($tmp[$v['type']])) {
+                    $tmp[$v['type']] = 0;
                 }
-                $tmp[$v['reconciliation_type']] += $v['reconciliation_adjustment'] * $rate[$v['reconciliation_currency']];
+                $tmp[$v['type']] += $v['adjustment'] * $rate[$v['reconciliation_currency']];
             } else {
-                $type = json_decode($v['reconciliation_type'], true);
-                $adjustment = json_decode($v['reconciliation_adjustment'], true);
+                $type = json_decode($v['type'], true);
+                $adjustment = json_decode($v['adjustment'], true);
                 foreach ($type as $key => $val) {
                     if (!isset($tmp[$val])) {
                         $tmp[$val] = 0;

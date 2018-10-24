@@ -85,12 +85,13 @@ class LeaveController extends AttController
         switch ($applyTypeId) {
             //请假
             case HolidayConfig::LEAVEID:
-                $userExt = UserExt::where(['user_id' => \Auth::user()->user_id])->first();
                 $holidayList = HolidayConfig::where(['apply_type_id' => HolidayConfig::LEAVEID])
-                    ->whereIn('restrict_sex', [$userExt->sex, 2])
+                    ->whereIn('restrict_sex', [\Auth::user()->userExt->sex, UserExt::SEX_NO_RESTRICT])
+                    ->where(['is_show' => HolidayConfig::STATUS_ENABLE])
                     ->orderBy('sort', 'desc')
                     ->get(['holiday_id', 'holiday'])
-                    ->pluck('holiday', 'holiday_id')->toArray();
+                    ->pluck('holiday', 'holiday_id')
+                    ->toArray();
                 $models = 'edit';
                 $title = trans('att.请假申请');
                 break;
@@ -145,6 +146,7 @@ class LeaveController extends AttController
         $driver = HolidayConfig::$driverType[$applyTypeId];
         //申请单检验
         $retCheck = \AttendanceService::driver($driver)->checkLeave($request);
+
         if(!$retCheck['success']) return redirect()->back()->with(['holiday_id' => $p['holiday_id']])->withInput()->withErrors($retCheck['message']);
         //获取申请单审核步骤流程
         $step = \AttendanceService::driver($driver)->getLeaveStep($retCheck['data']['number_day']);
@@ -336,6 +338,22 @@ class LeaveController extends AttController
         }
 
         return true;
+    }
+
+    public function showMemo(Request $request)
+    {
+        $p = $request->all();
+        $holidayConfig = HolidayConfig::where(['apply_type_id' => HolidayConfig::LEAVEID, 'holiday_id' => $p['id']])
+            ->whereIn('restrict_sex', [\Auth::user()->userExt->sex, UserExt::SEX_NO_RESTRICT])
+            ->where(['is_show' => HolidayConfig::STATUS_ENABLE])
+            ->first();
+
+        if(empty($holidayConfig->holiday_id))  return response()->json(['status' => -1, 'memo' => '', 'day' => 0]);
+
+        $driver = HolidayConfig::$cypherTypeChar[$holidayConfig->cypher_type];
+        $ret = \AttendanceService::driver($driver, 'cypher')->getUserHoliday(\Auth::user()->user_id, $holidayConfig);
+
+        return response()->json($ret);
     }
 
 }
