@@ -103,5 +103,16 @@ Route::group([
         Route::get('daily-detail/review/import/generate/log/{id}', [
             'middleware' => ['permission:daily-detail.review'],
             'uses' => 'PunchRecordController@log'])->name('daily-detail.review.import.generate.log');
+
+        #考勤申诉
+        Route::post('appeal/create', [
+//            'middleware' => ['permission:appeal.store'],
+            'uses' => 'AppealController@store'])->name('appeal.store');
+        Route::post('appeal/edit', [
+//            'middleware' => ['permission:appeal.update'],
+            'uses' => 'AppealController@update'])->name('appeal.update');
+        Route::get('appeal/review', [
+//            'middleware' => ['permission:appeal.review'],
+            'uses' => 'AppealController@reviewIndex'])->name('appeal.review.info');
     });
 });

@@ -41,7 +41,7 @@
                 center: 'title',
                 right: 'today'
             },
-            height: 500,
+            height: window.screen.height * 0.5,
             weekends: true,
             themeSystem: 'bootstrap3',
             events: function (start, end, a, callback) {
@@ -94,9 +94,10 @@
                 }
             },
             @endif
-        }).find('.fc-body').attr('title', '可选中日期查看').css('cursor', 'pointer');
+        });
 
         @if(isset($clickRead))
+        $('#calendar').find('.fc-body').attr('title', '可选中日期查看').css('cursor', 'pointer');
         ajaxGetDayInfo('{{ date('Y-m-d', time()) }}');
         @endif
     });

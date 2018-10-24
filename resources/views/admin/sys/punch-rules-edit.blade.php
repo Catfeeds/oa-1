@@ -111,3 +111,19 @@
 @endsection
 @include('widget.icheck')
 @include('widget.datepicker')
+
+@push('scripts')
+<script type="text/javascript">
+    $('[name=punch_type_id]').on('ifChecked', function () {
+       if ($(this).val() == '{{ \App\Models\Sys\PunchRules::RESTDAY }}' || $(this).val() == '{{ \App\Models\Sys\PunchRules::HOLIDAY }}') {
+            $('[name=ready_time]').prop('required', false).parents('.form-group').hide();
+            $('[name=work_start_time]').prop('required', false).parents('.form-group').hide();
+            $('[name=work_end_time]').prop('required', false).parents('.form-group').hide();
+       }else {
+           $('[name=ready_time]').parents('.form-group').show();
+           $('[name=work_start_time]').parents('.form-group').show();
+           $('[name=work_end_time]').parents('.form-group').show();
+       }
+    });
+</script>
+@endpush
