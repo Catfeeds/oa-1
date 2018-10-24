@@ -20,13 +20,13 @@
 </head>
 <body>
 <iframe id="xiumi"
-        src="http://xiumi.us/studio/v5#/paper">
+        src="https://xiumi.us/studio/v5#/paper">
 </iframe>
 
 <script type="text/javascript" src="./internal.js"></script>
 <script>
     var xiumi = document.getElementById('xiumi');
-    var xiumi_url = "http://xiumi.us";
+    var xiumi_url = "https://xiumi.us";
     xiumi.onload = function () {
         console.log("postMessage");
         xiumi.contentWindow.postMessage('ready', xiumi_url);
