@@ -136,7 +136,7 @@
                                     <td>
                                         @if(!isset($appealData[$v['leave_id']]))
                                             <a data-toggle="modal" data-target="#exampleModal" data-whatever="{{
-                                               serialize(['holiday_id' => $v['holiday_id'], 'leave_id' => $v['leave_id'],
+                                               serialize(['appeal_id' => $v['leave_id'],
                                                'appeal_type' => \App\Models\Attendance\Appeal::APPEAL_LEAVE])
                                                }}">申诉</a>
                                         @else

@@ -88,7 +88,7 @@
                                             @if(!isset($appealData[$v['id']]))
                                                 <a data-toggle="modal" data-target="#exampleModal"
                                                    data-whatever="{{serialize([
-                                                   'daily_id' => $v['id'], 'appeal_type' => \App\Models\Attendance\Appeal::APPEAL_DAILY
+                                                   'appeal_id' => $v['id'], 'appeal_type' => \App\Models\Attendance\Appeal::APPEAL_DAILY
                                                    ])}}">申诉</a>
                                             @else
                                                 <span>{{ \App\Models\Attendance\Appeal::getTextArr()[$appealData[$v['id']]] }}</span>
