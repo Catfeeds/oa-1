@@ -40,7 +40,7 @@
                     <div class="col-lg-6">
                         <div class="ibox">
                             <div class="ibox-title">
-                                <h5>待入职</h5>
+                                <h5>{{ trans('staff.待入职') }}</h5>
                             </div>
                             <div class="ibox-content">
                                 <div class="first-col-div text-center">
@@ -54,7 +54,7 @@
                     <div class="col-lg-6">
                         <div class="ibox">
                             <div class="ibox-title">
-                                <h5>试用期</h5>
+                                <h5>{{ trans('staff.试用期') }}</h5>
                             </div>
                             <div class="ibox-content">
                                 <div class="first-col-div text-center">
@@ -70,7 +70,7 @@
                     <div class="col-lg-6">
                         <div class="ibox">
                             <div class="ibox-title">
-                                <h5>正式员工</h5>
+                                <h5>{{ trans('staff.正式员工') }}</h5>
                             </div>
                             <div class="ibox-content">
                                 <div class="first-col-div text-center">
@@ -87,7 +87,7 @@
             <div class="col-lg-4">
                 <div class="ibox">
                     <div class="ibox-title">
-                        <h5>日程管理</h5>
+                        <h5>{{ trans('staff.日程管理') }}</h5>
                     </div>
                     <div class="ibox-content">
                         <div style="height: 500px; padding: 0 20px" id="day_admin">
@@ -96,7 +96,7 @@
                                 <h4 id="day-info-subtitle"></h4>
                             </div>
                             <div class="row" style="height: 70%">
-                                <h4>今日</h4>
+                                <h4>{{ trans('staff.今日') }}</h4>
                                 <div id="day-info-content"></div>
                             </div>
                         </div>
@@ -107,7 +107,7 @@
             <div class="col-lg-5">
                 <div class="ibox float-e-margins">
                     <div class="ibox-title">
-                        <h5>工作日历</h5>
+                        <h5>{{ trans('staff.工作日历') }}</h5>
                     </div>
                     <div class="ibox-content">
                         @include('widget.calendar-user', ['clickRead' => 1])

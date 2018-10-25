@@ -20,7 +20,7 @@
             <div class="col-xs-2 paddingx-5">
                 <div class="widget white-bg">
                     <div class="m-b-md">
-                        <h1 class="no-margins">待处理申诉</h1>
+                        <h1 class="no-margins">{{ trans('att.待处理申诉') }}</h1>
                     </div>
                     <div class="text-center">
                         <p class="font-bold no-margins text-success" style="font-size: 50px">{{ $countPending }}</p>
@@ -31,7 +31,7 @@
             <div class="col-xs-2 paddingx-5">
                 <div class="widget white-bg">
                     <div class="m-b-md">
-                        <h1 class="no-margins">已处理申诉</h1>
+                        <h1 class="no-margins">{{ trans('att.已处理申诉') }}</h1>
                     </div>
                     <div class="text-center">
                         <p class="font-bold no-margins text-success" style="font-size: 50px">{{ $countComplete }}</p>
@@ -46,17 +46,19 @@
                     <table class="table table-striped">
                         <thead>
                             <tr>
-                                <th>部门</th>
-                                <th>工号</th>
-                                <th>姓名</th>
-                                <th>申诉类型</th>
-                                <th>申诉内容</th>
-                                <th>提交时间</th>
-                                <th>处理结果</th>
-                                <th>操作人</th>
-                                <th>处理时间</th>
-                                <th>备注</th>
-                                <th width="5%">操作</th>
+                                <th>{{ trans('att.部门') }}</th>
+                                <th>{{ trans('att.工号') }}</th>
+                                <th>{{ trans('att.姓名') }}</th>
+                                <th>{{ trans('att.申诉类型') }}</th>
+                                <th>{{ trans('att.申诉内容') }}</th>
+                                <th>{{ trans('att.提交时间') }}</th>
+                                <th>{{ trans('att.处理结果') }}</th>
+                                <th>{{ trans('att.操作人') }}</th>
+                                <th>{{ trans('att.处理时间') }}</th>
+                                <th>{{ trans('att.备注') }}</th>
+                                @if(Entrust::can('appeal.update'))
+                                    <th width="5%">{{ trans('att.操作') }}</th>
+                                @endif
                             </tr>
                         </thead>
                         <tbody>
@@ -70,7 +72,7 @@
                                             {{ \App\Models\Sys\HolidayConfig::$applyType[$appeal['apply_type_id']] }}
                                         @endif
                                         @if($appeal['appeal_type'] == \App\Models\Attendance\Appeal::APPEAL_DAILY)
-                                            每日明细
+                                            {{ trans('att.每日明细') }}
                                         @endif
                                     </td>
                                     <td>
@@ -85,12 +87,14 @@
                                     <td>
                                         <pre style="height: 5em;width: 20em">{{ $appeal['remark'] ?? '暂无' }}</pre>
                                     </td>
-                                    <td>
-                                        <a data-toggle="modal" data-target="#exampleModal"
-                                           data-whatever="{{ $appeal['id'] }}" data-remark="{{ $appeal['remark'] }}" data-result="{{ $appeal['result'] }}">
-                                            {{ $appeal['result'] == 0 ? '处理' : '修改' }}
-                                        </a>
-                                    </td>
+                                    @if(Entrust::can('appeal.update'))
+                                        <td>
+                                            <a data-toggle="modal" data-target="#exampleModal"
+                                               data-whatever="{{ $appeal['id'] }}" data-remark="{{ $appeal['remark'] }}" data-result="{{ $appeal['result'] }}">
+                                                {{ $appeal['result'] == 0 ? '处理' : '修改' }}
+                                            </a>
+                                        </td>
+                                    @endif
                                 </tr>
                             @endforeach
                         </tbody>

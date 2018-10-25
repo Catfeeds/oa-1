@@ -18,6 +18,7 @@ class Permissions extends Seeder
         '_staff',
         '_staffCfg',
         '_oa',
+        '_bulletin'
     ];
 
     public function run()
@@ -101,6 +102,11 @@ class Permissions extends Seeder
             'daily-detail.review.send-batch'    => '员工考勤管理/批量发布考勤通知',
             'daily-detail.review.export'        => '员工考勤管理/选择导出excel',
             'daily-detail.review.export-batch'  => '员工考勤管理/批量导出excel',
+
+            'appeal-all'                        => '考勤管理/员工申诉管理',
+            'appeal.store'                      => '员工申诉管理/员工添加申诉',
+            'appeal.update'                     => '员工申诉管理/管理员审核申诉',
+            'appeal.review'                     => '员工申诉管理/申诉列表',
         ];
     }
 
@@ -142,6 +148,7 @@ class Permissions extends Seeder
 
             'staff-all'        => '所有权限/员工管理',
 
+            'manage.index'     => '员工管理/员工工作台',
             'staff'            => '员工管理/员工列表',
             'staff.edit'       => '员工管理/员工编辑',
             'staff.info'       => '员工管理/员工查看',
@@ -229,6 +236,18 @@ class Permissions extends Seeder
 
             'reconciliation-reconciliationSchedule-all'             => 'CRM管理/对账进度跟踪管理',
             'reconciliation-reconciliationSchedule'                 => '对账进度跟踪管理/对账进度跟踪信息列表',
+        ];
+    }
+
+    //公告栏管理
+    private function _bulletin(): array
+    {
+        return [
+            'bulletin-all'    => '所有权限/公告栏管理',
+
+            'bulletin.index'  => '公告栏管理/公告配置列表',
+            'bulletin.create' => '公告栏管理/公告添加',
+            'bulletin.edit'   => '公告栏管理/公告修改',
         ];
     }
 }

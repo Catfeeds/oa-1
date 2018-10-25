@@ -89,7 +89,9 @@
                             <th>{{ trans('att.申请时间') }}</th>
                             <th>{{ trans('att.申请状态') }}</th>
                             <th>{{ trans('att.操作') }}</th>
-                            <th>{{ trans('att.对假期有疑问?') }}</th>
+                            @if(Entrust::can('appeal.store'))
+                                <th>{{ trans('att.对假期有疑问?') }}</th>
+                            @endif
                         </tr>
                         </thead>
                         <tbody>
@@ -130,16 +132,18 @@
                                         {!! BaseHtml::tooltip(trans('att.请假详情'), route('leave.optInfo', ['id' => $v['leave_id'], 'type' => \App\Models\Attendance\Leave::LOGIN_INFO]), 'cog fa fa-newspaper-o') !!}
                                     @endif
                                 </td>
-                                <td>
-                                    @if(!isset($appealData[$v['leave_id']]))
-                                        <a data-toggle="modal" data-target="#exampleModal" data-whatever="{{
-                                           serialize(['holiday_id' => $v['holiday_id'], 'leave_id' => $v['leave_id'],
-                                           'appeal_type' => \App\Models\Attendance\Appeal::APPEAL_LEAVE])
-                                           }}">申诉</a>
-                                    @else
-                                        <span>{{ \App\Models\Attendance\Appeal::getTextArr()[$appealData[$v['leave_id']]] }}</span>
-                                    @endif
-                                </td>
+                                @if(Entrust::can('appeal.store'))
+                                    <td>
+                                        @if(!isset($appealData[$v['leave_id']]))
+                                            <a data-toggle="modal" data-target="#exampleModal" data-whatever="{{
+                                               serialize(['holiday_id' => $v['holiday_id'], 'leave_id' => $v['leave_id'],
+                                               'appeal_type' => \App\Models\Attendance\Appeal::APPEAL_LEAVE])
+                                               }}">申诉</a>
+                                        @else
+                                            <span>{{ \App\Models\Attendance\Appeal::getTextArr()[$appealData[$v['leave_id']]] }}</span>
+                                        @endif
+                                    </td>
+                                @endif
                             </tr>
                         @endforeach
                         </tbody>

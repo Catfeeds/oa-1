@@ -35,7 +35,9 @@
                                 <th>{{ trans('att.扣分') }}</th>
                                 <th>{{ trans('att.类型') }}</th>
                                 <th>{{ trans('att.操作') }}</th>
-                                <th>{{ trans('att.对考勤有疑问?') }}</th>
+                                @if(Entrust::can('appeal.store'))
+                                    <th>{{ trans('att.对考勤有疑问?') }}</th>
+                                @endif
                             </tr>
                             </thead>
                             <tbody>
@@ -81,16 +83,18 @@
                                             </a>
                                         @endif
                                     </td>
-                                    <td>
-                                        @if(!isset($appealData[$v['id']]))
-                                            <a data-toggle="modal" data-target="#exampleModal"
-                                               data-whatever="{{serialize([
-                                               'daily_id' => $v['id'], 'appeal_type' => \App\Models\Attendance\Appeal::APPEAL_DAILY
-                                               ])}}">申诉</a>
-                                        @else
-                                            <span>{{ \App\Models\Attendance\Appeal::getTextArr()[$appealData[$v['id']]] }}</span>
-                                        @endif
-                                    </td>
+                                    @if(Entrust::can('appeal.store'))
+                                        <td>
+                                            @if(!isset($appealData[$v['id']]))
+                                                <a data-toggle="modal" data-target="#exampleModal"
+                                                   data-whatever="{{serialize([
+                                                   'daily_id' => $v['id'], 'appeal_type' => \App\Models\Attendance\Appeal::APPEAL_DAILY
+                                                   ])}}">申诉</a>
+                                            @else
+                                                <span>{{ \App\Models\Attendance\Appeal::getTextArr()[$appealData[$v['id']]] }}</span>
+                                            @endif
+                                        </td>
+                                    @endif
                                 </tr>
                             @endforeach
                             </tbody>

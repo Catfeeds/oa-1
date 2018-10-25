@@ -24,28 +24,28 @@
                 <div class="row">
                     <div class="col-xs-5">
                         <div class="form-group">
-                            {!! Form::label('title', '标题:', ['class' => 'col-xs-3 control-label']) !!}
+                            {!! Form::label('title', trans('app.标题').':', ['class' => 'col-xs-3 control-label']) !!}
                             <div class="col-xs-5">
                                 {!! Form::text('title', $data->title ?? old('title'), [
-                                'placeholder' => '输入公告标题', 'required' => true, 'class' => 'form-control']) !!}
+                                'placeholder' => trans('app.输入公告标题'), 'required' => true, 'class' => 'form-control']) !!}
                             </div>
                         </div>
 
                         <div class="form-group @if (!empty($errors->first('valid_time'))) has-error @endif">
-                            {!! Form::label('valid_time', '有效时间:', ['class' => 'col-xs-3 control-label']) !!}
+                            {!! Form::label('valid_time', trans('app.有效时间').':', ['class' => 'col-xs-3 control-label']) !!}
                             <div class="col-xs-5">
                                 {!! Form::text('valid_time', $data->valid_time ?? old('valid_time'), [
-                                'placeholder' => '输入持续显示天数', 'required' => true, 'class' => 'form-control'
+                                'placeholder' => trans('app.输入持续显示天数'), 'required' => true, 'class' => 'form-control'
                             ]) !!}
                             </div>
                             <span class="text-danger">{{ $errors->first('valid_time') }}</span>
                         </div>
 
                         <div class="form-group @if (!empty($errors->first('weight'))) has-error @endif">
-                            {!! Form::label('weight', '权重:', ['class' => 'col-xs-3 control-label']) !!}
+                            {!! Form::label('weight', trans('app.权重').':', ['class' => 'col-xs-3 control-label']) !!}
                             <div class="col-xs-5">
                                 {!! Form::text('weight', $data->weight ?? old('weight'), [
-                                'placeholder' => '权重越大越靠前', 'required' => true, 'class' => 'form-control']) !!}
+                                'placeholder' => trans('app.权重越大越靠前'), 'required' => true, 'class' => 'form-control']) !!}
                             </div>
                             <span class="text-danger">{{ $errors->first('weight') }}</span>
                         </div>
@@ -65,7 +65,7 @@
                         </script>
                     </div>
                     <div class="form-group">
-                        {!! Form::submit('提交', ['class' => 'btn btn-success']) !!}
+                        {!! Form::submit(trans('app.提交'), ['class' => 'btn btn-success']) !!}
                     </div>
                 </div>
                 {!! Form::close() !!}
