@@ -15,9 +15,9 @@ class Recheck extends Cypher
         return parent::check($holidayConfig, $numberDay);
     }
 
-    public function getUserHoliday($userId, $holidayConfig)
+    public function getUserHoliday($entryTime, $userId, $holidayConfig)
     {
-        return parent::getUserHoliday($userId, $holidayConfig);
+        return parent::getUserHoliday($entryTime, $userId, $holidayConfig);
     }
 
 }

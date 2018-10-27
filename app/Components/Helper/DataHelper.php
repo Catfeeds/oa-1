@@ -205,4 +205,88 @@ class DataHelper
         }
         return array_unique($day);
     }
+
+
+    /**
+     * 对一个 DateTime 对象加上一定量的 日、月、年、小时、分钟和秒。
+     * @param $date 2018-10-27 09:00:00
+     * @param $formula [0,0,0,0,0,0]
+     * @param string $format Y-m-d H:i:s
+     * @return string 2018-10-27 09:00:00
+     */
+    public static function dateTimeAddToFormula($date, $formula, $format = 'Y-m-d H:i:s')
+    {
+        $formula = json_decode($formula, true);
+        if(empty($formula)) return '';
+
+        return (new \DateTime($date))
+            ->add(new \DateInterval('P'.$formula[0].'Y'.$formula[1].'M'.$formula[2].'DT'.$formula[3].'H'.$formula[4].'M'.$formula[5].'S'))
+            ->format($format);
+    }
+
+    /**
+     * 对一个 DateTime 对象加上一定量的 日、月、年、小时、分钟和秒。
+     *  1Y,1M 1D,T1H, T0H1M, T0H0M1S
+     * @param $date
+     * @param $interval
+     * @param string $format
+     * @return string
+     */
+    public static function dateTimeAdd($date, $interval, $format = 'Y-m-d H:i:s')
+    {
+        return (new \DateTime($date))
+            ->add(new \DateInterval('P' . $interval))
+            ->format($format);
+    }
+
+    public static function dateTimeAddToModify($date, $modify, $format = 'Y-m-d H:i:s')
+    {
+        return (new \DateTime($date))
+            ->modify($modify)
+            ->format($format);
+    }
+
+    /**
+     * 对一个 DateTime 对象加上一定量的 日、月、小时、分钟和秒。
+     * @param $date 2018-10-27 09:00:00
+     * @param $formula [0,0,0,0,0]
+     * @param string $format Y-m-d H:i:s
+     * @return string 2018-10-27 09:00:00
+     */
+    public static function dateTimeAddToNaturalCycle($date, $formula, $format = 'Y-m-d H:i:s')
+    {
+        $formula = json_decode($formula, true);
+
+        return (new \DateTime($date))
+            ->add(new \DateInterval('P'.$formula[0].'M'.$formula[1].'DT'.$formula[2].'H'.$formula[3].'M'.$formula[4].'S'))
+            ->format($format);
+    }
+
+
+    /**
+     * 对一个 DateTime 对象减去一定量的 日、月、年、小时、分钟和秒。
+     * @param $date 2018-10-27 09:00:00
+     * @param $formula [0,0,0,0,0,0]
+     * @param string $format Y-m-d H:i:s
+     * @return string 2018-10-27 09:00:00
+     */
+    public static function dateTimeSubToFormula($date, $formula, $format = 'Y-m-d H:i:s')
+    {
+        $formula = json_decode($formula, true);
+
+        return (new \DateTime($date))
+            ->sub(new \DateInterval('P'.$formula[0].'Y'.$formula[1].'M'.$formula[2].'DT'.$formula[3].'H'.$formula[4].'M'.$formula[5].'S'))
+            ->format($format);
+    }
+
+    /**
+     * 对一个 DateTime 格式化
+     * @param string $date
+     * @param string $format Y-m-d H:i:s
+     * @return string 2018-10-27 09:00:00
+     */
+    public static function dateTimeFormat($date = 'now', $format = 'Y-m-d H:i:s')
+    {
+        return (new \DateTime($date))->format($format);
+    }
 }

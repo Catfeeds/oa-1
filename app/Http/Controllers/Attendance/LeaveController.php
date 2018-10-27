@@ -13,6 +13,7 @@ use App\Http\Components\Helpers\AttendanceHelper;
 use App\Http\Components\Helpers\OperateLogHelper;
 use App\Http\Components\Helpers\ReviewHelper;
 use App\Http\Components\ScopeAtt\LeaveScope;
+use App\Models\Attendance\Appeal;
 use App\Models\Attendance\DailyDetail;
 use App\Models\Attendance\Leave;
 use App\Models\Sys\Dept;
@@ -68,8 +69,12 @@ class LeaveController extends AttController
             'visit' => $visitHolObj ?? NULL,
         ]);
 
+        $appealData = Appeal::getAppealResult(Appeal::APPEAL_LEAVE);
+
         $title = trans('att.我的假期详情');
-        return view('attendance.leave.index', compact('title', 'data', 'scope', 'holidayList', 'userIds', 'types', 'type', 'remainWelfare'));
+        return view('attendance.leave.index',
+            compact('title', 'data', 'scope', 'holidayList', 'userIds', 'types', 'type', 'remainWelfare', 'appealData')
+        );
     }
 
     public function create($applyTypeId)

@@ -1,5 +1,5 @@
 @if(Entrust::can(['leave*', 'staff*']))
-    <li @if (Route::is(['leave*', 'daily-detail*'])) class="active" @endif >
+    <li @if (Route::is(['leave*', 'daily-detail*', 'appeal*'])) class="active" @endif >
         <a href="#"><i class="fa fa-newspaper-o"></i> <span class="nav-label">{{ trans('att.考勤功能') }}</span><span
                     class="fa arrow"></span></a>
         <ul class="nav nav-second-level">
@@ -25,6 +25,12 @@
                     <a href="{{ route('daily-detail.review.info') }}">{{ trans('att.考勤管理') }}</a>
                 </li>
             @endif
+
+            @if(Entrust::can(['appeal.review']))
+                <li @if (Route::is(['appeal.review.*']) ) class="active" @endif>
+                    <a href="{{ route('appeal.review.info') }}">{{ trans('att.申诉管理') }}</a>
+                </li>
+            @endif
         </ul>
     </li>
 @endif
@@ -34,7 +40,7 @@
         <a href="#"><i class="fa fa-newspaper-o"></i> <span class="nav-label">{{ trans('staff.员工管理') }}</span><span
                     class="fa arrow"></span></a>
         <ul class="nav nav-second-level">
-            @if(Entrust::can(['staff*']))
+            @if(Entrust::can(['manage.index']))
                 <li @if (Route::is(['manage.index']) ) class="active" @endif>
                     <a href="{{ route('manage.index') }}">{{ trans('staff.员工工作台') }}</a>
                 </li>
@@ -57,9 +63,9 @@
 @endif
 
 @if(Entrust::can(['holiday-config', 'approval-step', 'punch-rules', 'calendar', 'dept',
-                'job', 'school', 'firm']))
+                'job', 'school', 'firm', 'bulletin']))
     <li @if (Route::is(['holiday-config*', 'approval-step*', 'punch-rules*', 'calendar*', 'dept*',
-                'job*', 'school*', 'firm*'])) class="active" @endif >
+                'job*', 'school*', 'firm*', 'bulletin*'])) class="active" @endif >
         <a href="#"><i class="fa fa-newspaper-o"></i> <span class="nav-label">{{ trans('staff.系统配置') }}</span><span
                     class="fa arrow"></span></a>
         <ul class="nav nav-second-level">
@@ -72,6 +78,11 @@
                 <a href="{{ route('dept') }}">{{ trans('staff.员工信息配置') }}</a>
             </li>
 
+            @if(Entrust::can('bulletin.index'))
+                <li @if (Route::is(['bulletin*']) ) class="active" @endif>
+                    <a href="{{ route('bulletin.index') }}">{{ trans('app.公告栏信息配置') }}</a>
+                </li>
+            @endif
         </ul>
     </li>
 @endif

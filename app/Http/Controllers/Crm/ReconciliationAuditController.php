@@ -9,6 +9,7 @@ use App\Models\Crm\EditLog;
 use App\Models\Crm\ExchangeRate;
 use App\Models\Crm\Principal;
 use App\Models\Crm\Product;
+use App\Models\Crm\Proportion;
 use App\Models\Crm\Reconciliation;
 use App\Http\Components\ScopeCrm\Reconciliation as Scope;
 use App\User;
@@ -55,6 +56,21 @@ class ReconciliationAuditController extends Controller
             }
         }
         $products = Product::getList($limitProduct);
+        if (\Entrust::can(['reconciliation-reconciliationAudit.global'])) {
+            unset($job);
+            unset($products);
+            $products = Product::getList();
+            foreach ($products as $k => $v) {
+                $job[$k][1] = 1;
+                $job[$k][2] = 2;
+                $job[$k][3] = 3;
+                $job[$k][4] = 4;
+                $job[$k][5] = 5;
+                $job[$k][6] = 6;
+                $job[$k][7] = 7;
+                $job[$k][8] = 8;
+            }
+        }
         $pid = \Request::get('product_id', key($products));
         if (!in_array($pid, array_keys($products))) {
             return redirect()->back()->withInput();
@@ -156,6 +172,7 @@ class ReconciliationAuditController extends Controller
                 a.product_id = p.product_id
                 AND a.backstage_channel = p.backstage_channel
                 AND a.billing_cycle_end = p.billing_cycle
+                AND a.client = p.client
             )
             WHERE a.product_id = {$pid} AND a.billing_cycle = '{$billing_cycle}'{$where} AND {$scope->getWhere()}
         ";
@@ -444,9 +461,8 @@ class ReconciliationAuditController extends Controller
                 $v->update($update);
                 unset($update);
             }
-            $this->push($pid, $source, $status, $reason);
             flash(trans('crm.审核', ['value' => trans('crm.对账审核')]), 'success');
-            return redirect()->route('reconciliationAudit', ['source' => $source, 'product_id' => $pid, 'scope[startDate]' => $scope->startTimestamp, 'scope[endDate]' => $scope->endTimestamp]);
+            return redirect()->route('reconciliationAudit', ['source' => $source, 'product_id' => $pid]);
         } else {
             DB::beginTransaction();
             try {
@@ -454,6 +470,7 @@ class ReconciliationAuditController extends Controller
                     ->whereBetween('billing_cycle_start', [$scope->startTimestamp, $scope->endTimestamp])
                     ->get();
                 foreach ($data as $v) {
+                    $p = Proportion::where(['product_id' => $v['product_id'], 'backstage_channel' => $v['backstage_channel'], 'billing_cycle' => $v['billing_cycle_end'], 'client' => $v['client']])->first();
                     $update = ['review_type' => (int)$status];
                     switch (true) {
                         case $status == Reconciliation::OPS:
@@ -461,8 +478,8 @@ class ReconciliationAuditController extends Controller
                                 $update += [
                                     'operation_water_other' => $v['backstage_water_other'],
                                     'operation_water_rmb' => $v['backstage_water_rmb'],
-                                    'operation_divide_other' => CrmHelper::dividedInto($v['channel_rate'], $v['first_division'], $v['second_division'], $v['second_division_condition'], $v['backstage_water_other']),
-                                    'operation_divide_rmb' => CrmHelper::dividedInto($v['channel_rate'], $v['first_division'], $v['second_division'], $v['second_division_condition'], $v['backstage_water_rmb']),
+                                    'operation_divide_other' => CrmHelper::dividedInto($p['channel_rate'], $p['first_division'], $p['second_division'], $p['second_division_condition'], $v['backstage_water_other']),
+                                    'operation_divide_rmb' => CrmHelper::dividedInto($p['channel_rate'], $p['first_division'], $p['second_division'], $p['second_division_condition'], $v['backstage_water_rmb']),
                                 ];
                             }
                             break;
@@ -471,8 +488,8 @@ class ReconciliationAuditController extends Controller
                                 $update += [
                                     'accrual_water_other' => $v['operation_water_other'],
                                     'accrual_water_rmb' => $v['operation_water_rmb'],
-                                    'accrual_divide_other' => CrmHelper::dividedInto($v['channel_rate'], $v['first_division'], $v['second_division'], $v['second_division_condition'], $v['operation_water_other']),
-                                    'accrual_divide_rmb' => CrmHelper::dividedInto($v['channel_rate'], $v['first_division'], $v['second_division'], $v['second_division_condition'], $v['operation_water_rmb']),
+                                    'accrual_divide_other' => CrmHelper::dividedInto($p['channel_rate'], $p['first_division'], $p['second_division'], $p['second_division_condition'], $v['operation_water_other']),
+                                    'accrual_divide_rmb' => CrmHelper::dividedInto($p['channel_rate'], $p['first_division'], $p['second_division'], $p['second_division_condition'], $v['operation_water_rmb']),
                                 ];
                             }
                             break;
@@ -484,12 +501,12 @@ class ReconciliationAuditController extends Controller
             } catch (\Exception $e) {
                 DB::rollBack();
                 flash(trans('crm.录入数据库失败：' . $e->getMessage()), 'danger');
-                return redirect()->route('reconciliationAudit', ['source' => $source, 'product_id' => $pid, 'scope[startDate]' => $scope->startTimestamp, 'scope[endDate]' => $scope->endTimestamp]);
+                return redirect()->route('reconciliationAudit', ['source' => $source, 'product_id' => $pid]);
             }
 
             $this->push($pid, $source, $status, $reason);
             flash(trans('crm.审核', ['value' => trans('crm.对账审核')]), 'success');
-            return redirect()->route('reconciliationAudit', ['source' => $source, 'product_id' => $pid, 'scope[startDate]' => $scope->startTimestamp, 'scope[endDate]' => $scope->endTimestamp]);
+            return redirect()->route('reconciliationAudit', ['source' => $source, 'product_id' => $pid]);
         }
     }
 
@@ -658,7 +675,7 @@ class ReconciliationAuditController extends Controller
             $tmp .= '<a href="' . $url['review'] . '" target="_self"> <i class="fa fa-check fa-lg confirmation" data-toggle="tooltip" data-placement="top" title="" data-original-title="审核" data-confirm="确认提交审核?"></i> </a>
 <a href="' . $url['refuse'] . '" target="_self"> <i class="fa fa-times fa-lg confirmation" data-toggle="tooltip" data-placement="top" title="" data-original-title="拒绝" data-confirm="确认拒绝?"></i> </a>';
         }
-        if ($source == Reconciliation::TREASURER && $p1 && in_array(Principal::FRC, $limitPost)){
+        if ($source == Reconciliation::TREASURER && $p1 && in_array(Principal::FRC, $limitPost)) {
             $tmp .= '<a href="' . $url['revision'] . '" class="generate"> <i class="fa fa-edit fa-lg" data-toggle="tooltip" data-placement="top" title="" data-original-title="调整流水"></i> </a>';
         }
         return $tmp;
@@ -768,7 +785,7 @@ class ReconciliationAuditController extends Controller
         Reconciliation::create($createData);
         $data->update($update);
         flash(trans('app.调整成功', ['value' => trans('crm.对账审核')]), 'success');
-        return redirect()->route('reconciliationAudit', ['source' => Reconciliation::TREASURER, 'product_id' => $data['product_id'], 'scope[startDate]' => $data['billing_cycle_start'], 'scope[endDate]' => $data['billing_cycle_end']]);
+        return redirect()->route('reconciliationAudit', ['source' => Reconciliation::TREASURER, 'product_id' => $data['product_id']]);
     }
 
     public function wipe(Request $request)
@@ -777,8 +794,8 @@ class ReconciliationAuditController extends Controller
 
         foreach ($data as $v) {
             $v->update(['reconciliation_adjustment' => sprintf('-%s', $v['accrual_water_other']), 'reconciliation_rmb_adjustment' => sprintf('-%s', $v['accrual_water_rmb']),
-                'reconciliation_type' => 11, 'reconciliation_water_other'  => 0, 'reconciliation_water_rmb' => 0
-            , 'reconciliation_user_name' => \Auth::user()->alias, 'reconciliation_time' => date('Y-m-d H:i:s', time()), 'reconciliation_remark' => '一键抹零']);
+                'reconciliation_type' => 11, 'reconciliation_water_other' => 0, 'reconciliation_water_rmb' => 0
+                , 'reconciliation_user_name' => \Auth::user()->alias, 'reconciliation_time' => date('Y-m-d H:i:s', time()), 'reconciliation_remark' => '一键抹零']);
         }
         flash(trans('crm.抹零成功', ['value' => trans('crm.对账审核')]), 'success');
         return redirect()->back()->withInput();
@@ -826,5 +843,38 @@ class ReconciliationAuditController extends Controller
         }
 
         return $data;
+    }
+
+    public function notice($pid, $source)
+    {
+        switch ($source){
+            case Reconciliation::TREASURER:
+                $water = '对账流水';
+                $jobId = Principal::OPS;
+                break;
+            case Reconciliation::FRC:
+                $water = '运营复核';
+                $jobId = Principal::FSR;
+                break;
+            default:
+                $water = '可以开票了！';
+                $jobId = Principal::FRC;
+                break;
+        }
+        $scope = $this->scope;
+        $userId = Principal::where(['product_id' => $pid, 'job_id' => $jobId])->first();
+        $product = Product::getList();
+        $user = User::where(['user_id' => $userId->principal_id])->first();
+
+        try {
+            OperateLogHelper::sendWXMsg($user->username, sprintf('你好！%s,%s%s月的%s审计已提交，请及时处理:%s', $user->username, $product[$pid],
+                date('m', strtotime($scope->startTimestamp)), $water, route('reconciliationAudit',
+                    ['source' => $source, 'product_id' => $pid])));
+            return ['message' => '通知成功！'];
+        } catch (\Exception $e) {
+            \Log::error('通知失败：' . $e->getMessage());
+            return ['message' => '通知失败!请通知管理员处理'];
+
+        }
     }
 }

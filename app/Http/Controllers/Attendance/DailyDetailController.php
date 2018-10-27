@@ -11,6 +11,7 @@ namespace App\Http\Controllers\Attendance;
 
 use App\Http\Components\ScopeAtt\DailyScope;
 use App\Http\Controllers\Controller;
+use App\Models\Attendance\Appeal;
 use App\Models\Attendance\ConfirmAttendance;
 use App\Models\Attendance\DailyDetail;
 use App\Models\Sys\HolidayConfig;
@@ -39,8 +40,10 @@ class DailyDetailController extends AttController
             ->orderBy('day', 'desc')->paginate(30);
         $userInfo['username'] = \Auth::user()->username;
         $userInfo['alias'] = \Auth::user()->alias;
+
+        $appealData = Appeal::getAppealResult(Appeal::APPEAL_DAILY);
         $title = trans('att.我的每日考勤详情');
-        return view('attendance.daily-detail.index', compact('title', 'data', 'scope', 'userInfo', 'monthInfo', 'scope'));
+        return view('attendance.daily-detail.index', compact('title', 'data', 'scope', 'userInfo', 'monthInfo', 'scope', 'appealData'));
     }
 
     //重新初始化scope,调用review控制器的方法

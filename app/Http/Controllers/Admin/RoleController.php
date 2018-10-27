@@ -89,6 +89,7 @@ class RoleController extends Controller
     public function appointUpdate($id, Request $request)
     {
         $data = $request->all();
+
         if(empty($data['nodesJson'])) {
             return response()->json(['status' => -1, 'url' => $this->redirectTo]);
         }

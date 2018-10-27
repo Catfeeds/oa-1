@@ -83,7 +83,7 @@ class Leaved extends Operate implements AttendanceInterface
             $et = date('Y', $et) .'-'. (int)date('m', $et) .'-'. (int)date('d', $et);
 
             $calendar= Calendar::with('punchRules')
-                ->whereRaw('CONCAT(year,"-",month,"-",day)>='. (int)$st .' and CONCAT(year,"-",month,"-",day) <= '. (int)$et)
+                ->whereRaw('CONCAT(year,"-",month,"-",day)>='. $st .' and CONCAT(year,"-",month,"-",day) <= '. $et)
                 ->get();
 
             foreach ($calendar as $ck => $cv) {

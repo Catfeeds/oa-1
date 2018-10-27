@@ -18,6 +18,7 @@ class Permissions extends Seeder
         '_staff',
         '_staffCfg',
         '_oa',
+        '_bulletin'
     ];
 
     public function run()
@@ -101,6 +102,11 @@ class Permissions extends Seeder
             'daily-detail.review.send-batch'    => '员工考勤管理/批量发布考勤通知',
             'daily-detail.review.export'        => '员工考勤管理/选择导出excel',
             'daily-detail.review.export-batch'  => '员工考勤管理/批量导出excel',
+
+            'appeal-all'                        => '考勤管理/员工申诉管理',
+            'appeal.store'                      => '员工申诉管理/员工添加申诉',
+            'appeal.update'                     => '员工申诉管理/管理员审核申诉',
+            'appeal.review'                     => '员工申诉管理/申诉列表',
         ];
     }
 
@@ -142,6 +148,7 @@ class Permissions extends Seeder
 
             'staff-all'        => '所有权限/员工管理',
 
+            'manage.index'     => '员工管理/员工工作台',
             'staff'            => '员工管理/员工列表',
             'staff.edit'       => '员工管理/员工编辑',
             'staff.info'       => '员工管理/员工查看',
@@ -193,6 +200,7 @@ class Permissions extends Seeder
             'crm-all' => '所有权限/CRM管理',
 
             'reconciliation-all' => 'CRM管理/对账管理',
+            'reconciliation-reconciliationAudit.global'                    => '对账管理/全局查看权限',
             'reconciliation-reconciliationAudit'                    => '对账管理/对账列表',
             'reconciliation-reconciliationAudit.edit'               => '对账管理/对账编辑',
             'reconciliation-reconciliationAudit.review'             => '对账管理/对账审核',
@@ -200,6 +208,7 @@ class Permissions extends Seeder
             'reconciliation-reconciliationAudit.invoice'            => '对账管理/对账开票确认',
             'reconciliation-reconciliationAudit.payback'            => '对账管理/对账回款确认',
             'reconciliation-reconciliationAudit.revision'           => '对账管理/对账调整流水',
+            'reconciliationAudit.notice'                            => '对账管理/一键通知',
 
             'reconciliation-reconciliationPrincipal-all'            => 'CRM管理/负责人管理',
             'reconciliation-reconciliationPrincipal'                => '负责人管理/负责人信息列表',
@@ -227,6 +236,18 @@ class Permissions extends Seeder
 
             'reconciliation-reconciliationSchedule-all'             => 'CRM管理/对账进度跟踪管理',
             'reconciliation-reconciliationSchedule'                 => '对账进度跟踪管理/对账进度跟踪信息列表',
+        ];
+    }
+
+    //公告栏管理
+    private function _bulletin(): array
+    {
+        return [
+            'bulletin-all'    => '所有权限/公告栏管理',
+
+            'bulletin.index'  => '公告栏管理/公告配置列表',
+            'bulletin.create' => '公告栏管理/公告添加',
+            'bulletin.edit'   => '公告栏管理/公告修改',
         ];
     }
 }

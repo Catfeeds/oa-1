@@ -116,7 +116,7 @@ return [
      * 自定义规则
      */
 
-    'phone_number'     => ':attribute 无效的手机号码。',
+    'phone_number' => ':attribute 无效的手机号码。',
 
 
     /*
@@ -179,5 +179,7 @@ return [
         'size'                  => '大小',
         'start_time'            => '请假开始时间',
         'end_time'              => '请假结束时间',
+        'valid_time'            => '有效天数',
+        'weight'                => '权重',
     ],
 ];

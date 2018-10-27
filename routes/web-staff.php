@@ -17,7 +17,7 @@ Route::group([
     Route::group(['namespace' => 'StaffManage', 'prefix' => 'staff'], function () {
         #员工首页
         Route::get('index', [
-            'middleware' => ['permission:staff'],
+            'middleware' => ['permission:manage.index'],
             'uses' => 'StaffController@staffManageIndex'])->name('manage.index');
 
         # 员工列表
