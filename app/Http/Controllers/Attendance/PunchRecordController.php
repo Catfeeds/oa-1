@@ -13,6 +13,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Attendance\DailyDetail;
 use App\Models\Attendance\PunchRecord;
 use App\Models\Sys\Calendar;
+use App\Models\Sys\PunchRules;
 use App\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
@@ -110,7 +111,7 @@ class PunchRecordController extends Controller
             return redirect()->route('daily-detail.review.info');
         }
         $isOK = true;
-       //事务开启
+        //事务开启
         DB::beginTransaction();
         try {
             //reader读取excel内容
@@ -133,6 +134,24 @@ class PunchRecordController extends Controller
                         $startTime = NULL;
                     } elseif (count($v) <= 6 && (int)str_replace(':', '', $v[5]) <= 1400) {
                         $endTime = NULL;
+                    }
+
+                    //昨天加班超过24:00且下班打卡时间不超过今天7:00的, 修改昨天的下班打卡时间
+                    if ((int)str_replace(':', '', $v[5]) < (int)str_replace(':', '', PunchRules::BEGIN_TIME)) {
+                        $lastDayEndTime = $v[5];
+                        $j = 5;
+                        for ($i = 6; $i < count($v) - 1; $i ++) {
+                            if ($v[$i] > $lastDayEndTime &&
+                                (int)str_replace(':', '', $v[$i]) < (int)str_replace(':', '', PunchRules::BEGIN_TIME)) {
+                                $lastDayEndTime = $v[$i];
+                                $j = $i;
+                            }else {
+                                break;
+                            }
+                        }
+                        $startTime = (int)str_replace(':', '', $v[$j + 1]) < 1400 ? $v[$j + 1] : NULL;//重新获得上班打卡时间
+                        list($h, $m) = explode(':', $lastDayEndTime);
+                        $lastDayEndTime = ($h + 24).':'.$m;//重新获得上一天的下班打卡时间
                     }
 
                     $ts = str_replace('/', '-', $v[0]);
@@ -165,7 +184,13 @@ class PunchRecordController extends Controller
                         'end_time'   => $endTime,
                     ];
 
-                    $data[$ts][] = $row;
+                    //修改指定用户上一天的下班时间
+                    if (isset($lastDayEndTime)) {
+                        $data[date('Y-n-j', strtotime("-1 day $ts"))][$v[3]]['end_time'] = $lastDayEndTime;
+                        unset($lastDayEndTime);
+                    }
+
+                    $data[$ts][$v[3]] = $row;
                 }
                 if(!$isOK){
                     //信息记录
@@ -230,7 +255,6 @@ class PunchRecordController extends Controller
                             $msgArr[] = $u['alias'] . '员工已导入[' . $dk . ']考勤记录!';
                             continue;
                         }
-
                         DailyDetail::create($dailyDetail);
 
                         $msgArr[] = $u['alias'] . '员工导入[' . $dk . ']考勤记录成功!';
@@ -243,18 +267,18 @@ class PunchRecordController extends Controller
                 $punchRecord->update(['log_file' => $logFile, 'status' => 3]);
 
             });
-      } catch (\Exception $e) {
-            //事务回滚
-            DB::rollBack();
-            $punchRecord->update(['status' => 2]);
+        } catch (\Exception $e) {
+              //事务回滚
+              DB::rollBack();
+              $punchRecord->update(['status' => 2]);
 
-            flash('生成失败，生成文件有误，无法解析!', 'danger');
-            return redirect()->route('daily-detail.review.import.info');
-        }
-        //事务提交
-        DB::commit();
-        flash(trans('att.生成成功员工每日打卡明细'), 'success');
-        return redirect()->route('daily-detail.review.import.info');
+              flash('生成失败，生成文件有误，无法解析!', 'danger');
+              return redirect()->route('daily-detail.review.import.info');
+          }
+          //事务提交
+          DB::commit();
+          flash(trans('att.生成成功员工每日打卡明细'), 'success');
+          return redirect()->route('daily-detail.review.import.info');
     }
 
     public function log($id)

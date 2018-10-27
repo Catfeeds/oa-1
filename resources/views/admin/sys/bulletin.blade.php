@@ -22,7 +22,9 @@
                             <th>{{ trans('app.发布人') }}</th>
                             <th>{{ trans('app.内容标题') }}</th>
                             <th>{{ trans('app.发布日期') }}</th>
-                            <th>{{ trans('app.有效日期') }}</th>
+                            {{--<th>{{ trans('app.有效日期') }}</th>--}}
+                            <th>{{ trans('app.开始时间') }}</th>
+                            <th>{{ trans('app.结束时间') }}</th>
                             <th>{{ trans('app.发布权重') }}</th>
                             @if(Entrust::can(['bulletin.edit']))
                                 <th>{{ trans('att.操作') }}</th>
@@ -36,7 +38,8 @@
                             <td>{{ $v->send_user }}</td>
                             <td>{{ $v->title }}</td>
                             <td>{{ $v->created_at }}</td>
-                            <td>{{ $v->valid_time }}</td>
+                            <td>{{ $v->start_date }}</td>
+                            <td>{{ $v->end_date }}</td>
                             <td>{{ $v->weight }}</td>
                             @if(Entrust::can(['bulletin.edit']))
                                 <td>{!! BaseHtml::tooltip(trans('app.设置'), route('bulletin.edit', ['id' => $v->id])) !!}</td>

@@ -42,4 +42,13 @@ class Appeal extends Model
         return $this->hasOne(User::class, 'user_id', 'user_id');
     }
 
+    public function leave()
+    {
+        return $this->hasOne(Leave::class, 'leave_id', 'appeal_id');
+    }
+
+    public function holidayConfig()
+    {
+        return $this->hasManyThrough(HolidayConfig::class, Leave::class, 'leave_id', 'holiday_id', 'appeal_id', 'holiday_id');
+    }
 }

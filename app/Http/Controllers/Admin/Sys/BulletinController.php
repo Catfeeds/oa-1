@@ -9,17 +9,14 @@ use App\Http\Controllers\Controller;
 class BulletinController extends Controller
 {
     private $_validateRule = [
-        'valid_time' => 'required|numeric',
-        'weight'     => 'required|numeric|min:0|max:1024',
         'content'    => 'required',
     ];
 
     public function index()
     {
         $title = '公告栏';
-        $data = Bulletin::orderBy(\DB::raw('created_at + valid_time * 24 * 3600'), 'desc')
-            ->orderBy('weight', 'desc')
-            ->paginate(30, ['id', 'send_user', 'valid_time', 'title', 'weight', 'created_at']);
+        $data = Bulletin::orderBy('end_date', 'desc')->orderBy('weight', 'desc')->orderBy('created_at', 'desc')
+            ->paginate(30);
         return view('admin.sys.bulletin', compact('title', 'data'));
     }
 

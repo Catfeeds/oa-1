@@ -32,6 +32,9 @@ class PunchRules extends Model
     const RESTDAY = 2;
     const HOLIDAY = 3;
 
+    const BEGIN_TIME = '7:00';//以早上7:00为上班打卡起始点
+    const END_TIME = '24:00';//24:00为下班结束点 超过24:00 以 24:00+ 计
+
     public static $punchType = [
         self::NORMALWORK => '正常上班',
         self::RESTDAY => '休息日',
