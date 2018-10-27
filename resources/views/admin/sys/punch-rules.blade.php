@@ -39,9 +39,6 @@
                                                 <th>{{ trans('app.规则ID') }}</th>
                                                 <th>{{ trans('app.规则类型') }}</th>
                                                 <th>{{ trans('app.规则名称') }}</th>
-                                                <th>{{ trans('app.上班准备时间') }}</th>
-                                                <th>{{ trans('app.上班时间') }}</th>
-                                                <th>{{ trans('app.下班时间') }}</th>
                                                 <th>{{ trans('app.提交时间') }}</th>
                                                 <th>{{ trans('app.操作') }}</th>
                                             </tr>
@@ -52,9 +49,6 @@
                                                     <td>{{ $v['id'] }}</td>
                                                     <td>{{ \App\Models\Sys\PunchRules::$punchType[$v['punch_type_id']] ?? '' }}</td>
                                                     <td>{{ $v['name'] }}</td>
-                                                    <td>{{ $v['ready_time'] }}</td>
-                                                    <td>{{ $v['work_start_time'] }}</td>
-                                                    <td>{{ $v['work_end_time'] }}</td>
                                                     <td>{{ $v['created_at'] }}</td>
                                                     <td>
                                                         @if(Entrust::can(['punch-rules.edit']))

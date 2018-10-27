@@ -351,7 +351,7 @@ class LeaveController extends AttController
         if(empty($holidayConfig->holiday_id))  return response()->json(['status' => -1, 'memo' => '', 'day' => 0]);
 
         $driver = HolidayConfig::$cypherTypeChar[$holidayConfig->cypher_type];
-        $ret = \AttendanceService::driver($driver, 'cypher')->getUserHoliday(\Auth::user()->user_id, $holidayConfig);
+        $ret = \AttendanceService::driver($driver, 'cypher')->getUserHoliday(\Auth::user()->userExt->entry_time, \Auth::user()->user_id, $holidayConfig);
 
         return response()->json($ret);
     }

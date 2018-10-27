@@ -22,12 +22,11 @@ class Cypher
         return $this->backCypherData(true);
     }
 
-    public function getUserHoliday($userId, $holidayConfig)
+    public function getUserHoliday($entryTime, $userId, $holidayConfig)
     {
         return ['status' => 1, 'show_memo' => true, 'memo' => $holidayConfig->memo];
 
     }
-
     /**
      * 申请单验证和数据返回
      * @param $success
