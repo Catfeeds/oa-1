@@ -45,7 +45,7 @@ class PunchRulesController extends Controller
 
         $arr = [];
         foreach ($punchRules['config'] as $k => $v) {
-            $key = $v['ready_time'] . $v['work_start_time'] . $v['work_end_time'];
+            $key = (int)md5($v['ready_time'] . $v['work_start_time'] . $v['work_end_time']);
             $copyDiv[] = $key;
             $arr[$key]['ready_time'] = $v['ready_time'];
             $arr[$key]['work_start_time'] = $v['work_start_time'];
