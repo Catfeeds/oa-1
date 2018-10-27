@@ -248,4 +248,7 @@ Route::group([
     Route::post('sys/bulletin/edit/{id}', [
         'middleware' => ['permission:bulletin.edit'],
         'uses' => 'Sys\BulletinController@update']);
+    Route::get('sys/bulletin/change-show', [
+        'middleware' => ['permission:bulletin.changeShow'],
+        'uses' => 'Sys\BulletinController@changeShow'])->name('bulletin.changeShow');
 });

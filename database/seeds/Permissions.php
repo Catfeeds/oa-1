@@ -248,6 +248,7 @@ class Permissions extends Seeder
             'bulletin.index'  => '公告栏管理/公告配置列表',
             'bulletin.create' => '公告栏管理/公告添加',
             'bulletin.edit'   => '公告栏管理/公告修改',
+            'bulletin.changeShow' => '公告栏管理/修改公告首页显示'
         ];
     }
 }

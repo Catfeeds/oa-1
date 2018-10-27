@@ -1,5 +1,9 @@
 @extends('admin.sys.sys')
 
+@push('css')
+<link rel="stylesheet" href="{{ asset('css/plugins/switchery/switchery-0.8/switchery.css') }}" />
+@endpush
+
 @section('content')
 <div class="wrapper wrapper-content">
     <div class="row">
@@ -22,10 +26,12 @@
                             <th>{{ trans('app.发布人') }}</th>
                             <th>{{ trans('app.内容标题') }}</th>
                             <th>{{ trans('app.发布日期') }}</th>
-                            {{--<th>{{ trans('app.有效日期') }}</th>--}}
                             <th>{{ trans('app.开始时间') }}</th>
                             <th>{{ trans('app.结束时间') }}</th>
                             <th>{{ trans('app.发布权重') }}</th>
+                            @if(Entrust::can(['bulletin.changeShow']))
+                            <th>{{ trans('att.是否开启') }}</th>
+                            @endif
                             @if(Entrust::can(['bulletin.edit']))
                                 <th>{{ trans('att.操作') }}</th>
                             @endif
@@ -41,6 +47,9 @@
                             <td>{{ $v->start_date }}</td>
                             <td>{{ $v->end_date }}</td>
                             <td>{{ $v->weight }}</td>
+                            @if(Entrust::can(['bulletin.changeShow']))
+                            <td><input type="checkbox" id="switch-{{ $v->id }}" class="js-switch" @if($v->no_show === 1) checked @endif></td>
+                            @endif
                             @if(Entrust::can(['bulletin.edit']))
                                 <td>{!! BaseHtml::tooltip(trans('app.设置'), route('bulletin.edit', ['id' => $v->id])) !!}</td>
                             @endif
@@ -53,3 +62,26 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script src="{{ asset('js/plugins/switchery/switchery-0.8/switchery.js') }}"></script>
+<script type="text/javascript">
+    var switchery = [];
+    var noShow = '';
+    $('.js-switch').each(function (i, ele) {
+        switchery[i] = new Switchery(ele, {
+            size: 'small',
+            color: '#fa6490'
+        });
+    }).on('change', function () {
+        noShow = $(this).prop('checked') === true ? 1 : 0;
+        $.get("{{ route('bulletin.changeShow') }}", {id: $(this).attr('id').substr(7), no_show: noShow}, function (data) {
+            if (data == 'success')
+                alert('操作成功');
+            else {
+                alert('操作失败');
+            }
+        });
+    });
+</script>
+@endpush

@@ -15,8 +15,7 @@ class BulletinController extends Controller
     public function index()
     {
         $title = '公告栏';
-        $data = Bulletin::orderBy('end_date', 'desc')->orderBy('weight', 'desc')->orderBy('created_at', 'desc')
-            ->paginate(30);
+        $data = Bulletin::orderBy('created_at', 'desc')->paginate(30);
         return view('admin.sys.bulletin', compact('title', 'data'));
     }
 
@@ -50,5 +49,14 @@ class BulletinController extends Controller
         $bltContent['send_user'] = \Auth::user()->alias;
         Bulletin::find($id)->update($bltContent) ? flash('修改成功', 'success') : flash('修改失败', 'danger');
         return redirect($request->url());
+    }
+
+    public function changeShow(Request $request) {
+        try{
+            Bulletin::find($request->input()['id'])->update(['no_show' => $request->input()['no_show']]);
+        }catch (\Exception $exception) {
+            return 'error';
+        }
+        return 'success';
     }
 }

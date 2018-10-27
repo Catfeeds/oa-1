@@ -50,7 +50,7 @@ class SuperAdmins extends Seeder
             ];
             $admin = \App\User::create($user);
             $admin->attachRole($role);
-            \App\Models\UserExt::create(['user_id' => $admin->user_id, 'is_confirm' => 1]);
+            \App\Models\UserExt::create(['user_id' => $admin->user_id]);
         }
     }
 }

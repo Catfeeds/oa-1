@@ -68,8 +68,8 @@ class ReviewHelper
      */
     public function countWelfare($user, array $obj)
     {
-        //$driver = HolidayConfig::$cypherTypeChar[$obj['year']->cypher_type];
-        //$ret = \AttendanceService::driver($driver, 'cypher')->getUserHoliday(\Auth::user()->userExt->entry_time, \Auth::user()->user_id, $obj['year']);
+        $driver = HolidayConfig::$cypherTypeChar[$obj['year']->cypher_type];
+        $ret = \AttendanceService::driver($driver, 'cypher')->getUserHoliday(\Auth::user()->userExt->entry_time, \Auth::user()->user_id, $obj['year']);
 
         /*//剩余年假
         $remainYear = isset($obj['year']) ? AttendanceHelper::getUserPayableDayToEntryTime($user->userExt->entry_time, $user->user_id,
