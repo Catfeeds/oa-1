@@ -11,7 +11,7 @@
                     {!! Form::label('message-text', '可填写备注:', ['class' => "control-label"]) !!}
                     {!! Form::textarea('remark', '', ['class' => 'form-control', 'id' => 'message-text']) !!}
                     {!! Form::hidden('operate_user_id', \Auth::user()->user_id) !!}
-                    {!! Form::hidden('appeal_id', '') !!}
+                    {!! Form::hidden('id', '') !!}
                     {!! Form::hidden('result', '') !!}
                 </div>
             </div>
@@ -30,7 +30,7 @@
     $(function () {
         $('#exampleModal').on('show.bs.modal', function (event) {
             var button = $(event.relatedTarget);
-            $(this).find('[name=appeal_id]').val(button.data('whatever'));
+            $(this).find('[name=id]').val(button.data('whatever'));
             $(this).find('[name=remark]').val(button.data('remark'));
             $(this).find('#accept').text(button.data('result') == 1 ? '已选择接受' : '接受');
             $(this).find('#deny').text(button.data('result') == 2 ? '已选择拒绝' : '拒绝');

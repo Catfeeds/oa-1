@@ -69,10 +69,10 @@
                                     <td>{{ $appeal['users']['alias'] }}</td>
                                     <td>
                                         @if($appeal['appeal_type'] == \App\Models\Attendance\Appeal::APPEAL_LEAVE)
-                                            {{ \App\Models\Sys\HolidayConfig::$applyType[$appeal['apply_type_id']] }}
+                                            {{ \App\Models\Sys\HolidayConfig::$applyType[$appeal['holiday_config']['apply_type_id']] }}
                                         @endif
                                         @if($appeal['appeal_type'] == \App\Models\Attendance\Appeal::APPEAL_DAILY)
-                                            {{ trans('att.每日明细') }}
+                                            每日明细
                                         @endif
                                     </td>
                                     <td>
