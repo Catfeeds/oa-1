@@ -28,6 +28,7 @@ class DelIsRenewUsersHolidayConfigTable extends Migration
     {
         Schema::table('users_holiday_config', function (Blueprint $table) {
             $table->dropColumn('is_full');
+            $table->unsignedTinyInteger('is_renew')->default(0)->after('is_boon')->comment = '福利假使用完是否可再提交申请假期 默认0 0:否 1:是';
         });
     }
 }

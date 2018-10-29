@@ -26,7 +26,7 @@ class ChangeDailyDetailTableLeaveIdToString extends Migration
     public function down()
     {
         Schema::table('attendance_daily_detail', function (Blueprint $table) {
-            $table->unsignedInteger('leave_id')->nullable()->comment = '假期申请单ID，默认为空';
+            $table->unsignedInteger('leave_id')->nullable()->change()->comment = '假期申请单ID，默认为空';
         });
     }
 }
