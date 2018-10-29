@@ -18,7 +18,7 @@ class AddEndDateFieldBulletinTable extends Migration
 
             $table->dateTime('start_date')->after('content')->comment = '公告栏开始显示时间';
             $table->dateTime('end_date')->after('start_date')->comment = '公告栏结束显示时间';
-            $table->boolean('no_show')->after('weight')->default(0)->comment = '强制不在首页显示 1为不显示 0为显示';
+            $table->boolean('show')->after('weight')->default(1)->comment = '强制不在首页显示 0为不显示 1为显示 ';
         });
     }
 

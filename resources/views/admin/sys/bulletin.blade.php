@@ -30,7 +30,7 @@
                             <th>{{ trans('app.结束时间') }}</th>
                             <th>{{ trans('app.发布权重') }}</th>
                             @if(Entrust::can(['bulletin.changeShow']))
-                            <th>{{ trans('att.是否开启') }}</th>
+                                <th>{{ trans('att.是否开启') }}</th>
                             @endif
                             @if(Entrust::can(['bulletin.edit']))
                                 <th>{{ trans('att.操作') }}</th>
@@ -48,7 +48,7 @@
                             <td>{{ $v->end_date }}</td>
                             <td>{{ $v->weight }}</td>
                             @if(Entrust::can(['bulletin.changeShow']))
-                            <td><input type="checkbox" id="switch-{{ $v->id }}" class="js-switch" @if($v->no_show === 1) checked @endif></td>
+                                <td><input type="checkbox" id="switch-{{ $v->id }}" class="js-switch" @if($v->show === 1) checked @endif></td>
                             @endif
                             @if(Entrust::can(['bulletin.edit']))
                                 <td>{!! BaseHtml::tooltip(trans('app.设置'), route('bulletin.edit', ['id' => $v->id])) !!}</td>
@@ -67,15 +67,15 @@
 <script src="{{ asset('js/plugins/switchery/switchery-0.8/switchery.js') }}"></script>
 <script type="text/javascript">
     var switchery = [];
-    var noShow = '';
+    var show = '';
     $('.js-switch').each(function (i, ele) {
         switchery[i] = new Switchery(ele, {
             size: 'small',
             color: '#fa6490'
         });
     }).on('change', function () {
-        noShow = $(this).prop('checked') === true ? 1 : 0;
-        $.get("{{ route('bulletin.changeShow') }}", {id: $(this).attr('id').substr(7), no_show: noShow}, function (data) {
+        show = $(this).prop('checked') === true ? 1 : 0;
+        $.get("{{ route('bulletin.changeShow') }}", {id: $(this).attr('id').substr(7), show: show}, function (data) {
             if (data == 'success')
                 alert('操作成功');
             else {

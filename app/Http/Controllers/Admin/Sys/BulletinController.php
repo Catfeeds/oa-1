@@ -53,7 +53,7 @@ class BulletinController extends Controller
 
     public function changeShow(Request $request) {
         try{
-            Bulletin::find($request->input()['id'])->update(['no_show' => $request->input()['no_show']]);
+            Bulletin::find($request->input()['id'])->update(['show' => $request->input()['show']]);
         }catch (\Exception $exception) {
             return 'error';
         }

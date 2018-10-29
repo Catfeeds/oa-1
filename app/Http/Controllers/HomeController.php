@@ -17,7 +17,7 @@ class HomeController extends Controller
         $bulletContent = Bulletin::where([
             [\DB::raw('UNIX_TIMESTAMP(end_date)'), '>=', time()],
             [\DB::raw('UNIX_TIMESTAMP(start_date)'), '<=', time()],
-            ['no_show', '=', 0],
+            ['show', '=', 1],
         ])
             ->orderBy('weight', 'desc')->orderBy('created_at', 'desc')->first(['content']);
         return view('home', compact('bulletContent'));
