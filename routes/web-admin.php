@@ -156,7 +156,7 @@ Route::group([
         'middleware' => ['permission:holiday-config.edit'],
         'uses' => 'Sys\HolidayConfigController@update']);
 
-    //审核流程配置管理
+    //审核流程配置管理-废弃
     Route::get('sys/approval-step', [
         'middleware' => ['permission:approval-step'],
         'uses' => 'Sys\ApprovalStepController@index'])->name('approval-step');
@@ -172,6 +172,26 @@ Route::group([
     Route::post('sys/approval-step/edit/{id}', [
         'middleware' => ['permission:approval-step.edit'],
         'uses' => 'Sys\ApprovalStepController@update']);
+    //审核流程配置管理-启用
+    Route::get('sys/review-step-flow', [
+        'middleware' => ['permission:approval-step'],
+        'uses' => 'Sys\ReviewStepFlowController@index'])->name('review-step-flow');
+    Route::get('sys/review-step-flow/create', [
+        'middleware' => ['permission:approval-step.create'],
+        'uses' => 'Sys\ReviewStepFlowController@create'])->name('review-step-flow.create');
+    Route::post('sys/review-step-flow/create', [
+        'middleware' => ['permission:approval-step.create'],
+        'uses' => 'Sys\ReviewStepFlowController@store']);
+    Route::get('sys/review-step-flow/edit/{id}', [
+        'middleware' => ['permission:approval-step.edit'],
+        'uses' => 'Sys\ReviewStepFlowController@edit'])->name('review-step-flow.edit');
+    Route::post('sys/review-step-flow/edit/{id}', [
+        'middleware' => ['permission:approval-step.edit'],
+        'uses' => 'Sys\ReviewStepFlowController@update']);
+    Route::get('sys/review-step-flow/get-holiday', [
+        'middleware' => ['permission:approval-step.edit'],
+        'uses' => 'Sys\ReviewStepFlowController@getHoliday'])->name('review-step-flow.getHoliday');
+
 
     //上下班时间配置管理
     Route::get('sys/punch-rules', [

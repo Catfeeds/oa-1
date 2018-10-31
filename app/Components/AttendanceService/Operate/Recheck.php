@@ -11,6 +11,7 @@
 namespace App\Components\AttendanceService\Operate;
 
 use App\Components\AttendanceService\AttendanceInterface;
+use App\Models\Attendance\DailyDetail;
 use App\Models\Sys\HolidayConfig;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 
@@ -70,8 +71,69 @@ class Recheck extends Operate implements AttendanceInterface
         return  $this->backLeaveData(true, [], $data);
     }
 
+    /**
+     * 创建申请单
+     * @param array $leave
+     * @return array
+     */
     public function createLeave(array $leave): array
     {
         return parent::createLeave($leave);
+    }
+
+    public function setDailyDetail($leave)
+    {
+        $startDay = strtotime($leave->start_time);
+        $endDay = strtotime($leave->end_time);
+
+        //上下班都要补打卡的情况
+        if (date('Y-m-d', $startDay) == date('Y-m-d', $endDay)) {
+            $daily = DailyDetail::whereIn('day', [date('Y-m-d', $startDay)])
+                ->where(['user_id' => $leave->user_id])
+                ->first();
+            $data = [
+                'user_id' => $leave->user_id,
+                'day' => date('Y-m-d', $startDay),
+                'leave_id' => self::addLeaveId($leave->leave_id, $daily->leave_id),
+                'punch_start_time' => date('h:i', $startDay),
+                'punch_start_time_num' => $startDay,
+                'punch_end_time' => date('H:i', $endDay),
+                'punch_end_time_num' => $endDay,
+            ];
+            $daily->update($data);
+            return ;
+        }
+        //上班补打卡
+        if($leave->holidayConfig->punch_type === 1) {
+            $daily = DailyDetail::whereIn('day', [date('Y-m-d', $startDay)])
+                ->where(['user_id' => $leave->user_id])
+                ->first();
+            $startData = [
+                'user_id' => $leave->user_id,
+                'day' => date('Y-m-d', $startDay),
+                'leave_id' => self::addLeaveId($leave->leave_id, $daily->leave_id),
+                'punch_start_time' => date('h:i', $startDay),
+                'punch_start_time_num' => $startDay,
+            ];
+
+            $daily->update($startData);
+        }
+
+        //下班补打卡
+        if($leave->holidayConfig->punch_type === 2) {
+            $daily = DailyDetail::whereIn('day', [date('Y-m-d', $endDay)])
+                ->where(['user_id' => $leave->user_id])
+                ->first();
+            $endData = [
+                'user_id' => $leave->user_id,
+                'day' => date('Y-m-d', $endDay),
+                'leave_id' => self::addLeaveId($leave->leave_id, $daily->leave_id),
+                'punch_end_time' => date('H:i', $endDay),
+                'punch_end_time_num' => $endDay,
+            ];
+
+            $daily->update($endData);
+        }
+
     }
 }

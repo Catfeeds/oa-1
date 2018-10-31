@@ -169,17 +169,18 @@ class AttendanceHelper
         if(empty($leave->remain_user)) {
             $leave->update(['status' => 3, 'review_user_id' => 0]);
         } else {
-            $remain_user = json_decode($leave->remain_user, true);
+            $remainUser = json_decode($leave->remain_user, true);
 
-            $review_user_id = reset($remain_user);
-            unset($remain_user[$review_user_id]);
-            if(empty($remain_user)) {
-                $remain_user = '';
+            $reviewUserId = reset($remainUser);
+            array_shift($remainUser);
+
+            if(empty($remainUser)) {
+                $remainUser = '';
             } else {
-                $remain_user = json_encode($remain_user);
+                $remainUser = json_encode($remainUser);
             }
 
-            $leave->update(['status' => 1, 'review_user_id' => $review_user_id, 'remain_user' => $remain_user]);
+            $leave->update(['status' => 1, 'review_user_id' => $reviewUserId, 'remain_user' => $remainUser]);
         }
     }
 
@@ -502,44 +503,6 @@ class AttendanceHelper
         return empty($userChangeLog->number_day) ? 0 :  $userChangeLog->number_day;
     }
 
-    /**
-     * 解析 申请配置公式格式
-     * @param string $formula 公式格式 [0,0,0,0,0,0] | [年,月,日,时,分,秒]
-     */
-    public static function resolveConfigFormula($formula)
-    {
-        $format = json_decode($formula, true);
-        if(empty($format)) return [];
-
-        $date = [];
-        foreach ($format as $k => $v) {
-            if(empty($v)) continue;
-            switch ($k) {
-                case 0 :
-                    $date['y'] = $v . 'year';
-                    break;
-                case 1 :
-                    $date['m'] = $v . 'month';
-                    break;
-                case 2 :
-                    $date['d'] = $v . 'day';
-                    break;
-                case 3 :
-                    $date['h'] = $v . 'hour';
-                    break;
-                case 4 :
-                    $date['i'] = $v . 'minute';
-                    break;
-                case 5 :
-                    $date['s'] = $v . 'second';
-                    break;
-            }
-        }
-
-        return $date;
-    }
-
-
     public static function resolveCycleConfigFormula($formula)
     {
         $format = json_decode($formula, true);
@@ -570,8 +533,6 @@ class AttendanceHelper
 
         return $date;
     }
-
-
 
     /**
      * 按员工入职时间维度获取带薪假期
@@ -725,4 +686,5 @@ class AttendanceHelper
         }
         return $show;
     }
+
 }
