@@ -115,6 +115,11 @@ class Leaved extends Operate implements AttendanceInterface
         return  $this->backLeaveData(true, [], $data);
     }
 
+    public function getLeaveStep($holidayId, $numberDay): array
+    {
+        return parent::getLeaveStep($holidayId, $numberDay);
+    }
+
     /**
      * 创建申请单
      * @param array $leave
@@ -125,6 +130,34 @@ class Leaved extends Operate implements AttendanceInterface
         return parent::createLeave($leave);
     }
 
+    /**
+     * @param object $leave
+     */
+    public function leaveReviewPass($leave)
+    {
+        if(empty($leave->remain_user)) {
+            $leave->update(['status' => 3, 'review_user_id' => 0]);
+            self::setDailyDetail($leave);
+
+        } else {
+            $remainUser = json_decode($leave->remain_user, true);
+
+            $reviewUserId = reset($remainUser);
+            array_shift($remainUser);
+
+            if(empty($remainUser)) {
+                $remainUser = '';
+            } else {
+                $remainUser = json_encode($remainUser);
+            }
+
+            $leave->update(['status' => 1, 'review_user_id' => $reviewUserId, 'remain_user' => $remainUser]);
+        }
+    }
+
+    /**
+     * @param $leave
+     */
     public function setDailyDetail($leave)
     {
         $startDay = strtotime($leave->start_time);
@@ -194,6 +227,5 @@ class Leaved extends Operate implements AttendanceInterface
             empty($endDaily->day) ? DailyDetail::create($endData) : $endDaily->update($endData);
         }
     }
-
 
 }

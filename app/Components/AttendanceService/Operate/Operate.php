@@ -95,9 +95,9 @@ class Operate
             'holiday_id' => $leave['holiday_id'],
             'step_id' => $leave['step_id'],
             'start_time' => $leave['start_time'],
-            'start_id' => 1,
+            'start_id' => $leave['start_id'],
             'end_time' => $leave['end_time'],
-            'end_id' => 1,
+            'end_id' => $leave['end_id'],
             'number_day' => $leave['number_day'],
             'reason' => $leave['reason'],
             'user_list' => $leave['user_list'],
@@ -156,7 +156,7 @@ class Operate
      * @param $endDay
      * @return array
      */
-    public static function getPunch($leave, $startDay, $endDay)
+    public function getPunch($leave, $startDay, $endDay)
     {
         $ps = (int)str_replace(':', '', Leave::$startId[$leave->start_id]);
         $pe = (int)str_replace(':', '', Leave::$endId[$leave->end_id]);
@@ -174,6 +174,37 @@ class Operate
                 NULL : strtotime(date('Y-m-d', $endDay) . ' ' . $arr1['punch_end_time']),
         ];
         return array_merge($arr1, $arr2);
+    }
+
+    /**
+     * 申请单 通过 操作
+     * @param object $leave 申请单信息
+     */
+    public function leaveReviewPass($leave)
+    {
+        if(empty($leave->remain_user)) {
+            $leave->update(['status' => 3, 'review_user_id' => 0]);
+            self::setDailyDetail($leave);
+
+        } else {
+            $remainUser = json_decode($leave->remain_user, true);
+
+            $reviewUserId = reset($remainUser);
+            array_shift($remainUser);
+
+            if(empty($remainUser)) {
+                $remainUser = '';
+            } else {
+                $remainUser = json_encode($remainUser);
+            }
+
+            $leave->update(['status' => 1, 'review_user_id' => $reviewUserId, 'remain_user' => $remainUser]);
+        }
+    }
+
+    public function setDailyDetail($leave)
+    {
+
     }
 
 }

@@ -98,8 +98,12 @@ class Change extends Operate implements AttendanceInterface
         return parent::createLeave($leave);
     }
 
-    public function setDailyDetail($leave)
+    /**
+     * @param object $leave
+     */
+    public function leaveReviewPass($leave)
     {
-
+        parent::leaveReviewPass($leave);
     }
+
 }
