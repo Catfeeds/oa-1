@@ -29,7 +29,10 @@ class Leaved extends Operate implements AttendanceInterface
     public function checkLeave($request) : array
     {
         $p = $request->all();
-        $this->validate($request, $this->_validateRule);
+        $this->validate($request, array_merge($this->_validateRule,[
+            'start_id' => 'required',
+            'end_id' => 'required',
+        ]));
         //假期配置ID
         $holidayId = $p['holiday_id'];
 
