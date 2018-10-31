@@ -62,7 +62,22 @@ class Paid extends Cypher
              ];
              break;
          default:
-             return ['status' => 1, 'show_memo' => true, 'memo' => $holidayConfig->memo];
-        }
+             $leaveInfo = AttendanceHelper::getUserPayableDayToNoCycleTime($userId, $holidayConfig);
+             $msg = $day = '<i class="fa fa-info-circle"></i>剩余假期天数:' . $leaveInfo['number_day'] . '天';
+             return [
+                 'status' => 1,
+                 'show_day' => true,
+                 'show_memo' => true,
+                 'memo' => $holidayConfig->memo,
+                 'number_day' => $leaveInfo['number_day'],
+                 'count_num' => $leaveInfo['count_num'],
+                 'msg' => $msg
+             ];
+         }
+    }
+
+    public function getDaysByScope($scope, $userId, $holidays)
+    {
+        return parent::getDaysByScope($scope, $userId, $holidays);
     }
 }

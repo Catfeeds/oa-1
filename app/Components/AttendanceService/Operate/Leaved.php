@@ -97,7 +97,6 @@ class Leaved extends Operate implements AttendanceInterface
         if(!$userHoliday['success']) {
             return $this->backLeaveData(false, $userHoliday['message']);
         }
-
         //返回数据
         $userList = json_encode($userList);
         $data = [

@@ -336,7 +336,6 @@ class LeaveController extends AttController
         } catch (Exception $ex) {
             return false;
         }
-
         return true;
     }
 

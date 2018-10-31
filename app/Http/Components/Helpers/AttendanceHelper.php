@@ -242,8 +242,32 @@ class AttendanceHelper
         $startDay = strtotime($leave->start_time);
         $endDay = strtotime($leave->end_time);
 
+        $ifNeedUpdate = DailyDetail::whereBetween(\DB::raw('DATE_FORMAT(day, "%Y-%m-%d")'),
+            [date('Y-m-d', $startDay), date('Y-m-d', $endDay)])->where('user_id', $leave->user_id)->get();
+
         $day = DataHelper::prDates($startDay, $endDay);
-        if(!empty($day)) {
+        $day = array_unique(array_merge($day, [$startDay, $endDay]));
+
+        if (count($ifNeedUpdate) == 0) {
+            foreach ($day as $d) {
+                $data = [
+                    'user_id' => $leave->user_id,
+                    'day' => date('Y-m-d', $d),
+                    'leave_id' => self::addLeaveId($leave->leave_id),
+                    'punch_start_time' => NULL,
+                    'punch_start_time_num' => NULL,
+                    'punch_end_time' => NULL,
+                    'punch_end_time_num' => NULL,
+                ];
+                DailyDetail::create($data);
+            }
+        }else {
+            foreach ($ifNeedUpdate as $item) {
+                $item->leave_id = self::addLeaveId($leave->leave_id, $item->leave_id);
+                $item->save();
+            }
+        }
+        /*if(!empty($day)) {
             foreach ($day as $k => $d) {
                 $daily = DailyDetail::whereIn('day', [date('Y-m-d', $d)])->where(['user_id' => $leave->user_id])->first();
                 if(!empty($daily->day)) continue;
@@ -303,7 +327,7 @@ class AttendanceHelper
                 'punch_end_time_num' => $endDaily->punch_end_time_num ?? $punch['punch_end_time_num'],
             ];
             empty($endDaily->day) ? DailyDetail::create($endData) : $endDaily->update($endData);
-        }
+        }*/
     }
 
     public static function setRecheckDailyDetail($leave)
@@ -596,7 +620,7 @@ class AttendanceHelper
 
         //到期时间之后，重置开始时间和到期时间
         if(strtotime($endTime) < time()) {
-            $startTime = DataHelper::dateTimeFormat('now', 'Y') . '-' . DataHelper::dateTimeFormat($startTime, 'm-d H:i:s');
+            $startTime = DataHelper::dateTimeFormat('now', 'Y') . '-' . DataHelper::dateTimeFormat($endTime, 'm-d H:i:s');
             $endTime = DataHelper::dateTimeAddToFormula($startTime, $holiday->payable_reset_formula);
         }
 
@@ -636,6 +660,13 @@ class AttendanceHelper
         return self::selectLeaveInfo($startTime, $endTime, $userId, $holiday);
     }
 
+    public static function getUserPayableDayToNoCycleTime($userId, $holiday)
+    {
+        $startTime = date('Y').'-01-01';
+        $endTime = date('Y').'-12-31';
+        return self::selectLeaveInfo($startTime, $endTime, $userId, $holiday);
+    }
+
     /**
      * 获取员工 月类型 记录信息
      * @param $userId
@@ -664,7 +695,7 @@ class AttendanceHelper
                 \DB::raw('SUM(number_day) number_day'),
                 \DB::raw('count(*) count_num'),
             ])
-            ->where('start_time', '>', $startDay)
+            ->where('start_time', '>=', $startDay)
             ->where('end_time', '<=', $endDay)
             ->whereIn('status', [Leave::PASS_REVIEW, Leave::WAIT_REVIEW, Leave::ON_REVIEW])
             ->where([
@@ -673,8 +704,7 @@ class AttendanceHelper
             ])->groupBy('user_id')->first('number_day');
 
         $numberDay = empty($userLeaveLog->number_day) ? $holiday->up_day : $holiday->up_day - $userLeaveLog->number_day;
-
-        return ['number_day' => $numberDay, 'count_num' => $userLeaveLog->count_num ?? 0];
+        return ['number_day' => $numberDay, 'count_num' => $userLeaveLog->count_num ?? 0, 'apply_days' => $userLeaveLog->number_day ?? 0];
     }
 
     /**

@@ -9,6 +9,9 @@
 namespace App\Components\AttendanceService\Cypher;
 
 
+use App\Http\Components\Helpers\AttendanceHelper;
+use App\Models\Sys\HolidayConfig;
+
 class Change extends Cypher
 {
     public function check($holidayConfig, $numberDay)
@@ -21,4 +24,8 @@ class Change extends Cypher
         return parent::getUserHoliday($entryTime, $userId, $holidayConfig);
     }
 
+    public function getDaysByScope($scope, $userId, $holidays)
+    {
+        return parent::getOverDaysByScope($scope, $userId, $holidays, HolidayConfig::CHANGE);
+    }
 }
