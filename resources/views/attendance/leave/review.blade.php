@@ -19,7 +19,9 @@
                     <h5>{{ $title }}</h5>
                 </div>
                 <div class="ibox-content">
-                    @include('widget.review-batch-operation-btn', ['btn' => [['review-btn-ok', '批量通过', 'btn-success'],['review-btn-no', '批量拒绝', 'btn-group']]])
+                    @if(Entrust::can('leave.review'))
+                        @include('widget.review-batch-operation-btn', ['btn' => [['review-btn-ok', '批量通过', 'btn-success'],['review-btn-no', '批量拒绝', 'btn-group']]])
+                    @endif
                     <div class="table-responsive">
                         <table class="table table-striped table-striped tooltip-demo">
                             <thead>
@@ -55,14 +57,14 @@
                                         @if(\App\Models\Sys\HolidayConfig::getHolidayApplyList()[$v['holiday_id']] === 3)
                                             {{$v['start_time'] ?? '---'}}
                                         @else
-                                            {{ date('Y-m-d', strtotime($v['start_time'])).' '.\App\Models\Attendance\Leave::$startId[$v['start_id']] }}
+                                            {{ \App\Http\Components\Helpers\AttendanceHelper::getLeaveTime($v['start_time'],$v['start_id'])}}
                                         @endif
                                     </td>
                                     <td>
                                         @if(\App\Models\Sys\HolidayConfig::getHolidayApplyList()[$v['holiday_id']] === 3)
                                             {{$v['end_time'] ?? '---'}}
                                         @else
-                                            {{ date('Y-m-d', strtotime($v['end_time'])).' '.\App\Models\Attendance\Leave::$endId[$v['end_id']] }}
+                                            {{ \App\Http\Components\Helpers\AttendanceHelper::getLeaveTime($v['end_time'],$v['end_id']) }}
                                         @endif
                                     </td>
                                     <td>{{$v['number_day'] . trans('att.天')}}</td>

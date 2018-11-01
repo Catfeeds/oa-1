@@ -47,6 +47,7 @@ class HolidayConfigController extends Controller
             'work_relief_formula' => '[0,0,0,0,0,0]',
             'payable_reset_formula' => '[0,0,0,0,0,0]',
             'payable_claim_formula' => '[0,0,0,0,0,0]',
+            'work_reset_formula' => '[0,0,0,0,0]',
 
         ];
         $title = trans('app.添加申请类型配置');

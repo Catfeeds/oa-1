@@ -109,14 +109,14 @@
                                     @if(\App\Models\Sys\HolidayConfig::getHolidayApplyList()[$v['holiday_id']] === 3)
                                         {{$v['start_time'] ?? '---'}}
                                     @else
-                                        {{ date('Y-m-d', strtotime($v['start_time'])).' '.\App\Models\Attendance\Leave::$startId[$v['start_id']] }}
+                                        {{ date('Y-m-d', strtotime($v['start_time'])).' '.$v['start_id'] }}
                                     @endif
                                 </td>
                                 <td>
                                     @if(\App\Models\Sys\HolidayConfig::getHolidayApplyList()[$v['holiday_id']] === 3)
                                         {{$v['end_time'] ?? '---'}}
                                     @else
-                                        {{ date('Y-m-d', strtotime($v['end_time'])).' '.\App\Models\Attendance\Leave::$endId[$v['end_id']] }}
+                                        {{ date('Y-m-d', strtotime($v['end_time'])).' '.$v['end_id'] }}
                                     @endif
                                 </td>
                                 <td>
@@ -128,9 +128,9 @@
                                 <td>{{ $v['created_at'] }}</td>
                                 <td>{{ \App\Models\Attendance\Leave::$status[$v['status']] }}</td>
                                 <td>
-                                    @if(Entrust::can(['leave-all', 'leave.edit']))
+                                   {{-- @if(Entrust::can(['leave.edit']))
                                         {!! BaseHtml::tooltip(trans('app.设置'), route('leave.edit', ['id' => $v['leave_id']]), 'cog fa-lg') !!}
-                                    @endif
+                                    @endif--}}
                                     @if(($v['user_id'] == \Auth::user()->user_id || $v['review_user_id'] == \Auth::user()->user_id || in_array(\Auth::user()->user_id, $userIds)) && Entrust::can(['leave.edit', 'leave.review']))
                                         {!! BaseHtml::tooltip(trans('att.请假详情'), route('leave.optInfo', ['id' => $v['leave_id'], 'type' => \App\Models\Attendance\Leave::LOGIN_INFO]), 'cog fa fa-newspaper-o') !!}
                                     @endif

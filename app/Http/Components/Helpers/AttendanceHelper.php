@@ -47,20 +47,9 @@ class AttendanceHelper
      * @param $startId
      * @return string
      */
-    public static function getLeaveStartTime($startTime, $startId)
+    public static function getLeaveTime($time, $id)
     {
-        return date('Y-m-d', strtotime($startTime)) . ' ' . Leave::$startId[$startId];
-    }
-
-    /**
-     * 获取申请单结束日期
-     * @param $endTime
-     * @param $endId
-     * @return string
-     */
-    public static function getLeaveEndTime($endTime, $endId)
-    {
-        return date('Y-m-d', strtotime($endTime)) . ' ' . Leave::$endId[$endId];
+        return date('Y-m-d', strtotime($time)) . ' ' . $id;
     }
 
     /**
@@ -160,29 +149,7 @@ class AttendanceHelper
         }
     }
 
-    /**
-     * 申请单 通过 操作
-     * @param object $leave 申请单信息
-     */
-    public static function leaveReviewPass($leave)
-    {
-        if(empty($leave->remain_user)) {
-            $leave->update(['status' => 3, 'review_user_id' => 0]);
-        } else {
-            $remainUser = json_decode($leave->remain_user, true);
 
-            $reviewUserId = reset($remainUser);
-            array_shift($remainUser);
-
-            if(empty($remainUser)) {
-                $remainUser = '';
-            } else {
-                $remainUser = json_encode($remainUser);
-            }
-
-            $leave->update(['status' => 1, 'review_user_id' => $reviewUserId, 'remain_user' => $remainUser]);
-        }
-    }
 
 
     /**

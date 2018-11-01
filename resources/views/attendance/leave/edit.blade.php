@@ -36,7 +36,7 @@
 
                     <div class="hr-line-dashed"></div>
 
-                    <div class="form-group @if (!empty($errors->first('start_time'))) has-error @endif">
+                    <div class="form-group @if (!empty($errors->first('start_time')) || !empty($errors->first('end_id'))) has-error @endif">
                         {!! Form::label('start_time', trans('att.请假开始时间'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-3">
                             <div class="input-group">
@@ -56,7 +56,7 @@
 
                     <div class="hr-line-dashed"></div>
 
-                    <div class="form-group @if (!empty($errors->first('end_time'))) has-error @endif">
+                    <div class="form-group @if (!empty($errors->first('end_time')) || !empty($errors->first('end_id'))) has-error @endif">
                         {!! Form::label('end_time', trans('att.请假结束时间'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-3">
                             <div class="input-group">
@@ -168,9 +168,13 @@
                 inquireEndInfo();
             });
 
+            showMemo();
 
         });
 
+        /**
+         * 显示剩余假期和描述
+         */
         function showMemo() {
             var val = $('#holiday_id').children('option:selected').val();
             if(val != "") {
@@ -232,6 +236,11 @@
             })
         }
 
+        /**
+         * 查询日期绑定的时间点
+         * @param time
+         * @param type
+         */
         function getPunchRules(time, type) {
             $.get('{{ route('leave.getPunchRules')}}', {time: time}, function ($data) {
 

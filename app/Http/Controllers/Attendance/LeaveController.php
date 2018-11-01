@@ -189,6 +189,7 @@ class LeaveController extends AttController
         return redirect()->route('leave.info');
     }
 
+
     public function optInfo($id, $type)
     {
         if(!in_array($type, [Leave::LOGIN_INFO, Leave::LOGIN_VERIFY_INFO])) return redirect()->route('leave.info');
@@ -312,10 +313,8 @@ class LeaveController extends AttController
                 case Leave::PASS_REVIEW:
                     $msg = '审核通过';
                     //申请单状态操作
-                    AttendanceHelper::leaveReviewPass($leave);
                     $driver = HolidayConfig::$driverType[$leave->holidayConfig->apply_type_id];
-                    //提前生成每日详情信息
-                    \AttendanceService::driver($driver)->setDailyDetail($leave);
+                    \AttendanceService::driver($driver)->leaveReviewPass($leave);
                     break;
                 case Leave::CANCEL_REVIEW:
                     $msg = '取消申请';
