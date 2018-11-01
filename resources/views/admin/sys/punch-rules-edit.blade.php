@@ -181,7 +181,6 @@
 @section('scripts-last')
     <script>
         $(function() {
-
             var i = 100;
             var copy_key = 100;
 

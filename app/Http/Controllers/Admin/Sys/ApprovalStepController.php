@@ -13,6 +13,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Role;
 use App\Models\Sys\ApprovalStep;
 use App\Models\Sys\Dept;
+use App\User;
 use Illuminate\Http\Request;
 
 class ApprovalStepController extends Controller
@@ -34,12 +35,10 @@ class ApprovalStepController extends Controller
 
     public function create()
     {
-
         $roleList = Role::getRoleTextList();
-        $roleId = [];
-        $dept= Dept::getDeptList();
+        $userList = User::getUsernameAliasList();
         $title = trans('app.添加审核流程配置');
-        return view('admin.sys.approval-step-edit', compact('title', 'roleList', 'roleId', 'dept'));
+        return view('admin.sys.approval-step-create', compact('title', 'roleList', 'userList'));
     }
 
     public function edit($id)
@@ -47,7 +46,7 @@ class ApprovalStepController extends Controller
         $roleList = Role::getRoleTextList();
         $roleId = $stepId = $checkStep = $checkId = [];
         $step = ApprovalStep::findOrFail($id);
-
+        $userList = User::getUsernameAliasList();
         $steps = (array)json_decode($step->step);
         foreach ($steps as $k => $v) {
             $roleId[] = $v;
@@ -64,6 +63,7 @@ class ApprovalStepController extends Controller
 
     public function store(Request $request)
     {
+        dd($request->all());
         $this->validate($request, $this->_validateRule);
 
         $p = $request->all();
@@ -74,6 +74,7 @@ class ApprovalStepController extends Controller
             flash(trans('app.添加失败,已存在该配置信息'), 'danger');
             return redirect($this->redirectTo);
         }
+
         $step = array_filter($p['check_step']);
 
         $steps = [];

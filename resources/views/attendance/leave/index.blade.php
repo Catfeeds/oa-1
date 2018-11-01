@@ -95,14 +95,17 @@
                         </tr>
                         </thead>
                         <tbody>
+
                         @foreach($data as $k => $v)
                             <tr>
+
                                 <td>{{ \App\Models\Sys\HolidayConfig::$applyType[\App\Models\Sys\HolidayConfig::getHolidayApplyList()[$v['holiday_id']]] }}</td>
                                 <td>
                                     {{ \App\Models\Sys\HolidayConfig::getHolidayList()[$v['holiday_id']] }}
                                 </td>
 
                                 <td>
+
                                     @if(\App\Models\Sys\HolidayConfig::getHolidayApplyList()[$v['holiday_id']] === 3)
                                         {{$v['start_time'] ?? '---'}}
                                     @else

@@ -101,14 +101,12 @@ class ReviewHelper
      * @param $user
      * @return int
      */
-    public function countActuallyDays($startDate, $endDate, $user)
+    public function countActuallyDays($startDate, $endDate, $user, $calPunch)
     {
         $detailArr = DailyDetail::where([
             ['day', '>=', $startDate], ['day', '<=', $endDate], ['user_id', $user->user_id]
         ])->get();
 
-        $calPunch = $this->getCalendarPunchRules($startDate, $endDate);
-        $detailArrLength = count($detailArr);
         $days = 0;
         foreach ($detailArr as $item) {
             $days = $days + $this->countDay($item->punch_start_time, $item->punch_end_time, $calPunch[$item->day]);
@@ -120,7 +118,7 @@ class ReviewHelper
      * 计算一天的打卡时间在打卡规则中是多少天
      * @param $punch_start
      * @param $punch_end
-     * @param $punchRule
+     * @param object $punchRule 该天对应的打卡规则对象
      * @return float|int
      */
     public function countDay($punch_start, $punch_end, $punchRule)

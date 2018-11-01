@@ -24,7 +24,6 @@ class Paid extends Cypher
         }
 
         $leaveInfo = self::getUserHoliday(\Auth::user()->userExt->entry_time, \Auth::user()->user_id, $holidayConfig);
-
         if($leaveInfo['count_num'] > $holidayConfig->cycle_num) {
             return $this->backCypherData(false, ['end_time' => '周期内可申请该假期次数为'. $holidayConfig->cycle_num .'次']);
         }

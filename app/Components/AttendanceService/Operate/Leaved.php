@@ -12,6 +12,7 @@ namespace App\Components\AttendanceService\Operate;
 use App\Components\AttendanceService\AttendanceInterface;
 use App\Components\Helper\DataHelper;
 use App\Http\Components\Helpers\AttendanceHelper;
+use App\Models\Attendance\DailyDetail;
 use App\Models\Attendance\Leave;
 use App\Models\Sys\Calendar;
 use App\Models\Sys\HolidayConfig;
@@ -39,8 +40,8 @@ class Leaved extends Operate implements AttendanceInterface
         $startTime = (string)$p['start_time'];
         $endTime = (string)$p['end_time'];
         //拼接有效时间戳
-        $startTimeS = trim($startTime .' '. Leave::$startId[$p['start_id'] ?? 0]);
-        $endTimeS = trim($endTime .' '. Leave::$endId[$p['end_id'] ?? 0]);
+        $startTimeS = trim($startTime .' '. $p['start_id']);
+        $endTimeS = trim($endTime .' '. $p['end_id']);
         //时间判断
         if(strtotime($startTimeS) > strtotime($endTimeS)) {
             return $this->backLeaveData(false, ['end_time' => trans('请选择有效的时间范围')]);
@@ -70,7 +71,7 @@ class Leaved extends Operate implements AttendanceInterface
         //渠道配置计算类型配置判断
         $holidayConfig = HolidayConfig::where(['holiday_id' => $holidayId])->first();
         $driver = HolidayConfig::$cypherTypeChar[$holidayConfig->cypher_type];
-        $userHoliday = $this->driver($driver)->check($holidayConfig, $numberDay, count($isLeaves->toArray()));
+        $userHoliday = $this->driver($driver)->check($holidayConfig, $numberDay);
         //验证是否要上次附件
         if($holidayConfig->is_annex === HolidayConfig::STATUS_ENABLE && empty($p['annex'])) {
             return $this->backLeaveData(false, ['annex' => trans('请上传附件')]);
@@ -123,4 +124,8 @@ class Leaved extends Operate implements AttendanceInterface
         return parent::createLeave($leave);
     }
 
+    public function setDailyDetail($leave)
+    {
+        return parent::setDailyDetail($leave);
+    }
 }

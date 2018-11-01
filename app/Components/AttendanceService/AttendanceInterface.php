@@ -28,8 +28,10 @@ interface AttendanceInterface
 
     /**
      * 获取审核步骤
+     * @param $holidayId
+     * @param $numberDay
      * @return array
      */
-    public function getLeaveStep($numberDay) : array;
+    public function getLeaveStep($holidayId, $numberDay) : array;
 
 }

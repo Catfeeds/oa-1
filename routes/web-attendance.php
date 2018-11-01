@@ -44,6 +44,13 @@ Route::group([
             'middleware' => ['permission:leave.create'],
             'uses' => 'LeaveController@showMemo'])->name('leave.showMemo');
 
+        Route::get('leave/inquire', [
+            'middleware' => ['permission:leave.create'],
+            'uses' => 'LeaveController@inquire'])->name('leave.inquire');
+        Route::get('leave/get-punch-rules', [
+            'middleware' => ['permission:leave.create'],
+            'uses' => 'LeaveController@getPunchRules'])->name('leave.getPunchRules');
+
 
         #申请单管理
         Route::get('leave/review/', [

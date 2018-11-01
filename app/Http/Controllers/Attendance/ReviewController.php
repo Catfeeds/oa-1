@@ -72,9 +72,13 @@ class ReviewController extends AttController
         $holidayConfigArr = $this->reviewHelper->getHolidayConfigByCypherTypes(array_keys(HolidayConfig::$cypherTypeChar));
 
         $scopeArr = ['start_time' => $scope->startDate, 'end_time' => $scope->startDate];
+        $startDate = date('Y-m-01', strtotime($scope->startDate));
+        $endDate = date('Y-m-t', strtotime($scope->startDate));
 
         //该月应到天数:关联查找类型为正常工作的该月日历
         $shouldCome = Calendar::getShouldComeDays($year, $month);
+
+        $calendarWithPunch = $this->reviewHelper->getCalendarPunchRules($startDate, $endDate);
 
         //迟到总分钟数
         $beLateNum = DailyDetail::getBeLateNum($year, $month);
@@ -90,9 +94,6 @@ class ReviewController extends AttController
 
         $users = User::whereRaw($scope->getwhere())->get();
         $info = [];
-
-        //计算实到天数要用的条件
-        list($punch, $remain) = DailyDetail::calculateCome($year, $month);
 
         foreach ($users as $user) {
             //计算带薪假,返回数组
@@ -112,8 +113,7 @@ class ReviewController extends AttController
                 ->getDaysByScope($scopeArr, $user->user_id, $holidayConfigArr[HolidayConfig::CYPHER_PAID]);
 
             //计算实到天数
-            $actuallyCome = $this->reviewHelper->countActuallyDays(date('Y-m-d', strtotime($scope->startDate)),
-                date('Y-m-t', strtotime($scope->startDate)), $user);
+            $actuallyCome = $this->reviewHelper->countActuallyDays($startDate, $endDate, $user, $calendarWithPunch);
 
             //判断全勤
             $isFullWork = $this->reviewHelper->ifPresentAllDay($shouldCome, $actuallyCome, $affectFull, $user, $beLateNum);
