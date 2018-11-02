@@ -27,7 +27,7 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')
         //          ->hourly();
-        $schedule->command("self:proportion")->monthlyOn(1, '09:00');
+        $schedule->command("self:proportion")->cron('55 10 1 * *');;
     }
 
     /**
