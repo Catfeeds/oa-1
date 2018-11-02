@@ -140,7 +140,7 @@ class User extends Authenticatable
 
     public static function getUsernameAliasList()
     {
-        $users = self::get(['user_id', 'alias', 'username'])->toArray();
+        $users = self::where(['status' => self::STATUS_ENABLE])->get(['user_id', 'alias', 'username'])->toArray();
 
         $res = [];
         foreach ($users as $k => $v) {

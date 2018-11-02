@@ -5,8 +5,8 @@
 @endif
 
 @if(Entrust::can(['approval-step']))
-    <li @if (Route::is('approval-step*')) class="active" @endif>
-        <a href="{{ route('approval-step') }}">{{ trans('app.审核流程配置') }}</a>
+    <li @if (Route::is('review-step-flow*')) class="active" @endif>
+        <a href="{{ route('review-step-flow') }}">{{ trans('app.审核流程配置') }}</a>
     </li>
 @endif
 

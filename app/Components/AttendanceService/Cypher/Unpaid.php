@@ -10,6 +10,8 @@
 namespace App\Components\AttendanceService\Cypher;
 
 
+use App\Http\Components\Helpers\AttendanceHelper;
+
 class Unpaid extends Cypher
 {
     public function check($holidayConfig, $numberDay)
@@ -17,8 +19,13 @@ class Unpaid extends Cypher
         return parent::check($holidayConfig, $numberDay);
     }
 
-    public function getUserHoliday($userId, $holidayConfig)
+    public function getUserHoliday($entryTime, $userId, $holidayConfig)
     {
-        return parent::getUserHoliday($userId, $holidayConfig);
+        return parent::getUserHoliday($entryTime, $userId, $holidayConfig);
+    }
+
+    public function getDaysByScope($scope, $userId, $holidays)
+    {
+        return parent::getDaysByScope($scope, $userId, $holidays);
     }
 }

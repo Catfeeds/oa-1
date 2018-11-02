@@ -77,13 +77,14 @@
             createTree('#tree');
             $('#didClick').click(function () {
                  $.ajax({
-                       url: '{{ route('role.appointUpdate', ['id' => $id])}}',
-                    type: 'GET',
+                     url: '{{ route('role.appointUpdate', ['id' => $id])}}',
+                    type: 'POST',
                     async: true,
-                        data: {
-                            PostMethod : "checkedBox",
-                            nodesJson: chkNodeStr
-                         },
+                    data: {
+                        PostMethod : "checkedBox",
+                        nodesJson: chkNodeStr,
+                        _token: "{{ csrf_token() }}"
+                     },
                    dataType: 'json',
                     success: function (data) {
                         if(data.status >= 1) {

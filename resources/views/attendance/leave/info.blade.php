@@ -63,9 +63,9 @@
                         <div class="col-sm-6">
                             <span class="help-block m-b-none">
                                 @if($applyTypeId == \App\Models\Sys\HolidayConfig::LEAVEID || $applyTypeId == \App\Models\Sys\HolidayConfig::CHANGE)
-                                    {{ \App\Http\Components\Helpers\AttendanceHelper::getLeaveStartTime($leave->start_time, $leave->start_id)}}
+                                    {{ \App\Http\Components\Helpers\AttendanceHelper::getLeaveTime($leave->start_time, $leave->start_id)}}
                                     ~
-                                    {{ \App\Http\Components\Helpers\AttendanceHelper::getLeaveEndTime($leave->end_time,$leave->end_id)}}
+                                    {{ \App\Http\Components\Helpers\AttendanceHelper::getLeaveTime($leave->end_time,$leave->end_id)}}
                                 @elseif($applyTypeId == \App\Models\Sys\HolidayConfig::RECHECK)
                                     @if(!empty($leave->start_time) && !empty($leave->end_time))
                                        {{ $leave->start_time }} ~ {{ $leave->end_time }}
@@ -176,13 +176,15 @@
 
                     <div class="form-group">
                         <div class="col-sm-4 col-sm-offset-5">
-                            @if(in_array($leave->status, [0, 1]))
-                                @if($leave->review_user_id == Auth::user()->user_id )
-                                    <a id="by_status" data-id=3 class="btn btn-success">{{ trans('att.审核通过') }}</a>
-                                    <a id="refuse_status" data-id=2 class="btn btn-primary">{{ trans('att.拒绝通过') }}</a>
+                            @if(Entrust::can('leave.review'))
+                                @if(in_array($leave->status, [0, 1]))
+                                    @if($leave->review_user_id == Auth::user()->user_id )
+                                        <a id="by_status" data-id=3 class="btn btn-success">{{ trans('att.审核通过') }}</a>
+                                        <a id="refuse_status" data-id=2 class="btn btn-primary">{{ trans('att.拒绝通过') }}</a>
+                                    @endif
                                 @endif
                             @endif
-                            @if($type === \App\User::IS_LEADER_TRUE)
+                            @if((int)$type === \App\Models\Attendance\Leave::LOGIN_VERIFY_INFO)
                                 <a href="{{route('leave.review.info')}}" class="btn btn-info">{{ trans('att.返回列表') }}</a>
                             @else
                                 <a href="{{route('leave.info')}}" class="btn btn-info">{{ trans('att.返回列表') }}</a>

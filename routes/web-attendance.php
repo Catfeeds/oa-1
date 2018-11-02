@@ -44,6 +44,13 @@ Route::group([
             'middleware' => ['permission:leave.create'],
             'uses' => 'LeaveController@showMemo'])->name('leave.showMemo');
 
+        Route::get('leave/inquire', [
+            'middleware' => ['permission:leave.create'],
+            'uses' => 'LeaveController@inquire'])->name('leave.inquire');
+        Route::get('leave/get-punch-rules', [
+            'middleware' => ['permission:leave.create'],
+            'uses' => 'LeaveController@getPunchRules'])->name('leave.getPunchRules');
+
 
         #申请单管理
         Route::get('leave/review/', [
@@ -106,13 +113,13 @@ Route::group([
 
         #考勤申诉
         Route::post('appeal/create', [
-//            'middleware' => ['permission:appeal.store'],
+            'middleware' => ['permission:appeal.store'],
             'uses' => 'AppealController@store'])->name('appeal.store');
         Route::post('appeal/edit', [
-//            'middleware' => ['permission:appeal.update'],
+            'middleware' => ['permission:appeal.update'],
             'uses' => 'AppealController@update'])->name('appeal.update');
         Route::get('appeal/review', [
-//            'middleware' => ['permission:appeal.review'],
+            'middleware' => ['permission:appeal.review'],
             'uses' => 'AppealController@reviewIndex'])->name('appeal.review.info');
     });
 });

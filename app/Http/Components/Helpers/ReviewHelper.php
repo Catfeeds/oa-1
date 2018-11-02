@@ -6,6 +6,8 @@
  * Time: 14:30
  */
 namespace App\Http\Components\Helpers;
+use App\Models\Attendance\DailyDetail;
+use App\Models\Sys\Calendar;
 use App\Models\Sys\HolidayConfig;
 
 class ReviewHelper
@@ -61,29 +63,93 @@ class ReviewHelper
     }
 
     /**
-     * 计算各种福利假的天数
+     * 计算各种带薪假的剩余天数
      * @param $user
      * @param array $obj
      * @return array
      */
     public function countWelfare($user, array $obj)
     {
-        //剩余年假
-        $remainYear = isset($obj['year']) ? AttendanceHelper::getUserPayableDayToEntryTime($user->userExt->entry_time, $user->user_id,
-            $obj['year']) : NULL;
+        $ret = [];
+        $arr = ['et' => $user->userExt->entry_time, 'id' => $user->user_id];
+        foreach ($obj as $k => $v) {
+            $driver = HolidayConfig::$cypherTypeChar[$v->cypher_type];
+            $ret[$k] = \AttendanceService::driver($driver, 'cypher')->getUserHoliday($arr['et'], $arr['id'], $v);
+        }
 
-        //剩余节日调休假
-        $arr = isset($obj['change']) ? AttendanceHelper::getUserChangeHoliday($user->user_id, $obj['change']) : NULL;
-        $remainChange = isset($arr) ? $arr['change_work_day'] - $arr['change_use_day'] : NULL;
+        //加了多少天班就剩余调休就多几天
+        $over = HolidayConfig::where('cypher_type', HolidayConfig::CYPHER_OVERTIME)->first();
+        $overArr = AttendanceHelper::selectLeaveInfo(date('Y').'-01-01', date('Y').'-12-31', $user->user_id, $over);
+        $ret['change']['number_day'] = $ret['change']['number_day'] + $overArr['apply_days'];
 
-        //剩余探亲假
-        $remainVisit = isset($obj['visit']) ? AttendanceHelper::getUserPayableDayToEntryTime($user->userExt->entry_time, $user->user_id, $obj['visit'])
-        : NULL;
-
-        return [
-            'year' => $remainYear,
-            'change' => $remainChange,
-            'visit' => $remainVisit
-        ];
+        return $ret;
     }
+
+    public function getHolidayConfigByCypherTypes(array $cypherTypes)
+    {
+        $holCon = [];
+        foreach ($cypherTypes as $cypherType) {
+            $holCon[$cypherType] = HolidayConfig::where('cypher_type', $cypherType)->get();
+        }
+        return $holCon;
+    }
+
+    /**
+     * 获取实到天数
+     * @param $startDate
+     * @param $endDate
+     * @param $user
+     * @return int
+     */
+    public function countActuallyDays($startDate, $endDate, $user, $calPunch)
+    {
+        $detailArr = DailyDetail::where([
+            ['day', '>=', $startDate], ['day', '<=', $endDate], ['user_id', $user->user_id]
+        ])->get();
+
+        $days = 0;
+        foreach ($detailArr as $item) {
+            $days = $days + $this->countDay($item->punch_start_time, $item->punch_end_time, $calPunch[$item->day]);
+        }
+        return $days;
+    }
+
+    /**
+     * 计算一天的打卡时间在打卡规则中是多少天
+     * @param $punch_start
+     * @param $punch_end
+     * @param object $punchRule 该天对应的打卡规则对象
+     * @return float|int
+     */
+    public function countDay($punch_start, $punch_end, $punchRule)
+    {
+        $day = 0;
+        if ($punch_start < '12:00' && $punch_end >= $punchRule->work_end_time && !empty($punch_end) && !empty($punch_start)) {
+            $day = 1;
+        }elseif ($punch_start >= '12:00' || $punch_end <= '14:00' && !empty($punch_end)) {
+            $day = 0.5;
+        }
+        return $day;
+    }
+
+    /**
+     * 连表获取日历对应的上下班配置, 以['year-month-day' => 上下班规则]
+     * @param $startDate
+     * @param $endDate
+     * @return array
+     */
+    public function getCalendarPunchRules($startDate, $endDate)
+    {
+        $calendarArr = Calendar::whereBetween(\DB::raw('UNIX_TIMESTAMP(CONCAT(year, "-", month, "-", day))'),
+            [strtotime($startDate), strtotime($endDate)])
+            ->with('punchRules')->get();
+
+        $newCalendarArr = [];
+        foreach ($calendarArr as $item) {
+            $key = sprintf("%d-%02d-%02d", $item->year, $item->month, $item->day);
+            $newCalendarArr[$key] = $item->punchRules;
+        }
+        return $newCalendarArr;
+    }
+
 }

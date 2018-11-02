@@ -69,13 +69,16 @@ class ReviewController extends AttController
 
         list($year, $month) = explode('-', $scope->startDate);
 
-        /*//取缓存
-        if (($info = $this->getFromRedis($year, $month, $cache, $scope))[0] == 'success') {
-            return $info;
-        }*/
+        $holidayConfigArr = $this->reviewHelper->getHolidayConfigByCypherTypes(array_keys(HolidayConfig::$cypherTypeChar));
+
+        $scopeArr = ['start_time' => $scope->startDate, 'end_time' => $scope->startDate];
+        $startDate = date('Y-m-01', strtotime($scope->startDate));
+        $endDate = date('Y-m-t', strtotime($scope->startDate));
 
         //该月应到天数:关联查找类型为正常工作的该月日历
         $shouldCome = Calendar::getShouldComeDays($year, $month);
+
+        $calendarWithPunch = $this->reviewHelper->getCalendarPunchRules($startDate, $endDate);
 
         //迟到总分钟数
         $beLateNum = DailyDetail::getBeLateNum($year, $month);
@@ -83,50 +86,40 @@ class ReviewController extends AttController
         //合计扣分
         $deductNum = DailyDetail::getDeductNum($year, $month);
 
-        //计算带薪假,返回数组
-        $hasSalary = Leave::getSalaryLeaves($year, $month);
-
-        //计算无薪假(请假),返回数组
-        $hasNoSalary = Leave::getNoSalaryLeaves($year, $month);
-
         //申请的假期中影响全勤的假期数
         $affectFull = Leave::noFull($year, $month);
 
         //获取用户对通知信息的状态
         $confirmStates = ConfirmAttendance::getConfirmState($year, $month);
 
-        //将'不设置','夜班加班调休','节假加班'纳入加班计算范围
-        $overLeaIds = Leave::getLeavesIdByChangeTypes(
-            [HolidayConfig::OVER_TIME, HolidayConfig::WEEK_WORK, HolidayConfig::NO_SETTING], $year, $month
-        );
-
-        //将'不设置','夜班加班','调休'纳入调休计算范围
-        $changeLeaIds = Leave::getLeavesIdByChangeTypes(
-            [HolidayConfig::WORK_CHANGE, HolidayConfig::OVER_TIME, HolidayConfig::NO_SETTING], $year, $month
-        );
-
         $users = User::whereRaw($scope->getwhere())->get();
         $info = [];
 
-        //计算实到天数要用的条件
-        list($punch, $remain) = DailyDetail::calculateCome($year, $month);
-
         foreach ($users as $user) {
+            //计算带薪假,返回数组
+            $hasSalary = \AttendanceService::driver('paid', 'cypher')
+                ->getDaysByScope($scopeArr, $user->user_id, $holidayConfigArr[HolidayConfig::CYPHER_PAID]);
+
+            //计算无薪假(请假),返回数组
+            $hasNoSalary = \AttendanceService::driver('unpaid', 'cypher')
+                ->getDaysByScope($scopeArr, $user->user_id, $holidayConfigArr[HolidayConfig::CYPHER_UNPAID]);
 
             //计算加班
-            $overDays = AttendanceHelper::selectChangeInfo('', '', explode(',', $overLeaIds[$user->user_id] ?? ''));
+            $overDays = \AttendanceService::driver('overtime', 'cypher')
+                ->getDaysByScope($scopeArr, $user->user_id, $holidayConfigArr[HolidayConfig::CYPHER_OVERTIME]);
 
             //计算调休
-            $changeDays = AttendanceHelper::selectChangeInfo('', '', explode(',', $changeLeaIds[$user->user_id] ?? ''));
+            $changeDays = \AttendanceService::driver('change', 'cypher')
+                ->getDaysByScope($scopeArr, $user->user_id, $holidayConfigArr[HolidayConfig::CYPHER_PAID]);
 
             //计算实到天数
-            $actuallyCome = ($punch[$user->user_id] ?? 0) + ($remain[$user->user_id] ?? 0) + $overDays;
+            $actuallyCome = $this->reviewHelper->countActuallyDays($startDate, $endDate, $user, $calendarWithPunch);
 
             //判断全勤
             $isFullWork = $this->reviewHelper->ifPresentAllDay($shouldCome, $actuallyCome, $affectFull, $user, $beLateNum);
 
             $remainWelfare = $this->reviewHelper->countWelfare($user, [
-                'year' => $yearHolObj, 'change' => $changeHolObj, 'visit' => $visitHolObj
+                'year' => $yearHolObj, 'change' => $changeHolObj, 'visit' => $visitHolObj,
             ]);
 
             $info["$user->user_id"] = [
@@ -139,22 +132,18 @@ class ReviewController extends AttController
                 'actually_come'       => $actuallyCome,
                 'overtime'            => $overDays,
                 'change_time'         => $changeDays,
-                'no_salary_leave'     => $hasNoSalary[$user->user_id] ?? 0,
-                'has_salary_leave'    => $hasSalary[$user->user_id] ?? 0,
+                'no_salary_leave'     => $hasNoSalary,
+                'has_salary_leave'    => $hasSalary,
                 'is_full_work'        => $isFullWork,
                 'late_num'            => $beLateNum[$user->user_id] ?? 0,
                 'other'               => '--',
                 'deduct_num'          => $deductNum[$user->user_id] ?? 0,
-                'remain_year_holiday' => $remainWelfare['year'],
-                'remain_change'       => $remainWelfare['change'],
-                'remain_visit'        => $remainWelfare['visit'],
+                'remain_year_holiday' => $remainWelfare['year']['number_day'] ?? 0,
+                'remain_change'       => $remainWelfare['change']['number_day'] ?? 0 ,
+                'remain_visit'        => $remainWelfare['visit']['number_day'] ?? 0,
                 'send'                => $confirmStates[$user->user_id] ?? 0,
             ];
         }
-        /*//将没有筛选的全部用户放入缓存
-        if ($cache === true && $scope->getWhere() == '1 = 1') {
-            Redis::setex("att-$year-$month", 100, serialize($info));
-        }*/
         return ['success', $info];
     }
 

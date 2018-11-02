@@ -53,7 +53,7 @@
             <div class="col-lg-3">
                 <div class="ibox">
                     <div class="ibox-title">
-                        <h2>常用功能</h2>
+                        <h2>{{ trans('app.常用功能') }}</h2>
                     </div>
                     <div class="ibox-content no_padding">
                         <table class="table table-bordered">
@@ -64,7 +64,7 @@
                                             <div>
                                                 <span class="fa fa-calendar-plus-o fa-3x"></span>
                                             </div>
-                                            <span class="m-t-xs font-bold">请假</span>
+                                            <span class="m-t-xs font-bold">{{ trans('app.请假') }}</span>
                                         </div>
                                     </a>
                                 </td>
@@ -74,7 +74,7 @@
                                             <div>
                                                 <span class="fa fa-star fa-3x"></span>
                                             </div>
-                                            <span class="m-t-xs font-bold">加班调休</span>
+                                            <span class="m-t-xs font-bold">{{ trans('app.加班调休') }}</span>
                                         </div>
                                     </a>
                                 </td>
@@ -84,7 +84,7 @@
                                             <div>
                                                 <span class="fa fa-sticky-note fa-3x"></span>
                                             </div>
-                                            <span class="m-t-xs font-bold">出勤记录</span>
+                                            <span class="m-t-xs font-bold">{{ trans('app.出勤记录') }}</span>
                                         </div>
                                     </a>
                                 </td>
@@ -96,7 +96,7 @@
                                             <div>
                                                 <span class="fa fa-spinner fa-3x"></span>
                                             </div>
-                                            <span class="m-t-xs font-bold">敬请期待</span>
+                                            <span class="m-t-xs font-bold">{{ trans('app.敬请期待') }}</span>
                                         </div>
                                     </a>
                                 </td>
@@ -106,7 +106,7 @@
                                             <div>
                                                 <span class="fa fa-spinner fa-3x"></span>
                                             </div>
-                                            <span class="m-t-xs font-bold">敬请期待</span>
+                                            <span class="m-t-xs font-bold">{{ trans('app.敬请期待') }}</span>
                                         </div>
                                     </a>
                                 </td>
@@ -116,39 +116,7 @@
                                             <div>
                                                 <span class="fa fa-spinner fa-3x"></span>
                                             </div>
-                                            <span class="m-t-xs font-bold">敬请期待</span>
-                                        </div>
-                                    </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <a>
-                                        <div class="text-center">
-                                            <div>
-                                                <span class="fa fa-spinner fa-3x"></span>
-                                            </div>
-                                            <span class="m-t-xs font-bold">敬请期待</span>
-                                        </div>
-                                    </a>
-                                </td>
-                                <td>
-                                    <a>
-                                        <div class="text-center">
-                                            <div>
-                                                <span class="fa fa-spinner fa-3x"></span>
-                                            </div>
-                                            <span class="m-t-xs font-bold">敬请期待</span>
-                                        </div>
-                                    </a>
-                                </td>
-                                <td>
-                                    <a>
-                                        <div class="text-center">
-                                            <div>
-                                                <span class="fa fa-spinner fa-3x"></span>
-                                            </div>
-                                            <span class="m-t-xs font-bold">敬请期待</span>
+                                            <span class="m-t-xs font-bold">{{ trans('app.敬请期待') }}</span>
                                         </div>
                                     </a>
                                 </td>
@@ -160,7 +128,7 @@
                                             <div>
                                                 <span class="fa fa-spinner fa-3x"></span>
                                             </div>
-                                            <span class="m-t-xs font-bold">敬请期待</span>
+                                            <span class="m-t-xs font-bold">{{ trans('app.敬请期待') }}</span>
                                         </div>
                                     </a>
                                 </td>
@@ -170,7 +138,7 @@
                                             <div>
                                                 <span class="fa fa-spinner fa-3x"></span>
                                             </div>
-                                            <span class="m-t-xs font-bold">敬请期待</span>
+                                            <span class="m-t-xs font-bold">{{ trans('app.敬请期待') }}</span>
                                         </div>
                                     </a>
                                 </td>
@@ -180,7 +148,39 @@
                                             <div>
                                                 <span class="fa fa-spinner fa-3x"></span>
                                             </div>
-                                            <span class="m-t-xs font-bold">敬请期待</span>
+                                            <span class="m-t-xs font-bold">{{ trans('app.敬请期待') }}</span>
+                                        </div>
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a>
+                                        <div class="text-center">
+                                            <div>
+                                                <span class="fa fa-spinner fa-3x"></span>
+                                            </div>
+                                            <span class="m-t-xs font-bold">{{ trans('app.敬请期待') }}</span>
+                                        </div>
+                                    </a>
+                                </td>
+                                <td>
+                                    <a>
+                                        <div class="text-center">
+                                            <div>
+                                                <span class="fa fa-spinner fa-3x"></span>
+                                            </div>
+                                            <span class="m-t-xs font-bold">{{ trans('app.敬请期待') }}</span>
+                                        </div>
+                                    </a>
+                                </td>
+                                <td>
+                                    <a>
+                                        <div class="text-center">
+                                            <div>
+                                                <span class="fa fa-spinner fa-3x"></span>
+                                            </div>
+                                            <span class="m-t-xs font-bold">{{ trans('app.敬请期待') }}</span>
                                         </div>
                                     </a>
                                 </td>
@@ -192,7 +192,7 @@
             <div class="col-lg-5">
                 <div class="ibox">
                     <div class="ibox-title text-center">
-                        <h2>公告</h2>
+                        <h2>{{ trans('app.公告') }}</h2>
                     </div>
                     <div class="ibox-content no_padding">
                         <div id="content">
@@ -206,7 +206,7 @@
             <div class="col-lg-4">
                 <div class="ibox">
                     <div class="ibox-title text-center">
-                        <h2>工作日历</h2>
+                        <h2>{{ trans('app.工作日历') }}</h2>
                     </div>
                     <div class="ibox-content no_padding">
                         @include('widget.calendar-user', ['home' => 1])
@@ -218,7 +218,7 @@
             <div class="col-md-12">
                 <div class="ibox">
                     <div class="ibox-title">
-                        <h2>工作台</h2>
+                        <h2>{{ trans('app.工作台') }}</h2>
                     </div>
                     <div class="ibox-content no_padding">
                         <table class="table table-bordered">

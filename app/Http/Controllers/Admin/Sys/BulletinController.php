@@ -9,17 +9,13 @@ use App\Http\Controllers\Controller;
 class BulletinController extends Controller
 {
     private $_validateRule = [
-        'valid_time' => 'required|numeric',
-        'weight'     => 'required|numeric|min:0|max:1024',
         'content'    => 'required',
     ];
 
     public function index()
     {
         $title = '公告栏';
-        $data = Bulletin::orderBy(\DB::raw('created_at + valid_time * 24 * 3600'), 'desc')
-            ->orderBy('weight', 'desc')
-            ->paginate(30, ['id', 'send_user', 'valid_time', 'title', 'weight', 'created_at']);
+        $data = Bulletin::orderBy('created_at', 'desc')->paginate(30);
         return view('admin.sys.bulletin', compact('title', 'data'));
     }
 
@@ -53,5 +49,14 @@ class BulletinController extends Controller
         $bltContent['send_user'] = \Auth::user()->alias;
         Bulletin::find($id)->update($bltContent) ? flash('修改成功', 'success') : flash('修改失败', 'danger');
         return redirect($request->url());
+    }
+
+    public function changeShow(Request $request) {
+        try{
+            Bulletin::find($request->input()['id'])->update(['show' => $request->input()['show']]);
+        }catch (\Exception $exception) {
+            return 'error';
+        }
+        return 'success';
     }
 }

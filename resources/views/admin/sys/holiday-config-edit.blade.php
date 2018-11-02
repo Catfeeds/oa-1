@@ -354,6 +354,23 @@
                                                 </span>
                                             </div>
                                         </div>
+
+                                        <div class="form-group @if (!empty($errors->first('work_reset_formula'))) has-error @endif">
+                                            {!! Form::label('work_relief_formula', trans('app.加班调休重置周期'), ['class' => 'col-sm-3 control-label']) !!}
+                                            <div class="col-sm-3">
+                                                {!! Form::text('work_reset_formula', isset($holiday->work_reset_formula) ? $holiday->work_reset_formula: old('work_relief_formula'), [
+                                                'class' => 'form-control',
+                                                'placeholder' => trans('app.请输入', ['value' => trans('app.上下班时间减免时长')]),
+                                                ]) !!}
+                                                <span class="help-block m-b-none">{{ $errors->first('work_reset_formula') }}</span>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <span class="help-block m-b-none">
+                                                    <i class="fa fa-info-circle"></i> {{ trans('公式:[月,日,时,分,秒]') }}
+                                                </span>
+                                            </div>
+                                        </div>
+
                                     </div>
                                     {{--加班/调休显示end--}}
 

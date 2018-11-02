@@ -11,7 +11,7 @@ UE.registerUI('dialog', function (editor, uiName) {
                 editor   : editor,
                 name     : 'xiumi-connect',
                 title    : "秀米图文消息助手",
-                cssRules : "width: " + (window.innerWidth * 0.7) + "px;" + "height: " + (window.innerHeight - 60) + "px;",
+                    cssRules : "width: " + (window.innerWidth * 0.7) + "px;" + "height: " + (window.innerHeight - 60) + "px;",
             });
             dialog.render();
             dialog.open();

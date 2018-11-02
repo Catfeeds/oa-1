@@ -16,13 +16,16 @@ use App\Http\Components\ScopeAtt\LeaveScope;
 use App\Models\Attendance\Appeal;
 use App\Models\Attendance\DailyDetail;
 use App\Models\Attendance\Leave;
+use App\Models\Sys\Calendar;
 use App\Models\Sys\Dept;
 use App\Models\Sys\HolidayConfig;
 use App\Models\Sys\OperateLog;
+use App\Models\Sys\PunchRulesConfig;
 use App\Models\UserExt;
 use App\User;
 use EasyWeChat\Kernel\Exceptions\Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class LeaveController extends AttController
 {
@@ -140,16 +143,14 @@ class LeaveController extends AttController
             flash('申请失败,请勿非法操作', 'danger');
             return redirect()->route('leave.info');
         }
-
         $p = $request->all();
-
         $driver = HolidayConfig::$driverType[$applyTypeId];
+
         //申请单检验
         $retCheck = \AttendanceService::driver($driver)->checkLeave($request);
-
         if(!$retCheck['success']) return redirect()->back()->with(['holiday_id' => $p['holiday_id']])->withInput()->withErrors($retCheck['message']);
         //获取申请单审核步骤流程
-        $step = \AttendanceService::driver($driver)->getLeaveStep($retCheck['data']['number_day']);
+        $step = \AttendanceService::driver($driver)->getLeaveStep($p['holiday_id'], $retCheck['data']['number_day']);
         if(!$step['success']) return redirect()->back()->withInput()->withErrors($step['message']);
         //设置上传图片
          $imagePath = AttendanceHelper::setAnnex($request);
@@ -187,6 +188,7 @@ class LeaveController extends AttController
         flash(trans('app.编辑成功', ['value' => trans('att.假期申请')]), 'success');
         return redirect()->route('leave.info');
     }
+
 
     public function optInfo($id, $type)
     {
@@ -298,44 +300,37 @@ class LeaveController extends AttController
         }
 
         $msg = '';
+        //mysql事物开始
+        DB::beginTransaction();
         try {
             switch ($status) {
                 //拒绝通过状态
                 case Leave::REFUSE_REVIEW:
                     $msg = '拒绝通过';
                     $leave->update(['status' => Leave::REFUSE_REVIEW, 'review_user_id' => 0]);
-                    //假期天数回退
-                    AttendanceHelper::leaveNumBack($leave);
                     break;
                 //审核通过状态
                 case Leave::PASS_REVIEW:
                     $msg = '审核通过';
                     //申请单状态操作
-                    AttendanceHelper::leaveReviewPass($leave);
-                    //提前生成每日详情信息
-                    switch ($leave->holidayConfig->apply_type_id) {
-                        case HolidayConfig::LEAVEID;
-                        case HolidayConfig::CHANGE;
-                            AttendanceHelper::setDailyDetail($leave);
-                            break;
-                        case HolidayConfig::RECHECK;
-                            AttendanceHelper::setRecheckDailyDetail($leave);
-                            break;
-                    }
+                    $driver = HolidayConfig::$driverType[$leave->holidayConfig->apply_type_id];
+                    \AttendanceService::driver($driver)->leaveReviewPass($leave);
                     break;
                 case Leave::CANCEL_REVIEW:
                     $msg = '取消申请';
                     $leave->update(['status' => Leave::CANCEL_REVIEW, 'review_user_id' => 0]);
-                    //假期天数回退
-                    AttendanceHelper::leaveNumBack($leave);
                     break;
             }
 
             OperateLogHelper::createOperateLog(OperateLogHelper::LEAVE_TYPE_ID, $leave->leave_id, $msg);
 
         } catch (Exception $ex) {
+            //mysql事物回滚
+            DB::rollBack();
             return false;
         }
+        //mysql事物提交
+        DB::commit();
 
         return true;
     }
@@ -351,9 +346,35 @@ class LeaveController extends AttController
         if(empty($holidayConfig->holiday_id))  return response()->json(['status' => -1, 'memo' => '', 'day' => 0]);
 
         $driver = HolidayConfig::$cypherTypeChar[$holidayConfig->cypher_type];
-        $ret = \AttendanceService::driver($driver, 'cypher')->getUserHoliday(\Auth::user()->user_id, $holidayConfig);
+        $ret = \AttendanceService::driver($driver, 'cypher')->getUserHoliday(\Auth::user()->userExt->entry_time, \Auth::user()->user_id, $holidayConfig);
 
         return response()->json($ret);
+    }
+
+    public function inquire(Request $request){
+        dd($request->all());
+    }
+
+
+    public function getPunchRules(Request $request)
+    {
+        $p = $request->all();
+
+        if(empty($p['time'])) return response()->json(['status' => -1, 'start_time' => '', 'end_time' => '']);
+
+        list($year, $month, $day) = explode('-', $p['time']);
+        $punchRules = Calendar::where(['year' => (int)$year, 'month' => (int)$month, 'day' => (int)$day])->first();
+
+        if(empty($punchRules->punch_rules_id)) return response()->json(['status' => -1, 'start_time' => '', 'end_time' => '']);
+
+        $config = PunchRulesConfig::getPunchRulesCfgToId($punchRules->punch_rules_id);
+
+        if(!empty($config)) {
+            return response()->json(['status' => 1, 'start_time' => $config['start_time'], 'end_time' => $config['end_time']]);
+        } else {
+            return response()->json(['status' => -1, 'start_time' => '', 'end_time' => '']);
+        }
+
     }
 
 }

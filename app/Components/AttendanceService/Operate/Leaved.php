@@ -12,6 +12,7 @@ namespace App\Components\AttendanceService\Operate;
 use App\Components\AttendanceService\AttendanceInterface;
 use App\Components\Helper\DataHelper;
 use App\Http\Components\Helpers\AttendanceHelper;
+use App\Models\Attendance\DailyDetail;
 use App\Models\Attendance\Leave;
 use App\Models\Sys\Calendar;
 use App\Models\Sys\HolidayConfig;
@@ -28,7 +29,10 @@ class Leaved extends Operate implements AttendanceInterface
     public function checkLeave($request) : array
     {
         $p = $request->all();
-        $this->validate($request, $this->_validateRule);
+        $this->validate($request, array_merge($this->_validateRule,[
+            'start_id' => 'required',
+            'end_id' => 'required',
+        ]));
         //假期配置ID
         $holidayId = $p['holiday_id'];
 
@@ -39,8 +43,8 @@ class Leaved extends Operate implements AttendanceInterface
         $startTime = (string)$p['start_time'];
         $endTime = (string)$p['end_time'];
         //拼接有效时间戳
-        $startTimeS = trim($startTime .' '. Leave::$startId[$p['start_id'] ?? 0]);
-        $endTimeS = trim($endTime .' '. Leave::$endId[$p['end_id'] ?? 0]);
+        $startTimeS = trim($startTime .' '. $p['start_id']);
+        $endTimeS = trim($endTime .' '. $p['end_id']);
         //时间判断
         if(strtotime($startTimeS) > strtotime($endTimeS)) {
             return $this->backLeaveData(false, ['end_time' => trans('请选择有效的时间范围')]);
@@ -70,7 +74,7 @@ class Leaved extends Operate implements AttendanceInterface
         //渠道配置计算类型配置判断
         $holidayConfig = HolidayConfig::where(['holiday_id' => $holidayId])->first();
         $driver = HolidayConfig::$cypherTypeChar[$holidayConfig->cypher_type];
-        $userHoliday = $this->driver($driver)->check($holidayConfig, $numberDay, count($isLeaves->toArray()));
+        $userHoliday = $this->driver($driver)->check($holidayConfig, $numberDay);
         //验证是否要上次附件
         if($holidayConfig->is_annex === HolidayConfig::STATUS_ENABLE && empty($p['annex'])) {
             return $this->backLeaveData(false, ['annex' => trans('请上传附件')]);
@@ -83,7 +87,7 @@ class Leaved extends Operate implements AttendanceInterface
             $et = date('Y', $et) .'-'. (int)date('m', $et) .'-'. (int)date('d', $et);
 
             $calendar= Calendar::with('punchRules')
-                ->whereRaw('CONCAT(year,"-",month,"-",day)>='. (int)$st .' and CONCAT(year,"-",month,"-",day) <= '. (int)$et)
+                ->whereRaw('CONCAT(year,"-",month,"-",day)>='. $st .' and CONCAT(year,"-",month,"-",day) <= '. $et)
                 ->get();
 
             foreach ($calendar as $ck => $cv) {
@@ -97,7 +101,6 @@ class Leaved extends Operate implements AttendanceInterface
         if(!$userHoliday['success']) {
             return $this->backLeaveData(false, $userHoliday['message']);
         }
-
         //返回数据
         $userList = json_encode($userList);
         $data = [
@@ -114,6 +117,11 @@ class Leaved extends Operate implements AttendanceInterface
         return  $this->backLeaveData(true, [], $data);
     }
 
+    public function getLeaveStep($holidayId, $numberDay): array
+    {
+        return parent::getLeaveStep($holidayId, $numberDay);
+    }
+
     /**
      * 创建申请单
      * @param array $leave
@@ -124,4 +132,36 @@ class Leaved extends Operate implements AttendanceInterface
         return parent::createLeave($leave);
     }
 
+    /**
+     * @param object $leave
+     */
+    public function leaveReviewPass($leave)
+    {
+        if(empty($leave->remain_user)) {
+            $leave->update(['status' => 3, 'review_user_id' => 0]);
+            self::setDailyDetail($leave);
+
+        } else {
+            $remainUser = json_decode($leave->remain_user, true);
+
+            $reviewUserId = reset($remainUser);
+            array_shift($remainUser);
+
+            if(empty($remainUser)) {
+                $remainUser = '';
+            } else {
+                $remainUser = json_encode($remainUser);
+            }
+
+            $leave->update(['status' => 1, 'review_user_id' => $reviewUserId, 'remain_user' => $remainUser]);
+        }
+    }
+
+    /**
+     * @param $leave
+     */
+    public function setDailyDetail($leave)
+    {
+        return parent::setDailyDetail($leave);
+    }
 }

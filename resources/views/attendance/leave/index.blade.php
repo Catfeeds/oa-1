@@ -72,9 +72,9 @@
                 <div class="row">
                     <div class="col-md-2 list-group" style="padding: 10px">
                         <div class="list-group-item"><h4 class="list-group-item-heading">剩余可申请的福利假</h4></div>
-                        <p class="list-group-item">剩余年假: {{ $remainWelfare['year'] ?? '尚未配置该福利假' }}</p>
-                        <p class="list-group-item">剩余节假日调休: {{ $remainWelfare['change'] ?? '尚未配置该福利假' }}</p>
-                        <p class="list-group-item">剩余探亲假: {{ $remainWelfare['visit'] ?? '尚未配置该福利假' }}</p>
+                        <p class="list-group-item">剩余年假: {{ $remainWelfare['year']['number_day'] ?? '尚未配置该福利假' }}</p>
+                        <p class="list-group-item">剩余节假日调休: {{ $remainWelfare['change']['number_day'] ?? '尚未配置该福利假' }}</p>
+                        <p class="list-group-item">剩余探亲假: {{ $remainWelfare['visit']['number_day'] ?? '尚未配置该福利假' }}</p>
                     </div>
                     <div class="col-md-10 table-responsive pre-scrollable" style="padding-left: 10px; border-left: 1px solid #e7eaec;">
                         <table class="table table-striped tooltip-demo">
@@ -89,27 +89,34 @@
                             <th>{{ trans('att.申请时间') }}</th>
                             <th>{{ trans('att.申请状态') }}</th>
                             <th>{{ trans('att.操作') }}</th>
-                            <th>{{ trans('att.对假期有疑问?') }}</th>
+                            @if(Entrust::can('appeal.store'))
+                                <th>{{ trans('att.对假期有疑问?') }}</th>
+                            @endif
                         </tr>
                         </thead>
                         <tbody>
+
                         @foreach($data as $k => $v)
                             <tr>
+
                                 <td>{{ \App\Models\Sys\HolidayConfig::$applyType[\App\Models\Sys\HolidayConfig::getHolidayApplyList()[$v['holiday_id']]] }}</td>
-                                <td>{{ \App\Models\Sys\HolidayConfig::getHolidayList()[$v['holiday_id']] }}</td>
+                                <td>
+                                    {{ \App\Models\Sys\HolidayConfig::getHolidayList()[$v['holiday_id']] }}
+                                </td>
 
                                 <td>
+
                                     @if(\App\Models\Sys\HolidayConfig::getHolidayApplyList()[$v['holiday_id']] === 3)
                                         {{$v['start_time'] ?? '---'}}
                                     @else
-                                        {{ date('Y-m-d', strtotime($v['start_time'])).' '.\App\Models\Attendance\Leave::$startId[$v['start_id']] }}
+                                        {{ date('Y-m-d', strtotime($v['start_time'])).' '.$v['start_id'] }}
                                     @endif
                                 </td>
                                 <td>
                                     @if(\App\Models\Sys\HolidayConfig::getHolidayApplyList()[$v['holiday_id']] === 3)
                                         {{$v['end_time'] ?? '---'}}
                                     @else
-                                        {{ date('Y-m-d', strtotime($v['end_time'])).' '.\App\Models\Attendance\Leave::$endId[$v['end_id']] }}
+                                        {{ date('Y-m-d', strtotime($v['end_time'])).' '.$v['end_id'] }}
                                     @endif
                                 </td>
                                 <td>
@@ -121,23 +128,25 @@
                                 <td>{{ $v['created_at'] }}</td>
                                 <td>{{ \App\Models\Attendance\Leave::$status[$v['status']] }}</td>
                                 <td>
-                                    @if(Entrust::can(['leave-all', 'leave.edit']))
+                                   {{-- @if(Entrust::can(['leave.edit']))
                                         {!! BaseHtml::tooltip(trans('app.设置'), route('leave.edit', ['id' => $v['leave_id']]), 'cog fa-lg') !!}
-                                    @endif
+                                    @endif--}}
                                     @if(($v['user_id'] == \Auth::user()->user_id || $v['review_user_id'] == \Auth::user()->user_id || in_array(\Auth::user()->user_id, $userIds)) && Entrust::can(['leave.edit', 'leave.review']))
                                         {!! BaseHtml::tooltip(trans('att.请假详情'), route('leave.optInfo', ['id' => $v['leave_id'], 'type' => \App\Models\Attendance\Leave::LOGIN_INFO]), 'cog fa fa-newspaper-o') !!}
                                     @endif
                                 </td>
-                                <td>
-                                    @if(!isset($appealData[$v['leave_id']]))
-                                        <a data-toggle="modal" data-target="#exampleModal" data-whatever="{{
-                                           serialize(['holiday_id' => $v['holiday_id'], 'leave_id' => $v['leave_id'],
-                                           'appeal_type' => \App\Models\Attendance\Appeal::APPEAL_LEAVE])
-                                           }}">申诉</a>
-                                    @else
-                                        <span>{{ \App\Models\Attendance\Appeal::getTextArr()[$appealData[$v['leave_id']]] }}</span>
-                                    @endif
-                                </td>
+                                @if(Entrust::can('appeal.store'))
+                                    <td>
+                                        @if(!isset($appealData[$v['leave_id']]))
+                                            <a data-toggle="modal" data-target="#exampleModal" data-whatever="{{
+                                               serialize(['appeal_id' => $v['leave_id'],
+                                               'appeal_type' => \App\Models\Attendance\Appeal::APPEAL_LEAVE])
+                                               }}">申诉</a>
+                                        @else
+                                            <span>{{ \App\Models\Attendance\Appeal::getTextArr()[$appealData[$v['leave_id']]] }}</span>
+                                        @endif
+                                    </td>
+                                @endif
                             </tr>
                         @endforeach
                         </tbody>

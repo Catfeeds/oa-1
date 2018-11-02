@@ -129,7 +129,6 @@ class HolidayConfig extends Model
         'is_full',
         'sort',
         'is_annex',
-        'condition_id',
         'restrict_sex',
         'punch_type',
         'show_name',
@@ -150,10 +149,11 @@ class HolidayConfig extends Model
         'is_before_after',
         'reset_type',
 
-
+        //待删除
         'num',
         'is_boon',
         'change_type',
+        'condition_id',
     ];
 
     public static function getHolidayList()
@@ -164,6 +164,11 @@ class HolidayConfig extends Model
             ->get(['holiday_id', 'holiday'])
             ->pluck('holiday', 'holiday_id')
             ->toArray();
+    }
+
+    public static function holidayList()
+    {
+        return self::get(['holiday_id', 'holiday'])->pluck('holiday', 'holiday_id')->toArray();
     }
 
     public static function getObjByName($name)

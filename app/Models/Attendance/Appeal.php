@@ -2,6 +2,7 @@
 
 namespace App\Models\Attendance;
 
+use App\Models\Sys\HolidayConfig;
 use App\User;
 use Illuminate\Database\Eloquent\Model;
 
@@ -9,7 +10,7 @@ class Appeal extends Model
 {
     protected $table = "appeal";
     protected $fillable = [
-        'apply_type_id', 'user_id', 'reason', 'result', 'remark', 'operate_user_id', 'leave_id', 'appeal_type', 'daily_id'
+        'appeal_id', 'user_id', 'reason', 'result', 'remark', 'operate_user_id', 'appeal_type',
     ];
     public $primaryKey = "id";
 
@@ -23,13 +24,8 @@ class Appeal extends Model
 
     public static function getAppealResult($appealType)
     {
-        $columns = [
-            self::APPEAL_LEAVE => 'leave_id',
-            self::APPEAL_DAILY => 'daily_id',
-        ];
-
         return self::where(['user_id' => \Auth::user()->user_id, 'appeal_type' => $appealType])
-            ->get()->pluck('result', $columns[$appealType])->toArray();
+            ->get()->pluck('result', 'appeal_id')->toArray();
     }
 
     public static function getTextArr()
@@ -46,8 +42,13 @@ class Appeal extends Model
         return $this->hasOne(User::class, 'user_id', 'user_id');
     }
 
-    public function daily()
+    public function leave()
     {
-        return $this->hasOne(DailyDetail::class, 'id', 'daily_id');
+        return $this->hasOne(Leave::class, 'leave_id', 'appeal_id');
+    }
+
+    public function holidayConfig()
+    {
+        return $this->hasManyThrough(HolidayConfig::class, Leave::class, 'leave_id', 'holiday_id', 'appeal_id', 'holiday_id');
     }
 }

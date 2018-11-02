@@ -28,7 +28,7 @@
                 <th>{{ trans('att.其他') }}</th>
                 <th>{{ trans('att.合计扣分') }}</th>
                 <th>{{ trans('att.剩余年假') }}</th>
-                <th>{{ trans('att.剩余节日调休假') }}</th>
+                <th>{{ trans('att.剩余调休假') }}</th>
                 <th>{{ trans('att.剩余探亲假') }}</th>
                 <?php $num = 0;?>
                 @if(Entrust::can(['daily-detail.review.detail']))

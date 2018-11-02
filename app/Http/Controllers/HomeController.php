@@ -15,10 +15,11 @@ class HomeController extends Controller
     public function index()
     {
         $bulletContent = Bulletin::where([
-            [\DB::raw("created_at + valid_time * 3600 * 24"), '>=', time()]
+            [\DB::raw('UNIX_TIMESTAMP(end_date)'), '>=', time()],
+            [\DB::raw('UNIX_TIMESTAMP(start_date)'), '<=', time()],
+            ['show', '=', 1],
         ])
-            ->orderBy('weight', 'desc')
-            ->first(['content']);
+            ->orderBy('weight', 'desc')->orderBy('created_at', 'desc')->first(['content']);
         return view('home', compact('bulletContent'));
     }
 }

@@ -47,20 +47,9 @@ class AttendanceHelper
      * @param $startId
      * @return string
      */
-    public static function getLeaveStartTime($startTime, $startId)
+    public static function getLeaveTime($time, $id)
     {
-        return date('Y-m-d', strtotime($startTime)) . ' ' . Leave::$startId[$startId];
-    }
-
-    /**
-     * 获取申请单结束日期
-     * @param $endTime
-     * @param $endId
-     * @return string
-     */
-    public static function getLeaveEndTime($endTime, $endId)
-    {
-        return date('Y-m-d', strtotime($endTime)) . ' ' . Leave::$endId[$endId];
+        return date('Y-m-d', strtotime($time)) . ' ' . $id;
     }
 
     /**
@@ -160,28 +149,7 @@ class AttendanceHelper
         }
     }
 
-    /**
-     * 申请单 通过 操作
-     * @param object $leave 申请单信息
-     */
-    public static function leaveReviewPass($leave)
-    {
-        if(empty($leave->remain_user)) {
-            $leave->update(['status' => 3, 'review_user_id' => 0]);
-        } else {
-            $remain_user = json_decode($leave->remain_user, true);
 
-            $review_user_id = reset($remain_user);
-            unset($remain_user[$review_user_id]);
-            if(empty($remain_user)) {
-                $remain_user = '';
-            } else {
-                $remain_user = json_encode($remain_user);
-            }
-
-            $leave->update(['status' => 1, 'review_user_id' => $review_user_id, 'remain_user' => $remain_user]);
-        }
-    }
 
 
     /**
@@ -231,135 +199,6 @@ class AttendanceHelper
         }
 
         return ['where' => $where, 'user_ids' => $userIds];
-    }
-
-    /**
-     * 请假调休 申请单通过记录到每日详情里
-     * @param $leave
-     */
-    public static function setDailyDetail($leave)
-    {
-        $startDay = strtotime($leave->start_time);
-        $endDay = strtotime($leave->end_time);
-
-        $day = DataHelper::prDates($startDay, $endDay);
-        if(!empty($day)) {
-            foreach ($day as $k => $d) {
-                $daily = DailyDetail::whereIn('day', [date('Y-m-d', $d)])->where(['user_id' => $leave->user_id])->first();
-                if(!empty($daily->day)) continue;
-                $data = [
-                    'user_id' => $leave->user_id,
-                    'day' => date('Y-m-d', $d),
-                    'leave_id' => self::addLeaveId($leave->leave_id),
-                    'punch_start_time' => Leave::$startId[1],
-                    'punch_start_time_num' => strtotime(date('Y-m-d', $d) . ' ' . Leave::$startId[1]),
-                    'punch_end_time' => Leave::$endId[3],
-                    'punch_end_time_num' => strtotime(date('Y-m-d', $d) . ' ' . Leave::$endId[3]),
-                ];
-
-                DailyDetail::create($data);
-            }
-        }
-
-        $startDaily = DailyDetail::where(['day' => date('Y-m-d', $startDay), 'user_id' => $leave->user_id])->first();
-        $endDaily = DailyDetail::where(['day' => date('Y-m-d', $endDay), 'user_id' => $leave->user_id])->first();
-
-        $punch = self::getPunch($leave, $startDay, $endDay);
-
-        if($startDay == $endDay) {
-            //插入或更新所需数据, 更新新的请假打卡也就是为空的字段,将新的请假id存入数组转为json存入数据表
-            $startData = [
-                'user_id' => $leave->user_id,
-                'day' => date('Y-m-d', $startDay),
-                'leave_id' => self::addLeaveId($leave->leave_id, $startDaily->leave_id ?? NULL),
-                'punch_start_time' => $startDaily->punch_start_time ?? $punch['punch_start_time'],
-                'punch_start_time_num' => $startDaily->punch_start_time_num ?? $punch['punch_start_time_num'],
-                'punch_end_time' => $startDaily->punch_end_time ?? $punch['punch_end_time'],
-                'punch_end_time_num' => $startDaily->punch_end_time_num ?? $punch['punch_end_time_num'],
-            ];
-            empty($startDaily->day) ? DailyDetail::create($startData) : $startDaily->update($startData);
-        }
-
-        if($startDay < $endDay) {
-            $startData = [
-                'user_id' => $leave->user_id,
-                'day' => date('Y-m-d', $startDay),
-                'leave_id' => self::addLeaveId($leave->leave_id, $startDaily->leave_id ?? NULL),
-                'punch_start_time' => $startDaily->punch_start_time ?? $punch['punch_start_time'],
-                'punch_start_time_num' => $startDaily->punch_start_time_num ?? $punch['punch_start_time_num'],
-                'punch_end_time' => $startDaily->punch_end_time ?? Leave::$endId[3],
-                'punch_end_time_num' => $startDaily->punch_end_time_num ?? strtotime(date('Y-m-d', $startDay) . ' ' . Leave::$endId[3]),
-            ];
-            empty($startDaily->day) ? DailyDetail::create($startData) : $startDaily->update($startData);
-
-            $endData = [
-                'user_id' => $leave->user_id,
-                'day' => date('Y-m-d', $endDay),
-                'leave_id' => self::addLeaveId($leave->leave_id, $endDaily->leave_id ?? NULL),
-                'punch_start_time' => $endDaily->punch_start_time ?? Leave::$startId[1],
-                'punch_start_time_num' => $endDaily->punch_start_time_num ??
-                    strtotime(date('Y-m-d', $endDay) . ' ' . Leave::$startId[1]),
-                'punch_end_time' => $endDaily->punch_end_time ?? $punch['punch_end_time'],
-                'punch_end_time_num' => $endDaily->punch_end_time_num ?? $punch['punch_end_time_num'],
-            ];
-            empty($endDaily->day) ? DailyDetail::create($endData) : $endDaily->update($endData);
-        }
-    }
-
-    public static function setRecheckDailyDetail($leave)
-    {
-        $startDay = strtotime($leave->start_time);
-        $endDay = strtotime($leave->end_time);
-
-        //上下班都要补打卡的情况
-        if (date('Y-m-d', $startDay) == date('Y-m-d', $endDay)) {
-            $daily = DailyDetail::whereIn('day', [date('Y-m-d', $startDay)])
-                ->where(['user_id' => $leave->user_id])
-                ->first();
-            $data = [
-                'user_id' => $leave->user_id,
-                'day' => date('Y-m-d', $startDay),
-                'leave_id' => self::addLeaveId($leave->leave_id, $daily->leave_id),
-                'punch_start_time' => date('h:i', $startDay),
-                'punch_start_time_num' => $startDay,
-                'punch_end_time' => date('H:i', $endDay),
-                'punch_end_time_num' => $endDay,
-            ];
-            $daily->update($data);
-            return ;
-        }
-
-        //上班补打卡
-        if($leave->holidayConfig->punch_type === 1) {
-            $daily = DailyDetail::whereIn('day', [date('Y-m-d', $startDay)])
-                ->where(['user_id' => $leave->user_id])
-                ->first();
-            $startData = [
-                'user_id' => $leave->user_id,
-                'day' => date('Y-m-d', $startDay),
-                'leave_id' => self::addLeaveId($leave->leave_id, $daily->leave_id),
-                'punch_start_time' => date('h:i', $startDay),
-                'punch_start_time_num' => $startDay,
-            ];
-
-            $daily->update($startData);
-        }
-
-        //下班补打卡
-        if($leave->holidayConfig->punch_type === 2) {
-            $daily = DailyDetail::whereIn('day', [date('Y-m-d', $endDay)])
-                ->where(['user_id' => $leave->user_id])
-                ->first();
-            $endData = [
-                'user_id' => $leave->user_id,
-                'day' => date('Y-m-d', $endDay),
-                'leave_id' => self::addLeaveId($leave->leave_id, $daily->leave_id),
-                'punch_end_time' => date('H:i', $endDay),
-                'punch_end_time_num' => $endDay,
-            ];
-
-            $daily->update($endData);
-        }
     }
 
     /**
@@ -502,44 +341,6 @@ class AttendanceHelper
         return empty($userChangeLog->number_day) ? 0 :  $userChangeLog->number_day;
     }
 
-    /**
-     * 解析 申请配置公式格式
-     * @param string $formula 公式格式 [0,0,0,0,0,0] | [年,月,日,时,分,秒]
-     */
-    public static function resolveConfigFormula($formula)
-    {
-        $format = json_decode($formula, true);
-        if(empty($format)) return [];
-
-        $date = [];
-        foreach ($format as $k => $v) {
-            if(empty($v)) continue;
-            switch ($k) {
-                case 0 :
-                    $date['y'] = $v . 'year';
-                    break;
-                case 1 :
-                    $date['m'] = $v . 'month';
-                    break;
-                case 2 :
-                    $date['d'] = $v . 'day';
-                    break;
-                case 3 :
-                    $date['h'] = $v . 'hour';
-                    break;
-                case 4 :
-                    $date['i'] = $v . 'minute';
-                    break;
-                case 5 :
-                    $date['s'] = $v . 'second';
-                    break;
-            }
-        }
-
-        return $date;
-    }
-
-
     public static function resolveCycleConfigFormula($formula)
     {
         $format = json_decode($formula, true);
@@ -548,6 +349,7 @@ class AttendanceHelper
         $date = [];
         foreach ($format as $k => $v) {
             if(empty($v)) continue;
+            if($v <10) $v = '0'.$v;
             switch ($k) {
                 case 0 :
                     $date['m'] = $v;
@@ -570,8 +372,6 @@ class AttendanceHelper
         return $date;
     }
 
-
-
     /**
      * 按员工入职时间维度获取带薪假期
      * @param $entryTime
@@ -582,15 +382,11 @@ class AttendanceHelper
     public static function getUserPayableDayToEntryTime($entryTime, $userId, $holiday)
     {
         //获得带薪假期配置信息
-        $claimDate = self::resolveConfigFormula($holiday->payable_claim_formula);
-        $claimTime = date('Y-m-d H:i:s', strtotime('+'. implode(' ', $claimDate), strtotime($entryTime)));
-
+        $claimTime = DataHelper::dateTimeAddToFormula($entryTime, $holiday->payable_claim_formula);
         //入职未满配置时间范围，返回天数为0
         if(empty($entryTime) || strtotime($claimTime) > time()) return 0;
-
         //获取带薪假期重置配置信息
-        $resetDate = self::resolveConfigFormula($holiday->payable_reset_formula);
-        $resetTime = date('Y-m-d H:i:s', strtotime('+'. implode(' ', $resetDate), strtotime($claimTime)));
+        $resetTime = DataHelper::dateTimeAddToFormula($entryTime, $holiday->payable_reset_formula);
 
         //开始默认为带薪起效时间
         $startTime= $claimTime;
@@ -599,9 +395,10 @@ class AttendanceHelper
 
         //到期时间之后，重置开始时间和到期时间
         if(strtotime($endTime) < time()) {
-            $startTime = date('Y', time()) . '-' . date('m-d H:i:s', strtotime($startTime));
-            $endTime = date('Y-m-d H:i:s', strtotime('+'. implode(' ', $resetDate), strtotime($startTime)));
+            $startTime = DataHelper::dateTimeFormat('now', 'Y') . '-' . DataHelper::dateTimeFormat($endTime, 'm-d H:i:s');
+            $endTime = DataHelper::dateTimeAddToFormula($startTime, $holiday->payable_reset_formula);
         }
+
         return self::selectLeaveInfo($startTime, $endTime, $userId, $holiday);
     }
 
@@ -613,29 +410,35 @@ class AttendanceHelper
      */
     public static function getUserPayableDayToNaturalCycleTime($entryTime, $userId, $holiday)
     {
-        $claimDate = self::resolveConfigFormula($holiday->payable_claim_formula);
-
-        $claimTime = date('Y-m-d H:i:s', strtotime('+'. implode(' ', $claimDate), strtotime($entryTime)));
+        $claimTime = DataHelper::dateTimeAddToFormula($entryTime, $holiday->payable_claim_formula);
         //入职未满配置时间范围，返回天数为0
         if(empty($entryTime) || strtotime($claimTime) > time()) return 0;
 
         $resetDate = self::resolveCycleConfigFormula($holiday->payable_reset_formula);
+        $resetTime = sprintf('%s %s:%s:%s', $resetDate['d'] ??  '01', $resetDate['h'] ?? '00', $resetDate['i'] ?? '00', $resetDate['s'] ?? '00');
+        $resetMoney = DataHelper::dateTimeFormat('now', 'Y') .'-'. DataHelper::dateTimeFormat('now', 'm') . '-' . $resetTime;
 
-        $resetTime = sprintf('%d %s:%s:%s', $resetDate['d'] ?? date('d', time()), $resetDate['h'] ?? '00', $resetDate['i'] ?? '00', $resetDate['s'] ?? '00');
         if(array_key_exists('m', $resetDate)) {
-            $startTime = date('Y-m-d H:i:s', strtotime(date('Y', time()) .'-'. $resetDate['m'] . '-' . $resetTime));
-            $endTime = date('Y-m-d H:i:s', strtotime('+1year', strtotime($startTime)));
+            $startTime = DataHelper::dateTimeFormat('now', 'Y')  .'-'. $resetDate['m'] . '-' . $resetTime;
+            $endTime = DataHelper::dateTimeAdd($startTime, '1Y');
         } elseif(empty($resetDate['m']) && !empty($resetDate['d'])) {
-            $startTime = date('Y-m-d H:i:s', strtotime(date('Y', time()) .'-'. date('m', time()) . '-' . $resetTime));;
-            $endTime = date('Y-m-d H:i:s', strtotime('+1month', strtotime($startTime)));
+            $startTime = $resetMoney;
+            $endTime = DataHelper::dateTimeAdd($startTime, '1M');
         } elseif(empty($resetDate['m']) && empty($resetDate['d']) && !empty($resetDate['h'])) {
-            $startTime = date('Y-m-d H:i:s', strtotime(date('Y', time()) .'-'. date('m', time()) . '-' . $resetTime));;
-            $endTime = date('Y-m-d H:i:s', strtotime('+1day', strtotime($startTime)));
+            $startTime = $resetMoney;
+            $endTime = DataHelper::dateTimeAdd($startTime, '1D');
         } else {
-            $startTime = date('Y-m-d H:i:s', strtotime(date('Y', time()) .'-'. date('m', time()) . '-' . $resetTime));;
-            $endTime = date('Y-m-d H:i:s', strtotime('+1hour', strtotime($startTime)));
+            $startTime = $resetMoney;
+            $endTime = DataHelper::dateTimeAdd($startTime, 'T1H');
         }
 
+        return self::selectLeaveInfo($startTime, $endTime, $userId, $holiday);
+    }
+
+    public static function getUserPayableDayToNoCycleTime($userId, $holiday)
+    {
+        $startTime = date('Y').'-01-01';
+        $endTime = date('Y').'-12-31';
         return self::selectLeaveInfo($startTime, $endTime, $userId, $holiday);
     }
 
@@ -654,19 +457,20 @@ class AttendanceHelper
     }
 
     /**
-     * 查询员工 福利假期类型 天数
+     * 查询员工 周期内 申请信息
      * @param $startDay
      * @param $endDay
      * @param $userId
      * @param $holiday
-     * @return mixed
+     * @return array number_day 申请天数 count_num申请次数
      */
     public static function selectLeaveInfo($startDay, $endDay, $userId, $holiday)
     {
         $userLeaveLog = Leave::select([
-            \DB::raw('SUM(number_day) number_day')
+                \DB::raw('SUM(number_day) number_day'),
+                \DB::raw('count(*) count_num'),
             ])
-            ->where('start_time', '>', $startDay)
+            ->where('start_time', '>=', $startDay)
             ->where('end_time', '<=', $endDay)
             ->whereIn('status', [Leave::PASS_REVIEW, Leave::WAIT_REVIEW, Leave::ON_REVIEW])
             ->where([
@@ -674,7 +478,8 @@ class AttendanceHelper
                 'holiday_id' => $holiday->holiday_id,
             ])->groupBy('user_id')->first('number_day');
 
-        return empty($userLeaveLog->number_day) ? $holiday->up_day : $holiday->up_day - $userLeaveLog->number_day;
+        $numberDay = empty($userLeaveLog->number_day) ? $holiday->up_day : $holiday->up_day - $userLeaveLog->number_day;
+        return ['number_day' => $numberDay, 'count_num' => $userLeaveLog->count_num ?? 0, 'apply_days' => $userLeaveLog->number_day ?? 0];
     }
 
     /**
@@ -725,4 +530,5 @@ class AttendanceHelper
         }
         return $show;
     }
+
 }

@@ -17,7 +17,7 @@
                     <div class="form-group @if (!empty($errors->first('holiday_id'))) has-error @endif">
                         {!! Form::label('holiday_id', trans('att.请假类型'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-2">
-                            <select onchange="func()" class="js-select2-single form-control" id="holiday_id" name="holiday_id" >
+                            <select onchange="showMemo()" class="js-select2-single form-control" id="holiday_id" name="holiday_id" >
                                 <option value="">请选择</option>
                                 @foreach($holidayList as $k => $v)
                                     <option value="{{ $k }}" @if($k === (int)old('holiday_id')) selected="selected" @endif>{{ $v }}</option>
@@ -36,47 +36,41 @@
 
                     <div class="hr-line-dashed"></div>
 
-                    <div class="form-group @if (!empty($errors->first('start_time'))) has-error @endif">
+                    <div class="form-group @if (!empty($errors->first('start_time')) || !empty($errors->first('end_id'))) has-error @endif">
                         {!! Form::label('start_time', trans('att.请假开始时间'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-3">
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
                                 {!! Form::text('start_time', !empty($leave->start_time) ? $leave->start_time : (old('start_time') ?? '') , [
                                 'class' => 'form-control date',
+                                'id' => 'start_time',
                                 'required' => true,
                                 ]) !!}
                                 <span class="help-block m-b-none">{{ $errors->first('start_time') }}</span>
                             </div>
                         </div>
                         <div class="col-sm-2">
-                            <select class="js-select2-single form-control" name="start_id" >
-                                @foreach(\App\Models\Attendance\Leave::$startId as $k => $v)
-                                    <option value="{{ $k }}" @if($k === $leave->start_id) selected="selected" @endif>{{ $v }}</option>
-                                @endforeach
-                            </select>
+                            <select class="js-select2-single form-control" id="start_id" name="start_id" > </select>
                         </div>
                     </div>
 
                     <div class="hr-line-dashed"></div>
 
-                    <div class="form-group @if (!empty($errors->first('end_time'))) has-error @endif">
+                    <div class="form-group @if (!empty($errors->first('end_time')) || !empty($errors->first('end_id'))) has-error @endif">
                         {!! Form::label('end_time', trans('att.请假结束时间'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-3">
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
                                 {!! Form::text('end_time', !empty($leave->end_time) ? $leave->end_time : (old('end_time') ?? '') , [
                                 'class' => 'form-control date',
+                                'id' => 'end_time',
                                 'required' => true,
                                 ]) !!}
                                 <span class="help-block m-b-none">{{ $errors->first('end_time') }}</span>
                             </div>
                         </div>
                         <div class="col-sm-2">
-                            <select class="js-select2-single form-control" name="end_id" >
-                                @foreach(\App\Models\Attendance\Leave::$endId as $k => $v)
-                                    <option value="{{ $k }}" @if($k === $leave->start_id) selected="selected" @endif>{{ $v }}</option>
-                                @endforeach
-                            </select>
+                            <select class="js-select2-single form-control" id="end_id" name="end_id" ></select>
                         </div>
                     </div>
 
@@ -167,16 +161,26 @@
                 readURL(this, '#show_mobile_header_image');
             });
 
+            $("#start_time").change(function(){
+                inquireStartInfo();
+            });
+            $("#end_time").change(function(){
+                inquireEndInfo();
+            });
+
+            showMemo();
 
         });
 
-        function func() {
+        /**
+         * 显示剩余假期和描述
+         */
+        function showMemo() {
             var val = $('#holiday_id').children('option:selected').val();
             if(val != "") {
                 $('#show_pre').html('');
                 $.get('{{ route('leave.showMemo')}}', {id: val}, function ($data) {
                     if ($data.status == 1) {
-
                         if($data.show_memo){
                             $('#show_pre').html($data.memo);
                             $('#show_memo').show();
@@ -198,7 +202,85 @@
                 $('#show_pre').html('');
                 $('#show_memo').hide();
             }
-
         }
+
+        function inquireStartInfo() {
+            var startTime = $('#start_time').val();
+            var startId = $('#start_id option:selected').text();
+            getPunchRules(startTime, 1);
+
+            if (startTime != ''&& startId != '') {
+                //inquire();
+            }
+        }
+
+        function inquireEndInfo() {
+            var endTime = $('#end_time').val();
+            getPunchRules(endTime, 2);
+            //inquire();
+        }
+
+        function inquire() {
+            var startTime = $('#start_time').val();
+            var endTime = $('#end_time').val();
+            var startId = $('#start_id option:selected').text();
+            var endId = $('#end_id option:selected').text();
+
+            $.get('{{ route('leave.inquire')}}', {startTime: startTime, endTime: endTime, startId:startId, endId:endId}, function ($data) {
+                if ($data.status == 1) {
+                    bootbox.alert($data.msg);
+                    location.reload();
+                } else {
+                    bootbox.alert($data.msg);
+                }
+            })
+        }
+
+        /**
+         * 查询日期绑定的时间点
+         * @param time
+         * @param type
+         */
+        function getPunchRules(time, type) {
+            $.get('{{ route('leave.getPunchRules')}}', {time: time}, function ($data) {
+
+                switch (type){
+                    case 1:
+                        if ($data.status == 1) {
+                            $("#start_id").select2("val", "");
+                            $("#start_id").empty();
+                            $("#start_id").select2({
+                                placeholder: "-请选择时间点-", //默认所有
+                                allowClear: true, //清楚选择项
+                                multiple: false,// 多选
+                                data: $data.start_time //绑定数据
+                            });
+                        } else {
+                            $("#start_id").select2("val", "");
+                            $("#start_id").empty();
+                        }
+                        break;
+                    case 2:
+                        if ($data.status == 1) {
+                            $("#end_id").select2("val", "");
+                            $("#end_id").empty();
+                            $("#end_id").select2({
+                                placeholder: "-请选择时间点-", //默认所有
+                                allowClear: true, //清楚选择项
+                                multiple: false,// 多选
+                                data: $data.end_time //绑定数据
+                            });
+
+                            $("#end_id").attr($data.end_time[0]).select2();
+                        } else {
+                            $("#end_id").select2("val", "");
+                            $("#end_id").empty();
+
+                        }
+                }
+
+            })
+        }
+
     </script>
 @endsection
