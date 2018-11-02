@@ -38,7 +38,11 @@ class PunchRulesConfig extends Model
     public static function getPunchRulesCfgToId($id)
     {
         $config = self::where(['punch_rules_id' => $id])->get()->toArray();
+        return self::getPunchRules($config);
+    }
 
+    public static function getPunchRules($config)
+    {
         $list = $arr = [];
         foreach ($config as $k => $v) {
             $sKey = self::resolveFormula($v['work_start_time']);
@@ -50,21 +54,23 @@ class PunchRulesConfig extends Model
             $arr[$sKey.'$$'.$eKey.'$$'.$rKey]['ded_num'][] = [
                 'start_gap' => self::resolveGapFormula($v['start_gap']),
                 'end_gap' => self::resolveGapFormula($v['end_gap']),
+                'late_type' => $v['late_type'],
+                'ded_type' => $v['ded_type'],
+                'ded_num' => $v['ded_num'],
             ];
         }
-
         return ['start_time' => array_values($list['start_time']), 'end_time' => array_values($list['end_time']), 'cfg' => $arr];
     }
 
 
-    private static function resolveFormula($formula)
+    public static function resolveFormula($formula)
     {
         $date = json_decode($formula, true);
 
         return sprintf('%s:%s', !empty($date[4])&&$date[4] > 1 ? $date[4]  : '00',  !empty($date[5])&&$date[5] > 1 ? $date[5]  : '00' );
     }
 
-    private static function resolveGapFormula($formula)
+    public static function resolveGapFormula($formula)
     {
         $data = json_decode($formula, true);
 
@@ -95,6 +101,24 @@ class PunchRulesConfig extends Model
         $second = array_sum($date);
 
         return $second;
+    }
+
+    /**
+     * 获取一天正常的上班时间与下班时间
+     * @param $punchRulesConfigs
+     * @return array
+     */
+    public static function getTodayNormalWorkTime($punchRulesConfigs)
+    {
+        $minReadyTime = 9999;
+        $maxEndTime = 0;
+        foreach ($punchRulesConfigs as $punchRulesConfig) {
+            $readyTime = self::resolveFormula($punchRulesConfig->ready_time);
+            $endTime = self::resolveFormula($punchRulesConfig->work_end_time);
+            $minReadyTime = (int)str_replace(':', '', $readyTime) < $minReadyTime ? $readyTime : $minReadyTime;
+            $maxEndTime = (int)str_replace(':', '', $endTime) > $maxEndTime ? $endTime : $maxEndTime;
+        }
+        return ['ready_time' => $minReadyTime, 'end_time' => $maxEndTime];
     }
 
 }

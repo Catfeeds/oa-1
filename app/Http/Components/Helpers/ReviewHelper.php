@@ -7,8 +7,10 @@
  */
 namespace App\Http\Components\Helpers;
 use App\Models\Attendance\DailyDetail;
+use App\Models\Attendance\Leave;
 use App\Models\Sys\Calendar;
 use App\Models\Sys\HolidayConfig;
+use App\Models\Sys\PunchRulesConfig;
 
 class ReviewHelper
 {
@@ -109,27 +111,83 @@ class ReviewHelper
 
         $days = 0;
         foreach ($detailArr as $item) {
-            $days = $days + $this->countDay($item->punch_start_time, $item->punch_end_time, $calPunch[$item->day]);
+            $days = $days + $this->countDay($item->punch_start_time, $item->punch_end_time, $calPunch[$item->day] ?? [], $item);
         }
         return $days;
     }
 
     /**
      * 计算一天的打卡时间在打卡规则中是多少天
-     * @param $punch_start
-     * @param $punch_end
-     * @param object $punchRule 该天对应的打卡规则对象
-     * @return float|int
+     * @param string $punch_start 该天上班打卡时间
+     * @param string $punch_end 该天下班打卡时间
+     * @param array $punchRuleConfigs 该天对应的打卡规则对象数组
+     * @param DailyDetail $dailyDetail 该天明细
+     * @return float|int 返回当天被扣天数之后的剩余天数
      */
-    public function countDay($punch_start, $punch_end, $punchRule)
+    public function countDay($punch_start, $punch_end, $punchRuleConfigs, $dailyDetail)
     {
-        $day = 0;
-        if ($punch_start < '12:00' && $punch_end >= $punchRule->work_end_time && !empty($punch_end) && !empty($punch_start)) {
-            $day = 1;
-        }elseif ($punch_start >= '12:00' || $punch_end <= '14:00' && !empty($punch_end)) {
-            $day = 0.5;
+        $day = 1;//默认为1天,扣到0为止
+        //当天明细含请假情况
+        if (!empty($dailyDetail->leave_id)) {
+            $day_l = 0;
+            $leaves = json_decode($dailyDetail->leave_id, true);
+            $leaveObjects = Leave::whereIn('leave_id', $leaves)->get();
+            foreach ($leaveObjects as $leaveObject) {
+                $leaStartDate = date('Y-m-d', strtotime($leaveObject->start_time));
+                $leaEndDate = date('Y-m-d', strtotime($leaveObject->end_time));
+                $test= PunchRulesConfig::getTodayNormalWorkTime($punchRuleConfigs);
+                //若这天是请半天的,累加请的天数
+                if (($dailyDetail->day == $leaStartDate && strtotime($leaveObject->start_id) > strtotime('14:00')) ||
+                    ($dailyDetail->day == $leaEndDate && strtotime($leaveObject->end_id) < strtotime('14:00'))) {
+                    $day_l = 0.5 + $day_l;
+                }else {
+                    $day_l = 1; break;
+                }
+            }
+            //大于等于1,证明一天都没来,不用经过上下班配置进行天数扣除
+            if ($day_l >= 1)
+                $day = 0;
+            else {
+                //小于1,剩余天数就要经过上下班配置进行天数的判断扣除
+                $deduct = $this->getDeduct($punch_start, $punch_end, $punchRuleConfigs);
+                $day = ((1 - $day_l) - $deduct) <= 0 ? 0 : (1 - $day_l) - $deduct;
+            }
+
+        }else {
+            //正常则按扣除规则
+            $deduct = $this->getDeduct($punch_start, $punch_end, $punchRuleConfigs);
+            $day = $day - $deduct;
         }
         return $day;
+    }
+
+    public function getDeduct($punch_start, $punch_end, $punchRuleConfigs)
+    {
+        $punchRuleConfArr = PunchRulesConfig::getPunchRules($punchRuleConfigs->toArray())['cfg'];
+        $deduct = 0;
+        if (!empty($punch_start) || !empty($punch_end)) {
+            foreach ($punchRuleConfArr as $key => $value) {//时间段
+                list($startWorkTime, $endWorkTime, $readyTime) = explode('$$', $key);
+                foreach ($value['ded_num'] as $item) {//时间段中的规则
+                    if (strtotime($punch_start) >= strtotime($readyTime) + $item['start_gap']
+                        && strtotime($punch_start) <= strtotime($readyTime) + $item['end_gap']
+                    ) {
+                        if ($item['late_type'] == 1) {
+                            $deduct = $deduct + $item['ded_num'];
+                        }
+                    }
+                    if (strtotime($punch_end) >= strtotime($endWorkTime) - $item['end_gap']
+                        && strtotime($punch_end) <= strtotime($endWorkTime) - $item['start_gap']) {
+                        if ($item['late_type'] == 1) {
+                            $deduct = $deduct + $item['ded_num'];
+                        }
+                    }
+                }
+            }
+        }
+        if (empty($punch_start)) $deduct = $deduct + 0.5;
+        if (empty($punch_end)) $deduct = $deduct + 0.5;
+        return $deduct;
     }
 
     /**
@@ -143,11 +201,10 @@ class ReviewHelper
         $calendarArr = Calendar::whereBetween(\DB::raw('UNIX_TIMESTAMP(CONCAT(year, "-", month, "-", day))'),
             [strtotime($startDate), strtotime($endDate)])
             ->with('punchRules')->get();
-
         $newCalendarArr = [];
         foreach ($calendarArr as $item) {
             $key = sprintf("%d-%02d-%02d", $item->year, $item->month, $item->day);
-            $newCalendarArr[$key] = $item->punchRules;
+            $newCalendarArr[$key] = $item->punchRules->config;
         }
         return $newCalendarArr;
     }

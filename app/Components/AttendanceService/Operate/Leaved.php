@@ -63,13 +63,13 @@ class Leaved extends Operate implements AttendanceInterface
             `end_time` BETWEEN '{$startTime}' and '{$endTime}'
         ")->get();
 
-        foreach ($isLeaves as $lk => $lv) {
+        /*foreach ($isLeaves as $lk => $lv) {
             if(empty($lv->user_id)) continue;
             $diffEndTime = strtotime(AttendanceHelper::getLeaveEndTime($lv->end_time, $lv->end_id));
             if($diffEndTime >= strtotime($startTimeS)) {
                 return $this->backLeaveData(false, ['end_time' => trans('已经有该时间段申请单')]);
             }
-        }
+        }*/
 
         //渠道配置计算类型配置判断
         $holidayConfig = HolidayConfig::where(['holiday_id' => $holidayId])->first();

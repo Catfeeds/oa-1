@@ -184,28 +184,29 @@ class Operate
 
         $ifNeedUpdate = DailyDetail::whereBetween(\DB::raw('DATE_FORMAT(day, "%Y-%m-%d")'),
             [date('Y-m-d', $startDay), date('Y-m-d', $endDay)])->where('user_id', $leave->user_id)->get();
+        foreach ($ifNeedUpdate as $item) {
+            $needUpdateDay[] = strtotime($item->day);
+        }
 
         $day = DataHelper::prDates($startDay, $endDay);
         $day = array_unique(array_merge($day, [$startDay, $endDay]));
+        $needCreateDay = array_diff($day, $needUpdateDay ?? []);
 
-        if (count($ifNeedUpdate) == 0) {
-            foreach ($day as $d) {
-                $data = [
-                    'user_id' => $leave->user_id,
-                    'day' => date('Y-m-d', $d),
-                    'leave_id' => self::addLeaveId($leave->leave_id),
-                    'punch_start_time' => NULL,
-                    'punch_start_time_num' => NULL,
-                    'punch_end_time' => NULL,
-                    'punch_end_time_num' => NULL,
-                ];
-                DailyDetail::create($data);
-            }
-        }else {
-            foreach ($ifNeedUpdate as $item) {
-                $item->leave_id = self::addLeaveId($leave->leave_id, $item->leave_id);
-                $item->save();
-            }
+        foreach ($needCreateDay as $d) {
+            $data = [
+                'user_id' => $leave->user_id,
+                'day' => date('Y-m-d', $d),
+                'leave_id' => self::addLeaveId($leave->leave_id),
+                'punch_start_time' => NULL,
+                'punch_start_time_num' => NULL,
+                'punch_end_time' => NULL,
+                'punch_end_time_num' => NULL,
+            ];
+            DailyDetail::create($data);
+        }
+        foreach ($ifNeedUpdate as $item) {
+            $item->leave_id = self::addLeaveId($leave->leave_id, $item->leave_id);
+            $item->save();
         }
         /*$startDay = strtotime($leave->start_time);
         $endDay = strtotime($leave->end_time);
