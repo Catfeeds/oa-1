@@ -73,6 +73,7 @@ class ReviewHelper
         $ret = [];
         $arr = ['et' => $user->userExt->entry_time, 'id' => $user->user_id];
         foreach ($obj as $k => $v) {
+            if(empty($v->cypher_type)) continue;
             $driver = HolidayConfig::$cypherTypeChar[$v->cypher_type];
             $ret[$k] = \AttendanceService::driver($driver, 'cypher')->getUserHoliday($arr['et'], $arr['id'], $v);
         }
