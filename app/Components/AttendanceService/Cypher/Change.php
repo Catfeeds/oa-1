@@ -19,7 +19,7 @@ class Change extends Cypher
     {
         $leaveInfo = self::getUserHoliday(\Auth::user()->userExt->entry_time, \Auth::user()->user_id, $holidayConfig);
 
-        if(empty($leaveInfo[$numberDay]) || $leaveInfo[$numberDay] <= 0 ) {
+        if(empty($leaveInfo['data'][$numberDay]) || $leaveInfo['data'][$numberDay] <= 0 ) {
             return $this->backCypherData(false, ['start_time' => '剩余调休假次数不足']);
         }
 
@@ -30,9 +30,14 @@ class Change extends Cypher
     {
         $leaveInfo = $this->getUserPayableDayToNaturalCycleTime($entryTime, $userId, $holidayConfig);
 
-        $msgArr = [];
+        $msgArr = $pointList = [];
+
         foreach (Leave::$workTimePoint as $k => $v) {
             $num = $leaveInfo[$k] ?? 0;
+            if($num !== 0) {
+                $pointList[] = ['id' => $k, 'text' => $v];
+            }
+
             $msgArr[$k] = $v .' 剩余调休次数: ' . $num ;
         };
 
@@ -46,6 +51,7 @@ class Change extends Cypher
             'number_day' => $leaveInfo,
             'count_num' => $leaveInfo,
             'data' => $leaveInfo,
+            'point_list' => $pointList,
             'msg' => $msg
         ];
     }

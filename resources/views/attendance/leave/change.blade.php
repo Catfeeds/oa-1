@@ -18,6 +18,7 @@
                         {!! Form::label('holiday_id', trans('att.调休类型'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-2">
                             <select onchange="showMemo()" id ='holiday_id' class="js-select2-single form-control" name="holiday_id" >
+                                <option value="">请选择</option>
                                 @foreach($holidayList as $k => $v)
                                     <option value="{{ $k }}" @if($k === (int)(!empty($leave->holiday_id) ? $leave->holiday_id : old('holiday_id'))) selected="selected" @endif>{{ $v }}</option>
                                 @endforeach
@@ -47,10 +48,8 @@
                             </div>
                         </div>
                         <div class="col-sm-2">
-                            <select class="js-select2-single form-control" name="start_id" >
-                                @foreach(\App\Models\Attendance\Leave::$workTimePoint as $k => $v)
-                                    <option value="{{ $k }}" @if($k === (int)(!empty($leave->start_id) ? $leave->start_id : old('start_id'))) selected="selected" @endif>{{ $v }}</option>
-                                @endforeach
+                            <select  class="js-select2-single form-control" name="start_id" id="start_id" >
+                                <option value="">-请选择时间点-</option>
                             </select>
                         </div>
                     </div>
@@ -176,6 +175,16 @@
                         if($data.show_day){
                             $('#show_p').show();
                             $('#show_p').html($data.msg);
+                            $("#start_id").select2("val", "");
+                            $("#start_id").empty();
+                            $("#start_id").select2({
+                                placeholder: "-请选择时间点-", //默认所有
+                                allowClear: true, //清楚选择项
+                                multiple: false,// 多选
+                                data: $data.point_list //绑定数据
+                            });
+
+
                         } else {
                             $('#show_p').hide();
                         }
@@ -191,5 +200,7 @@
                 $('#show_memo').hide();
             }
         }
+
+
     </script>
 @endsection

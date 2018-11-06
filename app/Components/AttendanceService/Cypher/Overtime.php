@@ -22,7 +22,18 @@ class Overtime extends Cypher
 
     public function getUserHoliday($entryTime, $userId, $holidayConfig)
     {
-        return parent::getUserHoliday($entryTime, $userId, $holidayConfig);
+        $pointList = [];
+        foreach (Leave::$workTimePoint as $k => $v){
+            $pointList[] = ['id' => $k, 'text' => $v];
+        }
+
+        return [
+            'status' => 1,
+            'show_day' => true,
+            'show_memo' => true,
+            'memo' => $holidayConfig->memo,
+            'point_list' => $pointList,
+        ];
     }
 
     public function getDaysByScope($scope, $userId, $holidays)
