@@ -84,7 +84,8 @@ class ReviewHelper
         //加了多少天班就剩余调休就多几天
         $over = HolidayConfig::where('cypher_type', HolidayConfig::CYPHER_OVERTIME)->first();
         $overArr = AttendanceHelper::selectLeaveInfo(date('Y').'-01-01', date('Y').'-12-31', $user->user_id, $over);
-        $ret['change']['number_day'] = $ret['change']['number_day'] + $overArr['apply_days'];
+        //$ret['change']['number_day'] = $ret['change']['number_day'] + $overArr['apply_days'];
+        $ret['change']['number_day'] = 0;
 
         return $ret;
     }
@@ -117,6 +118,7 @@ class ReviewHelper
             $countDays = $countDays + $dayInfo['day'];
             $countDeducts = $countDeducts + $dayInfo['deduct'];
         }
+
 //        return ['days' => $countDays, 'deducts' => $countDeducts];
         return $countDays;
     }
@@ -131,13 +133,15 @@ class ReviewHelper
      */
     public function countDay($punch_start, $punch_end, $punchRuleConfigs, $dailyDetail)
     {
+
         $deduct = 0;
-        if (!empty($dailyDetail->leave_id)) {
+        $leaves = json_decode($dailyDetail->leave_id, true);
+        if (!empty($leaves)) {
             //请假情况的扣除规则
             $day_l = 0;
             $fromTo = [];
-            $leaves = json_decode($dailyDetail->leave_id, true);
             $leaveObjects = Leave::whereIn('leave_id', $leaves)->get();
+
             foreach ($leaveObjects as $leaveObject) {
                 $leaStartDate = date('Y-m-d', strtotime($leaveObject->start_time));
                 $leaEndDate = date('Y-m-d', strtotime($leaveObject->end_time));
@@ -190,7 +194,8 @@ class ReviewHelper
                 $ps = $punch_start ?? $ps ?? (strtotime($readyTime) <= strtotime($punch_end) ? $readyTime : NULL);
                 $pe = $punch_end ?? $pe ?? (strtotime($endWorkTime) >= strtotime($punch_start) ? $endWorkTime : NULL);
                 if (empty($ps) || empty($pe) || strtotime($ps) >= strtotime($endWorkTime) || strtotime($pe) <= strtotime($readyTime)) {
-                    $deduct = $deduct + DataHelper::diffTime($readyTime, $endWorkTime);
+                    //$deduct = $deduct + DataHelper::diffTime($readyTime, $endWorkTime);
+                    $deduct = 0;
                 }
 
                 foreach ($punchRuleConfArr['cfg'][$key]['ded_num'] as $item) {
