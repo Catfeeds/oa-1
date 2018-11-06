@@ -29,11 +29,36 @@ class Leave extends Model
     const LOGIN_INFO = 1;
     const LOGIN_VERIFY_INFO = 2;
 
+    //审核状态
     const WAIT_REVIEW = 0;
     const ON_REVIEW = 1;
     const REFUSE_REVIEW = 2;
     const PASS_REVIEW = 3;
     const CANCEL_REVIEW = 4;
+    const WAIT_EFFECTIVE = 5;
+    //加班/调休时间点
+    const WORK_TIME_POINT_1 = 1;
+    const WORK_TIME_POINT_2 = 2;
+    const WORK_TIME_POINT_3 = 3;
+    const WORK_TIME_POINT_4 = 4;
+    const WORK_TIME_POINT_5 = 5;
+
+
+    public static $workTimePoint = [
+        self::WORK_TIME_POINT_1 => '9点~12点',
+        self::WORK_TIME_POINT_2 => '14点~18点',
+        self::WORK_TIME_POINT_3 => '14点~20点',
+        self::WORK_TIME_POINT_4 => '9点~18点',
+        self::WORK_TIME_POINT_5 => '9点~20点',
+    ];
+
+    public static $workTimePointChar = [
+        self::WORK_TIME_POINT_1 => ['start_time' => '9:00', 'end_time' => '12:00'],
+        self::WORK_TIME_POINT_2 => ['start_time' => '14:00', 'end_time' => '18:00'],
+        self::WORK_TIME_POINT_3 => ['start_time' => '14:00', 'end_time' => '20:00'],
+        self::WORK_TIME_POINT_4 => ['start_time' => '9:00', 'end_time' => '18:00'],
+        self::WORK_TIME_POINT_5 => ['start_time' => '9:00', 'end_time' => '20:00'],
+    ];
 
     public static $types = [
         self::MY_LEAVE => '我的申请单',
@@ -63,6 +88,15 @@ class Leave extends Model
         self::REFUSE_REVIEW => '已拒绝',
         self::PASS_REVIEW => '已通过',
         self::CANCEL_REVIEW => '已取消',
+        self::WAIT_EFFECTIVE => '已通过,待生效',
+    ];
+    //排除已拒绝的状态
+    public static $statusList = [
+        self::WAIT_REVIEW ,
+        self::ON_REVIEW ,
+        self::PASS_REVIEW ,
+        self::CANCEL_REVIEW ,
+        self::WAIT_EFFECTIVE ,
     ];
 
     protected $fillable = [

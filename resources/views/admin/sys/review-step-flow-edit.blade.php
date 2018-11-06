@@ -149,15 +149,16 @@
                 var id = 'copy_div_' + i;
                 var div = 'add_div';
 
-                var html = $('#copy_div_0').clone(true).attr({'id': id});
-                html.appendTo('#' + div);
+                var clone = $('#copy_div_0').clone(true).prop({'id': id});
                 /*复制之后变量重新定义*/
-                $('#' + id).find("*[id='step_order_id']").attr({'name': 'step['+i+'][step_order_id]'});
-                $('#' + id).find("*[id='assign_type']").attr({'name': 'step['+i+'][assign_type]', 'class' :'radio-inline i-checks', 'rel': i});
-                $('#' + id).find("*[id='assign_uid']").attr({'name': 'step['+i+'][assign_uid]', 'rel': i});
-                $('#' + id).find("*[id='group_type_id']").attr({'name': 'step['+i+'][group_type_id]', 'rel': i});
-                $('#' + id).find("*[id='assign_role_id']").attr({'name': 'step['+i+'][assign_role_id]', 'rel': i});
-                $('#' + id).find("*[id='remove_ded']").attr({'id': 'remove_ded_' + i, 'rel': i});
+                clone.find("*[id='step_order_id']").attr({'name': 'step['+i+'][step_order_id]'});
+                clone.find("*[id='assign_type']").attr({'name': 'step['+i+'][assign_type]', 'class' :'radio-inline i-checks', 'rel': i});
+                clone.find("*[id='assign_uid']").attr({'name': 'step['+i+'][assign_uid]', 'rel': i});
+                clone.find("*[id='group_type_id']").attr({'name': 'step['+i+'][group_type_id]', 'rel': i});
+                clone.find("*[id='assign_role_id']").attr({'name': 'step['+i+'][assign_role_id]', 'rel': i});
+                clone.find("*[id='remove_ded']").attr({'id': 'remove_ded_' + i, 'rel': i});
+                clone.appendTo('#' + div);
+
 
             });
 

@@ -87,9 +87,9 @@
                                                         <option value="{{ $k }}" @if($k === ($step->step_order_id ?? old('step_order_id') ?? '')) selected="selected" @endif>{{ $v }}</option>
                                                     @endforeach
                                                 </select>
-                                                <input id="assign_type" name="step[1][assign_type]" type="radio" value="0" checked = checked> {{trans('app.指定人')}}
+                                                <input id="assign_type" name="step[1][assign_type]" type="radio" value="0" checked="checked" > {{trans('app.指定人')}}
                                                 <select id="assign_uid" name="step[1][assign_uid]" >
-                                                    <option value="">{{trans('app.不指定')}}</option>
+                                                    <option value="">{{trans('app.未选择')}}</option>
                                                     @foreach($userList as $k => $v)
                                                         <option value="{{ $k }}" @if($k === ($step->assign_uid ?? old('assign_uid') ?? '')) selected="selected" @endif>{{ $v }}</option>
                                                     @endforeach
@@ -103,7 +103,7 @@
                                                 </select>
 
                                                 <select id="assign_role_id" name="step[1][assign_role_id]" >
-                                                    <option value="">{{trans('app.不指定')}}</option>
+                                                    <option value="">{{trans('app.未选择')}}</option>
                                                     @foreach($roleList as $k => $v)
                                                         <option value="{{ $k }}" @if($k === ($step->assign_role_id ?? old('assign_role_id') ?? '')) selected="selected" @endif>{{ $v }}</option>
                                                     @endforeach
@@ -143,22 +143,21 @@
     <script>
         $(function() {
 
-
             var i = 1;
             $('button[id^=add_step]').click(function () {
                 i++;
                 var id = 'copy_div_' + i;
                 var div = 'add_div';
+                var clone = $('#copy_div').clone(true).prop({'id': id});
 
-                var html = $('#copy_div').clone(true).attr({'id': id});
-                html.appendTo('#' + div);
                 /*复制之后变量重新定义*/
-                $('#' + id).find("*[id='step_order_id']").attr({'name': 'step['+i+'][step_order_id]'});
-                $('#' + id).find("*[id='assign_type']").attr({'name': 'step['+i+'][assign_type]', 'class' :'radio-inline i-checks', 'rel': i});
-                $('#' + id).find("*[id='assign_uid']").attr({'name': 'step['+i+'][assign_uid]', 'rel': i});
-                $('#' + id).find("*[id='group_type_id']").attr({'name': 'step['+i+'][group_type_id]', 'rel': i});
-                $('#' + id).find("*[id='assign_role_id']").attr({'name': 'step['+i+'][assign_role_id]', 'rel': i});
-                $('#' + id).find("*[id='remove_ded']").attr({'id': 'remove_ded_' + i, 'rel': i});
+                clone.find("*[id='step_order_id']").prop({'name': 'step['+i+'][step_order_id]'});
+                clone.find("*[id='assign_type']").prop({'name': 'step['+i+'][assign_type]'});
+                clone.find("*[id='assign_uid']").prop({'name': 'step['+i+'][assign_uid]'});
+                clone.find("*[id='group_type_id']").prop({'name': 'step['+i+'][group_type_id]'});
+                clone.find("*[id='assign_role_id']").prop({'name': 'step['+i+'][assign_role_id]'});
+                clone.find("*[id='remove_ded']").attr({'id': 'remove_ded_' + i, 'rel': i});
+                clone.appendTo('#' + div);
 
             });
 
@@ -168,12 +167,10 @@
                 i--;
             });
 
-
             $('#apply_type_id').change(function () {
                 $("#child_id").html('');
                 loadChild();
             });
-
 
         });
 

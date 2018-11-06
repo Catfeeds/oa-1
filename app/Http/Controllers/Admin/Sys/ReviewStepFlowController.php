@@ -129,9 +129,8 @@ class ReviewStepFlowController extends Controller
                         'step_order_id' => $v['step_order_id'],
                         'step_id' => $step->step_id,
                     ];
-
-                    $check = ReviewStepFlowConfig::where($config)->first()->toArray();
-                    if (!empty($check)) continue;
+                    $check = ReviewStepFlowConfig::where($config)->first();
+                    if (!empty($check->step_id)) continue;
 
                     if((int)$v['assign_type'] === 0) {
                         $config['assign_type'] = $v['assign_type'];

@@ -77,7 +77,7 @@
                         <p class="list-group-item">剩余探亲假: {{ $remainWelfare['visit']['number_day'] ?? '尚未配置该福利假' }}</p>
                     </div>
                     <div class="col-md-10 table-responsive pre-scrollable" style="padding-left: 10px; border-left: 1px solid #e7eaec;">
-                        <table class="table table-striped tooltip-demo">
+                        <table id="example" class="table  dataTable table-striped tooltip-demo">
                         <thead>
                         <tr>
                             <th>{{ trans('att.申请类型') }}</th>
@@ -98,33 +98,20 @@
 
                         @foreach($data as $k => $v)
                             <tr>
-
-                                <td>{{ \App\Models\Sys\HolidayConfig::$applyType[\App\Models\Sys\HolidayConfig::getHolidayApplyList()[$v['holiday_id']]] }}</td>
+                                <td>{{ \App\Models\Sys\HolidayConfig::$applyType[\App\Models\Sys\HolidayConfig::getHolidayApplyList()[$v['holiday_id']]] ?? '未识别' }}</td>
                                 <td>
-                                    {{ \App\Models\Sys\HolidayConfig::getHolidayList()[$v['holiday_id']] }}
-                                </td>
-
-                                <td>
-
-                                    @if(\App\Models\Sys\HolidayConfig::getHolidayApplyList()[$v['holiday_id']] === 3)
-                                        {{$v['start_time'] ?? '---'}}
-                                    @else
-                                        {{ date('Y-m-d', strtotime($v['start_time'])).' '.$v['start_id'] }}
-                                    @endif
+                                    {{ \App\Models\Sys\HolidayConfig::getHolidayList()[$v['holiday_id']] ?? '数据异常' }}
                                 </td>
                                 <td>
-                                    @if(\App\Models\Sys\HolidayConfig::getHolidayApplyList()[$v['holiday_id']] === 3)
-                                        {{$v['end_time'] ?? '---'}}
-                                    @else
-                                        {{ date('Y-m-d', strtotime($v['end_time'])).' '.$v['end_id'] }}
-                                    @endif
+                                    {{\App\Http\Components\Helpers\AttendanceHelper::spliceLeaveTime($v['holiday_id'], $v['start_time'], $v['start_id'], $v['number_day'])['time']}}
                                 </td>
                                 <td>
-
-                                    {{ empty($v['number_day']) ? '---' : $v['number_day'] . '天'}}
+                                    {{\App\Http\Components\Helpers\AttendanceHelper::spliceLeaveTime($v['holiday_id'], $v['end_time'], $v['end_id'], $v['number_day'])['time']}}
                                 </td>
-
-                                <td><pre style="height: 5em;width: 20em">{{ $v['reason'] }}</pre></td>
+                                <td>
+                                    {{\App\Http\Components\Helpers\AttendanceHelper::spliceLeaveTime($v['holiday_id'], $v['start_time'], $v['start_id'], $v['number_day'])['number_day']}}
+                                </td>
+                                <td><pre style="height: 3em;width: 10em">{{ $v['reason'] }}</pre></td>
                                 <td>{{ $v['created_at'] }}</td>
                                 <td>{{ \App\Models\Attendance\Leave::$status[$v['status']] }}</td>
                                 <td>
@@ -160,3 +147,30 @@
 
 @endsection
 @include('widget.select2')
+@include('widget.datatable')
+@section('scripts-last')
+    <script>
+        $(function() {
+            {{--{!! BaseChart::nativeDataTable('example')!!}--}}
+                $('#example').dataTable({
+                language: {
+                    url: '{{ asset('js/plugins/dataTables/i18n/Chinese.json') }}'
+                },
+                bLengthChange: false,
+                paging: 30,
+                info: false,
+                searching: false,
+                fixedHeader: true,
+                "order": [[1, "asc"]],
+                pageLength: 25,
+                responsive: true,
+                dom: '<"html5buttons"B>lTfgitp',
+                buttons: [
+                    {extend: 'copy'},
+                    {extend: 'csv'},
+                    {extend: 'excel'}
+                ]
+            });
+        });
+    </script>
+@endsection

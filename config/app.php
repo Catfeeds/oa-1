@@ -271,6 +271,7 @@ return [
         'Html' => Collective\Html\HtmlFacade::class,
 
         'BaseHtml' => App\Components\Helper\BaseHtml::class,
+        'BaseChart' => App\Components\Helper\BaseChart::class,
 
         //https://github.com/Zizaco/entrust
         'Entrust' => Zizaco\Entrust\EntrustFacade::class,

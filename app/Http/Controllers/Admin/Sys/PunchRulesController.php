@@ -72,8 +72,8 @@ class PunchRulesController extends Controller
         $this->validate($request, $this->_validateRule);
         $p = $request->all();
 
+        DB::beginTransaction();
         try {
-            DB::beginTransaction();
             $punchRules = [
                 'punch_type_id' => $p['punch_type_id'],
                 'name' => $p['name'],
@@ -123,6 +123,7 @@ class PunchRulesController extends Controller
             'punch_type_id' => $p['punch_type_id'],
             'name' => $p['name'],
         ];
+        DB::beginTransaction();
         try{
             $punchRules->update($rules);
             PunchRulesConfig::where(['punch_rules_id' => $punchRules->id])->delete();

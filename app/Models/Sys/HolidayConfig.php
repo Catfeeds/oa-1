@@ -44,13 +44,15 @@ class HolidayConfig extends Model
     const RELIEF_GO_WORK = 1;
     const RELIEF_OFF_WORK = 2;
 
+    //假期计算类型
     const CYPHER_NO_RESTRICT = -1;
     const CYPHER_UNPAID = 1;
     const CYPHER_PAID = 2;
-    const CYPHER_CHANGE = 3;
-    const CYPHER_OVERTIME = 4;
-    const CYPHER_RECHECK = 5;
-    const CYPHER_HOUR = 6;
+    const CYPHER_DELAY = 3;
+    const CYPHER_CHANGE = 4;
+    const CYPHER_OVERTIME = 5;
+    const CYPHER_RECHECK = 6;
+    const CYPHER_HOUR = 7;
 
     const RESET_ENTRY_TIME = 1;
     const RESET_NATURAL_CYCLE = 2;
@@ -65,6 +67,11 @@ class HolidayConfig extends Model
         self::LEAVEID => '请假',
         self::CHANGE => '加班调休',
         self::RECHECK => '补打卡',
+    ];
+    public static $applyTypeInt = [
+        self::LEAVEID => 1,
+        self::CHANGE => 2,
+        self::RECHECK => 3,
     ];
 
     public static $driverType = [
@@ -106,6 +113,7 @@ class HolidayConfig extends Model
         self::CYPHER_NO_RESTRICT => '不限制',
         self::CYPHER_UNPAID => '无薪假',
         self::CYPHER_PAID => '带薪假',
+        self::CYPHER_DELAY => '延迟假',
         self::CYPHER_CHANGE => '调休假',
         self::CYPHER_OVERTIME => '加班',
         self::CYPHER_RECHECK => '打卡',
@@ -115,6 +123,7 @@ class HolidayConfig extends Model
     public static $cypherTypeChar = [
         self::CYPHER_UNPAID => 'unpaid',
         self::CYPHER_PAID => 'paid',
+        self::CYPHER_DELAY => 'delay',
         self::CYPHER_CHANGE => 'change',
         self::CYPHER_OVERTIME => 'overtime',
         self::CYPHER_RECHECK => 'recheck',
@@ -135,6 +144,7 @@ class HolidayConfig extends Model
         'cypher_type',
         'work_relief_formula',
         'work_relief_type',
+        'work_reset_formula',
         'work_relief_cycle_num',
         'add_pop',
         'up_day',

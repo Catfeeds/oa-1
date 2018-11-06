@@ -62,10 +62,12 @@
                         {!! Form::label('holiday_id', trans('att.申请时间'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-6">
                             <span class="help-block m-b-none">
-                                @if($applyTypeId == \App\Models\Sys\HolidayConfig::LEAVEID || $applyTypeId == \App\Models\Sys\HolidayConfig::CHANGE)
-                                    {{ \App\Http\Components\Helpers\AttendanceHelper::getLeaveTime($leave->start_time, $leave->start_id)}}
+                                @if($applyTypeId == \App\Models\Sys\HolidayConfig::LEAVEID)
+                                    {{\App\Http\Components\Helpers\AttendanceHelper::spliceLeaveTime($leave->holiday_id, $leave->start_time, $leave->start_id, $leave->number_day)['time']}}
                                     ~
-                                    {{ \App\Http\Components\Helpers\AttendanceHelper::getLeaveTime($leave->end_time,$leave->end_id)}}
+                                    {{\App\Http\Components\Helpers\AttendanceHelper::spliceLeaveTime($leave->holiday_id, $leave->end_time, $leave->end_id, $leave->number_day)['time']}}
+                                @elseif($applyTypeId == \App\Models\Sys\HolidayConfig::CHANGE)
+                                    {{\App\Http\Components\Helpers\AttendanceHelper::spliceLeaveTime($leave->holiday_id, $leave->start_time, $leave->start_id, $leave->number_day)['time']}}
                                 @elseif($applyTypeId == \App\Models\Sys\HolidayConfig::RECHECK)
                                     @if(!empty($leave->start_time) && !empty($leave->end_time))
                                        {{ $leave->start_time }} ~ {{ $leave->end_time }}
@@ -83,10 +85,10 @@
                     <div class="hr-line-dashed"></div>
 
                     <div class="form-group">
-                        {!! Form::label('day', trans('att.申请天数'), ['class' => 'col-sm-2 control-label']) !!}
+                        {!! Form::label('day', trans('att.申请时间'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-6">
                             <span class="help-block m-b-none">
-                                {{ empty($leave->number_day) ? trans('att.补打卡'): $leave->number_day . trans('att.天') }}
+                                {{ empty($leave->number_day) ? trans('att.补打卡') : \App\Http\Components\Helpers\AttendanceHelper::spliceLeaveTime($leave->holiday_id, $leave->start_time, $leave->start_id, $leave->number_day)['number_day']}}
                             </span>
                         </div>
                     </div>
@@ -145,7 +147,7 @@
                                 <select disabled="disabled" multiple="multiple" class="js-select2-multiple form-control">
                                     @foreach($deptUsers as $key => $val)
                                         <option value="{{ $val['user_id'] }}"
-                                                @if (in_array($val['user_id'], $userIds ?: old('dept_users') ?? [])) selected @endif>{{ $val['alias'].'('.$val['username'].')' }}</option>
+                                                @if (in_array($val['user_id'], $userIds)) selected @endif>{{ $val['alias'].'('.$val['username'].')' }}</option>
                                     @endforeach
                                 </select>
                             </div>
