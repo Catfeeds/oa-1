@@ -82,8 +82,8 @@ class ReviewHelper
         }
 
         //加了多少天班就剩余调休就多几天
-        $over = HolidayConfig::where('cypher_type', HolidayConfig::CYPHER_OVERTIME)->first();
-        $overArr = AttendanceHelper::selectLeaveInfo(date('Y').'-01-01', date('Y').'-12-31', $user->user_id, $over);
+        //$over = HolidayConfig::where('cypher_type', HolidayConfig::CYPHER_OVERTIME)->first();
+        //$overArr = AttendanceHelper::selectLeaveInfo(date('Y').'-01-01', date('Y').'-12-31', $user->user_id, $over);
         //$ret['change']['number_day'] = $ret['change']['number_day'] + $overArr['apply_days'];
         $ret['change']['number_day'] = 0;
 
