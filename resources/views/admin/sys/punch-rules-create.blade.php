@@ -197,24 +197,23 @@
 
         $('#add_ded').click(function () {
             i++;
-            var $id = 'row_copy_' + i;
+            var id = 'row_copy_' + i;
             var div = 'create_div_' + $(this).attr('rel');
 
-            var $html = $('#' + div).find("#row_copy").clone(true).attr({'id': $id});
-            $html.appendTo('#create_div_' + $(this).attr('rel'));
+            var clone = $('#' + div).find("#row_copy").clone(true).prop({'id': id});
 
             /*复制之后变量重新定义*/
-            $('#' + $id).find("button[id='remove_ded']").attr({'id': 'remove_ded_'+ i, 'rel': i});
-            $('#' + $id).find("*[id=ded_type1]").attr({'name': 'work['+ $(this).attr('rel') +'][cfg]['+i+'][ded_type]['+i+']', 'rel': i});
-            $('#' + $id).find("*[id=ded_type2]").attr({'name': 'work['+ $(this).attr('rel') +'][cfg]['+i+'][ded_type]['+i+']' , 'rel': i});
-            $('#' + $id).find("*[id=rule_desc]").attr({'name': 'work['+ key +'][cfg]['+ i +'][rule_desc]'});
-            $('#' + $id).find("*[id=late_type]").attr({'name': 'work['+ key +'][cfg]['+ i +'][late_type]'});
-            $('#' + $id).find("*[id=start_gap]").attr({'name': 'work['+ key +'][cfg]['+ i +'][start_gap]'});
-            $('#' + $id).find("*[id=end_gap]").attr({'name': 'work['+ key +'][cfg]['+ i +'][end_gap]'});
-            $('#' + $id).find("*[id=holiday_id]").attr({'name': 'work['+ key +'][cfg]['+ i +'][holiday_id]'});
-            $('#' + $id).find("*[id=ded_num]").attr({'name': 'work['+ key +'][cfg]['+ i +'][ded_num]'});
+            clone.find("button[id='remove_ded']").attr({'id': 'remove_ded_'+ i, 'rel': i});
+            clone.find("*[id=ded_type1]").attr({'name': 'work['+ $(this).attr('rel') +'][cfg]['+i+'][ded_type]['+i+']', 'rel': i});
+            clone.find("*[id=ded_type2]").attr({'name': 'work['+ $(this).attr('rel') +'][cfg]['+i+'][ded_type]['+i+']' , 'rel': i});
+            clone.find("*[id=rule_desc]").attr({'name': 'work['+ key +'][cfg]['+ i +'][rule_desc]'});
+            clone.find("*[id=late_type]").attr({'name': 'work['+ key +'][cfg]['+ i +'][late_type]'});
+            clone.find("*[id=start_gap]").attr({'name': 'work['+ key +'][cfg]['+ i +'][start_gap]'});
+            clone.find("*[id=end_gap]").attr({'name': 'work['+ key +'][cfg]['+ i +'][end_gap]'});
+            clone.find("*[id=holiday_id]").attr({'name': 'work['+ key +'][cfg]['+ i +'][holiday_id]'});
+            clone.find("*[id=ded_num]").attr({'name': 'work['+ key +'][cfg]['+ i +'][ded_num]'});
 
-
+            clone.appendTo('#create_div_' + $(this).attr('rel'));
         });
 
         $('button[id^=remove_ded]').click(function () {
@@ -225,36 +224,32 @@
 
         $('#add_create_rule').click(function () {
             key++;
-
-            var $id = 'create_rule_' + key;
-            var $html = $("#copy_rule").clone(true).attr({'id': $id});
-            $html.appendTo('#create_rule');
+            var id = 'create_rule_' + key;
+            var clone = $("#copy_rule").clone(true).attr({'id': id});
 
             var h3_a = '<a href="#collapseOne'+key+'" data-toggle="collapse" data-parent="#accordion'+key+'">上下班时间'+key+'</a>';
-            $('#' + $id).find("h3[id^=h3_a]").html(h3_a);
-            $('#' + $id).find("div[id^=collapseOne]").attr({'id': 'collapseOne'+ key});
-            $('#' + $id).find("div[id^=accordion]").attr({'id': 'accordion'+ key});
-
-
-            $('#' + $id).find("div[id^=create_div]").attr({'id': 'create_div_'+ key, 'rel': key});
-            $('#' + $id).find("button[id='remove_rule']").attr({'id': 'remove_rule_'+ key, 'rel': key});
-            $('#' + $id).find("button[id='add_ded']").attr({'rel': key});
+            clone.find("h3[id^=h3_a]").html(h3_a);
+            clone.find("div[id^=collapseOne]").attr({'id': 'collapseOne'+ key});
+            clone.find("div[id^=accordion]").attr({'id': 'accordion'+ key});
+            clone.find("div[id^=create_div]").attr({'id': 'create_div_'+ key, 'rel': key});
+            clone.find("button[id='remove_rule']").attr({'id': 'remove_rule_'+ key, 'rel': key});
+            clone.find("button[id='add_ded']").attr({'rel': key});
 
             /*复制之后变量重新定义*/
-            $('#' + $id).find("*[id=work_start_time]").attr({'name': 'work['+ key +'][work_start_time]', 'id': 'work_start_time' + key });
-            $('#' + $id).find("*[id=work_end_time]").attr({'name': 'work['+ key +'][work_end_time]', 'id': 'work_end_time' + key });
-            $('#' + $id).find("*[id=ready_time]").attr({'name': 'work['+ key +'][ready_time]', 'id': 'ready_time' + key });
-            $('#' + $id).find("*[id=rule_desc]").attr({'name': 'work['+ key +'][cfg]['+ i +'][rule_desc]'});
-            $('#' + $id).find("*[id=late_type]").attr({'name': 'work['+ key +'][cfg]['+ i +'][late_type]'});
-            $('#' + $id).find("*[id=start_gap]").attr({'name': 'work['+ key +'][cfg]['+ i +'][start_gap]'});
-            $('#' + $id).find("*[id=end_gap]").attr({'name': 'work['+ key +'][cfg]['+ i +'][end_gap]'});
-            $('#' + $id).find("*[id=holiday_id]").attr({'name': 'work['+ key +'][cfg]['+ i +'][holiday_id]'});
-            $('#' + $id).find("*[id=ded_num]").attr({'name': 'work['+ key +'][cfg]['+ i +'][ded_num]'});
-            $('#' + $id).find("*[id=ded_type1]").attr({'name': 'work['+ key +'][cfg]['+ i +'][ded_type]['+ i +']'});
-            $('#' + $id).find("*[id=ded_type2]").attr({'name': 'work['+ key +'][cfg]['+ i +'][ded_type]['+ i +']'});
+            clone.find("*[id=work_start_time]").attr({'name': 'work['+ key +'][work_start_time]', 'id': 'work_start_time' + key });
+            clone.find("*[id=work_end_time]").attr({'name': 'work['+ key +'][work_end_time]', 'id': 'work_end_time' + key });
+            clone.find("*[id=ready_time]").attr({'name': 'work['+ key +'][ready_time]', 'id': 'ready_time' + key });
+            clone.find("*[id=rule_desc]").attr({'name': 'work['+ key +'][cfg]['+ i +'][rule_desc]'});
+            clone.find("*[id=late_type]").attr({'name': 'work['+ key +'][cfg]['+ i +'][late_type]'});
+            clone.find("*[id=start_gap]").attr({'name': 'work['+ key +'][cfg]['+ i +'][start_gap]'});
+            clone.find("*[id=end_gap]").attr({'name': 'work['+ key +'][cfg]['+ i +'][end_gap]'});
+            clone.find("*[id=holiday_id]").attr({'name': 'work['+ key +'][cfg]['+ i +'][holiday_id]'});
+            clone.find("*[id=ded_num]").attr({'name': 'work['+ key +'][cfg]['+ i +'][ded_num]'});
+            clone.find("*[id=ded_type1]").attr({'name': 'work['+ key +'][cfg]['+ i +'][ded_type]['+ i +']'});
+            clone.find("*[id=ded_type2]").attr({'name': 'work['+ key +'][cfg]['+ i +'][ded_type]['+ i +']'});
+            clone.find('div[id^=row_copy_]').remove();
 
-
-            $('#' + $id).find('div[id^=row_copy_]').remove();
+            clone.appendTo('#create_rule');
 
         });
 

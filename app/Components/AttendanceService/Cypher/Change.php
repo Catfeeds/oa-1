@@ -4,28 +4,145 @@
  * User: weiming Email: 329403630@qq.com
  * Date: 2018/10/17
  * Time: 11:57
+ * 调休 计算类型配置
  */
 
 namespace App\Components\AttendanceService\Cypher;
 
-
-use App\Http\Components\Helpers\AttendanceHelper;
+use App\Components\Helper\DataHelper;
+use App\Models\Attendance\Leave;
 use App\Models\Sys\HolidayConfig;
 
 class Change extends Cypher
 {
     public function check($holidayConfig, $numberDay)
     {
+        $leaveInfo = self::getUserHoliday(\Auth::user()->userExt->entry_time, \Auth::user()->user_id, $holidayConfig);
+
+        if(empty($leaveInfo[$numberDay]) || $leaveInfo[$numberDay] <= 0 ) {
+            return $this->backCypherData(false, ['start_time' => '剩余调休假次数不足']);
+        }
+
         return $this->backCypherData(true);
     }
 
     public function getUserHoliday($entryTime, $userId, $holidayConfig)
     {
-        return parent::getUserHoliday($entryTime, $userId, $holidayConfig);
+        $leaveInfo = $this->getUserPayableDayToNaturalCycleTime($entryTime, $userId, $holidayConfig);
+
+        $msgArr = [];
+        foreach (Leave::$workTimePoint as $k => $v) {
+            $num = $leaveInfo[$k] ?? 0;
+            $msgArr[$k] = $v .' 剩余调休次数: ' . $num ;
+        };
+
+        $msg = '<i class="fa fa-info-circle"></i>调休剩余列表<br>' . implode('<br>', $msgArr);
+
+        return [
+            'status' => 1,
+            'show_day' => true,
+            'show_memo' => true,
+            'memo' => $holidayConfig->memo,
+            'number_day' => $leaveInfo,
+            'count_num' => $leaveInfo,
+            'data' => $leaveInfo,
+            'msg' => $msg
+        ];
     }
 
     public function getDaysByScope($scope, $userId, $holidays)
     {
         return parent::getOverDaysByScope($scope, $userId, $holidays, HolidayConfig::CHANGE);
+    }
+
+    /**
+     * 按自然周期时间维度获取带薪假期
+     * @param $userId
+     * @param $holiday
+     * @return mixed
+     */
+    public function getUserPayableDayToNaturalCycleTime($entryTime, $userId, $holiday)
+    {
+        $resetDate = self::resolveCycleConfigFormula($holiday->work_reset_formula);
+
+        $resetTime = sprintf('%s %s:%s:%s', $resetDate['d'] ??  '01', $resetDate['h'] ?? '00', $resetDate['i'] ?? '00', $resetDate['s'] ?? '00');
+        $resetMoney = DataHelper::dateTimeFormat('now', 'Y') .'-'. DataHelper::dateTimeFormat('now', 'm') . '-' . $resetTime;
+
+        if(array_key_exists('m', $resetDate)) {
+            $startTime = DataHelper::dateTimeFormat('now', 'Y')  .'-'. $resetDate['m'] . '-' . $resetTime;
+            $endTime = DataHelper::dateTimeAdd($startTime, '1Y');
+        } elseif(empty($resetDate['m']) && !empty($resetDate['d'])) {
+            $startTime = $resetMoney;
+            $endTime = DataHelper::dateTimeAdd($startTime, '1M');
+        } elseif(empty($resetDate['m']) && empty($resetDate['d']) && !empty($resetDate['h'])) {
+            $startTime = $resetMoney;
+            $endTime = DataHelper::dateTimeAdd($startTime, '1D');
+        } else {
+            $startTime = $resetMoney;
+            $endTime = DataHelper::dateTimeAdd($startTime, 'T1H');
+        }
+
+        return $this->selectLeaveInfo($startTime, $endTime, $userId, $holiday);
+    }
+
+    /**
+     * 查询员工 周期内 申请信息
+     * @param $startDay
+     * @param $endDay
+     * @param $userId
+     * @param $holiday
+     * @return array number_day 申请天数 count_num申请次数
+     */
+    public function selectLeaveInfo($startDay, $endDay, $userId, $holiday)
+    {
+        //加班类型ID
+        $overTimeId = HolidayConfig::where(['cypher_type' => HolidayConfig::CYPHER_OVERTIME])->first();
+        //获取加班剩余次数
+        $overTimeLeaveLog = self::selectLeave($startDay, $endDay, $userId, $overTimeId->holiday_id, [Leave::PASS_REVIEW]);
+        //申请调休的申请单次数
+        $changeLeaveLog = self::selectLeave($startDay, $endDay, $userId, $holiday->holiday_id, Leave::$statusList);
+
+        $userLeaveInfo  = [];
+
+        if(!empty($changeLeaveLog)) {
+            foreach ($changeLeaveLog as $ck => $cv) {
+                if(empty($overTimeLeaveLog[$ck])) continue;
+                $userLeaveInfo[(int)$ck] = $overTimeLeaveLog[$ck] - $cv;
+            }
+        } else {
+            foreach ($overTimeLeaveLog as $lk => $lv) {
+                $userLeaveInfo[(int)$lk] = $lv;
+            }
+        }
+
+        return $userLeaveInfo;
+    }
+
+    /**
+     * 申请单信息查询
+     * @param $startDay
+     * @param $endDay
+     * @param $userId
+     * @param $holidayId
+     * @param $status
+     * @return array
+     */
+    public function selectLeave($startDay, $endDay, $userId, $holidayId, $status)
+    {
+        return Leave::select([
+            \DB::raw('number_day'),
+            \DB::raw('count(*) count_num'),
+        ])
+            ->where('start_time', '>=', $startDay)
+            ->where('end_time', '<=', $endDay)
+            ->whereIn('status', $status)
+            ->where([
+                'user_id' => $userId,
+                'holiday_id' => $holidayId,
+            ])
+            ->groupBy(['user_id', 'number_day'])
+            ->get(['number_day', 'count_num'])
+            ->pluck('count_num', 'number_day')
+            ->toArray();
     }
 }

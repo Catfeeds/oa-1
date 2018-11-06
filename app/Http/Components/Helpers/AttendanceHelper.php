@@ -129,6 +129,7 @@ class AttendanceHelper
 
 
     /**
+     * 回退功能暂时不用
      * 申请单 拒绝/取消 福利天数回退
      * @param object $leave 申请单信息
      */
@@ -146,6 +147,39 @@ class AttendanceHelper
             if($num > $holidayConfig->num) $num = $holidayConfig->num;
 
             $userConfig->update(['num' => $num]);
+        }
+    }
+
+    public static function spliceLeaveTime($holidayId, $time, $timeId, $numberDay = 0)
+    {
+        $holidayCfg =  HolidayConfig::getHolidayApplyList();
+
+        $time = DataHelper::dateTimeFormat($time, 'Y-m-d');
+        $msg = '天';
+        switch ($holidayCfg[$holidayId]) {
+            case HolidayConfig::LEAVEID:
+                return [
+                    'time'=> DataHelper::dateTimeFormat($time .' '. $timeId, 'Y-m-d H:i'),
+                    'number_day' => $numberDay . $msg
+                ];
+                break;
+            case HolidayConfig::CHANGE:
+                return [
+                    'time'=> $time,
+                    'number_day' => Leave::$workTimePoint[(int)$numberDay] ?? '数据异常',
+                ];
+                break;
+            case HolidayConfig::RECHECK:
+                return [
+                    'time'=> $time,
+                    'number_day' => $numberDay . $msg
+                ];
+                break;
+            default:
+                return [
+                    'time'=> '',
+                    'number_day' => ''
+                ];
         }
     }
 
@@ -472,13 +506,14 @@ class AttendanceHelper
             ])
             ->where('start_time', '>=', $startDay)
             ->where('end_time', '<=', $endDay)
-            ->whereIn('status', [Leave::PASS_REVIEW, Leave::WAIT_REVIEW, Leave::ON_REVIEW])
+            ->whereIn('status', [Leave::PASS_REVIEW, Leave::WAIT_REVIEW, Leave::ON_REVIEW, Leave::WAIT_EFFECTIVE])
             ->where([
                 'user_id' => $userId,
                 'holiday_id' => $holiday->holiday_id,
             ])->groupBy('user_id')->first('number_day');
 
         $numberDay = empty($userLeaveLog->number_day) ? $holiday->up_day : $holiday->up_day - $userLeaveLog->number_day;
+
         return ['number_day' => $numberDay, 'count_num' => $userLeaveLog->count_num ?? 0, 'apply_days' => $userLeaveLog->number_day ?? 0];
     }
 

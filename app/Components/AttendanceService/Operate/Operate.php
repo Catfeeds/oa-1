@@ -42,7 +42,6 @@ class Operate
     public function getLeaveStep($holidayId, $numberDay) : array
     {
         $steps = ReviewStepFlow::with('config')->where(['child_id' => $holidayId])->get()->toArray();
-
         $step = [];
         foreach ($steps as $sk => $sv) {
             if($sv['min_num'] <= $numberDay && $sv['max_num'] >= $numberDay) {
@@ -284,9 +283,8 @@ class Operate
     public function leaveReviewPass($leave)
     {
         if(empty($leave->remain_user)) {
-            $leave->update(['status' => 3, 'review_user_id' => 0]);
+            $leave->update(['status' => Leave::PASS_REVIEW, 'review_user_id' => 0]);
             self::setDailyDetail($leave);
-
         } else {
             $remainUser = json_decode($leave->remain_user, true);
 
@@ -299,7 +297,7 @@ class Operate
                 $remainUser = json_encode($remainUser);
             }
 
-            $leave->update(['status' => 1, 'review_user_id' => $reviewUserId, 'remain_user' => $remainUser]);
+            $leave->update(['status' => Leave::ON_REVIEW, 'review_user_id' => $reviewUserId, 'remain_user' => $remainUser]);
         }
     }
 

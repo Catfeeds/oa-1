@@ -66,11 +66,12 @@ class LeaveController extends AttController
             ->paginate(30);
 
         list($message, $yearHolObj, $visitHolObj, $changeHolObj) = $this->reviewHelper->ifConfig();
-        $remainWelfare = $this->reviewHelper->countWelfare(\Auth::user(), [
+  /*      $remainWelfare = $this->reviewHelper->countWelfare(\Auth::user(), [
             'year' => $yearHolObj ?? NULL,
             'change' => $changeHolObj ?? NULL,
             'visit' => $visitHolObj ?? NULL,
-        ]);
+        ]);*/
+        $remainWelfare = 0;
 
         $appealData = Appeal::getAppealResult(Appeal::APPEAL_LEAVE);
 
@@ -151,7 +152,7 @@ class LeaveController extends AttController
         if(!$retCheck['success']) return redirect()->back()->with(['holiday_id' => $p['holiday_id']])->withInput()->withErrors($retCheck['message']);
         //获取申请单审核步骤流程
         $step = \AttendanceService::driver($driver)->getLeaveStep($p['holiday_id'], $retCheck['data']['number_day']);
-        if(!$step['success']) return redirect()->back()->withInput()->withErrors($step['message']);
+        if(!$step['success']) return redirect()->back()->with(['holiday_id' => $p['holiday_id']])->withInput()->withErrors($step['message']);
         //设置上传图片
          $imagePath = AttendanceHelper::setAnnex($request);
         //数据整合
@@ -159,6 +160,8 @@ class LeaveController extends AttController
         $leave['image_path'] = $imagePath;
         $leave['reason'] = $p['reason'];
 
+        //事物开始
+        DB::beginTransaction();
         try {
             //创建申请单
             $retLeave = \AttendanceService::driver($driver)->createLeave($leave);
@@ -170,12 +173,15 @@ class LeaveController extends AttController
             //OperateLogHelper::sendWXMsg($review_user_id, '测试下');
 
         } catch (Exception $ex) {
+            //事物回滚
+            DB::rollBack();
             flash('申请失败,请重新提交申请!', 'danger');
             return redirect()->route('leave.info');
         }
+        //事物提交
+        DB::commit();
 
         flash(trans('app.添加成功', ['value' => trans('att.假期申请')]), 'success');
-
         return redirect()->route('leave.info');
     }
 
@@ -201,7 +207,7 @@ class LeaveController extends AttController
         $logUserIds[] = $leave->review_user_id;
         $userDept = User::getUserAliasToId($leave->user_id);
         //调休包含人员也可以查看
-        $userIds = AttendanceHelper::setChangeList($userDept->dept_id)['user_ids'];
+        $userIds = json_decode($leave->user_list, true);
         if((in_array(\Auth::user()->user_id, $logUserIds) || in_array(\Auth::user()->user_id, $userIds)) && !empty($leave->leave_id) ) {
             $reviewUserId = $leave->review_user_id;
             $user = User::with(['dept'])->where(['user_id' => $reviewUserId])->first();
@@ -338,7 +344,8 @@ class LeaveController extends AttController
     public function showMemo(Request $request)
     {
         $p = $request->all();
-        $holidayConfig = HolidayConfig::where(['apply_type_id' => HolidayConfig::LEAVEID, 'holiday_id' => $p['id']])
+        $holidayConfig = HolidayConfig::where(['holiday_id' => $p['id']])
+            ->whereIn('apply_type_id', HolidayConfig::$applyTypeInt)
             ->whereIn('restrict_sex', [\Auth::user()->userExt->sex, UserExt::SEX_NO_RESTRICT])
             ->where(['is_show' => HolidayConfig::STATUS_ENABLE])
             ->first();

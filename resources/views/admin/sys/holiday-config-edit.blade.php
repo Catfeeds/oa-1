@@ -298,7 +298,7 @@
                                     {{--带薪显示end--}}
 
                                     {{--加班/调休显示--}}
-                                    <div id="work" style="display: none">
+                                    <div id="delay" style="display: none">
                                         <div class="form-group @if (!empty($errors->first('work_relief_formula'))) has-error @endif">
                                             {!! Form::label('work_relief_formula', trans('app.上下班时间减免时长'), ['class' => 'col-sm-3 control-label']) !!}
                                             <div class="col-sm-3">
@@ -354,7 +354,10 @@
                                                 </span>
                                             </div>
                                         </div>
-
+                                    </div>
+                                    {{--加班/调休显示end--}}
+                                    {{--打卡显示--}}
+                                    <div id="change" style="display: none">
                                         <div class="form-group @if (!empty($errors->first('work_reset_formula'))) has-error @endif">
                                             {!! Form::label('work_relief_formula', trans('app.加班调休重置周期'), ['class' => 'col-sm-3 control-label']) !!}
                                             <div class="col-sm-3">
@@ -365,17 +368,16 @@
                                                 <span class="help-block m-b-none">{{ $errors->first('work_reset_formula') }}</span>
                                             </div>
                                             <div class="col-sm-2">
-                                                <span class="help-block m-b-none">
-                                                    <i class="fa fa-info-circle"></i> {{ trans('公式:[月,日,时,分,秒]') }}
-                                                </span>
+                                                    <span class="help-block m-b-none">
+                                                        <i class="fa fa-info-circle"></i> {{ trans('公式:[月,日,时,分,秒]') }}
+                                                    </span>
                                             </div>
                                         </div>
-
                                     </div>
-                                    {{--加班/调休显示end--}}
+                                    {{--打卡显示end--}}
 
                                     {{--打卡显示--}}
-                                    <div id="change" style="display: none">
+                                    <div id="recheck" style="display: none">
                                         <div class="form-group">
                                             {!! Form::label('punch_type', trans('app.补打卡设置'), ['class' => 'col-sm-3 control-label']) !!}
                                             <div class="col-sm-6">
@@ -434,38 +436,44 @@
             case '1':
                 $("#unpaid").show();
                 $("#paid").hide();
-                $("#work").hide();
+                $("#recheck").hide();
                 $("#change").hide();
+                $("#delay").hide();
                 break;
             case '2':
                 $("#unpaid").show();
                 $("#paid").show();
-                $("#work").hide();
+                $("#recheck").hide();
                 $("#change").hide();
+                $("#delay").hide();
                 break;
             case '3':
-                $("#work").show();
+                $("#delay").show();
+                $("#recheck").hide();
                 $("#unpaid").hide();
                 $("#paid").hide();
                 $("#change").hide();
                 break;
             case '4':
-                $("#work").hide();
+                $("#change").show();
+                $("#delay").hide();
+                $("#unpaid").hide();
+                $("#paid").hide();
+                $("#recheck").hide();
+                break;
+            case '6':
+                $("#recheck").show();
                 $("#unpaid").hide();
                 $("#paid").hide();
                 $("#change").hide();
-                break;
-            case '5':
-                $("#change").show();
-                $("#unpaid").hide();
-                $("#paid").hide();
-                $("#work").hide();
+                $("#delay").hide();
                 break;
             default:
                 $("#change").hide();
                 $("#unpaid").hide();
                 $("#paid").hide();
-                $("#work").hide();
+                $("#recheck").hide();
+                $("#delay").hide();
         }
     }
 

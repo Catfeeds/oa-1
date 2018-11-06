@@ -17,12 +17,18 @@
                     <div class="form-group @if (!empty($errors->first('holiday_id'))) has-error @endif">
                         {!! Form::label('holiday_id', trans('att.调休类型'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-2">
-                            <select class="js-select2-single form-control" name="holiday_id" >
+                            <select onchange="showMemo()" id ='holiday_id' class="js-select2-single form-control" name="holiday_id" >
                                 @foreach($holidayList as $k => $v)
-                                    <option value="{{ $k }}" @if($k === $leave->holiday_id) selected="selected" @endif>{{ $v }}</option>
+                                    <option value="{{ $k }}" @if($k === (int)(!empty($leave->holiday_id) ? $leave->holiday_id : old('holiday_id'))) selected="selected" @endif>{{ $v }}</option>
                                 @endforeach
                             </select>
                             <span class="help-block m-b-none">{{ $errors->first('holiday_id') }}</span>
+                        </div>
+                        <div class="col-sm-2">
+                            <span id="show_memo" style="display: none"  style="color: red" class="help-block m-b-none">
+                                <p style="color: red" id="show_p"></p>
+                                <pre style="width: 30em; height: 10em"  id="show_pre"></pre>
+                            </span>
                         </div>
                     </div>
 
@@ -42,35 +48,13 @@
                         </div>
                         <div class="col-sm-2">
                             <select class="js-select2-single form-control" name="start_id" >
-                                @foreach(\App\Models\Attendance\Leave::$startId as $k => $v)
-                                    <option value="{{ $k }}" @if($k === $leave->start_id) selected="selected" @endif>{{ $v }}</option>
+                                @foreach(\App\Models\Attendance\Leave::$workTimePoint as $k => $v)
+                                    <option value="{{ $k }}" @if($k === (int)(!empty($leave->start_id) ? $leave->start_id : old('start_id'))) selected="selected" @endif>{{ $v }}</option>
                                 @endforeach
                             </select>
                         </div>
                     </div>
 
-                    <div class="hr-line-dashed"></div>
-
-                    <div class="form-group @if (!empty($errors->first('end_time'))) has-error @endif">
-                        {!! Form::label('end_time', trans('att.调休结束时间'), ['class' => 'col-sm-2 control-label']) !!}
-                        <div class="col-sm-3">
-                            <div class="input-group">
-                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                                {!! Form::text('end_time', !empty($leave->end_time) ? $leave->end_time : (old('end_time') ?? '') , [
-                                'class' => 'form-control date',
-                                'required' => true,
-                                ]) !!}
-                                <span class="help-block m-b-none">{{ $errors->first('end_time') }}</span>
-                            </div>
-                        </div>
-                        <div class="col-sm-2">
-                            <select class="js-select2-single form-control" name="end_id" >
-                                @foreach(\App\Models\Attendance\Leave::$endId as $k => $v)
-                                    <option value="{{ $k }}" @if($k === $leave->start_id) selected="selected" @endif>{{ $v }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
                     {{--只有上级才可以显示批量选择人员--}}
                     @if(Auth::user()->is_leader === 1)
                         <div class="hr-line-dashed"></div>
@@ -110,6 +94,21 @@
                             ]) !!}
                         </div>
                         <span class="help-block m-b-none">{{ $errors->first('reason') }}</span>
+                    </div>
+
+                    <div class="hr-line-dashed"></div>
+
+                    <div class="form-group @if (!empty($errors->first('copy_user'))) has-error @endif">
+                        {!! Form::label('copy_user', trans('att.抄送'), ['class' => 'col-sm-2 control-label']) !!}
+                        <div class="col-sm-3">
+                            <select multiple="multiple" class="js-select2-multiple form-control"
+                                    name="copy_user[]">
+                                @foreach($allUsers as $key => $val)
+                                    <option value="{{ $val['user_id'] }}">{{ $val['alias'].'('.$val['username'].')' }}</option>
+                                @endforeach
+                            </select>
+                            <span class="help-block m-b-none">{{ $errors->first('copy_user') }}</span>
+                        </div>
                     </div>
 
                     <div class="hr-line-dashed"></div>
@@ -157,6 +156,40 @@
             $("#select-mobile-header-file").change(function(){
                 readURL(this, '#show_mobile_header_image');
             });
+
+            showMemo();
         });
+
+        /**
+         * 显示剩余假期和描述
+         */
+        function showMemo() {
+            var val = $('#holiday_id').children('option:selected').val();
+            if(val != "") {
+                $('#show_pre').html('');
+                $.get('{{ route('leave.showMemo')}}', {id: val}, function ($data) {
+                    if ($data.status == 1) {
+                        if($data.show_memo){
+                            $('#show_pre').html($data.memo);
+                            $('#show_memo').show();
+                        }
+                        if($data.show_day){
+                            $('#show_p').show();
+                            $('#show_p').html($data.msg);
+                        } else {
+                            $('#show_p').hide();
+                        }
+
+                    } else {
+                        $('#show_memo').hide();
+                        $('#show_p').hide();
+                        $('#show_pre').html('');
+                    }
+                })
+            } else {
+                $('#show_pre').html('');
+                $('#show_memo').hide();
+            }
+        }
     </script>
 @endsection

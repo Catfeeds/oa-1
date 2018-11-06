@@ -35,7 +35,7 @@ class Paid extends Cypher
     {
         switch ($holidayConfig->reset_type) {
          case HolidayConfig::RESET_ENTRY_TIME:
-             $leaveInfo = AttendanceHelper::getUserPayableDayToEntryTime($entryTime, $userId, $holidayConfig);
+             $leaveInfo = $this->getUserPayableDayToEntryTime($entryTime, $userId, $holidayConfig);
              $msg = $day = '<i class="fa fa-info-circle"></i>剩余假期天数:' . $leaveInfo['number_day'] . '天';
              return [
                  'status' => 1,
@@ -48,7 +48,7 @@ class Paid extends Cypher
              ];
              break;
          case HolidayConfig::RESET_NATURAL_CYCLE:
-             $leaveInfo = AttendanceHelper::getUserPayableDayToNaturalCycleTime($entryTime, $userId, $holidayConfig);
+             $leaveInfo = $this->getUserPayableDayToNaturalCycleTime($entryTime, $userId, $holidayConfig);
              $msg = $day = '<i class="fa fa-info-circle"></i>剩余假期天数:' . $leaveInfo['number_day'] . '天';
              return [
                  'status' => 1,
@@ -61,7 +61,7 @@ class Paid extends Cypher
              ];
              break;
          default:
-             $leaveInfo = AttendanceHelper::getUserPayableDayToNoCycleTime($userId, $holidayConfig);
+             $leaveInfo = $this->getUserPayableDayToNoCycleTime($userId, $holidayConfig);
              $msg = $day = '<i class="fa fa-info-circle"></i>剩余假期天数:' . $leaveInfo['number_day'] . '天';
              return [
                  'status' => 1,
