@@ -14,6 +14,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Attendance\Appeal;
 use App\Models\Attendance\ConfirmAttendance;
 use App\Models\Attendance\DailyDetail;
+use App\Models\Attendance\Leave;
 use App\Models\Sys\HolidayConfig;
 use App\User;
 use Illuminate\Http\Request;
@@ -42,8 +43,11 @@ class DailyDetailController extends AttController
         $userInfo['alias'] = \Auth::user()->alias;
 
         $appealData = Appeal::getAppealResult(Appeal::APPEAL_DAILY);
+
+        $danger = $this->review->reviewHelper->getDanger(date('Y-m-01', strtotime($scope->startDate)),
+            date('Y-m-t', strtotime($scope->startDate)), $data);
         $title = trans('att.我的每日考勤详情');
-        return view('attendance.daily-detail.index', compact('title', 'data', 'scope', 'userInfo', 'monthInfo', 'scope', 'appealData'));
+        return view('attendance.daily-detail.index', compact('title', 'data', 'scope', 'userInfo', 'monthInfo', 'scope', 'appealData', 'danger'));
     }
 
     //重新初始化scope,调用review控制器的方法

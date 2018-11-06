@@ -289,4 +289,13 @@ class DataHelper
     {
         return (new \DateTime($date))->format($format);
     }
+
+    public static function timesToNum(...$times)
+    {
+        $arr = [];
+        foreach ($times as $time) {
+            $arr[] = is_string($time) ? (int)str_replace(':', '', $time) : (int)str_replace(':', '', date('H:i', $time));
+        }
+        return $arr;
+    }
 }

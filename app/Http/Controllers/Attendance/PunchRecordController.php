@@ -9,6 +9,7 @@
 namespace App\Http\Controllers\Attendance;
 
 use App\Components\Helper\FileHelper;
+use App\Http\Components\Helpers\PunchHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Attendance\DailyDetail;
 use App\Models\Attendance\PunchRecord;
@@ -24,6 +25,12 @@ class PunchRecordController extends Controller
     private $_validateRule = [
         'memo' => 'max:32',
     ];
+
+    public $punchHelper;
+    public function __construct(PunchHelper $punchHelper)
+    {
+        $this->punchHelper = $punchHelper;
+    }
 
     public function index()
     {
@@ -112,14 +119,15 @@ class PunchRecordController extends Controller
         }
         $isOK = true;
         //事务开启
-        DB::beginTransaction();
-        try {
+       /* DB::beginTransaction();
+        try {*/
             //reader读取excel内容
             \Excel::load(storage_path($punchRecord->annex), function ($reader) use ($punchRecord, $isOK) {
 
                 $reader = $reader->getSheet(0);
                 $reader = $reader->toarray();
                 $data = $msgArr = [];
+                $minTs = '2300-12-31';$maxTs = '2001-01-01';
                 foreach ($reader as $k => $v) {
                     if ($v[0] == null || $k == 0) continue;
                     //去除空值
@@ -176,6 +184,8 @@ class PunchRecordController extends Controller
                     }
                     //线上环境
                     $ts = $year . '-' . $month . '-' . $day;
+                    $minTs = strtotime($ts) <= strtotime($minTs) ? $ts : $minTs;
+                    $maxTs = strtotime($ts) >= strtotime($maxTs) ? $ts : $maxTs;
                     //线上环境end
                     $row = [
                         'ts'         => $ts,
@@ -189,9 +199,10 @@ class PunchRecordController extends Controller
                         $data[date('Y-n-j', strtotime("-1 day $ts"))][$v[3]]['end_time'] = $lastDayEndTime;
                         unset($lastDayEndTime);
                     }
-
                     $data[$ts][$v[3]] = $row;
                 }
+                $calPunch = $this->punchHelper->getCalendarPunchRules($minTs, $maxTs);
+
                 if(!$isOK){
                     //信息记录
                     $strArr = '<?php return ' . var_export($msgArr, true) . ';';
@@ -200,6 +211,7 @@ class PunchRecordController extends Controller
                     throw new \Exception('信息错误');
                 }
 
+                $deduct = array();
                 foreach ($data as $dk => $dv) {
 
                     $punchRuleStartTime = strtotime($dk . ' ' . $calendar->punchRules->work_start_time);
@@ -211,6 +223,10 @@ class PunchRecordController extends Controller
                             $msgArr[] = '未找到[' . $u['alias'] . ']员工信息!';
                             continue;
                         }
+
+                        $day = date('Y-m-d', strtotime($u['ts']));
+                        $detail = DailyDetail::where(['user_id' => $user->user_id, 'day' => $day])->first();
+                        $deduct[$user->user_id][$u['ts']] = $this->punchHelper->countDeduct($u['start_time'], $u['end_time'], $calPunch[$u['ts']], $detail);
 
                         //迟到分数计算
                         $startTimeNum = empty($u['start_time']) ? 0 : strtotime($dk . ' ' . $u['start_time']);
@@ -243,7 +259,7 @@ class PunchRecordController extends Controller
                             }
 
                             //向审核通过时插入的数据中添加excel打卡表中正常打卡的数据
-                            $userDailyDetail->update([
+                            /*$userDailyDetail->update([
                                 'punch_start_time'     => $userDailyDetail->punch_start_time ?? $u['start_time'],
                                 'punch_start_time_num' => $userDailyDetail->punch_start_time_num ?: $startTimeNum,
                                 'punch_end_time'       => $userDailyDetail->punch_end_time ?? $u['end_time'],
@@ -251,15 +267,16 @@ class PunchRecordController extends Controller
                                 'heap_late_num'        => $userDailyDetail->heap_late_num ?: $hn,
                                 'lave_buffer_num'      => 0,
                                 'deduction_num'        => $userDailyDetail->deduction_num ?: $dn,
-                            ]);
+                            ]);*/
                             $msgArr[] = $u['alias'] . '员工已导入[' . $dk . ']考勤记录!';
                             continue;
                         }
-                        DailyDetail::create($dailyDetail);
-
+                        //DailyDetail::create($dailyDetail);
                         $msgArr[] = $u['alias'] . '员工导入[' . $dk . ']考勤记录成功!';
                     }
                 }
+                dump($deduct);
+                dd('-------test----');
                 //信息记录
                 $strArr = '<?php return ' . var_export($msgArr, true) . ';';
                 $logFile = storage_path('app/punch-record/' . date('Ymd', time()) . '/' . $punchRecord->id . '_punch_log.txt');
@@ -267,18 +284,18 @@ class PunchRecordController extends Controller
                 $punchRecord->update(['log_file' => $logFile, 'status' => 3]);
 
             });
-        } catch (\Exception $e) {
+        /*} catch (\Exception $e) {
               //事务回滚
               DB::rollBack();
               $punchRecord->update(['status' => 2]);
 
               flash('生成失败，生成文件有误，无法解析!', 'danger');
-              return redirect()->route('daily-detail.review.import.info');
+              //return redirect()->route('daily-detail.review.import.info');
           }
           //事务提交
           DB::commit();
           flash(trans('att.生成成功员工每日打卡明细'), 'success');
-          return redirect()->route('daily-detail.review.import.info');
+          //return redirect()->route('daily-detail.review.import.info');*/
     }
 
     public function log($id)

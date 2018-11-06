@@ -58,8 +58,11 @@ class PunchRulesConfig extends Model
                 'ded_type' => $v['ded_type'],
                 'ded_num' => $v['ded_num'],
             ];
+            $arr_[$sKey.'$$'.$eKey.'$$'.$rKey] = strtotime($rKey);
         }
-        return ['start_time' => array_values($list['start_time']), 'end_time' => array_values($list['end_time']), 'cfg' => $arr];
+        asort($arr_);
+        return ['start_time' => array_values($list['start_time']), 'end_time' => array_values($list['end_time']),
+                'cfg' => $arr, 'sort' => $arr_];
     }
 
 
@@ -117,8 +120,9 @@ class PunchRulesConfig extends Model
             $endTime = self::resolveFormula($punchRulesConfig->work_end_time);
             $minReadyTime = (int)str_replace(':', '', $readyTime) < $minReadyTime ? $readyTime : $minReadyTime;
             $maxEndTime = (int)str_replace(':', '', $endTime) > $maxEndTime ? $endTime : $maxEndTime;
+            $arr[$readyTime.'$$'.$endTime] = strtotime($readyTime);
         }
-        return ['ready_time' => $minReadyTime, 'end_time' => $maxEndTime];
+        asort($arr);
+        return ['ready_time' => $minReadyTime, 'end_time' => $maxEndTime, 'sort_config' => $arr];
     }
-
 }

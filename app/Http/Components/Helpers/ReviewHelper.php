@@ -6,6 +6,7 @@
  * Time: 14:30
  */
 namespace App\Http\Components\Helpers;
+use App\Components\Helper\DataHelper;
 use App\Models\Attendance\DailyDetail;
 use App\Models\Attendance\Leave;
 use App\Models\Sys\Calendar;
@@ -109,11 +110,14 @@ class ReviewHelper
             ['day', '>=', $startDate], ['day', '<=', $endDate], ['user_id', $user->user_id]
         ])->get();
 
-        $days = 0;
+        $countDays = $countDeducts = 0;
         foreach ($detailArr as $item) {
-            $days = $days + $this->countDay($item->punch_start_time, $item->punch_end_time, $calPunch[$item->day] ?? [], $item);
+            $dayInfo = $this->countDay($item->punch_start_time, $item->punch_end_time, $calPunch[$item->day] ?? [], $item);
+            $countDays = $countDays + $dayInfo['day'];
+            $countDeducts = $countDeducts + $dayInfo['deduct'];
         }
-        return $days;
+//        return ['days' => $countDays, 'deducts' => $countDeducts];
+        return $countDays;
     }
 
     /**
@@ -122,24 +126,27 @@ class ReviewHelper
      * @param string $punch_end 该天下班打卡时间
      * @param array $punchRuleConfigs 该天对应的打卡规则对象数组
      * @param DailyDetail $dailyDetail 该天明细
-     * @return float|int 返回当天被扣天数之后的剩余天数
+     * @return array 返回当天被扣天数之后的剩余天数
      */
     public function countDay($punch_start, $punch_end, $punchRuleConfigs, $dailyDetail)
     {
-        $day = 1;//默认为1天,扣到0为止
-        //当天明细含请假情况
+        $deduct = 0;
         if (!empty($dailyDetail->leave_id)) {
+            //请假情况的扣除规则
             $day_l = 0;
+            $fromTo = [];
             $leaves = json_decode($dailyDetail->leave_id, true);
             $leaveObjects = Leave::whereIn('leave_id', $leaves)->get();
             foreach ($leaveObjects as $leaveObject) {
                 $leaStartDate = date('Y-m-d', strtotime($leaveObject->start_time));
                 $leaEndDate = date('Y-m-d', strtotime($leaveObject->end_time));
-                $test= PunchRulesConfig::getTodayNormalWorkTime($punchRuleConfigs);
                 //若这天是请半天的,累加请的天数
-                if (($dailyDetail->day == $leaStartDate && strtotime($leaveObject->start_id) > strtotime('14:00')) ||
-                    ($dailyDetail->day == $leaEndDate && strtotime($leaveObject->end_id) < strtotime('14:00'))) {
+                if ($dailyDetail->day == $leaStartDate && strtotime($leaveObject->start_id) > strtotime('14:00')) {
                     $day_l = 0.5 + $day_l;
+                    $fromTo = ['start' => NULL, 'end' => '14:00'];//这天可以打卡的范围缩小
+                }elseif (($dailyDetail->day == $leaEndDate && strtotime($leaveObject->end_id) < strtotime('14:00'))) {
+                    $day_l = 0.5 + $day_l;
+                    $fromTo = ['start' => '14:00', 'end' => NULL];
                 }else {
                     $day_l = 1; break;
                 }
@@ -148,46 +155,66 @@ class ReviewHelper
             if ($day_l >= 1)
                 $day = 0;
             else {
-                //小于1,剩余天数就要经过上下班配置进行天数的判断扣除
-                $deduct = $this->getDeduct($punch_start, $punch_end, $punchRuleConfigs);
-                $day = ((1 - $day_l) - $deduct) <= 0 ? 0 : (1 - $day_l) - $deduct;
+                //小于1,限制打卡的计算范围,在此范围内先按正常扣天去扣, 再剔除里面包含请假天数的扣除
+                $ps = $fromTo['start'] ?? $punch_start ?? NULL;
+                $pe = $fromTo['end'] ?? $punch_end ?? NULL;
+                $deduct = $this->getDeduct($ps, $pe, $punchRuleConfigs)[0] - $day_l;
+                $day = (1 - $deduct) >= 0 ? 1 - $deduct : 0;
             }
-
         }else {
             //正常则按扣除规则
-            $deduct = $this->getDeduct($punch_start, $punch_end, $punchRuleConfigs);
-            $day = $day - $deduct;
+            $deduct = $this->getDeduct($punch_start, $punch_end, $punchRuleConfigs)[0];
+            $day = (1 - $deduct) >= 0 ? 1 - $deduct : 0;
         }
-        return $day;
+        return ['day' => $day, 'deduct' => $deduct];
     }
 
+    /**
+     * 正常情况下 上下班时间与对应规则的匹配,进行扣除迟到或早退的时间
+     * @param $punch_start
+     * @param $punch_end
+     * @param $punchRuleConfigs
+     * @return array [扣除分数, 扣除的标记留给前端显示红色]
+     */
     public function getDeduct($punch_start, $punch_end, $punchRuleConfigs)
     {
-        $punchRuleConfArr = PunchRulesConfig::getPunchRules($punchRuleConfigs->toArray())['cfg'];
+        $punchRuleConfArr = PunchRulesConfig::getPunchRules($punchRuleConfigs->toArray());
         $deduct = 0;
+        $isDanger = ['on_work' => false, 'off_work' => false];
         if (!empty($punch_start) || !empty($punch_end)) {
-            foreach ($punchRuleConfArr as $key => $value) {//时间段
+            foreach ($punchRuleConfArr['sort'] as $key => $value) {//时间段
                 list($startWorkTime, $endWorkTime, $readyTime) = explode('$$', $key);
-                foreach ($value['ded_num'] as $item) {//时间段中的规则
-                    if (strtotime($punch_start) >= strtotime($readyTime) + $item['start_gap']
+
+                //上班时间对比各个时间段,若开始时间在该时间段之后或结束时间在该时间段之前都证明不在该段内,扣掉该段的时间差
+                $ps = $punch_start ?? $ps ?? (strtotime($readyTime) <= strtotime($punch_end) ? $readyTime : NULL);
+                $pe = $punch_end ?? $pe ?? (strtotime($endWorkTime) >= strtotime($punch_start) ? $endWorkTime : NULL);
+                if (empty($ps) || empty($pe) || strtotime($ps) >= strtotime($endWorkTime) || strtotime($pe) <= strtotime($readyTime)) {
+                    $deduct = $deduct + DataHelper::diffTime($readyTime, $endWorkTime);
+                }
+
+                foreach ($punchRuleConfArr['cfg'][$key]['ded_num'] as $item) {
+                    //按照这个时间段的多个规则进行匹配扣除
+                    if (!empty($punch_start) && strtotime($punch_start) >= strtotime($readyTime) + $item['start_gap']
                         && strtotime($punch_start) <= strtotime($readyTime) + $item['end_gap']
                     ) {
                         if ($item['late_type'] == 1) {
                             $deduct = $deduct + $item['ded_num'];
+                            $isDanger['on_work'] = true;
                         }
                     }
-                    if (strtotime($punch_end) >= strtotime($endWorkTime) - $item['end_gap']
+                    if (!empty($punch_end) && strtotime($punch_end) >= strtotime($endWorkTime) - $item['end_gap']
                         && strtotime($punch_end) <= strtotime($endWorkTime) - $item['start_gap']) {
                         if ($item['late_type'] == 1) {
                             $deduct = $deduct + $item['ded_num'];
+                            $isDanger['off_work'] = true;
                         }
                     }
                 }
             }
+        }else {
+            $deduct = 1;
         }
-        if (empty($punch_start)) $deduct = $deduct + 0.5;
-        if (empty($punch_end)) $deduct = $deduct + 0.5;
-        return $deduct;
+        return [$deduct, $isDanger];
     }
 
     /**
@@ -207,6 +234,41 @@ class ReviewHelper
             $newCalendarArr[$key] = $item->punchRules->config;
         }
         return $newCalendarArr;
+    }
+
+    /**
+     * 获取上下班时间早退或迟到时的标记,用于在前端显示红色标明
+     * @param $startDate
+     * @param $endDate
+     * @param array $dailyDetailData 打卡明细数组
+     * @return array e.g: $danger['2018-10-10']['on_work' => true, 'off_work' => false]
+     */
+    public function getDanger($startDate, $endDate, $dailyDetailData)
+    {
+        $danger = [];
+        $calPunch = $this->getCalendarPunchRules($startDate, $endDate);
+        foreach ($dailyDetailData as $datum) {
+            $danger[$datum->day] = $this->getDeduct($datum->punch_start_time, $datum->punch_end_time, $calPunch[$datum->day])[1];
+
+            $leaveArr = json_decode($datum->leave_id, true);
+            if (!empty($leaveArr)) {
+                //这天若打卡在请假区间,false不显示红色
+                $leaves = Leave::whereIn('leave_id', $leaveArr)->get();
+                foreach ($leaves as $leaf) {
+                    $leafStart = strtotime(date('Y-m-d', strtotime($leaf->start_time)).' '.$leaf->start_id);
+                    $leafEnd = strtotime(date('Y-m-d', strtotime($leaf->end_time)).' '.$leaf->end_id);
+                    $datumStart = strtotime($datum->day.' '.$datum->punch_start_time);
+                    $datumEnd = strtotime($datum->day.' '.$datum->punch_end_time);
+                    if ($datumStart >= $leafStart && $datumStart <= $leafEnd) {
+                        $danger[$datum->day]['on_work'] = false; break;
+                    }
+                    if ($datumEnd >= $leafStart && $datumEnd <= $leafEnd) {
+                        $danger[$datum->day]['off_work'] = false; break;
+                    }
+                }
+            }
+        }
+        return $danger;
     }
 
 }
