@@ -29,7 +29,6 @@ class Cypher
     public function getUserHoliday($entryTime, $userId, $holidayConfig)
     {
         return ['status' => 1, 'show_memo' => true, 'memo' => $holidayConfig->memo];
-
     }
     /**
      * 申请单验证和数据返回
@@ -215,6 +214,7 @@ class Cypher
     {
         $userLeaveLog = Leave::select([
             \DB::raw('SUM(number_day) number_day'),
+            \DB::raw('SUM(exceed_day) exceed_day'),
             \DB::raw('count(*) count_num'),
         ])
             ->where('start_time', '>=', $startDay)
@@ -223,12 +223,10 @@ class Cypher
             ->where([
                 'user_id' => $userId,
                 'holiday_id' => $holiday->holiday_id,
-            ])->groupBy('user_id')->first('number_day');
+            ])->groupBy('user_id')->first();
 
-        $numberDay = empty($userLeaveLog->number_day) ? $holiday->up_day : $holiday->up_day - $userLeaveLog->number_day;
+        $numberDay = empty($userLeaveLog->number_day) ? $holiday->up_day : $holiday->up_day - ($userLeaveLog->number_day - $userLeaveLog->exceed_day);
 
         return ['number_day' => $numberDay, 'count_num' => $userLeaveLog->count_num ?? 0, 'apply_days' => $userLeaveLog->number_day ?? 0];
     }
-
-
 }

@@ -49,6 +49,7 @@ class Leaved extends Operate implements AttendanceInterface
         if(strtotime($startTimeS) > strtotime($endTimeS)) {
             return $this->backLeaveData(false, ['end_time' => trans('请选择有效的时间范围')]);
         }
+
         //时间天数分配
         $numberDay = DataHelper::diffTime($startTimeS, $endTimeS);
         if(empty($numberDay)) {
@@ -65,8 +66,7 @@ class Leaved extends Operate implements AttendanceInterface
 
         foreach ($isLeaves as $lk => $lv) {
             if(empty($lv->user_id)) continue;
-
-            $diffEndTime = strtotime(AttendanceHelper::spliceLeaveTime($holidayId, $lv->end_time, $lv->end_id)['time']);
+            $diffEndTime = strtotime(AttendanceHelper::spliceLeaveTime($lv->holiday_id, $lv->end_time, $lv->end_id)['time']);
             if($diffEndTime >= strtotime($startTimeS)) {
                 return $this->backLeaveData(false, ['end_time' => trans('已经有该时间段申请单')]);
             }
@@ -112,7 +112,9 @@ class Leaved extends Operate implements AttendanceInterface
             'user_list' => $userList,
             'copy_user' => json_encode($copyUser),
             'start_id' => $p['start_id'],
-            'end_id'   => $p['end_id'],
+            'end_id' => $p['end_id'],
+            'exceed_day' => $userHoliday['exceed_day'] ?? NULL,
+            'exceed_holiday_id' => $userHoliday['exceed_day'] ?? NULL
         ];
 
         return  $this->backLeaveData(true, [], $data);

@@ -107,6 +107,8 @@ class Operate
             'review_user_id' => $leave['review_user_id'],
             'remain_user' => $leave['remain_user'],
             'copy_user' => $leave['copy_user'],
+            'exceed_day' => $leave['exceed_day'] ?? NULL,
+            'exceed_holiday_id' => $leave['exceed_holiday_id'] ?? NULL,
         ];
 
          $ret = Leave::create($data);

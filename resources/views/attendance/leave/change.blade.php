@@ -54,6 +54,19 @@
                         </div>
                     </div>
 
+                    <div style="display: none" id="show_time" class="form-group @if (!empty($errors->first('end_time'))) has-error @endif">
+                        {!! Form::label('end_time', trans('att.调休结束时间'), ['class' => 'col-sm-2 control-label']) !!}
+                        <div class="col-sm-3">
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                {!! Form::text('end_time', !empty($leave->end_time) ? $leave->end_time : (old('end_time') ?? '') , [
+                                'class' => 'form-control date_time',
+                                ]) !!}
+                                <span class="help-block m-b-none">{{ $errors->first('end_time') }}</span>
+                            </div>
+                        </div>
+                    </div>
+
                     {{--只有上级才可以显示批量选择人员--}}
                     @if(Auth::user()->is_leader === 1)
                         <div class="hr-line-dashed"></div>
@@ -156,7 +169,14 @@
                 readURL(this, '#show_mobile_header_image');
             });
 
+
+            $("#start_time").change(function(){
+                inquireStartInfo();
+            });
+
+
             showMemo();
+            inquireStartInfo();
         });
 
         /**
@@ -164,6 +184,7 @@
          */
         function showMemo() {
             var val = $('#holiday_id').children('option:selected').val();
+            $('#start_time').attr('rel', '');
             if(val != "") {
                 $('#show_pre').html('');
                 $.get('{{ route('leave.showMemo')}}', {id: val}, function ($data) {
@@ -172,9 +193,10 @@
                             $('#show_pre').html($data.memo);
                             $('#show_memo').show();
                         }
-                        if($data.show_day){
+                        if($data.show_day) {
                             $('#show_p').show();
                             $('#show_p').html($data.msg);
+
                             $("#start_id").select2("val", "");
                             $("#start_id").empty();
                             $("#start_id").select2({
@@ -184,23 +206,64 @@
                                 data: $data.point_list //绑定数据
                             });
 
-
                         } else {
+                            $("#start_id").select2("val", "");
+                            $("#start_id").empty();
                             $('#show_p').hide();
                         }
 
+                        if($data.show_time) {
+                            $('#show_time').show();
+                            $('#start_time').attr('rel', 1);
+                        } else {
+                            $('#show_time').hide();
+                        }
+
                     } else {
+                        $("#start_id").select2("val", "");
+                        $("#start_id").empty();
                         $('#show_memo').hide();
                         $('#show_p').hide();
                         $('#show_pre').html('');
                     }
                 })
             } else {
+                $("#start_id").select2("val", "");
+                $("#start_id").empty();
                 $('#show_pre').html('');
                 $('#show_memo').hide();
             }
         }
 
+        function inquireStartInfo() {
+            var startTime = $('#start_time').val();
+            var rel =  $('#start_time').attr('rel');
+            if (rel != 1) return false;
+            getPunchRules(startTime);
+        }
+
+        /**
+         * 查询日期绑定的时间点
+         * @param time
+         * @param type
+         */
+        function getPunchRules(time) {
+            $.get('{{ route('leave.getPunchRules')}}', {time: time}, function ($data) {
+                if ($data.status == 1) {
+                    $("#start_id").select2("val", "");
+                    $("#start_id").empty();
+                    $("#start_id").select2({
+                        placeholder: "-请选择时间点-", //默认所有
+                        allowClear: true, //清楚选择项
+                        multiple: false,// 多选
+                        data: $data.end_time //绑定数据
+                    });
+                } else {
+                    $("#start_id").select2("val", "");
+                    $("#start_id").empty();
+                }
+            })
+        }
 
     </script>
 @endsection

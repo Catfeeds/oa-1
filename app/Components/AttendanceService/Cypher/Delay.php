@@ -4,7 +4,7 @@
  * User: weiming Email: 329403630@qq.com
  * Date: 2018/11/2
  * Time: 14:29
- * 延迟假计算类型
+ * 延迟假 计算类型
  */
 
 namespace App\Components\AttendanceService\Cypher;

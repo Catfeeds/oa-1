@@ -287,7 +287,7 @@
                                             <div class="col-sm-6">
                                                 <select style="width: 15em" name="exceed_change_id" class="js-select2-single form-control" >
                                                     <option value="">{{trans('app.转换配置选择')}}</option>
-                                                    @foreach(\App\Models\Sys\HolidayConfig::getHolidayList() as $k => $v)
+                                                    @foreach(\App\Models\Sys\HolidayConfig::holidayList() as $k => $v)
                                                         <option value="{{ $k }}" @if($k === $holiday->exceed_change_id) selected="selected" @endif>{{ $v }}</option>
                                                     @endforeach
                                                 </select>
@@ -356,7 +356,7 @@
                                         </div>
                                     </div>
                                     {{--加班/调休显示end--}}
-                                    {{--打卡显示--}}
+                                    {{--加班调休显示--}}
                                     <div id="change" style="display: none">
                                         <div class="form-group @if (!empty($errors->first('work_reset_formula'))) has-error @endif">
                                             {!! Form::label('work_relief_formula', trans('app.加班调休重置周期'), ['class' => 'col-sm-3 control-label']) !!}
@@ -374,7 +374,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    {{--打卡显示end--}}
+                                    {{--加班调休显示end--}}
 
                                     {{--打卡显示--}}
                                     <div id="recheck" style="display: none">
@@ -391,6 +391,21 @@
                                         </div>
                                     </div>
                                     {{--打卡显示end--}}
+
+                                    {{--加班调休显示--}}
+                                    <div id="duration" style="display: none">
+                                        <div class="form-group @if (!empty($errors->first('duration'))) has-error @endif">
+                                            {!! Form::label('duration', trans('app.夜班加班调休起效时长'), ['class' => 'col-sm-3 control-label']) !!}
+                                            <div class="col-sm-3">
+                                                {!! Form::text('duration', isset($holiday->duration) ? $holiday->duration: old('duration'), [
+                                                'class' => 'form-control',
+                                                'placeholder' => trans('app.请输入', ['value' => trans('app.夜班加班调休起效时长')]),
+                                                ]) !!}
+                                                <span class="help-block m-b-none">{{ $errors->first('duration') }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {{--加班调休显示end--}}
 
 
                                     <div class="form-group">
@@ -439,6 +454,7 @@
                 $("#recheck").hide();
                 $("#change").hide();
                 $("#delay").hide();
+                $("#duration").hide();
                 break;
             case '2':
                 $("#unpaid").show();
@@ -446,6 +462,7 @@
                 $("#recheck").hide();
                 $("#change").hide();
                 $("#delay").hide();
+                $("#duration").hide();
                 break;
             case '3':
                 $("#delay").show();
@@ -453,6 +470,7 @@
                 $("#unpaid").hide();
                 $("#paid").hide();
                 $("#change").hide();
+                $("#duration").hide();
                 break;
             case '4':
                 $("#change").show();
@@ -460,6 +478,7 @@
                 $("#unpaid").hide();
                 $("#paid").hide();
                 $("#recheck").hide();
+                $("#duration").hide();
                 break;
             case '6':
                 $("#recheck").show();
@@ -467,8 +486,18 @@
                 $("#paid").hide();
                 $("#change").hide();
                 $("#delay").hide();
+                $("#duration").hide();
+                break;
+            case '8':
+                $("#duration").show();
+                $("#recheck").hide();
+                $("#unpaid").hide();
+                $("#paid").hide();
+                $("#change").hide();
+                $("#delay").hide();
                 break;
             default:
+                $("#duration").hide();
                 $("#change").hide();
                 $("#unpaid").hide();
                 $("#paid").hide();
