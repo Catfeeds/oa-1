@@ -324,7 +324,6 @@ class AttendanceHelper
             default :
                 return self::backUserHolidayInfo(true);
                 break;
-
         }
 
     }
@@ -524,7 +523,7 @@ class AttendanceHelper
      * @param $endDay
      * @return array
      */
-    public static function getPunch($leave, $startDay, $endDay)
+    /*public static function getPunch($leave, $startDay, $endDay)
     {
         $ps = (int)str_replace(':', '', Leave::$startId[$leave->start_id]);
         $pe = (int)str_replace(':', '', Leave::$endId[$leave->end_id]);
@@ -542,26 +541,26 @@ class AttendanceHelper
                 NULL : strtotime(date('Y-m-d', $endDay) . ' ' . $arr1['punch_end_time']),
         ];
         return array_merge($arr1, $arr2);
-    }
-
+    }*/
+/*
     public static function addLeaveId($leaveId, $idArr = NULL)
     {
         $a = json_decode($idArr);
         $a[] = $leaveId;
         return json_encode($a);
-    }
+    }*/
 
     public static function showLeaveIds($leaveIds)
     {
-        if(empty($leaveIds) || !json_decode($leaveIds)) return '--';
+        if (empty($leaveIds) || !json_decode($leaveIds)) return '--';
 
         $show = '';
-        $idList = Leave::getHolidayIdList();
-        $list = HolidayConfig::getHolidayList();
+        $idList = Leave::getHolidayIdList(true);
+        $list = HolidayConfig::getHolidayList(true);
 
         foreach (json_decode($leaveIds) ?? [] as $leaveId) {
             $sep = empty($show) ? '' : ", $show";
-            $show = $list[$idList[$leaveId]].$sep;
+            $show = ($list[$idList[$leaveId] ?? ''] ?? '') . $sep;
         }
         return $show;
     }

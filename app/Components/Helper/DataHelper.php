@@ -298,4 +298,13 @@ class DataHelper
         }
         return $arr;
     }
+
+    public static function ifBetween($start, $end, $needleStart, $needleEnd = '')
+    {
+        if (empty($needleEnd)) {
+            return $needleStart >= $start && $needleStart <= $end ?  true :  false;
+        }else {
+            return $needleStart <= $needleEnd && $needleStart >= $start && $needleEnd <= $end ? true : false;
+        }
+    }
 }

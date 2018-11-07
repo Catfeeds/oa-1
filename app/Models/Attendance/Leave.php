@@ -36,6 +36,8 @@ class Leave extends Model
     const PASS_REVIEW = 3;
     const CANCEL_REVIEW = 4;
     const WAIT_EFFECTIVE = 5;
+    const SWITCH_REVIEW_ON = 6;
+    const SWITCH_REVIEW_OFF = 7;
     //加班/调休时间点
     const WORK_TIME_POINT_1 = 1;
     const WORK_TIME_POINT_2 = 2;
@@ -89,6 +91,8 @@ class Leave extends Model
         self::PASS_REVIEW => '已通过',
         self::CANCEL_REVIEW => '已取消',
         self::WAIT_EFFECTIVE => '已通过,待生效',
+        self::SWITCH_REVIEW_ON => '转换假期生效',
+        self::SWITCH_REVIEW_OFF => '转换假期取消',
     ];
     //排除已拒绝的状态
     public static $statusList = [
@@ -121,9 +125,13 @@ class Leave extends Model
         return $this->hasOne(HolidayConfig::class, 'holiday_id', 'holiday_id');
     }
 
-    public static function getHolidayIdList()
+    public static function getHolidayIdList($noIncludeOffSwitch = false)
     {
-        return self::get(['holiday_id', 'leave_id'])->pluck('holiday_id', 'leave_id')->toArray();
+        if ($noIncludeOffSwitch === false) {
+            return self::get(['holiday_id', 'leave_id'])->pluck('holiday_id', 'leave_id')->toArray();
+        }
+        return self::where('status', '<>', self::SWITCH_REVIEW_OFF)
+            ->get(['holiday_id', 'leave_id'])->pluck('holiday_id', 'leave_id')->toArray();
     }
 
     //提取统计条件

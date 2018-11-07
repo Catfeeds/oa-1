@@ -119,8 +119,8 @@ class PunchRecordController extends Controller
         }
         $isOK = true;
         //事务开启
-       /* DB::beginTransaction();
-        try {*/
+        DB::beginTransaction();
+        try {
             //reader读取excel内容
             \Excel::load(storage_path($punchRecord->annex), function ($reader) use ($punchRecord, $isOK) {
 
@@ -201,7 +201,7 @@ class PunchRecordController extends Controller
                     }
                     $data[$ts][$v[3]] = $row;
                 }
-                $calPunch = $this->punchHelper->getCalendarPunchRules($minTs, $maxTs);
+                $calPunch = PunchHelper::getCalendarPunchRules($minTs, $maxTs);
 
                 if(!$isOK){
                     //信息记录
@@ -211,7 +211,6 @@ class PunchRecordController extends Controller
                     throw new \Exception('信息错误');
                 }
 
-                $deduct = array();
                 foreach ($data as $dk => $dv) {
 
                     $punchRuleStartTime = strtotime($dk . ' ' . $calendar->punchRules->work_start_time);
@@ -226,7 +225,8 @@ class PunchRecordController extends Controller
 
                         $day = date('Y-m-d', strtotime($u['ts']));
                         $detail = DailyDetail::where(['user_id' => $user->user_id, 'day' => $day])->first();
-                        $deduct[$user->user_id][$u['ts']] = $this->punchHelper->countDeduct($u['start_time'], $u['end_time'], $calPunch[$u['ts']], $detail);
+                        $deduct = $this->punchHelper->countDeduct($u['start_time'], $u['end_time'], $calPunch[$u['ts']], $detail);
+                        $switchLeaveId = $this->punchHelper->storeDeductInLeave($deduct, $user->user_id, $u['ts']);
 
                         //迟到分数计算
                         $startTimeNum = empty($u['start_time']) ? 0 : strtotime($dk . ' ' . $u['start_time']);
@@ -244,6 +244,7 @@ class PunchRecordController extends Controller
                             'heap_late_num'        => $startNum + $endNum,
                             'lave_buffer_num'      => 0,
                             'deduction_num'        => $startNum + $endNum,
+                            'leave_id'             => empty($switchLeaveId) ? NULL : json_encode([$switchLeaveId]),
                         ];
 
                         $userDailyDetail = DailyDetail::where(['user_id' => $user->user_id, 'day' => $dk])->first();
@@ -259,7 +260,7 @@ class PunchRecordController extends Controller
                             }
 
                             //向审核通过时插入的数据中添加excel打卡表中正常打卡的数据
-                            /*$userDailyDetail->update([
+                            $userDailyDetail->update([
                                 'punch_start_time'     => $userDailyDetail->punch_start_time ?? $u['start_time'],
                                 'punch_start_time_num' => $userDailyDetail->punch_start_time_num ?: $startTimeNum,
                                 'punch_end_time'       => $userDailyDetail->punch_end_time ?? $u['end_time'],
@@ -267,16 +268,15 @@ class PunchRecordController extends Controller
                                 'heap_late_num'        => $userDailyDetail->heap_late_num ?: $hn,
                                 'lave_buffer_num'      => 0,
                                 'deduction_num'        => $userDailyDetail->deduction_num ?: $dn,
-                            ]);*/
+                                'leave_id'             => \AttendanceService::driver('operate')->addLeaveId($switchLeaveId, $userDailyDetail->leave_id),
+                            ]);
                             $msgArr[] = $u['alias'] . '员工已导入[' . $dk . ']考勤记录!';
                             continue;
                         }
-                        //DailyDetail::create($dailyDetail);
+                        DailyDetail::create($dailyDetail);
                         $msgArr[] = $u['alias'] . '员工导入[' . $dk . ']考勤记录成功!';
                     }
                 }
-                dump($deduct);
-                dd('-------test----');
                 //信息记录
                 $strArr = '<?php return ' . var_export($msgArr, true) . ';';
                 $logFile = storage_path('app/punch-record/' . date('Ymd', time()) . '/' . $punchRecord->id . '_punch_log.txt');
@@ -284,18 +284,18 @@ class PunchRecordController extends Controller
                 $punchRecord->update(['log_file' => $logFile, 'status' => 3]);
 
             });
-        /*} catch (\Exception $e) {
+        } catch (\Exception $e) {
               //事务回滚
               DB::rollBack();
               $punchRecord->update(['status' => 2]);
 
               flash('生成失败，生成文件有误，无法解析!', 'danger');
-              //return redirect()->route('daily-detail.review.import.info');
+              return redirect()->route('daily-detail.review.import.info');
           }
           //事务提交
           DB::commit();
           flash(trans('att.生成成功员工每日打卡明细'), 'success');
-          //return redirect()->route('daily-detail.review.import.info');*/
+          return redirect()->route('daily-detail.review.import.info');
     }
 
     public function log($id)

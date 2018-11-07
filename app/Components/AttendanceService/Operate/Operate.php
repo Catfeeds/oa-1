@@ -144,6 +144,7 @@ class Operate
 
     public function addLeaveId($leaveId, $idArr = NULL)
     {
+        if (empty($leaveId)) return $idArr;
         $arr = json_decode($idArr);
         $arr[] = $leaveId;
         $arr = array_unique($arr);
@@ -284,7 +285,7 @@ class Operate
     {
         if(empty($leave->remain_user)) {
             $leave->update(['status' => Leave::PASS_REVIEW, 'review_user_id' => 0]);
-            self::setDailyDetail($leave);
+            $this->setDailyDetail($leave);
         } else {
             $remainUser = json_decode($leave->remain_user, true);
 

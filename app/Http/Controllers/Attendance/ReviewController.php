@@ -11,6 +11,7 @@ namespace App\Http\Controllers\Attendance;
 use App\Components\Helper\DataHelper;
 use App\Http\Components\Helpers\AttendanceHelper;
 use App\Http\Components\Helpers\OperateLogHelper;
+use App\Http\Components\Helpers\PunchHelper;
 use App\Http\Components\Helpers\ReviewHelper;
 use App\Http\Components\ScopeAtt\DailyScope;
 use App\Http\Components\ScopeAtt\LeaveScope;
@@ -78,8 +79,6 @@ class ReviewController extends AttController
         //该月应到天数:关联查找类型为正常工作的该月日历
         $shouldCome = Calendar::getShouldComeDays($year, $month);
 
-        $calendarWithPunch = $this->reviewHelper->getCalendarPunchRules($startDate, $endDate);
-
         //迟到总分钟数
         $beLateNum = DailyDetail::getBeLateNum($year, $month);
 
@@ -113,7 +112,7 @@ class ReviewController extends AttController
                 ->getDaysByScope($scopeArr, $user->user_id, $holidayConfigArr[HolidayConfig::CYPHER_PAID]);
 
             //计算实到天数
-            $actuallyCome = $this->reviewHelper->countActuallyDays($startDate, $endDate, $user, $calendarWithPunch);
+            $actuallyCome = $this->reviewHelper->countActuallyDays($startDate, $endDate, $user);
 
             //判断全勤
             $isFullWork = $this->reviewHelper->ifPresentAllDay($shouldCome, $actuallyCome, $affectFull, $user, $beLateNum);

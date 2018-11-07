@@ -53,6 +53,7 @@ class HolidayConfig extends Model
     const CYPHER_OVERTIME = 5;
     const CYPHER_RECHECK = 6;
     const CYPHER_HOUR = 7;
+    const CYPHER_SWITCH = 8;
 
     const RESET_ENTRY_TIME = 1;
     const RESET_NATURAL_CYCLE = 2;
@@ -118,6 +119,8 @@ class HolidayConfig extends Model
         self::CYPHER_OVERTIME => '加班',
         self::CYPHER_RECHECK => '打卡',
         self::CYPHER_HOUR => '小时假',
+        self::CYPHER_SWITCH => '转换假',
+
     ];
 
     public static $cypherTypeChar = [
@@ -128,6 +131,8 @@ class HolidayConfig extends Model
         self::CYPHER_OVERTIME => 'overtime',
         self::CYPHER_RECHECK => 'recheck',
         self::CYPHER_HOUR => 'hour',
+        self::CYPHER_SWITCH => 'switch',
+
     ];
 
     protected $fillable = [
@@ -166,14 +171,16 @@ class HolidayConfig extends Model
         'condition_id',
     ];
 
-    public static function getHolidayList()
+    public static function getHolidayList($ifIncludeSwitch = false)
     {
-        return self::whereIn('restrict_sex', [\Auth::user()->userExt->sex, UserExt::SEX_NO_RESTRICT])
-            ->where(['is_show' => self::STATUS_ENABLE])
-            ->orderBy('sort', 'desc')
-            ->get(['holiday_id', 'holiday'])
-            ->pluck('holiday', 'holiday_id')
-            ->toArray();
+        if ($ifIncludeSwitch === false) {
+            $where = self::where(['is_show' => self::STATUS_ENABLE]);
+        }else {
+            $where = self::where(function ($query) {
+               $query->where('is_show', self::STATUS_ENABLE)->orWhere(['cypher_type' => self::CYPHER_SWITCH]);
+            });
+        }
+        return $where->orderBy('sort', 'desc')->get(['holiday_id', 'holiday'])->pluck('holiday', 'holiday_id')->toArray();
     }
 
     public static function holidayList()

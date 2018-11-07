@@ -22,7 +22,6 @@ class Change extends Cypher
         if(empty($leaveInfo[$numberDay]) || $leaveInfo[$numberDay] <= 0 ) {
             return $this->backCypherData(false, ['start_time' => '剩余调休假次数不足']);
         }
-
         return $this->backCypherData(true);
     }
 
@@ -114,6 +113,7 @@ class Change extends Cypher
                 $userLeaveInfo[(int)$lk] = $lv;
             }
         }
+        //dd($overTimeId, $overTimeLeaveLog, $changeLeaveLog, $userLeaveInfo);
 
         return $userLeaveInfo;
     }

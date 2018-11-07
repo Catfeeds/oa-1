@@ -13,6 +13,7 @@ use App\Components\Helper\DataHelper;
 use App\Models\Attendance\DailyDetail;
 use App\Models\Attendance\Leave;
 use App\Models\Sys\Calendar;
+use App\Models\Sys\HolidayConfig;
 use App\Models\Sys\PunchRulesConfig;
 
 class PunchHelper
@@ -23,7 +24,7 @@ class PunchHelper
      * @param $endDate
      * @return array
      */
-    public function getCalendarPunchRules($startDate, $endDate)
+    public static function getCalendarPunchRules($startDate, $endDate)
     {
         $calendarArr = Calendar::whereBetween(\DB::raw('UNIX_TIMESTAMP(CONCAT(year, "-", month, "-", day))'),
             [strtotime($startDate), strtotime($endDate) + 3600 * 12])
@@ -46,12 +47,14 @@ class PunchHelper
      * @param $punch_start
      * @param $punch_end
      * @param $punchRuleConfigs
-     * @return float
+     * @return array
      */
     public function getDeduct($punch_start, $punch_end, $punchRuleConfigs)
     {
         $punchRuleConfArr = PunchRulesConfig::getPunchRules($punchRuleConfigs->toArray());
         $deduct = 0;
+        $isDanger = ['on_work' => false, 'off_work' => false];
+
         if (!empty($punch_start) || !empty($punch_end)) {
             foreach ($punchRuleConfArr['sort'] as $key => $value) {//时间段
                 list($startWorkTime, $endWorkTime, $readyTime) = explode('$$', $key);
@@ -72,16 +75,16 @@ class PunchHelper
                     );
                     //上班规则匹配
                     if ($item['late_type'] == 1) {
-                        if (!empty($punch_start) && (int)str_replace(':', '', $punch_start) >= $countArr[0]
-                            && (int)str_replace(':', '', $punch_start) <= $countArr[1]) {
+                        if (!empty($punch_start) && DataHelper::ifBetween($countArr[0], $countArr[1], (int)str_replace(':', '', $punch_start))) {
                             $deduct = $deduct + $item['ded_num'];
+                            $isDanger['on_work'] = true;
                         }
                     }
                     //下班规则匹配
                     if ($item['late_type'] == 2) {
-                        if (!empty($punch_end) && (int)str_replace(':', '', $punch_end) >= $countArr[2]
-                            && (int)str_replace(':', '', $punch_end) <= $countArr[3]) {
+                        if (!empty($punch_end) && DataHelper::ifBetween($countArr[2], $countArr[3], (int)str_replace(':', '', $punch_end))) {
                             $deduct = $deduct + $item['ded_num'];
+                            $isDanger['off_work'] = true;
                         }
                     }
                 }
@@ -89,7 +92,7 @@ class PunchHelper
         }else {
             $deduct = 1;
         }
-        return $deduct;
+        return ['deduct' => $deduct, 'danger' => $isDanger];
     }
 
     /**
@@ -129,17 +132,35 @@ class PunchHelper
                 //小于1,限制打卡的计算范围,在此范围内先按正常扣天去扣, 再剔除里面包含请假天数的扣除
                 $ps = $fromTo['start'] ?? $punch_start ?? NULL;
                 $pe = $fromTo['end'] ?? $punch_end ?? NULL;
-                $deduct = $this->getDeduct($ps, $pe, $punchRuleConfigs) - $day_l;
+                $deduct = $this->getDeduct($ps, $pe, $punchRuleConfigs)['deduct'] - $day_l;
             }
         }else {
             //正常则按扣除规则
-            $deduct = $this->getDeduct($punch_start, $punch_end, $punchRuleConfigs);
+            $deduct = $this->getDeduct($punch_start, $punch_end, $punchRuleConfigs)['deduct'];
         }
         return $deduct > 1 ? 1 : $deduct;
     }
 
-    public function storeDeductInLeave($deduct)
+    public function storeDeductInLeave($deduct, $userId, $date)
     {
-
+        $switch = HolidayConfig::where('cypher_type', HolidayConfig::CYPHER_SWITCH)->first();
+        $switchLeaveId = NULL;
+        if ($deduct > 0) {
+            $data = [
+                'user_id'     => $userId,
+                'holiday_id' => $switch->holiday_id,
+                'step_id'     => 0,
+                'start_time'  => $date,
+                'end_time'    => $date,
+                'number_day'  => $deduct,
+                'reason'      => '',
+                'user_list'   => '',
+                'status'      => 6,
+                'remain_user' => '',
+                'copy_user'   => '',
+            ];
+            $switchLeaveId = Leave::create($data)->leave_id;
+        }
+        return $switchLeaveId;
     }
 }
