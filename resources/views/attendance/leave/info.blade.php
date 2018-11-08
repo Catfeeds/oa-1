@@ -142,7 +142,7 @@
                     </div>
 
                     {{--调休名单显示--}}
-                    @if($applyTypeId === \App\Models\Sys\HolidayConfig::CHANGE && !empty($leave->user_list))
+                    @if($applyTypeId === \App\Models\Sys\HolidayConfig::CHANGE && !empty($leave->user_list) && !empty($userIds))
                         <div class="hr-line-dashed"></div>
                         <div class="form-group">
                             {!! Form::label('reason', trans('att.调休名单'), ['class' => 'col-sm-2 control-label']) !!}

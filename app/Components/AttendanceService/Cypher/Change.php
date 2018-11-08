@@ -109,16 +109,15 @@ class Change extends Cypher
         //申请调休的申请单次数
         $changeLeaveLog = self::selectLeave($startDay, $endDay, $userId, $holiday->holiday_id, Leave::$statusList);
 
-
-
-        if(!empty($changeLeaveLog)) {
-            foreach ($changeLeaveLog as $ck => $cv) {
-                if(empty($overTimeLeaveLog[$ck])) continue;
-                $userLeaveInfo[(int)$ck] = $overTimeLeaveLog[$ck] - $cv;
-            }
-        } else {
+        if(!empty($overTimeLeaveLog)) {
             foreach ($overTimeLeaveLog as $lk => $lv) {
                 $userLeaveInfo[(int)$lk] = $lv;
+            }
+            if(!empty($changeLeaveLog)) {
+                foreach ($changeLeaveLog as $ck => $cv) {
+                    if(empty($userLeaveInfo[(int)$ck])) continue;
+                        $userLeaveInfo[(int)$ck] = $userLeaveInfo[(int)$ck] - $cv;
+                    }
             }
         }
         //dd($overTimeId, $overTimeLeaveLog, $changeLeaveLog, $userLeaveInfo);
