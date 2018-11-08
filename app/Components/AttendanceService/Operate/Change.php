@@ -103,8 +103,8 @@ class Change extends Operate implements AttendanceInterface
             'copy_user' => json_encode($copyUser),
             'start_id' => $startId,
             'end_id' => $endId,
-            'exceed_day' => $userHoliday['exceed_day'],
-            'exceed_holiday_id' => $userHoliday ['exceed_holiday_id'],
+            'exceed_day' => $userHoliday['exceed_day'] ?? NULL,
+            'exceed_holiday_id' => $userHoliday ['exceed_holiday_id'] ?? NULL,
         ];
 
         return  $this->backLeaveData(true, [], $data);
