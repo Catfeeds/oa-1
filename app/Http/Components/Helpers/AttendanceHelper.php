@@ -16,6 +16,7 @@ use App\Models\Role;
 use App\Models\Sys\ApprovalStep;
 use App\Models\Sys\Calendar;
 use App\Models\Sys\HolidayConfig;
+use App\Models\Sys\ReviewStepFlow;
 use App\Models\UserHoliday;
 use App\User;
 use EasyWeChat\Kernel\Exceptions\Exception;
@@ -28,13 +29,25 @@ class AttendanceHelper
      */
     public static function showApprovalStep($stepId)
     {
-        $step = ApprovalStep::where(['step_id' => $stepId])->first();
-        $roleId = $roleName = [];
-        if(!empty($step->step)) {
-            $roleId = json_decode($step->step, true);
+        $step = ReviewStepFlow::with('config')->where(['step_id' => $stepId])->first();
+
+        $leaderStepUid = $roleName = [];
+        foreach ($step['config'] as $lk => $lv) {
+
+            if((int)$lv['assign_type'] === 0) {
+                $leaderStepUid[$lv['step_order_id']] = $lv['assign_uid'];
+            }
+
+            if((int)$lv['assign_type'] === 1) {
+                $roleId = sprintf('JSON_EXTRACT(role_id, "$.id_%d") = "%d"', $lv['assign_role_id'], $lv['assign_role_id']);
+                $userLeader = User::whereRaw('dept_id ='.\Auth::user()->dept_id .' and ' . $roleId )->first();
+                $leaderStepUid[$lv['step_order_id']] = $userLeader->user_id;
+            }
+
         }
-        foreach ($roleId as $k => $v) {
-            $roleName[] = Role::getRoleText($v);
+
+        foreach ($leaderStepUid as $k => $v) {
+            $roleName[] = User::getUsernameAliasList()[$v];
         }
 
         $roleName = implode('->', $roleName);

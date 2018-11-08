@@ -119,6 +119,8 @@ class Leave extends Model
         'review_user_id',
         'remain_user',
         'copy_user',
+        'exceed_day',
+        'exceed_holiday_id',
     ];
 
     public function holidayConfig() {

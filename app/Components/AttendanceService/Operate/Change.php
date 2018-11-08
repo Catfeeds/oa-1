@@ -25,7 +25,7 @@ class Change extends Operate implements AttendanceInterface
     public function checkLeave($request) : array
     {
         $p = $request->all();
-        unset($this->_validateRule['end_time']);
+        if(empty($p['end_time'])) unset($this->_validateRule['end_time']);
         $this->validate($request, $this->_validateRule);
         //假期配置ID
         $holidayId = $p['holiday_id'];
@@ -33,15 +33,32 @@ class Change extends Operate implements AttendanceInterface
         //批量调休人员名单
         $userList = $p['dept_users'] ?? '';
         $copyUser = $p['copy_user'] ?? '';
-        //申请时间
-        $startTime = (string)$p['start_time'];
-        $endTime = (string)$p['start_time'];
 
-        //加班调休获得的时间点范围ID,可查看leave模型里面配置的$workTimePoint
-        $numberDay = (int)$p['start_id'];
-        $timePointChar = Leave::$workTimePointChar;
-        $startId = $timePointChar[$p['start_id']]['start_time'];
-        $endId = $timePointChar[$p['start_id']]['end_time'];
+        //针对夜班调休情况判断
+        if(!empty($p['end_time']) || !empty($p['start_id']) && strlen($p['start_id']) >= 3 ) {
+            $startTime = (string)$p['start_time'];
+            $endTime =  (string)$p['end_time'];
+            $startTimeS = trim($startTime .' '. $p['start_id']);
+            //时间判断
+            if(strtotime($startTimeS) > strtotime($endTime)) {
+                return $this->backLeaveData(false, ['end_time' => trans('请选择有效的时间范围')]);
+            }
+            //申请时间
+            $numberDay = sprintf("%.1f", (strtotime($endTime) - strtotime($startTimeS))/3600) ;
+            $startId = $p['start_id'];
+            $endId = DataHelper::dateTimeFormat($p['end_time'], 'H:i');
+
+        } else {
+            //加班调休获得的时间点范围ID,可查看leave模型里面配置的$workTimePoint
+            //申请时间
+            $startTime = (string)$p['start_time'];
+            $endTime =  (string)$p['start_time'];
+            $numberDay = (int)$p['start_id'];
+            $timePointChar = Leave::$workTimePointChar;
+            $startId = $timePointChar[$p['start_id']]['start_time'];
+            $endId = $timePointChar[$p['start_id']]['end_time'];
+        }
+
         //验证是否已经有再提交的请假单,排除已拒绝的请假单
         $isLeaves = Leave::whereRaw("
                     status != 2 and 
@@ -85,7 +102,9 @@ class Change extends Operate implements AttendanceInterface
             'user_list' => $userList,
             'copy_user' => json_encode($copyUser),
             'start_id' => $startId,
-            'end_id'   => $endId,
+            'end_id' => $endId,
+            'exceed_day' => $userHoliday['exceed_day'] ?? NULL,
+            'exceed_holiday_id' => $userHoliday ['exceed_holiday_id'] ?? NULL,
         ];
 
         return  $this->backLeaveData(true, [], $data);

@@ -41,6 +41,7 @@ class Role extends EntrustRole
 
     public static function getRoleText($id) {
         $list = self::getRoleTextList();
+        dd($list);
         return isset($list[$id]) ? $list[$id] : '';
     }
 

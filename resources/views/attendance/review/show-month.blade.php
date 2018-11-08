@@ -5,42 +5,52 @@
             <thead>
             <tr>
                 <th colspan="4" style="text-align: center">{{ trans('att.基础信息') }}</th>
-                <th colspan="7" style="text-align: center">{{ trans('att.考勤天数') }}</th>
+                <th colspan="10" style="text-align: center">{{ trans('att.考勤天数') }}</th>
                 <th colspan="3" style="text-align: center">{{ trans('att.扣分统计') }}</th>
-                <th colspan="3" style="text-align: center">{{ trans('att.剩余假期') }}</th>
+                <th colspan="6" style="text-align: center">{{ trans('att.剩余假期') }}</th>
                 @if(Entrust::can(['daily-detail.review.send', 'daily-detail.review.detail', 'daily-detail.review.export']))
                     <th style="text-align: center">{{ trans('att.操作') }}</th>
                 @endif
             </tr>
             <tr>
-                <th>{{ trans('att.月份') }}</th>
-                <th>{{ trans('att.工号') }}</th>
-                <th>{{ trans('att.姓名') }}</th>
-                <th>{{ trans('att.部门') }}</th>
-                <th>{{ trans('att.应到天数') }}</th>
-                <th>{{ trans('att.实到天数') }}</th>
-                <th>{{ trans('att.加班') }}</th>
-                <th>{{ trans('att.调休') }}</th>
-                <th>{{ trans('att.无薪假') }}</th>
-                <th>{{ trans('att.带薪假') }}</th>
-                <th>{{ trans('att.全勤') }}</th>
-                <th>{{ trans('att.迟到总分钟') }}</th>
-                <th>{{ trans('att.其他') }}</th>
-                <th>{{ trans('att.合计扣分') }}</th>
-                <th>{{ trans('att.剩余年假') }}</th>
-                <th>{{ trans('att.剩余调休假') }}</th>
-                <th>{{ trans('att.剩余探亲假') }}</th>
+                <th rowspan="2">{{ trans('att.月份') }}</th>
+                <th rowspan="2">{{ trans('att.工号') }}</th>
+                <th rowspan="2">{{ trans('att.姓名') }}</th>
+                <th rowspan="2">{{ trans('att.部门') }}</th>
+                <th rowspan="2">{{ trans('att.应到天数') }}</th>
+                <th rowspan="2">{{ trans('att.实到天数') }}</th>
+                <th colspan="4" style="background-color: white; text-align: center">加班</th>
+                <th rowspan="2">{{ trans('att.调休') }}</th>
+                <th rowspan="2">{{ trans('att.无薪假') }}</th>
+                <th rowspan="2">{{ trans('att.带薪假') }}</th>
+                <th rowspan="2">{{ trans('att.全勤') }}</th>
+                <th rowspan="2">{{ trans('att.迟到总分钟') }}</th>
+                <th rowspan="2">{{ trans('att.其他') }}</th>
+                <th rowspan="2">{{ trans('att.合计扣分') }}</th>
+                <th rowspan="2">{{ trans('att.剩余年假') }}</th>
+                <th rowspan="2">{{ trans('att.剩余探亲假') }}</th>
+                <th colspan="4" style="background-color: white; text-align: center">剩余调休假</th>
                 <?php $num = 0;?>
                 @if(Entrust::can(['daily-detail.review.detail']))
-                    <th>{{ trans('att.当月明细') }}</th> <?php $num++;?>
+                    <th rowspan="2">{{ trans('att.当月明细') }}</th> <?php $num++;?>
                 @endif
                 @if(Entrust::can(['daily-detail.review.send']))
-                    <th>{{ trans('att.发布确认通知') }}</th> <?php $num++;?>
+                    <th rowspan="2">{{ trans('att.发布确认通知') }}</th> <?php $num++;?>
                 @endif
                 @if(Entrust::can(['daily-detail.review.export']))
-                    <th>{{ trans('att.选择导出') }}</th> <?php $num++;?>
+                    <th rowspan="2">{{ trans('att.选择导出') }}</th> <?php $num++;?>
                 @endif
                 {!! Form::hidden('permissions', $num) !!}
+            </tr>
+            <tr>
+                <th>加班</th>
+                <th>加班</th>
+                <th>加班</th>
+                <th>加班</th>
+                <th>剩余调休假</th>
+                <th>剩余调休假</th>
+                <th>剩余调休假</th>
+                <th>剩余调休假</th>
             </tr>
             </thead>
             <tbody>
@@ -53,7 +63,10 @@
                     <td>{{ $v['user_dept'] }}</td>
                     <td>{{ $v['should_come'] }}</td>
                     <td>{{ $v['actually_come'] }}</td>
-                    <td>{{ $v['overtime'] }}</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
                     <td>{{ $v['change_time'] }}</td>
                     <td>{{ $v['no_salary_leave'] }}</td>
                     <td>{{ $v['has_salary_leave'] }}</td>
@@ -62,8 +75,11 @@
                     <td>{{ $v['other'] }}</td>
                     <td>{{ $v['deduct_num'] }}</td>
                     <td>{{ $v['remain_year_holiday'] }}</td>
-                    <td>{{ $v['remain_change'] }}</td>
                     <td>{{ $v['remain_visit'] }}</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
                     @if(Entrust::can(['daily-detail.review.detail']))
                         <td>
                             <a href="{{ route('daily-detail.review.user', ['id' => $v['user_id']]) }}">{{ trans('att.明细') }}</a>

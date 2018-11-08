@@ -66,8 +66,10 @@ class Recheck extends Operate implements AttendanceInterface
             'number_day' => 0,//补打卡默认天数未0
             'user_list' => '',
             'copy_user' => json_encode($copyUser),
-            'start_id' => 0,
-            'end_id'   => 0,
+            'start_id' => '',
+            'end_id' => '',
+            'exceed_day' => '',
+            'exceed_holiday_id' => '',
         ];
 
         return  $this->backLeaveData(true, [], $data);

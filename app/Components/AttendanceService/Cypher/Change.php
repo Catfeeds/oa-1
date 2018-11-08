@@ -4,7 +4,7 @@
  * User: weiming Email: 329403630@qq.com
  * Date: 2018/10/17
  * Time: 11:57
- * 调休 计算类型配置
+ * 调休假 计算类型
  */
 
 namespace App\Components\AttendanceService\Cypher;
@@ -19,7 +19,7 @@ class Change extends Cypher
     {
         $leaveInfo = self::getUserHoliday(\Auth::user()->userExt->entry_time, \Auth::user()->user_id, $holidayConfig);
 
-        if(empty($leaveInfo[$numberDay]) || $leaveInfo[$numberDay] <= 0 ) {
+        if(empty($leaveInfo['data'][$numberDay]) || $leaveInfo['data'][$numberDay] <= 0 ) {
             return $this->backCypherData(false, ['start_time' => '剩余调休假次数不足']);
         }
         return $this->backCypherData(true);
@@ -29,9 +29,14 @@ class Change extends Cypher
     {
         $leaveInfo = $this->getUserPayableDayToNaturalCycleTime($entryTime, $userId, $holidayConfig);
 
-        $msgArr = [];
+        $msgArr = $pointList = [];
+
         foreach (Leave::$workTimePoint as $k => $v) {
             $num = $leaveInfo[$k] ?? 0;
+            if($num !== 0) {
+                $pointList[] = ['id' => $k, 'text' => $v];
+            }
+
             $msgArr[$k] = $v .' 剩余调休次数: ' . $num ;
         };
 
@@ -45,6 +50,7 @@ class Change extends Cypher
             'number_day' => $leaveInfo,
             'count_num' => $leaveInfo,
             'data' => $leaveInfo,
+            'point_list' => $pointList,
             'msg' => $msg
         ];
     }
@@ -94,14 +100,16 @@ class Change extends Cypher
      */
     public function selectLeaveInfo($startDay, $endDay, $userId, $holiday)
     {
+        $userLeaveInfo  = [];
         //加班类型ID
         $overTimeId = HolidayConfig::where(['cypher_type' => HolidayConfig::CYPHER_OVERTIME])->first();
+        if (empty($overTimeId)) return $userLeaveInfo;
         //获取加班剩余次数
         $overTimeLeaveLog = self::selectLeave($startDay, $endDay, $userId, $overTimeId->holiday_id, [Leave::PASS_REVIEW]);
         //申请调休的申请单次数
         $changeLeaveLog = self::selectLeave($startDay, $endDay, $userId, $holiday->holiday_id, Leave::$statusList);
 
-        $userLeaveInfo  = [];
+
 
         if(!empty($changeLeaveLog)) {
             foreach ($changeLeaveLog as $ck => $cv) {

@@ -43,6 +43,7 @@ class PunchRulesConfig extends Model
 
     public static function getPunchRules($config)
     {
+
         $list = $arr = [];
         foreach ($config as $k => $v) {
             $sKey = self::resolveFormula($v['work_start_time']);
@@ -60,6 +61,7 @@ class PunchRulesConfig extends Model
             ];
             $arr_[$sKey.'$$'.$eKey.'$$'.$rKey] = strtotime($rKey);
         }
+
         asort($arr_);
         return ['start_time' => array_values($list['start_time']), 'end_time' => array_values($list['end_time']),
                 'cfg' => $arr, 'sort' => $arr_];
@@ -69,8 +71,9 @@ class PunchRulesConfig extends Model
     public static function resolveFormula($formula)
     {
         $date = json_decode($formula, true);
-
-        return sprintf('%s:%s', !empty($date[4])&&$date[4] > 1 ? $date[4]  : '00',  !empty($date[5])&&$date[5] > 1 ? $date[5]  : '00' );
+        $time = sprintf('%s:%s', !empty($date[4])&&$date[4] > 1 ? $date[4]  : '00',  !empty($date[5])&&$date[5] > 1 ? $date[5]  : '00' );
+        unset($date);
+        return $time;
     }
 
     public static function resolveGapFormula($formula)

@@ -341,6 +341,11 @@ class LeaveController extends AttController
         return true;
     }
 
+    /**
+     * 显示申请类型剩余情况和描述展示
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function showMemo(Request $request)
     {
         $p = $request->all();
@@ -362,7 +367,11 @@ class LeaveController extends AttController
         dd($request->all());
     }
 
-
+    /**
+     * 请假类型 显示每日时间点获取
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getPunchRules(Request $request)
     {
         $p = $request->all();
@@ -381,7 +390,6 @@ class LeaveController extends AttController
         } else {
             return response()->json(['status' => -1, 'start_time' => '', 'end_time' => '']);
         }
-
     }
 
 }

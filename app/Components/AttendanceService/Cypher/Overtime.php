@@ -4,7 +4,7 @@
  * User: weiming Email: 329403630@qq.com
  * Date: 2018/10/17
  * Time: 12:04
- * 加班计算类型
+ * 加班 计算类型
  */
 
 namespace App\Components\AttendanceService\Cypher;
@@ -22,7 +22,18 @@ class Overtime extends Cypher
 
     public function getUserHoliday($entryTime, $userId, $holidayConfig)
     {
-        return parent::getUserHoliday($entryTime, $userId, $holidayConfig);
+        $pointList = [];
+        foreach (Leave::$workTimePoint as $k => $v){
+            $pointList[] = ['id' => $k, 'text' => $v];
+        }
+
+        return [
+            'status' => 1,
+            'show_day' => true,
+            'show_memo' => true,
+            'memo' => $holidayConfig->memo,
+            'point_list' => $pointList,
+        ];
     }
 
     public function getDaysByScope($scope, $userId, $holidays)
