@@ -199,4 +199,18 @@ class HolidayConfig extends Model
     {
         return self::get(['holiday_id', 'apply_type_id'])->pluck('apply_type_id', 'holiday_id')->toArray();
     }
+
+    public static function getHolidayConfigsByCypherType(array $cypherTypes)
+    {
+        $arr = [];
+        foreach ($cypherTypes as $cypherType) {
+            $arr[$cypherType] = self::where('cypher_type', $cypherType)->get();
+        }
+        return $arr;
+    }
+
+    public static function getNamesByCypherType($cypherType)
+    {
+        return self::where('cypher_type', $cypherType)->get()->pluck('show_name', 'holiday_id')->toArray();
+    }
 }

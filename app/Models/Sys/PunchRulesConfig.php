@@ -17,6 +17,14 @@ class PunchRulesConfig extends Model
 {
     use LogsActivity;
 
+    const DEDUCT_SCORE = 1;
+    const DEDUCT_DAY = 2;
+
+    static $deductType = [
+        self::DEDUCT_SCORE => '扣分',
+        self::DEDUCT_DAY => '扣天',
+    ];
+
     protected $table = 'punch_rules_config';
 
     protected $primaryKey = 'id';

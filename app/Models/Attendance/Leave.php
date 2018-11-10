@@ -159,7 +159,7 @@ class Leave extends Model
     {
         return self::leaveBuilder($year, $month)
             ->whereHas('holidayConfig', function ($query) {
-                $query->where('is_full', 1);
+                $query->where([['is_full', '=', 1], ['cypher_type', '<>', HolidayConfig::CYPHER_RECHECK]]);
             })
             ->groupBy('user_id')
             ->get([DB::raw('count(user_id) as a'), 'user_id'])

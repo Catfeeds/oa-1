@@ -27,7 +27,7 @@ class Change extends Cypher
 
     public function getUserHoliday($entryTime, $userId, $holidayConfig)
     {
-        $leaveInfo = $this->getUserPayableDayToNaturalCycleTime($entryTime, $userId, $holidayConfig);
+        $leaveInfo = $this->getUserPayableDayToNaturalCycleTime($entryTime, $userId, $holidayConfig)['userLeaveInfo'];
 
         $msgArr = $pointList = [];
 
@@ -100,7 +100,7 @@ class Change extends Cypher
      */
     public function selectLeaveInfo($startDay, $endDay, $userId, $holiday)
     {
-        $userLeaveInfo  = [];
+        $userLeaveInfo  = $overTimeLeave = $changeLeave = [];
         //加班类型ID
         $overTimeId = HolidayConfig::where(['cypher_type' => HolidayConfig::CYPHER_OVERTIME])->first();
         if (empty($overTimeId)) return $userLeaveInfo;
@@ -112,17 +112,21 @@ class Change extends Cypher
         if(!empty($overTimeLeaveLog)) {
             foreach ($overTimeLeaveLog as $lk => $lv) {
                 $userLeaveInfo[(int)$lk] = $lv;
+                $overTimeLeave[(int)$lk] = $lv;
             }
             if(!empty($changeLeaveLog)) {
                 foreach ($changeLeaveLog as $ck => $cv) {
                     if(empty($userLeaveInfo[(int)$ck])) continue;
                         $userLeaveInfo[(int)$ck] = $userLeaveInfo[(int)$ck] - $cv;
-                    }
+                    $changeLeave[(int)$ck] = $cv;
+                }
             }
         }
         //dd($overTimeId, $overTimeLeaveLog, $changeLeaveLog, $userLeaveInfo);
-
-        return $userLeaveInfo;
+        //dd($userLeaveInfo);
+        return ['userLeaveInfo' => $userLeaveInfo,
+                'overTimeLeaveLog' => $overTimeLeave,
+                'changeLeaveLog' => $changeLeave];
     }
 
     /**

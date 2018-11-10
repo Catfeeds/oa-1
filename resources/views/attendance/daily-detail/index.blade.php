@@ -30,7 +30,7 @@
                                 <th>{{ trans('att.姓名') }}</th>
                                 <th>{{ trans('att.上班时间') }}</th>
                                 <th>{{ trans('att.下班时间') }}</th>
-                                <th>{{ trans('att.当日累积迟到分钟数') }}</th>
+                                <th>{{ trans('att.当日迟到分钟数') }}</th>
                                 <th>{{ trans('att.剩余缓冲时间') }}</th>
                                 <th>{{ trans('att.扣分') }}</th>
                                 <th>{{ trans('att.类型') }}</th>
@@ -57,9 +57,9 @@
                                     @else
                                         <td @if($danger[$v['day']]['off_work'] === true) style="color: red" @endif>{{ $v['punch_end_time'] }}</td>
                                     @endif
-                                    <td>{{ $v['heap_late_num'] ? $v['heap_late_num']  : '--' }}</td>
-                                    <td>{{ $v['lave_buffer_num'] ? $v['heap_late_num']  : '--'  }}</td>
-                                    <td>{{ $v['deduction_num'] ? $v['heap_late_num']  : '--'  }}</td>
+                                    <td>{{ $v['heap_late_num'] ?? '--' }}</td>
+                                    <td>{{ $v['lave_buffer_num'] ?? '--'  }}</td>
+                                    <td>{{ $v['deduction_num'] ?? '--'  }}</td>
                                     <td>
                                         {{ \App\Http\Components\Helpers\AttendanceHelper::showLeaveIds($v['leave_id']) }}
                                     </td>

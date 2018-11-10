@@ -48,9 +48,10 @@ class ReviewController extends AttController
 
         $monthInfo = $this->dealAttendance($scope);
         if ($this->reviewHelper->errorRedirect($monthInfo)) return redirect()->route('holiday-config');
+        $paidNames = HolidayConfig::getNamesByCypherType(HolidayConfig::CYPHER_PAID);
 
         $title = trans('att.考勤管理');
-        return view('attendance.daily-detail.review', compact('title', 'monthInfo', 'scope'));
+        return view('attendance.daily-detail.review', compact('title', 'monthInfo', 'scope', 'paidNames'));
     }
 
     /**
@@ -63,7 +64,6 @@ class ReviewController extends AttController
     public function dealAttendance($scope, $cache = true)
     {
         //判断配置,返回错误信息
-        list($message, $yearHolObj, $visitHolObj, $changeHolObj) = $this->reviewHelper->ifConfig();
         if (!empty($message)) {
             return ['error', $message];
         }
@@ -91,6 +91,8 @@ class ReviewController extends AttController
         //获取用户对通知信息的状态
         $confirmStates = ConfirmAttendance::getConfirmState($year, $month);
 
+        $holidayConfigs = HolidayConfig::getHolidayConfigsByCypherType([HolidayConfig::CYPHER_PAID, HolidayConfig::CYPHER_CHANGE]);
+
         $users = User::whereRaw($scope->getwhere())->get();
         $info = [];
 
@@ -99,17 +101,13 @@ class ReviewController extends AttController
             $hasSalary = \AttendanceService::driver('paid', 'cypher')
                 ->getDaysByScope($scopeArr, $user->user_id, $holidayConfigArr[HolidayConfig::CYPHER_PAID]);
 
-            //计算无薪假(请假),返回数组
+            //计算无薪假,返回数组
             $hasNoSalary = \AttendanceService::driver('unpaid', 'cypher')
                 ->getDaysByScope($scopeArr, $user->user_id, $holidayConfigArr[HolidayConfig::CYPHER_UNPAID]);
 
-            //计算加班
-            $overDays = \AttendanceService::driver('overtime', 'cypher')
-                ->getDaysByScope($scopeArr, $user->user_id, $holidayConfigArr[HolidayConfig::CYPHER_OVERTIME]);
-
-            //计算调休
-            $changeDays = \AttendanceService::driver('change', 'cypher')
-                ->getDaysByScope($scopeArr, $user->user_id, $holidayConfigArr[HolidayConfig::CYPHER_PAID]);
+            //返回[剩余调休, 已加班, 已调休]
+            $leaveInfo = \AttendanceService::driver('change', 'cypher')
+                ->selectLeaveInfo($startDate, $endDate, $user->user_id, $holidayConfigs[HolidayConfig::CYPHER_CHANGE][0]);
 
             //计算实到天数
             $actuallyCome = $this->reviewHelper->countActuallyDays($startDate, $endDate, $user);
@@ -117,9 +115,7 @@ class ReviewController extends AttController
             //判断全勤
             $isFullWork = $this->reviewHelper->ifPresentAllDay($shouldCome, $actuallyCome, $affectFull, $user, $beLateNum);
 
-            $remainWelfare = $this->reviewHelper->countWelfare($user, [
-                'year' => $yearHolObj, 'change' => $changeHolObj, 'visit' => $visitHolObj,
-            ]);
+            $remainWelfare = $this->reviewHelper->countWelfare($user, $holidayConfigs[HolidayConfig::CYPHER_PAID]);
 
             $info["$user->user_id"] = [
                 'date'                => "$year-$month",
@@ -129,17 +125,16 @@ class ReviewController extends AttController
                 'user_dept'           => $user->dept->dept ?? '无',
                 'should_come'         => empty($shouldCome) ? '请配置日历' : $shouldCome,
                 'actually_come'       => $actuallyCome,
-                'overtime'            => $overDays,
-                'change_time'         => $changeDays,
+                'overtime'            => $leaveInfo['overTimeLeaveLog'],
+                'change_time'         => $leaveInfo['changeLeaveLog'],
                 'no_salary_leave'     => $hasNoSalary,
                 'has_salary_leave'    => $hasSalary,
                 'is_full_work'        => $isFullWork,
                 'late_num'            => $beLateNum[$user->user_id] ?? 0,
                 'other'               => '--',
                 'deduct_num'          => $deductNum[$user->user_id] ?? 0,
-                'remain_year_holiday' => $remainWelfare['year']['number_day'] ?? 0,
-                'remain_change'       => $remainWelfare['change']['number_day'] ?? 0 ,
-                'remain_visit'        => $remainWelfare['visit']['number_day'] ?? 0,
+                'remain_paid'         => $remainWelfare ?? [],
+                'remain_change'       => $leaveInfo['userLeaveInfo'],
                 'send'                => $confirmStates[$user->user_id] ?? 0,
             ];
         }

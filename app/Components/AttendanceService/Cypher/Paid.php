@@ -62,6 +62,8 @@ class Paid extends Cypher
             'show_day' => true,
             'show_memo' => true,
             'memo' => $holidayConfig->memo,
+            'holiday_name' => $holidayConfig->show_name,
+            'holiday_id' => $holidayConfig->holiday_id,
             'number_day' => $leaveInfo['number_day'],
             'count_num' => $leaveInfo['count_num'],
             'msg' => $msg,

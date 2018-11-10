@@ -20,6 +20,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 class DailyDetail extends Model
 {
     use LogsActivity;
+    const LEAVE_BUFFER = 30;
 
     protected $table = 'attendance_daily_detail';
 

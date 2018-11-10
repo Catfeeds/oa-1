@@ -65,12 +65,6 @@ class LeaveController extends AttController
             ->orderBy('created_at', 'desc')
             ->paginate(30);
 
-        list($message, $yearHolObj, $visitHolObj, $changeHolObj) = $this->reviewHelper->ifConfig();
-  /*      $remainWelfare = $this->reviewHelper->countWelfare(\Auth::user(), [
-            'year' => $yearHolObj ?? NULL,
-            'change' => $changeHolObj ?? NULL,
-            'visit' => $visitHolObj ?? NULL,
-        ]);*/
         $remainWelfare = 0;
 
         $appealData = Appeal::getAppealResult(Appeal::APPEAL_LEAVE);

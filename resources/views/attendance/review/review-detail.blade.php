@@ -29,7 +29,7 @@
                                 <th>{{ trans('att.姓名') }}</th>
                                 <th>{{ trans('att.上班时间') }}</th>
                                 <th>{{ trans('att.下班时间') }}</th>
-                                <th>{{ trans('att.当日累积迟到分钟数') }}</th>
+                                <th>{{ trans('att.当日迟到分钟数') }}</th>
                                 <th>{{ trans('att.剩余缓冲时间') }}</th>
                                 <th>{{ trans('att.扣分') }}</th>
                                 <th>{{ trans('att.类型') }}</th>

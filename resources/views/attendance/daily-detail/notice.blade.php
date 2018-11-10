@@ -18,30 +18,50 @@
                 <thead>
                 <tr>
                     <th colspan="4" style="text-align: center">{{ trans('att.基础信息') }}</th>
-                    <th colspan="7" style="text-align: center">{{ trans('att.考勤天数') }}</th>
+                    <th colspan="15" style="text-align: center">{{ trans('att.考勤天数') }}</th>
                     <th colspan="3" style="text-align: center">{{ trans('att.扣分统计') }}</th>
-                    <th colspan="3" style="text-align: center">{{ trans('att.剩余假期') }}</th>
+                    <th colspan="{{ 5 + count($paidNames) }}" style="text-align: center">{{ trans('att.剩余假期') }}</th>
                     <th colspan="1" style="text-align: center">{{ trans('att.操作') }}</th>
                 </tr>
+                <tr style="height: 10px">
+                    <th rowspan="2">{{ trans('att.月份') }}</th>
+                    <th rowspan="2">{{ trans('att.工号') }}</th>
+                    <th rowspan="2">{{ trans('att.姓名') }}</th>
+                    <th rowspan="2">{{ trans('att.部门') }}</th>
+                    <th rowspan="2">{{ trans('att.应到天数') }}</th>
+                    <th rowspan="2">{{ trans('att.实到天数') }}</th>
+                    <th colspan="5" style="text-align: center; width: 5%">加班次数</th>
+                    <th colspan="5" style="text-align: center; width: 5%">调休次数</th>
+                    <th rowspan="2">{{ trans('att.无薪假') }}</th>
+                    <th rowspan="2">{{ trans('att.带薪假') }}</th>
+                    <th rowspan="2">{{ trans('att.全勤') }}</th>
+                    <th rowspan="2">{{ trans('att.迟到总分钟') }}</th>
+                    <th rowspan="2">{{ trans('att.其他') }}</th>
+                    <th rowspan="2">{{ trans('att.合计扣分') }}</th>
+                    <th colspan="5" style="text-align: center; width: 5%">剩余调休假次数</th>
+                    @foreach($paidNames as $name)
+                        <th rowspan="2">{{ '剩余'.$name }}</th>
+                    @endforeach
+                    <th rowspan="2">{{ trans('att.确认通知') }}</th>
+                </tr>
                 <tr>
-                    <th>{{ trans('att.月份') }}</th>
-                    <th>{{ trans('att.工号') }}</th>
-                    <th>{{ trans('att.姓名') }}</th>
-                    <th>{{ trans('att.部门') }}</th>
-                    <th>{{ trans('att.应到天数') }}</th>
-                    <th>{{ trans('att.实到天数') }}</th>
-                    <th>{{ trans('att.加班') }}</th>
-                    <th>{{ trans('att.调休') }}</th>
-                    <th>{{ trans('att.无薪假') }}</th>
-                    <th>{{ trans('att.带薪假') }}</th>
-                    <th>{{ trans('att.全勤') }}</th>
-                    <th>{{ trans('att.迟到总分钟') }}</th>
-                    <th>{{ trans('att.其他') }}</th>
-                    <th>{{ trans('att.合计扣分') }}</th>
-                    <th>{{ trans('att.剩余年假') }}</th>
-                    <th>{{ trans('att.剩余节日调休假') }}</th>
-                    <th>{{ trans('att.剩余探亲假') }}</th>
-                    <th>{{ trans('att.确认通知') }}</th>
+                    <th>9~12</th>
+                    <th>9~18</th>
+                    <th>9~20</th>
+                    <th>14~20</th>
+                    <th>14~18</th>
+
+                    <th>9~12</th>
+                    <th>9~18</th>
+                    <th>9~20</th>
+                    <th>14~20</th>
+                    <th>14~18</th>
+
+                    <th>9~12</th>
+                    <th>9~18</th>
+                    <th>9~20</th>
+                    <th>14~20</th>
+                    <th>14~18</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -54,17 +74,30 @@
                         <td>{{ $v['user_dept'] }}</td>
                         <td>{{ $v['should_come'] }}</td>
                         <td>{{ $v['actually_come'] }}</td>
-                        <td>{{ $v['overtime'] }}</td>
-                        <td>{{ $v['change_time'] }}</td>
+
+                        @for($i = 1; $i <= 5; $i ++)
+                            <td>{{ $v['overtime'][$i] ?? 0 }}</td>
+                        @endfor
+
+                        @for($i = 1; $i <= 5; $i ++)
+                            <td>{{ $v['change_time'][$i] ?? 0 }}</td>
+                        @endfor
+
                         <td>{{ $v['no_salary_leave'] }}</td>
                         <td>{{ $v['has_salary_leave'] }}</td>
                         <td>{{ $v['is_full_work'] }}</td>
                         <td>{{ $v['late_num'] }}</td>
                         <td>{{ $v['other'] }}</td>
                         <td>{{ $v['deduct_num'] }}</td>
-                        <td>{{ $v['remain_year_holiday'] }}</td>
-                        <td>{{ $v['remain_change'] }}</td>
-                        <td>{{ $v['remain_visit'] }}</td>
+
+                        @for($i = 1; $i <= 5; $i ++)
+                            <td>{{ $v['remain_change'][$i] ?? 0 }}</td>
+                        @endfor
+
+                        @foreach($v['remain_paid'] as $value)
+                            <td>{{ $value['number_day'] ?? 0 }}</td>
+                        @endforeach
+
                         <td>
                             <a class="confirm" con_state="{{ $v['send'] }}" id="confirm_{{ $v['user_id'] }}"
                                @if($v['send'] == \App\Models\Attendance\ConfirmAttendance::SENT)

@@ -57,7 +57,7 @@ class Cypher
     {
         $days = 0;
         foreach ($holidays as $holiday) {
-            $days = $days + AttendanceHelper::getUserMonthHoliday($scope, $userId, $holiday)['apply_days'];
+            $days = $days + $this->getUserMonthHoliday($scope, $userId, $holiday)['apply_days'];
         }
         return $days;
     }
