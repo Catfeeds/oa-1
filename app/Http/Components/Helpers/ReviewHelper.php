@@ -15,6 +15,23 @@ use App\Models\Sys\PunchRulesConfig;
 
 class ReviewHelper
 {
+    public $yearName = '年假';
+    public $visitName = '探亲假';
+
+    /**
+     * @return array
+     */
+    public function ifConfig(): array
+    {
+        $message = [];
+        if (!$yearHolObj = HolidayConfig::getObjByName($this->yearName)) {
+            $message['年假'] = ['message' => "请添加或修改假期配置名称成: '$this->yearName'后再进行", 'sign' => 'danger'];
+        }
+        if (!$visitHolObj = HolidayConfig::getObjByName($this->visitName)) {
+            $message['探亲'] = ['message' => "请添加或修改假期配置名称成: '$this->visitName'后再进行", 'sign' => 'danger'];
+        }
+        return [$message, $yearHolObj, $visitHolObj];
+    }
     /**
      * 有权限则跳转到假期配置页,没有则在页面判断,显示联系管理员
      * @param $monthInfo
@@ -46,7 +63,18 @@ class ReviewHelper
      * @param array $obj
      * @return array
      */
-    public function countWelfare($user, $obj)
+    public function countWelfare($user, array $obj)
+    {
+        $ret = [];
+        $arr = ['et' => $user->userExt->entry_time, 'id' => $user->user_id];
+        foreach ($obj as $k => $v) {
+            if(empty($v->cypher_type)) continue;
+            $driver = HolidayConfig::$cypherTypeChar[$v->cypher_type];
+            $ret[$k] = \AttendanceService::driver($driver, 'cypher')->getUserHoliday($arr['et'], $arr['id'], $v);
+        }
+        return $ret;
+    }
+    /*public function countWelfare($user, $obj)
     {
         $ret = [];
         $arr = ['et' => $user->userExt->entry_time, 'id' => $user->user_id];
@@ -57,7 +85,7 @@ class ReviewHelper
             $ret[$re['holiday_id']] = $re;
         }
         return $ret;
-    }
+    }*/
 
     public function getHolidayConfigByCypherTypes(array $cypherTypes)
     {
@@ -71,13 +99,19 @@ class ReviewHelper
     public function countActuallyDays($startDate, $endDate, $user)
     {
         $dailies = DailyDetail::whereBetween('day', [$startDate, $endDate])->where('user_id', $user->user_id)->count();
+        $overDays = Leave::whereBetween('end_time', [$startDate, $endDate])->where('user_id', $user->user_id)
+            ->whereIn('status', [Leave::PASS_REVIEW, Leave::SWITCH_REVIEW_ON])
+            ->whereHas('holidayConfig', function ($query) {
+                $query->where('cypher_type', HolidayConfig::CYPHER_OVERTIME);
+            })->count();
+
         $leaves = Leave::whereBetween('end_time', [$startDate, $endDate])->where('user_id', $user->user_id)
             ->whereIn('status', [Leave::PASS_REVIEW, Leave::SWITCH_REVIEW_ON])
             ->whereHas('holidayConfig', function ($query) {
-                $query->whereNotIn('cypher_type', [HolidayConfig::CYPHER_OVERTIME, HolidayConfig::CYPHER_CHANGE]);
+                $query->whereNotIn('cypher_type', [HolidayConfig::CYPHER_OVERTIME]);
             })
             ->sum('number_day');
-        return $dailies - $leaves;
+        return $dailies - $overDays - $leaves;
     }
 
 

@@ -48,7 +48,6 @@ class ReviewController extends AttController
 
         $monthInfo = $this->dealAttendance($scope);
         if ($this->reviewHelper->errorRedirect($monthInfo)) return redirect()->route('holiday-config');
-        $paidNames = HolidayConfig::getNamesByCypherType(HolidayConfig::CYPHER_PAID);
 
         $title = trans('att.考勤管理');
         return view('attendance.daily-detail.review', compact('title', 'monthInfo', 'scope', 'paidNames'));
@@ -67,7 +66,7 @@ class ReviewController extends AttController
         if (!empty($message)) {
             return ['error', $message];
         }
-
+        list($message, $yearHolObj, $visitHolObj) = $this->reviewHelper->ifConfig();
         list($year, $month) = explode('-', $scope->startDate);
 
         $holidayConfigArr = $this->reviewHelper->getHolidayConfigByCypherTypes(array_keys(HolidayConfig::$cypherTypeChar));
@@ -115,7 +114,9 @@ class ReviewController extends AttController
             //判断全勤
             $isFullWork = $this->reviewHelper->ifPresentAllDay($shouldCome, $actuallyCome, $affectFull, $user, $beLateNum);
 
-            $remainWelfare = $this->reviewHelper->countWelfare($user, $holidayConfigs[HolidayConfig::CYPHER_PAID]);
+            $remainWelfare = $this->reviewHelper->countWelfare($user, [
+                'year' => $yearHolObj, 'visit' => $visitHolObj,
+            ]);
 
             $info["$user->user_id"] = [
                 'date'                => "$year-$month",
@@ -133,7 +134,8 @@ class ReviewController extends AttController
                 'late_num'            => $beLateNum[$user->user_id] ?? 0,
                 'other'               => '--',
                 'deduct_num'          => $deductNum[$user->user_id] ?? 0,
-                'remain_paid'         => $remainWelfare ?? [],
+                'remain_year_holiday' => $remainWelfare['year']['number_day'] ?? 0,
+                'remain_visit'        => $remainWelfare['visit']['number_day'] ?? 0,
                 'remain_change'       => $leaveInfo['userLeaveInfo'],
                 'send'                => $confirmStates[$user->user_id] ?? 0,
             ];

@@ -51,7 +51,7 @@ class Leaved extends Operate implements AttendanceInterface
         }
 
         //时间天数分配
-        $numberDay = DataHelper::diffTime($startTimeS, $endTimeS);
+        $numberDay = DataHelper::leaveDayDiff($startTimeS, $p['start_id'], $endTimeS, $p['end_id']);
         if(empty($numberDay)) {
             return $this->backLeaveData(false, ['end_time' => trans('申请失败,时间跨度异常，有疑问请联系人事')]);
         }
@@ -71,7 +71,6 @@ class Leaved extends Operate implements AttendanceInterface
                 return $this->backLeaveData(false, ['end_time' => trans('已经有该时间段申请单')]);
             }
         }
-
         //申请配置计算类型配置判断
         $holidayConfig = HolidayConfig::where(['holiday_id' => $holidayId])->first();
         $driver = HolidayConfig::$cypherTypeChar[$holidayConfig->cypher_type];
@@ -120,9 +119,9 @@ class Leaved extends Operate implements AttendanceInterface
         return  $this->backLeaveData(true, [], $data);
     }
 
-    public function getLeaveStep($holidayId, $numberDay): array
+    public function getLeaveStep($request, $numberDay): array
     {
-        return parent::getLeaveStep($holidayId, $numberDay);
+        return parent::getLeaveStep($request, $numberDay);
     }
 
     /**

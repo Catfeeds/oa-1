@@ -125,7 +125,7 @@
                         {!! Form::label('reason', trans('att.审核流程'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-8">
                             <span class="help-block m-b-none">
-                                {{ \App\Http\Components\Helpers\AttendanceHelper::showApprovalStep($leave->step_id) ?? '未匹配到流程' }}
+                                {{ \App\Http\Components\Helpers\AttendanceHelper::showApprovalStep($leave->step_user) ?? '未匹配到流程' }}
                             </span>
                         </div>
                     </div>
@@ -136,7 +136,7 @@
                         {!! Form::label('reason', trans('att.审核状态'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-6">
                             <span class="help-block m-b-none">
-                                {{ empty($reviewUserId) ?  \App\Models\Attendance\Leave::$status[$leave->status] : '待'. /*$user->role->name ??*/ '' . '审核' }}
+                                {{ empty($reviewUserId) ?  \App\Models\Attendance\Leave::$status[$leave->status] : '待['. \App\User::getUsernameAliasList()[$reviewUserId]. ']审核' }}
                             </span>
                         </div>
                     </div>

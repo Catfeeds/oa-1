@@ -47,10 +47,8 @@ class DailyDetailController extends AttController
         $danger = $this->review->reviewHelper->getDanger(date('Y-m-01', strtotime($scope->startDate)),
             date('Y-m-t', strtotime($scope->startDate)), $data);
 
-        $paidNames = HolidayConfig::getNamesByCypherType(HolidayConfig::CYPHER_PAID);
-
         $title = trans('att.我的每日考勤详情');
-        return view('attendance.daily-detail.index', compact('title', 'data', 'scope', 'userInfo', 'monthInfo', 'scope', 'appealData', 'danger', 'paidNames'));
+        return view('attendance.daily-detail.index', compact('title', 'data', 'scope', 'userInfo', 'monthInfo', 'scope', 'appealData', 'danger'));
     }
 
     //重新初始化scope,调用review控制器的方法

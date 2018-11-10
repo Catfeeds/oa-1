@@ -75,6 +75,11 @@ class Recheck extends Operate implements AttendanceInterface
         return  $this->backLeaveData(true, [], $data);
     }
 
+    public function getLeaveStep($request, $numberDay): array
+    {
+        return parent::getLeaveStep($request, $numberDay);
+    }
+
     /**
      * 创建申请单
      * @param array $leave

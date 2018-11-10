@@ -33,7 +33,6 @@
                         </div>
                     </div>
 
-
                     <div class="hr-line-dashed"></div>
 
                     <div class="form-group @if (!empty($errors->first('start_time')) || !empty($errors->first('end_id'))) has-error @endif">
@@ -41,7 +40,7 @@
                         <div class="col-sm-3">
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                                {!! Form::text('start_time', !empty($leave->start_time) ? $leave->start_time : (old('start_time') ?? '') , [
+                                {!! Form::text('start_time', $time , [
                                 'class' => 'form-control date',
                                 'id' => 'start_time',
                                 'required' => true,
@@ -50,7 +49,7 @@
                             </div>
                         </div>
                         <div class="col-sm-2">
-                            <select class="js-select2-single form-control" id="start_id" name="start_id" > </select>
+                            <select onchange="startChange()" class="js-select2-single form-control" id="start_id" name="start_id" > </select>
                         </div>
                     </div>
 
@@ -61,7 +60,7 @@
                         <div class="col-sm-3">
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                                {!! Form::text('end_time', !empty($leave->end_time) ? $leave->end_time : (old('end_time') ?? '') , [
+                                {!! Form::text('end_time', $time , [
                                 'class' => 'form-control date',
                                 'id' => 'end_time',
                                 'required' => true,
@@ -70,7 +69,7 @@
                             </div>
                         </div>
                         <div class="col-sm-2">
-                            <select class="js-select2-single form-control" id="end_id" name="end_id" ></select>
+                            <select onchange="endChange()" class="js-select2-single form-control" id="end_id" name="end_id" ></select>
                         </div>
                     </div>
 
@@ -91,7 +90,7 @@
 
                     <div class="form-group @if (!empty($errors->first('reason'))) has-error @endif">
                         {!! Form::label('reason', trans('att.请假理由'), ['class' => 'col-sm-2 control-label']) !!}
-                        <div class="col-sm-8">
+                        <div class="col-sm-5">
                             {!! Form::textarea('reason', $leave->reason ?? old('reason'), [
                             'required' => true,
                             ]) !!}
@@ -112,6 +111,17 @@
                             </select>
                             <span class="help-block m-b-none">{{ $errors->first('copy_user') }}</span>
                         </div>
+                    </div>
+
+                    <div class="hr-line-dashed"></div>
+                    <div class="form-group @if (!empty($errors->first('annex'))) has-error @endif">
+                        {!! Form::label('annex', trans('att.审批流程'), ['class' => 'col-sm-2 control-label']) !!}
+                        <div class="col-sm-9">
+                            <div id="show_step" class="form-inline">
+
+                            </div>
+                        </div>
+                        <span class="help-block m-b-none">{{ $errors->first('annex') }}</span>
                     </div>
 
 
@@ -139,6 +149,7 @@
 @section('scripts-last')
     <script>
         $(function() {
+            $.fn.select2.defaults.set("theme", "bootstrap");
             function readURL(input, $class_id) {
                 if (input.files && input.files[0]) {
                     var reader = new FileReader();
@@ -171,8 +182,18 @@
             showMemo();
             inquireStartInfo();
             inquireEndInfo();
+            startChange();
+            endChange();
 
         });
+
+        function startChange() {
+            inquire();
+        }
+
+        function endChange() {
+            inquire();
+        }
 
         /**
          * 显示剩余假期和描述
@@ -183,16 +204,23 @@
                 $('#show_pre').html('');
                 $.get('{{ route('leave.showMemo')}}', {id: val}, function ($data) {
                     if ($data.status == 1) {
-                        if($data.show_memo){
+                        /*显示描述*/
+                        if($data.show_memo) {
                             $('#show_pre').html($data.memo);
                             $('#show_memo').show();
                         }
-                        if($data.show_day){
+                        /*显示假期剩余情况*/
+                        if($data.show_day) {
                             $('#show_p').show();
                             $('#show_p').html($data.msg);
                         } else {
                             $('#show_p').hide();
                         }
+                        var html = $data.step;
+
+                        $('#show_step').html(html).find('select').select2();
+                        //$('#show_step').html($data.step)
+                        inquire();
 
                     } else {
                         $('#show_memo').hide();
@@ -208,32 +236,30 @@
 
         function inquireStartInfo() {
             var startTime = $('#start_time').val();
-            var startId = $('#start_id option:selected').text();
             getPunchRules(startTime, 1);
+            inquire();
 
-            if (startTime != ''&& startId != '') {
-                //inquire();
-            }
         }
 
         function inquireEndInfo() {
             var endTime = $('#end_time').val();
             getPunchRules(endTime, 2);
-            //inquire();
+            inquire();
+
         }
 
         function inquire() {
+            var holidayId = $('#holiday_id').val();
             var startTime = $('#start_time').val();
             var endTime = $('#end_time').val();
-            var startId = $('#start_id option:selected').text();
-            var endId = $('#end_id option:selected').text();
-
-            $.get('{{ route('leave.inquire')}}', {startTime: startTime, endTime: endTime, startId:startId, endId:endId}, function ($data) {
+            var startId = $('#start_id').val();
+            var endId = $('#end_id').val();
+            if (holidayId != '' && startTime != '' && endTime != '' && startId != '' && endId != '' )
+            $.get('{{ route('leave.inquire')}}', {holidayId: holidayId,startTime: startTime, endTime: endTime, startId:startId, endId:endId}, function ($data) {
                 if ($data.status == 1) {
-                    bootbox.alert($data.msg);
-                    location.reload();
+                    $('#show_step').html($data.step).find('select').select2();
                 } else {
-                    bootbox.alert($data.msg);
+                    $('#show_step').html('');
                 }
             })
         }
@@ -257,6 +283,8 @@
                                 multiple: false,// 多选
                                 data: $data.start_time //绑定数据
                             });
+                            $("#start_id").val($data.start_time[0]).select2();
+
                         } else {
                             $("#start_id").select2("val", "");
                             $("#start_id").empty();
@@ -273,7 +301,7 @@
                                 data: $data.end_time //绑定数据
                             });
 
-                            $("#end_id").attr($data.end_time[0]).select2();
+                            $("#end_id").val($data.end_time[0]).select2();
                         } else {
                             $("#end_id").select2("val", "");
                             $("#end_id").empty();

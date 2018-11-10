@@ -26,7 +26,7 @@
                             <span class="help-block m-b-none">{{ $errors->first('holiday_id') }}</span>
                         </div>
                         <div class="col-sm-2">
-                            <span id="show_memo" style="display: none"  style="color: red" class="help-block m-b-none">
+                            <span id="show_memo" style="display: none"  class="help-block m-b-none">
                                 <p style="color: red" id="show_p"></p>
                                 <pre style="width: 30em; height: 10em"  id="show_pre"></pre>
                             </span>
@@ -64,6 +64,12 @@
                                 ]) !!}
                                 <span class="help-block m-b-none">{{ $errors->first('end_time') }}</span>
                             </div>
+                        </div>
+
+                        <div  class="col-sm-2">
+                            <span id="show_msg_p" style="display: none" class="help-block m-b-none">
+                                <p style=";color: red" id="show_msg"></p>
+                            </span>
                         </div>
                     </div>
 
@@ -185,6 +191,7 @@
         function showMemo() {
             var val = $('#holiday_id').children('option:selected').val();
             $('#start_time').attr('rel', '');
+            $('#end_time').val('');
             if(val != "") {
                 $('#show_pre').html('');
                 $.get('{{ route('leave.showMemo')}}', {id: val}, function ($data) {
@@ -215,6 +222,12 @@
                         if($data.show_time) {
                             $('#show_time').show();
                             $('#start_time').attr('rel', 1);
+                            $('#start_time').val($data.day);
+                            $('#end_time').val($data.end_day);
+                            inquireStartInfo();
+                            $('#show_msg').html($data.msg);
+                            $('#show_msg_p').show();
+
                         } else {
                             $('#show_time').hide();
                         }
@@ -256,7 +269,7 @@
                         placeholder: "-请选择时间点-", //默认所有
                         allowClear: true, //清楚选择项
                         multiple: false,// 多选
-                        data: $data.end_time //绑定数据
+                        data: $data.last_time //绑定数据
                     });
                 } else {
                     $("#start_id").select2("val", "");

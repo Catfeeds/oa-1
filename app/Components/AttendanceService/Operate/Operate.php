@@ -36,50 +36,80 @@ class Operate
 
     /**
      * 获取员工审核步骤
-     * @param $numberDay //申请单天数
+     * @param $request
+     * @param $numberDay //申请天数
      * @return array
      */
-    public function getLeaveStep($holidayId, $numberDay) : array
+    public function getLeaveStep($request, $numberDay) : array
     {
-        $steps = ReviewStepFlow::with('config')->where(['child_id' => $holidayId])->get()->toArray();
-        $step = [];
-        foreach ($steps as $sk => $sv) {
-            if($sv['min_num'] <= $numberDay && $sv['max_num'] >= $numberDay) {
-                $step = $sv;
-                break;
+        $holidayId = $request['holiday_id'];
+
+        //可编辑审核人的情况下,请求数据，在渠道Cypher->showLeaveStep 方法生成
+        if(!empty($request['step_id']) && !empty($request['step_user']) && !empty($request['is_edit_step']) && (int)$request['is_edit_step'] === ReviewStepFlow::MODIFY_YES) {
+            $stepId = $request['step_id'];
+
+            $check = ReviewStepFlow::where(['child_id' => $holidayId, 'step_id' => $stepId])->first();
+            if(empty($check->step_id)) {
+                return self::backLeaveData(false, ['holiday_id' => trans('申请失败, 错误的审核流程数据，有疑问请联系人事')]);
             }
-        }
-
-        if(empty($step['config'])) return self::backLeaveData(false, ['holiday_id' => trans('申请失败, 未设置部门审核人员，有疑问请联系人事')]);
-
-        $leaderStepUid = [];
-        foreach ($step['config'] as $lk => $lv) {
-
-            if((int)$lv['assign_type'] === 0) {
-                $leaderStepUid[$lv['step_order_id']] = $lv['assign_uid'];
+            foreach ($request['step_user'] as $sk => $sv) {
+                $leaderStepUid[] = (int)$sv;
             }
 
-            if((int)$lv['assign_type'] === 1) {
-                $roleId = sprintf('JSON_EXTRACT(role_id, "$.id_%d") = "%d"', $lv['assign_role_id'], $lv['assign_role_id']);
-                $userLeader = User::whereRaw('dept_id ='.\Auth::user()->dept_id .' and ' . $roleId )->first();
-                if(empty($userLeader->user_id)) return self::backLeaveData(false, ['holiday_id' => trans('申请失败, 未设置部门主管权限，有疑问请联系人事')]);
-                $leaderStepUid[$lv['step_order_id']] = $userLeader->user_id;
-            }
-
-        }
-        ksort($leaderStepUid);
-        $reviewUserId = reset($leaderStepUid);
-        array_shift($leaderStepUid);
-        if(empty($leaderStepUid)) {
-            $remainUser = '';
-        } else {
+            ksort($leaderStepUid);
+            $stepUser = json_encode($leaderStepUid);
+            $reviewUserId = reset($leaderStepUid);
+            array_shift($leaderStepUid);
             $remainUser = json_encode($leaderStepUid);
+
+        } else {
+            $steps = ReviewStepFlow::with('config')->where(['child_id' => $holidayId])->get()->toArray();
+            $step = [];
+            foreach ($steps as $sk => $sv) {
+                if($sv['min_num'] <= $numberDay && $sv['max_num'] >= $numberDay) {
+                    $step = $sv;
+                    break;
+                }
+            }
+
+            if(empty($step['config'])) return self::backLeaveData(false, ['holiday_id' => trans('申请失败, 未设置部门审核人员，有疑问请联系人事')]);
+
+            $leaderStepUid = [];
+            foreach ($step['config'] as $lk => $lv) {
+
+                if((int)$lv['assign_type'] === 0) {
+                    $leaderStepUid[$lv['step_order_id']] = $lv['assign_uid'];
+                }
+
+                if((int)$lv['assign_type'] === 1) {
+                    $roleId = sprintf('JSON_EXTRACT(role_id, "$.id_%d") = "%d"', $lv['assign_role_id'], $lv['assign_role_id']);
+                    $dept = ' and dept_id ='.\Auth::user()->dept_id ;
+                    if((int)$lv['group_type_id'] === 1) $dept = '';
+                    $userLeader = User::whereRaw( $roleId . $dept )->first();
+                    if(empty($userLeader->user_id)) return self::backLeaveData(false, ['holiday_id' => trans('申请失败, 未设置部门主管权限，有疑问请联系人事')]);
+                    $leaderStepUid[$lv['step_order_id']] = $userLeader->user_id;
+                }
+            }
+
+            ksort($leaderStepUid);
+            $stepUser = json_encode($leaderStepUid);
+            $reviewUserId = reset($leaderStepUid);
+            array_shift($leaderStepUid);
+
+            if(empty($leaderStepUid)) {
+                $remainUser = '';
+            } else {
+                $remainUser = json_encode($leaderStepUid);
+            }
+
+            $stepId = $step['step_id'];
         }
 
         $data = [
-            'step_id' => $step['step_id'],
+            'step_id' => $stepId,
             'remain_user'  => $remainUser,
             'review_user_id' => $reviewUserId,
+            'step_user' => $stepUser,
         ];
 
         return self::backLeaveData(true, [], $data);
@@ -109,8 +139,9 @@ class Operate
             'copy_user' => $leave['copy_user'],
             'exceed_day' => $leave['exceed_day'] ?? NULL,
             'exceed_holiday_id' => $leave['exceed_holiday_id'] ?? NULL,
+            'step_user' => $leave['step_user'] ?? NULL
         ];
-
+        dd($data);
          $ret = Leave::create($data);
 
          return $this->backLeaveData(true, [], ['leave_id' => $ret->leave_id]);

@@ -25,32 +25,21 @@ class AttendanceHelper
 {
     /**
      * 显示审核步骤流程
-     * @param $stepId
+     * @param $stepUser
      */
-    public static function showApprovalStep($stepId)
+    public static function showApprovalStep($stepUser)
     {
-        $step = ReviewStepFlow::with('config')->where(['step_id' => $stepId])->first();
 
-        $leaderStepUid = $roleName = [];
-        foreach ($step['config'] as $lk => $lv) {
+        $stepUser = json_decode($stepUser, true);
 
-            if((int)$lv['assign_type'] === 0) {
-                $leaderStepUid[$lv['step_order_id']] = $lv['assign_uid'];
-            }
+        if(empty($stepUser)) return '获取审核步骤人员异常';
 
-            if((int)$lv['assign_type'] === 1) {
-                $roleId = sprintf('JSON_EXTRACT(role_id, "$.id_%d") = "%d"', $lv['assign_role_id'], $lv['assign_role_id']);
-                $userLeader = User::whereRaw('dept_id ='.\Auth::user()->dept_id .' and ' . $roleId )->first();
-                $leaderStepUid[$lv['step_order_id']] = $userLeader->user_id;
-            }
-
-        }
-
-        foreach ($leaderStepUid as $k => $v) {
+        $roleName = [];
+        foreach ($stepUser as $k => $v) {
             $roleName[] = User::getUsernameAliasList()[$v];
         }
 
-        $roleName = implode('->', $roleName);
+        $roleName = implode('>>', $roleName);
         return $roleName;
     }
 

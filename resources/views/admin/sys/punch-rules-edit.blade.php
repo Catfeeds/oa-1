@@ -202,6 +202,7 @@
                 clone.find("*[id=holiday_id]").attr({'name': 'work['+ key +'][cfg]['+ i +'][holiday_id]'});
                 clone.find("*[id=ded_num]").attr({'name': 'work['+ key +'][cfg]['+ i +'][ded_num]'});
                 clone.appendTo('#' + div);
+                //clone.appendTo('#' + div).find('select').select2();
             });
 
             $('button[id^=remove_ded]').click(function () {

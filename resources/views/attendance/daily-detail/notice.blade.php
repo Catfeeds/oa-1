@@ -20,7 +20,7 @@
                     <th colspan="4" style="text-align: center">{{ trans('att.基础信息') }}</th>
                     <th colspan="15" style="text-align: center">{{ trans('att.考勤天数') }}</th>
                     <th colspan="3" style="text-align: center">{{ trans('att.扣分统计') }}</th>
-                    <th colspan="{{ 5 + count($paidNames) }}" style="text-align: center">{{ trans('att.剩余假期') }}</th>
+                    <th colspan="7" style="text-align: center">{{ trans('att.剩余假期') }}</th>
                     <th colspan="1" style="text-align: center">{{ trans('att.操作') }}</th>
                 </tr>
                 <tr style="height: 10px">
@@ -39,9 +39,8 @@
                     <th rowspan="2">{{ trans('att.其他') }}</th>
                     <th rowspan="2">{{ trans('att.合计扣分') }}</th>
                     <th colspan="5" style="text-align: center; width: 5%">剩余调休假次数</th>
-                    @foreach($paidNames as $name)
-                        <th rowspan="2">{{ '剩余'.$name }}</th>
-                    @endforeach
+                    <th rowspan="2">{{ trans('att.剩余年假') }}</th>
+                    <th rowspan="2">{{ trans('att.剩余探亲假') }}</th>
                     <th rowspan="2">{{ trans('att.确认通知') }}</th>
                 </tr>
                 <tr>
@@ -94,9 +93,8 @@
                             <td>{{ $v['remain_change'][$i] ?? 0 }}</td>
                         @endfor
 
-                        @foreach($v['remain_paid'] as $value)
-                            <td>{{ $value['number_day'] ?? 0 }}</td>
-                        @endforeach
+                        <td>{{ $v['remain_year_holiday'] }}</td>
+                        <td>{{ $v['remain_visit'] }}</td>
 
                         <td>
                             <a class="confirm" con_state="{{ $v['send'] }}" id="confirm_{{ $v['user_id'] }}"

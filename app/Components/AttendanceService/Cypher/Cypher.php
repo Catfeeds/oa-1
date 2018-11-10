@@ -11,6 +11,8 @@ namespace App\Components\AttendanceService\Cypher;
 use App\Components\Helper\DataHelper;
 use App\Http\Components\Helpers\AttendanceHelper;
 use App\Models\Attendance\Leave;
+use App\Models\Sys\ReviewStepFlow;
+use App\User;
 
 class Cypher
 {
@@ -228,4 +230,69 @@ class Cypher
 
         return ['number_day' => $numberDay, 'count_num' => $userLeaveLog->count_num ?? 0, 'apply_days' => $userLeaveLog->number_day ?? 0];
     }
+
+    /**
+     * 显示审核步骤
+     * @param $holidayId
+     * @param int $numberDay
+     * @return string
+     */
+    public function showLeaveStep($holidayId, $numberDay = 0.5)
+    {
+        $leaderStepUid = $step =  [];
+
+        $steps = ReviewStepFlow::with('config')
+            ->where(['child_id' => $holidayId])
+            ->orderBy('min_num', 'asc')
+            ->get()
+            ->toArray();
+
+        if(empty($numberDay) && !empty($steps)) $steps[] = $steps[0];
+
+        foreach ($steps as $sk => $sv) {
+            if($sv['min_num'] <= $numberDay && $sv['max_num'] >= $numberDay) {
+                $step = $sv;
+                break;
+            }
+        }
+
+        if(!empty($step)) {
+            foreach ($step['config'] as $lk => $lv) {
+                //指定人类型
+                if((int)$lv['assign_type'] === 0) {
+                    $leaderStepUid[$lv['step_order_id']] = (User::getUsernameAliasList()[$lv['assign_uid']] ?? '无')
+                        .' <input type="hidden" name="step_user['.$lv['step_order_id'].']" value="'.$lv['assign_uid'].'">';
+                }
+
+                //指定角色类型
+                $dept = ' and dept_id ='.\Auth::user()->dept_id ;
+                if((int)$lv['group_type_id'] === 1) $dept = '';
+
+                $roleId = sprintf('JSON_EXTRACT(role_id, "$.id_%d") = "%d"', $lv['assign_role_id'], $lv['assign_role_id']);
+                $userLeader = User::whereRaw($roleId . $dept)->get()->toArray();
+                if((int)$lv['assign_type'] === 1 && empty($userLeader)) $leaderStepUid[$lv['step_order_id']]  = '无';
+                if((int)$lv['assign_type'] === 1 && !empty($userLeader)) {
+                    //是否可以修改审批人 角色分配大于等于2人
+                    if((int)$step['is_modify'] === ReviewStepFlow::MODIFY_YES && count($userLeader) >= 2) {
+                        $opt = [];
+                        foreach ($userLeader as $uk => $uv) {
+                            $opt[] = '<option value="'.$uv['user_id'].'">'.$uv['alias'] . '('. $uv['username'] . ')</option>';
+                        }
+
+                        $leaderStepUid[$lv['step_order_id']]  = '<select id="copy_user" style="width: 10em" name="step_user['.$lv['step_order_id'].']">' .
+                            implode(' ', $opt)
+                            .'</select> <input type="hidden" name="is_edit_step" value="'.ReviewStepFlow::MODIFY_YES.'">
+                            <input type="hidden" name="step_id" value="'.$step['step_id'].'">';
+                    } else {
+                        $leaderStepUid[$lv['step_order_id']] = (User::getUsernameAliasList()[$userLeader[0]['user_id']] ?? '无')
+                            .' <input type="hidden" name="step_user['.$lv['step_order_id'].']" value="'.$lv['assign_uid'].'">';;
+                    }
+                }
+            }
+        }
+
+        ksort($leaderStepUid);
+        return empty($leaderStepUid) ? '未设置' : implode('>>', $leaderStepUid);
+    }
+
 }

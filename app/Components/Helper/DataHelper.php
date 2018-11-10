@@ -194,6 +194,26 @@ class DataHelper
 
     }
 
+    public static function leaveDayDiff($startTime, $startId, $endTime, $endId)
+    {
+        $startTime = new \DateTime($startTime);
+        $endTime = new \DateTime($endTime);
+
+        $day = $startTime->diff($endTime);
+        $days[] = (int)$day->format('%a');
+
+        $startId = (int)str_replace(':', '', $startId);
+        $endId = (int)str_replace(':', '', $endId);
+
+        if(($endId - $startId) > 800) {
+            $days[] = 1;
+        } else {
+            $days[] = 0.5;
+        }
+
+        return array_sum($days);
+    }
+
     public static function prDates($startDay, $endDay)
     {
         $day = [];
