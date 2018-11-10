@@ -194,4 +194,14 @@ class HolidayConfig extends Model
     {
         return self::get(['holiday_id', 'apply_type_id'])->pluck('apply_type_id', 'holiday_id')->toArray();
     }
+
+    public static function checkHolidayToId($holidayId)
+    {
+        return self::where(['holiday_id' => $holidayId])
+            ->whereIn('apply_type_id', self::$applyTypeInt)
+            ->whereIn('restrict_sex', [\Auth::user()->userExt->sex, UserExt::SEX_NO_RESTRICT])
+            ->where(['is_show' => self::STATUS_ENABLE])
+            ->first();
+    }
+
 }

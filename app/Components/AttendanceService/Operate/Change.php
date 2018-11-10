@@ -110,9 +110,9 @@ class Change extends Operate implements AttendanceInterface
         return  $this->backLeaveData(true, [], $data);
     }
 
-    public function getLeaveStep($holidayId, $numberDay): array
+    public function getLeaveStep($request, $numberDay): array
     {
-        return parent::getLeaveStep($holidayId, $numberDay);
+        return parent::getLeaveStep($request, $numberDay);
     }
 
     public function createLeave(array $leave): array

@@ -49,11 +49,11 @@
                                             @foreach($data as $v)
                                                 <tr>
                                                     <td>{{ $v['step_id'] }}</td>
-                                                    <td>{{ $v['apply_type_id'] }}</td>
-                                                    <td>{{ $v['child_id']}}</td>
+                                                    <td>{{ \App\Models\Sys\HolidayConfig::$applyType[$v['apply_type_id']] ?? '数据异常' }}</td>
+                                                    <td>{{ \App\Models\Sys\HolidayConfig::holidayList()[$v['child_id']] ?? '数据异常' }}</td>
                                                     <td>{{ $v['min_num'] }}</td>
                                                     <td>{{ $v['max_num'] }}</td>
-                                                    <td>{{ $v['is_modify'] }}</td>
+                                                    <td>{{ \App\Models\Sys\ReviewStepFlow::$modifyType[$v['is_modify']] ?? '数据异常' }}</td>
                                                     <td>{{$v['created_at'] }}</td>
                                                     <td>
                                                         @if(Entrust::can(['approval-step.edit']))

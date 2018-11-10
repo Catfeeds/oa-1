@@ -56,7 +56,8 @@ class Paid extends Cypher
     }
 
     public function returnData($leaveInfo, $holidayConfig) {
-        $msg = $day = '<i class="fa fa-info-circle"></i>剩余假期天数:' . $leaveInfo['number_day'] . '天';
+        $msg = '<i class="fa fa-info-circle"></i>剩余假期天数:' . $leaveInfo['number_day'] . '天';
+
         return [
             'status' => 1,
             'show_day' => true,

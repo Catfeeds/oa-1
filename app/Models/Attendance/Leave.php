@@ -117,6 +117,7 @@ class Leave extends Model
         'copy_user',
         'exceed_day',
         'exceed_holiday_id',
+        'step_user',
     ];
 
     public function holidayConfig() {

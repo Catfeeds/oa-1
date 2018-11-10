@@ -9,6 +9,7 @@
 
 namespace App\Http\Controllers\Attendance;
 
+use App\Components\Helper\DataHelper;
 use App\Http\Components\Helpers\AttendanceHelper;
 use App\Http\Components\Helpers\OperateLogHelper;
 use App\Http\Components\Helpers\ReviewHelper;
@@ -86,6 +87,7 @@ class LeaveController extends AttController
         $leave = (object)['holiday_id' => '', 'start_id' => '', 'end_id' => ''];
         $reviewUserId = '';
         $allUsers = User::where(['status' => 1])->get();
+        $time = date('Y-m-d', time());
         switch ($applyTypeId) {
             //请假
             case HolidayConfig::LEAVEID:
@@ -128,7 +130,7 @@ class LeaveController extends AttController
                 return redirect()->route('leave.info');
         }
 
-        return view('attendance.leave.'.$models, compact('title', 'holidayList', 'leave', 'reviewUserId' , 'deptUsersSelected', 'deptUsers', 'allUsers', 'daily'));
+        return view('attendance.leave.'.$models, compact('title', 'time', 'holidayList', 'leave', 'reviewUserId' , 'deptUsersSelected', 'deptUsers', 'allUsers', 'daily'));
     }
 
     /**
@@ -139,6 +141,7 @@ class LeaveController extends AttController
      */
     public function store(Request $request, $applyTypeId)
     {
+
         //验证是否是有效的请假配置类型
         if(!in_array((int)$applyTypeId, [HolidayConfig::LEAVEID, HolidayConfig::CHANGE, HolidayConfig::RECHECK])) {
             flash('申请失败,请勿非法操作', 'danger');
@@ -151,7 +154,7 @@ class LeaveController extends AttController
         $retCheck = \AttendanceService::driver($driver)->checkLeave($request);
         if(!$retCheck['success']) return redirect()->back()->with(['holiday_id' => $p['holiday_id']])->withInput()->withErrors($retCheck['message']);
         //获取申请单审核步骤流程
-        $step = \AttendanceService::driver($driver)->getLeaveStep($p['holiday_id'], $retCheck['data']['number_day']);
+        $step = \AttendanceService::driver($driver)->getLeaveStep($p, $retCheck['data']['number_day']);
         if(!$step['success']) return redirect()->back()->with(['holiday_id' => $p['holiday_id']])->withInput()->withErrors($step['message']);
         //设置上传图片
          $imagePath = AttendanceHelper::setAnnex($request);
@@ -349,12 +352,7 @@ class LeaveController extends AttController
     public function showMemo(Request $request)
     {
         $p = $request->all();
-        $holidayConfig = HolidayConfig::where(['holiday_id' => $p['id']])
-            ->whereIn('apply_type_id', HolidayConfig::$applyTypeInt)
-            ->whereIn('restrict_sex', [\Auth::user()->userExt->sex, UserExt::SEX_NO_RESTRICT])
-            ->where(['is_show' => HolidayConfig::STATUS_ENABLE])
-            ->first();
-
+        $holidayConfig = HolidayConfig::checkHolidayToId($p['id']);
         if(empty($holidayConfig->holiday_id))  return response()->json(['status' => -1, 'memo' => '', 'day' => 0]);
 
         $driver = HolidayConfig::$cypherTypeChar[$holidayConfig->cypher_type];
@@ -363,9 +361,28 @@ class LeaveController extends AttController
         return response()->json($ret);
     }
 
-    public function inquire(Request $request){
-        dd($request->all());
+    public function inquire(Request $request)
+    {
+
+        $p = $request->all();
+        $holidayConfig = HolidayConfig::checkHolidayToId($p['holidayId']);
+
+        if(empty($holidayConfig->holiday_id))  return response()->json(['status' => -1, 'memo' => '', 'day' => 0]);
+
+        $numberDay = DataHelper::leaveDayDiff($p['startTime'], $p['startId'], $p['endTime'], $p['endId']);
+
+        $driver = HolidayConfig::$cypherTypeChar[$holidayConfig->cypher_type];
+        $ret = \AttendanceService::driver($driver, 'cypher')->showLeaveStep($holidayConfig->holiday_id, $numberDay);
+
+        $html = <<<HTML
+            $ret
+HTML;
+
+        return response()->json(['status' => 1, 'step' => $html]);
     }
+
+
+
 
     /**
      * 请假类型 显示每日时间点获取
@@ -386,7 +403,7 @@ class LeaveController extends AttController
         $config = PunchRulesConfig::getPunchRulesCfgToId($punchRules->punch_rules_id);
 
         if(!empty($config)) {
-            return response()->json(['status' => 1, 'start_time' => $config['start_time'], 'end_time' => $config['end_time']]);
+            return response()->json(['status' => 1, 'start_time' => $config['start_time'], 'end_time' => $config['end_time'], 'last_time' => [ end($config['end_time'])] ]);
         } else {
             return response()->json(['status' => -1, 'start_time' => '', 'end_time' => '']);
         }

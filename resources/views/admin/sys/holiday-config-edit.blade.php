@@ -248,6 +248,7 @@
                                                 {!! Form::text('payable_claim_formula', isset($holiday->payable_claim_formula) ? $holiday->payable_claim_formula: old('payable_claim_formula'), [
                                                 'class' => 'form-control',
                                                 'placeholder' => trans('app.请输入', ['value' => trans('app.计薪天数起始要求')]),
+                                                'data-mask' => "[999,12,31,60,60]"
                                                 ]) !!}
                                                 <span class="help-block m-b-none">{{ $errors->first('payable_claim_formula') }}</span>
                                             </div>
@@ -429,6 +430,7 @@
 @push('scripts')
 <script>
     $(function () {
+
         $("#cypher_type").trigger('onchange');
 
 
