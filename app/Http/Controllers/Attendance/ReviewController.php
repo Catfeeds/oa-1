@@ -62,11 +62,12 @@ class ReviewController extends AttController
      */
     public function dealAttendance($scope, $cache = true)
     {
-        //判断配置,返回错误信息
-        if (!empty($message)) {
-            return ['error', $message];
-        }
         list($message, $yearHolObj, $visitHolObj) = $this->reviewHelper->ifConfig();
+        //判断配置,返回错误信息
+        /*if (!empty($message)) {
+            return ['error', $message];
+        }*/
+
         list($year, $month) = explode('-', $scope->startDate);
 
         $holidayConfigArr = $this->reviewHelper->getHolidayConfigByCypherTypes(array_keys(HolidayConfig::$cypherTypeChar));
@@ -90,23 +91,21 @@ class ReviewController extends AttController
         //获取用户对通知信息的状态
         $confirmStates = ConfirmAttendance::getConfirmState($year, $month);
 
-        $holidayConfigs = HolidayConfig::getHolidayConfigsByCypherType([HolidayConfig::CYPHER_PAID, HolidayConfig::CYPHER_CHANGE]);
-
         $users = User::whereRaw($scope->getwhere())->get();
         $info = [];
 
         foreach ($users as $user) {
             //计算带薪假,返回数组
-            $hasSalary = \AttendanceService::driver('paid', 'cypher')
+            $hasSalary = empty($holidayConfigArr[HolidayConfig::CYPHER_PAID]) ? 0 : \AttendanceService::driver('paid', 'cypher')
                 ->getDaysByScope($scopeArr, $user->user_id, $holidayConfigArr[HolidayConfig::CYPHER_PAID]);
 
             //计算无薪假,返回数组
-            $hasNoSalary = \AttendanceService::driver('unpaid', 'cypher')
+            $hasNoSalary = empty($holidayConfigArr[HolidayConfig::CYPHER_UNPAID]) ? 0 : \AttendanceService::driver('unpaid', 'cypher')
                 ->getDaysByScope($scopeArr, $user->user_id, $holidayConfigArr[HolidayConfig::CYPHER_UNPAID]);
 
             //返回[剩余调休, 已加班, 已调休]
-            $leaveInfo = \AttendanceService::driver('change', 'cypher')
-                ->selectLeaveInfo($startDate, $endDate, $user->user_id, $holidayConfigs[HolidayConfig::CYPHER_CHANGE][0]);
+            $leaveInfo = empty($holidayConfigArr[HolidayConfig::CYPHER_CHANGE][0]) ? 0 : \AttendanceService::driver('change', 'cypher')
+                ->selectLeaveInfo($startDate, $endDate, $user->user_id, $holidayConfigArr[HolidayConfig::CYPHER_CHANGE][0]);
 
             //计算实到天数
             $actuallyCome = $this->reviewHelper->countActuallyDays($startDate, $endDate, $user);
