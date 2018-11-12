@@ -159,8 +159,6 @@ class PunchRecordController extends Controller
                             }
                         }
                         $startTime = (int)str_replace(':', '', $v[$j + 1]) < 1400 ? $v[$j + 1] : NULL;//重新获得上班打卡时间
-                        /*$startTime = $v[$j + 1] ?? NULL;
-                        $endTime = $v[$j + 2] ?? NULL;*/
                         list($h, $m) = explode(':', $lastDayEndTime);
                         $lastDayEndTime = ($h + 24).':'.$m;//重新获得上一天的下班打卡时间
                     }
@@ -235,6 +233,10 @@ class PunchRecordController extends Controller
                         if (!in_array($user->user_id, $users)) $users[] = $user->user_id;
 
                         $detail = DailyDetail::where(['user_id' => $user->user_id, 'day' => $u['ts']])->first();
+                        if (count($calPunch[$u['ts']]) === 0) {
+                            $msgArr[] = '['.$u['ts'].']这天未有上下班打卡配置,请先配置';
+                            continue;
+                        }
                         $deducts = $this->punchHelper->countDeduct($u['start_time'], $u['end_time'], $calPunch[$u['ts']], $detail);
                         $switchLeaveId = $this->punchHelper->storeDeductInLeave($deducts['deduct_day'], $user->user_id, $u['ts']);
 
@@ -270,7 +272,7 @@ class PunchRecordController extends Controller
                             }*/
 
                             //向审核通过时插入的数据中添加excel打卡表中正常打卡的数据
-                            /*$userDailyDetail->update([
+                            $userDailyDetail->update([
                                 'punch_start_time'     => $userDailyDetail->punch_start_time ?? $u['start_time'],
                                 'punch_start_time_num' => $userDailyDetail->punch_start_time_num ?: $startTimeNum,
                                 'punch_end_time'       => $userDailyDetail->punch_end_time ?? $u['end_time'],
@@ -279,7 +281,7 @@ class PunchRecordController extends Controller
                                 'lave_buffer_num'      => 0,
                                 'deduction_num'        => $userDailyDetail->deduction_num ?: $deducts['deduct_score']['score'] ?? 0,
                                 'leave_id'             => \AttendanceService::driver('operate')->addLeaveId($switchLeaveId, $userDailyDetail->leave_id),
-                            ]);*/
+                            ]);
                             $msgArr[] = $u['alias'] . '员工已导入[' . $dk . ']考勤记录!';
                             continue;
                         }

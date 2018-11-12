@@ -57,6 +57,7 @@
                                     @else
                                         <td @if($danger[$v['day']]['off_work'] === true) style="color: red" @endif>{{ $v['punch_end_time'] }}</td>
                                     @endif
+
                                     <td>{{ $v['heap_late_num'] ?? '--' }}</td>
                                     <td>{{ $v['lave_buffer_num'] ?? '--'  }}</td>
                                     <td>{{ $v['deduction_num'] ?? '--'  }}</td>

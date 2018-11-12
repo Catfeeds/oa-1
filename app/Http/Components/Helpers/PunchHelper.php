@@ -38,6 +38,13 @@ class PunchHelper
         return $newCalendarArr;
     }
 
+    /**
+     * 对上班打卡时间为空或下班打卡时间为空的明细填充一个对应该时间段的时间,供后面计算
+     * @param $punch_start
+     * @param $punch_end
+     * @param $formulaPunchRules
+     * @return array
+     */
     public function prPunchTime($punch_start, $punch_end, $formulaPunchRules)
     {
         $minPrEndPunch = '24:00';
@@ -72,10 +79,9 @@ class PunchHelper
      */
     public function getDeduct($punch_start, $punch_end, $punchRuleConfigs, $formula = NULL)
     {
-        $formulaPunchRules = empty($form) ? PunchRulesConfig::getPunchRules($punchRuleConfigs->toArray()) : $formula;
+        $formulaPunchRules = empty($formula) ? PunchRulesConfig::getPunchRules($punchRuleConfigs->toArray()) : $formula;
         $deductDay = 0;
         $deductScore = ['minute' => 0, 'score' => 0];
-        $isDanger = ['on_work' => false, 'off_work' => false];
 
         if (!empty($punch_start) || !empty($punch_end)) {
             foreach ($formulaPunchRules['sort'] as $key => $value) {//时间段
@@ -107,7 +113,6 @@ class PunchHelper
                                 //或扣的天数
                                 $deductDay = $deductDay + $item['ded_num'];
                             }
-                            $isDanger['on_work'] = true;
                         }
                     }
                     //下班规则匹配
@@ -120,7 +125,6 @@ class PunchHelper
                             }else {
                                 $deductDay = $deductDay + $item['ded_num'];
                             }
-                            $isDanger['off_work'] = true;
                         }
                     }
                 }
@@ -128,7 +132,7 @@ class PunchHelper
         }else {
             $deductDay = 1;
         }
-        return ['deduct_day' => $deductDay, 'deduct_score' => $deductScore, 'danger' => $isDanger];
+        return ['deduct_day' => $deductDay, 'deduct_score' => $deductScore];
     }
 
     /**
@@ -137,7 +141,7 @@ class PunchHelper
      * @param string $punch_end 该天下班打卡时间
      * @param array $punchRuleConfigs 该天对应的打卡规则对象数组
      * @param DailyDetail $dailyDetail 该天明细
-     * @return
+     * @return array
      */
     public function countDeduct($punch_start, $punch_end, $punchRuleConfigs, $dailyDetail)
     {
@@ -202,6 +206,14 @@ class PunchHelper
         return $switchLeaveId;
     }
 
+    /**
+     * 计算一天的缓冲时间
+     * @param $buffer
+     * @param $punchRuleConfigs
+     * @param $startTime
+     * @param $endTime
+     * @return array
+     */
     public function dealBuffer($buffer, $punchRuleConfigs, $startTime, $endTime)
     {
         $buf = $buffer;
@@ -212,18 +224,27 @@ class PunchHelper
             if (DataHelper::ifBetween(strtotime($readyTime), strtotime($endWorkTime), strtotime($startTime))) {
                 $diff = (strtotime($startTime) - strtotime($readyTime)) / 60;
                 if ($diff >= $buf) {
+                    //迟到时间大于缓冲时间, 缓冲时间直接为0, 上班时间修改为减去缓冲时间的时间去计算
                     $ret = $this->getDeduct(DataHelper::dateTimeAdd($startTime, 'T'.$buf.'M', 'H:i', 'sub'), $endTime, $punchRuleConfigs, $formulaPunchRules);
                     $buf = 0;
-                    break;
                 }elseif ($diff > 0) {
+                    //小于缓冲时间,以正常上班的时间去计算
                     $buf = $buf - $diff;
                     $ret = $this->getDeduct($readyTime, $endTime, $punchRuleConfigs, $formulaPunchRules);
                 }
+                break;
             }
         }
         return ['remain_buffer' => $buf, 'ret' => $ret];
     }
 
+    /**
+     * 对存入打卡表的扣分进行考虑缓冲时间的更新
+     * @param $startDate
+     * @param $endDate
+     * @param $userIds
+     * @param $punchRuleConfigsArr
+     */
     public function updateDeductBuffer($startDate, $endDate, $userIds, $punchRuleConfigsArr)
     {
         $buffer = $pluckDetail = [];

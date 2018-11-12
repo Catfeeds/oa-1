@@ -44,16 +44,19 @@
                                     @if(empty($v['punch_start_time']))
                                         <td style="color: red">--</td>
                                     @else
-                                        <td>{{ $v['punch_start_time'] }}</td>
+                                        <td @if($danger[$v['day']]['on_work'] === true) style="color: red" @endif>{{ $v['punch_start_time'] }}</td>
                                     @endif
+
                                     @if(empty($v['punch_end_time']))
                                         <td style="color: red">--</td>
                                     @else
-                                        <td>{{ $v['punch_end_time'] }}</td>
+                                        <td @if($danger[$v['day']]['off_work'] === true) style="color: red" @endif>{{ $v['punch_end_time'] }}</td>
                                     @endif
-                                    <td>{{ $v['heap_late_num'] ? $v['heap_late_num']  : '--' }}</td>
-                                    <td>{{ $v['lave_buffer_num'] ? $v['heap_late_num']  : '--'  }}</td>
-                                    <td>{{ $v['deduction_num'] ? $v['heap_late_num']  : '--'  }}</td>
+
+                                    <td>{{ $v['heap_late_num'] ?? '--' }}</td>
+                                    <td>{{ $v['lave_buffer_num'] ?? '--'  }}</td>
+                                    <td>{{ $v['deduction_num'] ?? '--'  }}</td>
+
                                     <td>
                                         {{ \App\Http\Components\Helpers\AttendanceHelper::showLeaveIds($v['leave_id']) }}
                                     </td>

@@ -52,7 +52,7 @@ class PunchRulesConfig extends Model
     public static function getPunchRules($config)
     {
 
-        $list = $arr = [];
+        $list = $arr = $arr_ = [];
         foreach ($config as $k => $v) {
             $sKey = self::resolveFormula($v['work_start_time']);
             $eKey = self::resolveFormula($v['work_end_time']);
@@ -71,7 +71,7 @@ class PunchRulesConfig extends Model
         }
 
         asort($arr_);
-        return ['start_time' => array_values($list['start_time']), 'end_time' => array_values($list['end_time']),
+        return ['start_time' => array_values($list['start_time'] ?? []), 'end_time' => array_values($list['end_time'] ?? []),
                 'cfg' => $arr, 'sort' => $arr_];
     }
 
