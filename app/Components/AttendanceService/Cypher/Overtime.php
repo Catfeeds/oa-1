@@ -9,7 +9,7 @@
 
 namespace App\Components\AttendanceService\Cypher;
 
-use App\Http\Components\Helpers\AttendanceHelper;
+use App\Components\Helper\DataHelper;
 use App\Models\Attendance\Leave;
 use App\Models\Sys\HolidayConfig;
 
@@ -39,5 +39,22 @@ class Overtime extends Cypher
     public function getDaysByScope($scope, $userId, $holidays)
     {
         return parent::getOverDaysByScope($scope, $userId, $holidays, HolidayConfig::OVERTIME);
+    }
+
+    /**
+     * 获取申请天数
+     * @param $params
+     * @return int|number
+     */
+    public function getLeaveNumberDay($params)
+    {
+        $numberDay = 0;
+        if(empty($params['startId'])) return $numberDay;
+
+        $startId = Leave::$workTimePointChar[$params['startId']]['start_time'];
+        $endId = Leave::$workTimePointChar[$params['startId']]['end_time'];
+        $numberDay = DataHelper::leaveDayDiff($params['startTime'], $startId, $params['startTime'], $endId);
+
+        return $numberDay;
     }
 }

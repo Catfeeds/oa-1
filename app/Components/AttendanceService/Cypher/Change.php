@@ -156,4 +156,22 @@ class Change extends Cypher
             ->pluck('count_num', 'number_day')
             ->toArray();
     }
+
+    /**
+     * 获取申请天数
+     * @param $params
+     * @return int|number
+     */
+    public function getLeaveNumberDay($params)
+    {
+
+        $numberDay = 0;
+        if(empty($params['startId'])) return $numberDay;
+
+        $startId = Leave::$workTimePointChar[$params['startId']]['start_time'];
+        $endId = Leave::$workTimePointChar[$params['startId']]['end_time'];
+        $numberDay = DataHelper::leaveDayDiff($params['startTime'], $startId, $params['startTime'], $endId);
+
+        return $numberDay;
+    }
 }

@@ -9,7 +9,6 @@
 
 namespace App\Http\Controllers\Attendance;
 
-use App\Components\Helper\DataHelper;
 use App\Http\Components\Helpers\AttendanceHelper;
 use App\Http\Components\Helpers\OperateLogHelper;
 use App\Http\Components\Helpers\ReviewHelper;
@@ -357,15 +356,14 @@ class LeaveController extends AttController
 
     public function inquire(Request $request)
     {
-
         $p = $request->all();
         $holidayConfig = HolidayConfig::checkHolidayToId($p['holidayId']);
 
         if(empty($holidayConfig->holiday_id))  return response()->json(['status' => -1, 'memo' => '', 'day' => 0]);
 
-        $numberDay = DataHelper::leaveDayDiff($p['startTime'], $p['startId'], $p['endTime'], $p['endId']);
-
         $driver = HolidayConfig::$cypherTypeChar[$holidayConfig->cypher_type];
+
+        $numberDay = \AttendanceService::driver($driver, 'cypher')->getLeaveNumberDay($p);
         $ret = \AttendanceService::driver($driver, 'cypher')->showLeaveStep($holidayConfig->holiday_id, $numberDay);
 
         $html = <<<HTML
@@ -374,9 +372,6 @@ HTML;
 
         return response()->json(['status' => 1, 'step' => $html]);
     }
-
-
-
 
     /**
      * 请假类型 显示每日时间点获取
