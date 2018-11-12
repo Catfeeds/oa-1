@@ -207,6 +207,8 @@ class ReviewController extends AttController
         $userInfo['username'] = User::where('user_id', $id)->first()->username;
         $userInfo['alias'] = User::where('user_id', $id)->first()->alias;
         $title = "{$userInfo['username']}的考勤详情";
-        return view('attendance.review.review-detail', compact('title', 'data', 'userInfo'));
+        $danger = $this->reviewHelper->getDanger(date('Y-m-01', strtotime($this->scope->startDate)),
+            date('Y-m-t', strtotime($this->scope->startDate)), $data);
+        return view('attendance.review.review-detail', compact('title', 'data', 'userInfo', 'danger'));
     }
 }

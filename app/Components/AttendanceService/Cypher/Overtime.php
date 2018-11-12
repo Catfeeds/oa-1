@@ -36,10 +36,11 @@ class Overtime extends Cypher
         ];
     }
 
-    public function getDaysByScope($scope, $userId, $holidays)
+    /*public function getDaysByScope($scope, $userId, $holidays)
     {
         return parent::getOverDaysByScope($scope, $userId, $holidays, HolidayConfig::OVERTIME);
-    }
+
+    }/*
 
     /**
      * 获取申请天数
@@ -57,4 +58,5 @@ class Overtime extends Cypher
 
         return $numberDay;
     }
+
 }

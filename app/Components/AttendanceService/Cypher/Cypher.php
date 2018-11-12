@@ -72,7 +72,7 @@ class Cypher
      * @param $applyType
      * @return int|mixed
      */
-    public function getOverDaysByScope($scope, $userId, $holidays, $applyType)
+    /*public function getOverDaysByScope($scope, $userId, $holidays, $applyType)
     {
         $holidayIds = [];
         foreach ($holidays as $holiday) {
@@ -84,7 +84,7 @@ class Cypher
             ->whereIn('holiday_id', $holidayIds)->where('user_id', $userId)->get()->pluck('leave_id')->toArray();
 
         return AttendanceHelper::selectChangeInfo('', '', $leaveIds);
-    }
+    }*/
 
 
     /**
