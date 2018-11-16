@@ -62,9 +62,9 @@ class ReviewStepFlowController extends Controller
 
         $data = [
             'apply_type_id' => $p['apply_type_id'],
-            'child_id' => $p['child_id'],
-            'min_num' => $p['min_num'],
-            'max_num' => $p['max_num'],
+            'child_id' => $p['child_id'] ?? NULL,
+            'min_num' => $p['min_num'] ?? NULL,
+            'max_num' => $p['max_num'] ?? NULL,
             'is_modify' => $p['is_modify'],
         ];
 
@@ -113,9 +113,9 @@ class ReviewStepFlowController extends Controller
         $step = ReviewStepFlow::findOrFail($id);
         $data = [
             'apply_type_id' => $p['apply_type_id'],
-            'child_id' => $p['child_id'],
-            'min_num' => $p['min_num'],
-            'max_num' => $p['max_num'],
+            'child_id' => $p['child_id'] ?? NULL,
+            'min_num' => $p['min_num'] ?? NULL,
+            'max_num' => $p['max_num'] ?? NULL,
             'is_modify' => $p['is_modify'],
         ];
 

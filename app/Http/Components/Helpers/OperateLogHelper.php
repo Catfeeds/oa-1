@@ -13,9 +13,10 @@ use App\Models\Sys\OperateLog;
 class OperateLogHelper
 {
     const LEAVE_TYPE_ID = 1;
+    const MATERIAL = 5;
     /**
      * 操作日志
-     * @param int $typeId 操作类型ID 1:请假模块
+     * @param int $typeId 操作类型ID 1:请假模块 5:物料模块
      * @param int $infoId 操作记录ID
      * @param string $opt_name 操作内容
      * @param string $memo 备注
@@ -38,9 +39,10 @@ class OperateLogHelper
      * @param $userId
      * @return array
      */
-    public static function getLogInfoIdToUid($userId)
+    public static function getLogInfoIdToUid($userId, $typeId = OperateLogHelper::LEAVE_TYPE_ID)
     {
         $infoIds = OperateLog::where(['opt_uid' => $userId])
+            ->where('type_id', $typeId)
             ->whereIn('opt_name', ['审核通过', '拒绝通过'])
             ->get(['info_id'])
             ->pluck('info_id')

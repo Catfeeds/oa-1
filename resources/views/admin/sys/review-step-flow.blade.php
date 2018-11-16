@@ -49,10 +49,10 @@
                                             @foreach($data as $v)
                                                 <tr>
                                                     <td>{{ $v['step_id'] }}</td>
-                                                    <td>{{ \App\Models\Sys\HolidayConfig::$applyType[$v['apply_type_id']] ?? '数据异常' }}</td>
-                                                    <td>{{ \App\Models\Sys\HolidayConfig::holidayList()[$v['child_id']] ?? '数据异常' }}</td>
-                                                    <td>{{ $v['min_num'] }}</td>
-                                                    <td>{{ $v['max_num'] }}</td>
+                                                    <td>{{ \App\Models\Sys\HolidayConfig::$allApplyType[$v['apply_type_id']] ?? '数据异常' }}</td>
+                                                    <td>{{ \App\Models\Sys\HolidayConfig::holidayList()[$v['child_id']] ?? '暂无' }}</td>
+                                                    <td>{{ $v['min_num'] ?? '暂无' }}</td>
+                                                    <td>{{ $v['max_num'] ?? '暂无'}}</td>
                                                     <td>{{ \App\Models\Sys\ReviewStepFlow::$modifyType[$v['is_modify']] ?? '数据异常' }}</td>
                                                     <td>{{$v['created_at'] }}</td>
                                                     <td>

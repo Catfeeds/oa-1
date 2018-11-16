@@ -271,4 +271,27 @@ Route::group([
     Route::get('sys/bulletin/change-show', [
         'middleware' => ['permission:bulletin.changeShow'],
         'uses' => 'Sys\BulletinController@changeShow'])->name('bulletin.changeShow');
+
+    #资质外借库存配置
+    Route::get('sys/inventory', [
+        /*'middleware' => ['permission:material.inventory-list'],*/
+        'uses' => 'Sys\InventoryController@inventoryList'])->name('inventory.list');
+    Route::get('sys/inventory/create', [
+        /*'middleware' => ['permission:material.inventory-list'],*/
+        'uses' => 'Sys\InventoryController@create'])->name('inventory.create');
+    Route::post('sys/inventory/create', [
+        /*'middleware' => ['permission:material.inventory-create'],*/
+        'uses' => 'Sys\InventoryController@store']);
+    Route::get('sys/inventory/edit/{id}', [
+        /*'middleware' => ['permission:material.inventory-edit'],*/
+        'uses' => 'Sys\InventoryController@edit'])->name('inventory.edit');
+    Route::post('sys/inventory/edit/{id}', [
+        /*'middleware' => ['permission:material.inventory-edit'],*/
+        'uses' => 'Sys\InventoryController@update']);
+    Route::get('sys/inventory/upload', [
+        /*'middleware' => ['permission:material.inventory-upload'],*/
+        'uses' => 'Sys\InventoryController@upload'])->name('inventory.upload');
+    Route::post('sys/inventory/upload', [
+        /*'middleware' => ['permission:material.inventory-upload'],*/
+        'uses' => 'Sys\InventoryController@excel']);
 });

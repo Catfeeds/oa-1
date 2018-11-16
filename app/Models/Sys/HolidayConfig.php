@@ -29,6 +29,7 @@ class HolidayConfig extends Model
     const CHANGE = 2;
     const OVERTIME = 2;
     const RECHECK = 3;
+    const MATERIAL = 4;
 
     const NO_SETTING = 0;
     const GO_WORK = 1;
@@ -70,6 +71,14 @@ class HolidayConfig extends Model
         self::CHANGE => '加班调休',
         self::RECHECK => '补打卡',
     ];
+
+    public static $allApplyType = [
+        self::LEAVEID => '请假',
+        self::CHANGE => '加班调休',
+        self::RECHECK => '补打卡',
+        self::MATERIAL => '物料审核',
+    ];
+
     public static $applyTypeInt = [
         self::LEAVEID => 1,
         self::CHANGE => 2,

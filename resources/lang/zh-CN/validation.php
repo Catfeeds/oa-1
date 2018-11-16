@@ -181,5 +181,6 @@ return [
         'end_time'              => '请假结束时间',
         'valid_time'            => '有效天数',
         'weight'                => '权重',
+        'inv_remain'            => '库存总数',
     ],
 ];
