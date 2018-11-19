@@ -29,7 +29,7 @@ return [
     |
     */
     // 错误邮件接收者
-    'notification' => env('APP_ADMIN', 'sy0011'),
+    'notification' => env('APP_ADMIN', 'oaadmin'),
 
     'env' => env('APP_ENV', 'production'),
 

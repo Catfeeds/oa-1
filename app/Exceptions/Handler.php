@@ -40,7 +40,7 @@ class Handler extends ExceptionHandler
     public function report(Exception $exception)
     {
         // 发送通知邮件
-        if ($exception) {
+        if (config('app.env') != 'local' && $this->mailReport($exception)) {
             $url = \Request::fullUrl();
             $user = \Auth::user();
 
@@ -67,7 +67,6 @@ class Handler extends ExceptionHandler
     protected function mailReport($e): bool
     {
         $es = [
-
             HttpResponseException::class,
             \ErrorException::class,
             \PDOException::class,
