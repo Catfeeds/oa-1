@@ -49,7 +49,7 @@ class LeaveController extends AttController
         switch ($type) {
             //调休
             case Leave::DEPT_LEAVE :
-                $where = sprintf(" AND user_id1 = %d AND parent_id !=''", \Auth::user()->user_id);
+                $where = sprintf(" AND user_id = %d AND parent_id !=''", \Auth::user()->user_id);
                 break;
             //抄送
             case Leave::COPY_LEAVE :
