@@ -30,7 +30,8 @@
                                     <div class="form-group @if (!empty($errors->first('dept_id'))) has-error @endif">
                                         {!! Form::label('apply_type_id', trans('app.项目类型'), ['class' => 'col-sm-3 control-label']) !!}
                                         <div class="col-sm-3">
-                                            {!! Form::select('apply_type_id', \App\Models\Sys\HolidayConfig::$applyType,  $step->apply_type_id ?? old('apply_type_id'), [
+                                            {!! Form::select('apply_type_id', \App\Models\Sys\HolidayConfig::$allApplyType,
+                                            $step->apply_type_id ?? old('apply_type_id'), [
                                             'class' => 'form-control js-select2-single',
                                             'placeholder' => trans('app.请选择', ['value' => trans('app.项目类型')]),
                                             'required' => true,
@@ -176,18 +177,24 @@
 
         function loadChild() {
             var applyTypeId = $("#apply_type_id").val();
-            $.get("{{ route('review-step-flow.getHoliday') }}", {id: applyTypeId}, function (result) {
-                if (result.status == 1) {
-                    console.log(result.data);
-                    $(".child_id").select2({
-                        placeholder: "-请选择子项目类型-", //默认所有
-                        allowClear: true, //清楚选择项
-                        multiple: false,// 多选
-                        data: result.data, //绑定数据
-                        minimumResultsForSearch: "1"
-                    });
-                }
-            });
+            var arr = JSON.parse('{{ json_encode(array_keys(\App\Models\Sys\HolidayConfig::$applyType)) }}');
+            if ($.inArray(Number(applyTypeId), arr) !== -1) {
+                $('#child_id, input[name=min_num], input[name=max_num]').prop('disabled', false);
+                $.get("{{ route('review-step-flow.getHoliday') }}", {id: applyTypeId}, function (result) {
+                    if (result.status == 1) {
+                        console.log(result.data);
+                        $(".child_id").select2({
+                            placeholder: "-请选择子项目类型-", //默认所有
+                            allowClear: true, //清楚选择项
+                            multiple: false,// 多选
+                            data: result.data, //绑定数据
+                            minimumResultsForSearch: "1"
+                        });
+                    }
+                });
+            }else {
+                $('#child_id, input[name=min_num], input[name=max_num]').prop('disabled', true);
+            }
         }
 
     </script>
