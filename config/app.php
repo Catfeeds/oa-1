@@ -28,6 +28,8 @@ return [
     | services your application utilizes. Set this in your ".env" file.
     |
     */
+    // 错误邮件接收者
+    'notification' => env('APP_ADMIN', 'sy0011'),
 
     'env' => env('APP_ENV', 'production'),
 
