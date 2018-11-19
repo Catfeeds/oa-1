@@ -49,7 +49,7 @@ class LeaveController extends AttController
         switch ($type) {
             //调休
             case Leave::DEPT_LEAVE :
-                $where = sprintf(" AND user_id = %d AND parent_id !=''", \Auth::user()->user_id);
+                $where = sprintf(" AND user_id1 = %d AND parent_id !=''", \Auth::user()->user_id);
                 break;
             //抄送
             case Leave::COPY_LEAVE :
@@ -221,7 +221,7 @@ class LeaveController extends AttController
      */
     public function optInfo($id)
     {
-        $leave = Leave::with('holidayConfig1')->findOrFail($id);
+        $leave = Leave::with('holidayConfig')->findOrFail($id);
         if(empty($leave->leave_id)) return redirect()->route('leave.info');
         //抄送人员也可以查看
         $copyIds = json_decode($leave->copy_user, true);
