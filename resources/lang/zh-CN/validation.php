@@ -182,5 +182,6 @@ return [
         'valid_time'            => '有效天数',
         'weight'                => '权重',
         'inv_remain'            => '库存总数',
+        'expect_return_time'    => '预计归还时间'
     ],
 ];

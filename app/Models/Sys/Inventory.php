@@ -2,6 +2,7 @@
 
 namespace App\Models\Sys;
 
+use App\Models\Material\Apply;
 use Illuminate\Database\Eloquent\Model;
 
 class Inventory extends Model
@@ -18,4 +19,9 @@ class Inventory extends Model
     protected $fillable = [
         'type', 'name', 'content', 'description', 'inv_remain', 'company', 'is_annex', 'is_show'
     ];
+
+    public function apply()
+    {
+        return $this->belongsToMany(Apply::class, 'material_apply_inventory', 'inventory_id', 'apply_id')->withPivot('part');
+    }
 }

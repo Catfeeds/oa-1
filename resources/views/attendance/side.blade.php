@@ -84,35 +84,39 @@
                 </li>
             @endif
 
-            <li @if(Route::is('inventory*')) class="active" @endif>
-                <a href="{{ route('inventory.list') }}">{{ trans('material.资质外借库存配置') }}</a>
-            </li>
+            @if(Entrust::can('material.inventory-list'))
+                <li @if(Route::is('inventory*')) class="active" @endif>
+                    <a href="{{ route('inventory.list') }}">{{ trans('material.资质外借库存配置') }}</a>
+                </li>
+            @endif
         </ul>
     </li>
 @endif
 
+@if(Entrust::can(['material.approve*', 'material.apply*']))
     <li @if(Route::is('material*')) class="active" @endif>
         <a href="#"><i class="fa fa-newspaper-o"></i> <span class="nav-label">{{ trans('material.物料管理系统') }}</span><span
                     class="fa arrow"></span></a>
         <ul class="nav nav-second-level">
-            {{--@if(Entrust::can(['manage.index']))--}}
+            @if(Entrust::can(['material.apply.index']))
                 <li @if (Route::is(['material.apply*']) ) class="active" @endif>
                     <a href="{{ route('material.apply.index') }}">{{ trans('material.资质外借') }}</a>
                 </li>
-            {{--@endif--}}
+            @endif
 
-            {{--@if(Entrust::can(['staff*']))--}}
+            @if(Entrust::can(['material.approve.index']))
                 <li @if (Route::is(['material.approve*']) ) class="active" @endif>
-                    <a href="{{ route('material.approve.index') }}">{{ trans('material.资质外借审批') }}</a>
+                    <a href="{{ route('material.approve.index', ['state' => 'all']) }}">{{ trans('material.资质外借审批') }}</a>
                 </li>
-            {{--@endif--}}
+            @endif
 
             {{--@if(Entrust::can(['entry*']))--}}
-                <li @if (Route::is(['entry*']) ) class="active" @endif>
-                    <a href="#">{{ trans('material.会议室租用管理') }}</a>
-                </li>
+            <li @if (Route::is(['entry*']) ) class="active" @endif>
+                <a href="#">{{ trans('material.会议室租用管理') }}</a>
+            </li>
             {{--@endif--}}
-
         </ul>
     </li>
+@endif
+
 

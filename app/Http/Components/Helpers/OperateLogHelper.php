@@ -37,13 +37,15 @@ class OperateLogHelper
     /**
      * 通过员工ID获取审核过的请假单
      * @param $userId
+     * @param int $typeId
+     * @param array $optName
      * @return array
      */
-    public static function getLogInfoIdToUid($userId, $typeId = OperateLogHelper::LEAVE_TYPE_ID)
+    public static function getLogInfoIdToUid($userId, $typeId = OperateLogHelper::LEAVE_TYPE_ID , $optName = ['审核通过', '拒绝通过'])
     {
         $infoIds = OperateLog::where(['opt_uid' => $userId])
             ->where('type_id', $typeId)
-            ->whereIn('opt_name', ['审核通过', '拒绝通过'])
+            ->whereIn('opt_name', $optName)
             ->get(['info_id'])
             ->pluck('info_id')
             ->toArray();

@@ -7,32 +7,30 @@
                 <div class="ibox-title">
                     <h5>{{ $title }}</h5>
                     <div class="ibox-tools">
-                        <a href="{{ route('inventory.upload') }}" class="btn btn-primary btn-xs">批量添加资质借用</a>
-                        <a href="{{ route('inventory.create') }}" class="btn btn-primary btn-xs">添加资质借用</a>
+                        @if(Entrust::can('material.inventory-upload'))
+                            <a href="{{ route('inventory.upload') }}" class="btn btn-primary btn-xs">批量添加资质借用</a>
+                        @endif
+                        @if(Entrust::can('material.inventory-create'))
+                            <a href="{{ route('inventory.create') }}" class="btn btn-primary btn-xs">添加资质借用</a>
+                        @endif
                     </div>
                 </div>
                 <div class="ibox-content">
-                    {{--<div class="row">
-                        <div class="col-md-1 m-b-xs" style="width: 125px">
-                            <a href="{{ route('inventory.upload') }}" class="btn btn-primary btn-sm">批量添加资质借用</a>
-                        </div>
-                        <div class="col-md-1 m-b-xs">
-                            <a href="{{ route('inventory.create') }}" class="btn btn-primary btn-sm">添加资质借用</a>
-                        </div>
-                    </div>--}}
                     @include('flash::message')
                     <table class="table table-striped">
                         <thead>
-                            <tr>
-                                <th>id</th>
-                                <th>类型</th>
-                                <th>名称</th>
-                                <th>内容</th>
-                                <th>说明</th>
-                                <th>所属公司</th>
-                                <th>库存总数</th>
+                        <tr>
+                            <th>id</th>
+                            <th>类型</th>
+                            <th>名称</th>
+                            <th>内容</th>
+                            <th>说明</th>
+                            <th>所属公司</th>
+                            <th>库存总数</th>
+                            @if(Entrust::can('material.inventory-edit'))
                                 <th>操作</th>
-                            </tr>
+                            @endif
+                        </tr>
                         </thead>
                         <tbody>
                         @foreach($data as $v)
@@ -44,9 +42,9 @@
                                 <td>{{ $v->description }}</td>
                                 <td>{{ $v->company }}</td>
                                 <td>{{ $v->inv_remain }}</td>
-                                <td>
-                                    <a href="{{ route('inventory.edit', ['id' => $v->id]) }}">修改</a>
-                                </td>
+                                @if(Entrust::can('material.inventory-edit'))
+                                    <td><a href="{{ route('inventory.edit', ['id' => $v->id]) }}">修改</a></td>
+                                @endif
                             </tr>
                         @endforeach
                         </tbody>
@@ -56,9 +54,3 @@
         </div>
     </div>
 @endsection
-
-
-@push('scripts')
-<script>
-</script>
-@endpush

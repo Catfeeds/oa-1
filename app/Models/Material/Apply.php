@@ -16,17 +16,19 @@ class Apply extends Model
     const APPLY_FAIL = 5;
     const APPLY_REDRAW = 6;
     const APPLY_CANCEL = 7;
+    const APPLY_PART_RETURN = 8;
 
 
     static $stateChar = [
-        self::APPLY_SUBMIT  => '申请中',
+        self::APPLY_SUBMIT  => '提交申请',
         self::APPLY_REVIEW => '审批中',
         self::APPLY_BORROW => '借用中',
         self::APPLY_PASS => '已通过',
         self::APPLY_RETURN  => '已归还',
         self::APPLY_FAIL => '拒绝通过',
-        self::APPLY_REDRAW => '撤回',
-        self::APPLY_CANCEL => '取消',
+        self::APPLY_REDRAW => '撤回申请',
+        self::APPLY_CANCEL => '取消申请',
+        self::APPLY_PART_RETURN => '部分归还',
     ];
 
     protected $table = 'material_apply';
@@ -37,6 +39,7 @@ class Apply extends Model
 
     public function inventory()
     {
-        return $this->belongsToMany(Inventory::class, 'material_apply_inventory', 'apply_id', 'inventory_id');
+        return $this->belongsToMany(Inventory::class, 'material_apply_inventory', 'apply_id', 'inventory_id')->withPivot('part');
     }
 }
+

@@ -1,13 +1,5 @@
 @extends('attendance.side-nav')
 
-@push('css')
-<style>
-    #operate > div > a.btn {
-        width: 85px;
-    }
-</style>
-@endpush
-
 @section('title', $title)
 
 @section('content')
@@ -18,6 +10,7 @@
                     <h5>{{ $title }}</h5>
                 </div>
                 <div class="ibox-content">
+                    @include('flash::message')
                     {!! Form::open(['class' => 'form-horizontal', 'enctype' => 'multipart/form-data']) !!}
                     <div class="row">
                         {{--分割线--}}
@@ -56,7 +49,7 @@
                             <div class="hr-line-dashed"></div>
 
                             <div class="form-group">
-                                {!! Form::label('holiday_id', trans('att.预期归还时间'), ['class' => 'col-sm-2 control-label']) !!}
+                                {!! Form::label('holiday_id', trans('material.预计归还时间'), ['class' => 'col-sm-2 control-label']) !!}
                                 <div class="col-sm-6">
                             <span class="help-block m-b-none">
                                 {{ $apply['expect_return_time'] }}
@@ -67,7 +60,7 @@
                             <div class="hr-line-dashed"></div>
 
                             <div class="form-group">
-                                {!! Form::label('reason', trans('att.借用事由'), ['class' => 'col-sm-2 control-label']) !!}
+                                {!! Form::label('reason', trans('material.借用事由'), ['class' => 'col-sm-2 control-label']) !!}
                                 <div class="col-sm-6">
                             <span class="help-block m-b-none">
                                 {{ $apply['reason'] }}
@@ -78,18 +71,18 @@
                             <div class="hr-line-dashed"></div>
 
                             <div class="form-group">
-                                {!! Form::label('reason', trans('att.借用项目'), ['class' => 'col-sm-2 control-label']) !!}
+                                {!! Form::label('reason', trans('material.借用项目'), ['class' => 'col-sm-2 control-label']) !!}
                                 <div class="col-sm-6">
                                     <div class="help-block m-b-none">
                                         <table class="table table-bordered">
                                             <thead>
                                             <tr>
-                                                <td>id</td>
-                                                <td>类型</td>
-                                                <td>具体文件名称</td>
-                                                <td>数量</td>
-                                                <td>所属公司</td>
-                                                <td>内容</td>
+                                                <td>{{ trans('material.id') }}</td>
+                                                <td>{{ trans('material.类型') }}</td>
+                                                <td>{{ trans('material.具体文件名称') }}</td>
+                                                <td>{{ trans('material.数量') }}</td>
+                                                <td>{{ trans('material.所属公司') }}</td>
+                                                <td>{{ trans('material.内容') }}</td>
                                             </tr>
                                             </thead>
                                             <tbody>
@@ -165,33 +158,34 @@
                     </div>
                     <div class="row">
                         <div class="form-group m-t-md">
-                            <div class="col-sm-4 col-sm-offset-4" id="operate">
-                                {{--@if(Entrust::can('leave.review'))
-                                    @if(in_array($leave->status, [0, 1]))
-                                        @if($leave->review_user_id == Auth::user()->user_id )--}}
-                                    <div class="col-lg-2"><a data-id='{{ \App\Models\Material\Apply::APPLY_PASS }}'
-                                                             class="btn btn-success">{{ trans('att.审核通过') }}</a></div>
-                                    <div class="col-lg-2"><a data-id='{{ \App\Models\Material\Apply::APPLY_FAIL }}'
-                                                             class="btn btn-warning">{{ trans('att.拒绝通过') }}</a></div>
-                                    <div class="col-lg-2"><a data-id="{{ \App\Models\Material\Apply::APPLY_CANCEL }}"
-                                                class="btn btn-info">{{ trans('att.取消申请') }}</a></div>
-                                    <div class="col-lg-2"><a data-toggle="modal" data-target="#approve-modal" id="return"
-                                                         class="btn btn-primary">{{ trans('att.确认归还') }}</a></div>
-                                    @include('material.approve-modal')
-                                    <div class="col-lg-2"><a class="btn btn-danger" id="back">{{ trans('att.返回列表') }}</a></div>
-                                {{--<div>
-                                    <a id="back_status" data-id=5 class="btn btn-primary">{{ trans('att.转审') }}</a>
-                                </div>--}}
-
-
-                                {{--        @endif
+                            <div class="col-sm-6 col-sm-offset-4" id="operate">
+                                @if(Entrust::can('material.approve.info') && $type == \App\Models\Attendance\Leave::LOGIN_VERIFY_INFO)
+                                    @if(in_array($apply['state'], [
+                                        \App\Models\Material\Apply::APPLY_SUBMIT,\App\Models\Material\Apply::APPLY_REVIEW
+                                        ]))
+                                        <a data-id='{{ \App\Models\Material\Apply::APPLY_PASS }}'
+                                           class="btn btn-success">{{ trans('material.审核通过') }}</a>
+                                        <a data-id='{{ \App\Models\Material\Apply::APPLY_FAIL }}'
+                                           class="btn btn-warning">{{ trans('material.拒绝通过') }}</a>
                                     @endif
-                                @endif--}}
-                                {{--@if((int)$type === \App\Models\Attendance\Leave::LOGIN_VERIFY_INFO)--}}
-                                {{--<a href="{{route('leave.review.info')}}" class="btn btn-info">{{ trans('att.返回列表') }}</a>--}}
-                                {{--@else--}}
-                                {{--<a href="{{route('leave.info')}}" class="btn btn-info">{{ trans('att.返回列表') }}</a>--}}
-                                {{--@endif--}}
+                                    @if($apply['state'] == \App\Models\Material\Apply::APPLY_BORROW ||
+                                    $apply['state'] == \App\Models\Material\Apply::APPLY_PART_RETURN)
+                                        <a data-id="{{ \App\Models\Material\Apply::APPLY_CANCEL }}"
+                                           class="btn btn-info">{{ trans('material.取消申请') }}</a>
+                                        <a data-toggle="modal" data-target="#approve-modal" id="return"
+                                           class="btn btn-primary">{{ trans('material.确认归还') }}</a>
+                                        @include('material.approve-modal')
+                                    @endif
+                                @endif
+
+                                @if(Entrust::can('material.apply.info') && $type == \App\Models\Attendance\Leave::LOGIN_INFO
+                                && Entrust::can('material.apply.redraw'))
+                                    @if($apply['state'] == \App\Models\Material\Apply::APPLY_SUBMIT)
+                                        <a href="{{ route('material.apply.redraw', ['id' => $apply['id']]) }}"
+                                           class="btn btn-primary">{{ trans('material.撤回') }}</a>
+                                    @endif
+                                @endif
+                                <a class="btn btn-danger" href="{{ $back }}" id="back">{{ trans('att.返回列表') }}</a>
                             </div>
                         </div>
                     </div>
@@ -208,7 +202,7 @@
 
         $('#operate a:not(' + '#return, #back)').click(function () {
             var status = $(this).data('id');
-            edit_status(status, '是否' + $(this).text() + '!');
+            edit_status(status, '{{ trans('material.是否') }}' + $(this).text() + '!');
         });
 
         function edit_status(status, $msg) {
@@ -223,7 +217,8 @@
             $('.i-checks:checked').each(function (index, ele) {
                 invIds.push($(ele).val());
             });
-            $(location).prop('href', '{{ route('material.approve.return') }}' + '?inventoryIds=' + JSON.stringify(invIds));
+            var status = '{{ \App\Models\Material\Apply::APPLY_RETURN }}'
+            $(location).prop('href', '{{ route('material.approve.optStatus',['id' => $apply['id']]) }}' + "?status=" + status + '&inventoryIds=' + JSON.stringify(invIds));
         });
     });
 </script>

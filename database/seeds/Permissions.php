@@ -18,7 +18,8 @@ class Permissions extends Seeder
         '_staff',
         '_staffCfg',
         '_oa',
-        '_bulletin'
+        '_bulletin',
+        '_material',
     ];
 
     public function run()
@@ -251,4 +252,29 @@ class Permissions extends Seeder
             'bulletin.changeShow' => '公告栏管理/修改公告首页显示'
         ];
     }
+
+    //物料管理
+    private function _material(): array
+    {
+        return [
+            'material-all' => '所有权限/物料管理',
+
+            'material.inventory-all' => '物料管理/库存配置',
+            'material.inventory-list' => '库存配置/库存列表',
+            'material.inventory-create' => '库存配置/库存添加',
+            'material.inventory-edit' => '库存配置/库存修改',
+            'material.inventory-upload' => '库存配置/excel批量导入',
+
+            'material.apply-all'   => '物料管理/用户申请',
+            'material.apply.index' => '用户申请/申请列表',
+            'material.apply.create' => '用户申请/创建申请',
+            'material.apply.info' => '用户申请/查看申请详情',
+            'material.apply.redraw' => '用户申请/申请撤回',
+
+            'material.approve-all' => '物料管理/审批申请',
+            'material.approve.info' => '审批申请/查看审批申请详情',
+            'material.approve.index' => '审批申请/审批申请列表',
+        ];
+    }
 }
+

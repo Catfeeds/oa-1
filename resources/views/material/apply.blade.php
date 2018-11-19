@@ -6,19 +6,24 @@
             @include('flash::message')
             <div class="ibox">
                 <div class="ibox-title">
-                    <h5>近期申请记录</h5>
+                    <h5>{{ trans('material.近期前5条申请记录') }}</h5>
+                    <div class="ibox-tools">
+                        <a href="{{ route('material.apply.index-all') }}" style="color: #0a568c">{{ trans('material.显示更多') }}>></a>
+                    </div>
                 </div>
                 <div class="ibox-content">
                     <table class="table table-striped">
                         <thead>
                         <tr>
-                            <th>id</th>
-                            <th>名称</th>
-                            <th>申请事由</th>
-                            <th>预计归还时间</th>
-                            <th>申请时间</th>
-                            <th>状态</th>
-                            <th>操作</th>
+                            <th>{{ trans('material.id') }}</th>
+                            <th>{{ trans('material.名称') }}</th>
+                            <th>{{ trans('material.申请事由') }}</th>
+                            <th>{{ trans('material.预计归还时间') }}</th>
+                            <th>{{ trans('material.申请时间') }}</th>
+                            <th>{{ trans('material.状态') }}</th>
+                            @if(Entrust::can(['material.apply.info', 'material.apply.redraw']))
+                                <th>{{ trans('material.操作') }}</th>
+                            @endif
                         </tr>
                         </thead>
                         <tbody>
@@ -31,8 +36,14 @@
                                 <td>{{ $apply['created_at'] }}</td>
                                 <td>{{ \App\Models\Material\Apply::$stateChar[$apply['state']] }}</td>
                                 <td>
-                                    <a href="{{ route('material.apply.info') }}">查看详情</a>
-                                    <a href="{{ route('material.apply.redraw', ['id' => $apply['id']]) }}">撤回</a>
+                                    @if(Entrust::can('material.apply.info'))
+                                        <a href="{{ route('material.apply.info', ['id' => $apply['id'], 'type' => \App\Models\Attendance\Leave::LOGIN_INFO]) }}">{{ trans('material.查看详情') }}</a>
+                                    @endif
+                                    @if(Entrust::can('material.apply.redraw'))
+                                        @if($apply['state'] == \App\Models\Material\Apply::APPLY_SUBMIT)
+                                            <a href="{{ route('material.apply.redraw', ['id' => $apply['id']]) }}">{{ trans('material.撤回') }}</a>
+                                        @endif
+                                    @endif
                                 </td>
                             </tr>
                         @endforeach
@@ -44,26 +55,28 @@
         <div class="row">
             <div class="ibox">
                 <div class="ibox-title">
-                    <h5>资质库存列表</h5>
+                    <h5>{{ trans('material.资质库存列表') }}</h5>
                 </div>
                 <div class="ibox-content">
                     <div class="m-b-md">
-                        @include('widget.review-batch-operation-btn', ['btn' => [['submit-apply', '提交借用申请', 'btn-success']]])
+                        @include('widget.review-batch-operation-btn', ['btn' =>
+                            Entrust::can('material.apply.create') ? [['submit-apply', trans('material.提交借用申请'), 'btn-success']] : []
+                        ])
                     </div>
 
                     <table class="table table-striped">
                         <thead>
                         <tr>
                             <th width="4%"></th>
-                            <th>id</th>
-                            <th>类型</th>
-                            <th>名称</th>
-                            <th>内容</th>
-                            <th>说明</th>
-                            <th>所属公司</th>
-                            <th>库存数</th>
-                            <th>预计归还时间</th>
-                            <th>状态</th>
+                            <th>{{ trans('material.id') }}</th>
+                            <th>{{ trans('material.类型') }}</th>
+                            <th>{{ trans('material.名称') }}</th>
+                            <th>{{ trans('material.内容') }}</th>
+                            <th>{{ trans('material.说明') }}</th>
+                            <th>{{ trans('material.所属公司') }}</th>
+                            <th>{{ trans('material.库存数') }}</th>
+                            <th>{{ trans('material.预计归还时间') }}</th>
+                            <th>{{ trans('material.状态') }}</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -83,11 +96,11 @@
                                 <td>{{ $v->company }}</td>
                                 <td>{{ $v->inv_remain }}</td>
                                 @if(empty($v->inv_remain))
-                                    <td>2018-10-10</td>
-                                    <td>不可借用</td>
+                                    <td>{{ $expectReturn[$v->id] ?? NULL }}</td>
+                                    <td>{{ trans('material.不可借用') }}</td>
                                 @else
                                     <td>--</td>
-                                    <td>可借用</td>
+                                    <td>{{ trans('material.可借用') }}</td>
                                 @endif
                             </tr>
                         @endforeach
@@ -108,7 +121,11 @@
             $('.i-checks:checked').each(function (index, ele) {
                 invIds.push($(ele).val());
             });
-            $(location).prop('href', '{{ route('material.apply.create') }}' + '?inventoryIds=' + JSON.stringify(invIds));
+            if (invIds.length == 0) {
+                alert({{ trans('material.请选择以下库存再进行提交') }});
+            }else {
+                $(location).prop('href', '{{ route('material.apply.create') }}' + '?inventoryIds=' + JSON.stringify(invIds));
+            }
         })
     });
 
