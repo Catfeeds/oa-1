@@ -53,7 +53,7 @@ class LeaveController extends AttController
                 break;
             //抄送
             case Leave::COPY_LEAVE :
-                $res = AttendanceHelper::getCopyLeaveWhere($scope,\Auth::user()->user_id, 'copy_list');
+                $res = AttendanceHelper::getCopyLeaveWhere($scope,\Auth::user()->user_id, 'copy_user');
                 $where = $res['where'];
                 $userIds = $res['user_ids'];
                 break;
@@ -224,7 +224,7 @@ class LeaveController extends AttController
         $leave = Leave::with('holidayConfig')->findOrFail($id);
         if(empty($leave->leave_id)) return redirect()->route('leave.info');
         //抄送人员也可以查看
-        $copyIds = json_decode($leave->copy_list, true);
+        $copyIds = json_decode($leave->copy_user, true);
 
         if((!empty($copyIds)&&in_array(\Auth::user()->user_id, $copyIds)) || \Auth::user()->user_id === $leave->user_id) {
             $userIds = json_decode($leave->user_list, true);
