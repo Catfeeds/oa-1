@@ -15,6 +15,7 @@ use App\Http\Components\Helpers\PunchHelper;
 use App\Models\Attendance\DailyDetail;
 use App\Models\Attendance\Leave;
 use App\Models\Sys\HolidayConfig;
+use App\User;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 
 
@@ -59,17 +60,24 @@ class Recheck extends Operate implements AttendanceInterface
             ]),['请选择有效的时间范围']);
         }
 
+        //批量抄送组织可查询的JSON数据
+        if(!empty($copyUser)) {
+            $copyIds = [];
+            foreach ($copyUser as $d => $v) {
+                $roleIds['id_' . $v] = $v;
+            }
+            $copyUser = json_encode($copyIds);
+        }
         $data = [
             'start_time' => $startTime,
             'end_time' => $endTime,
             'holiday_id' => $holidayId,
             'number_day' => 0,//补打卡默认天数未0
-            'user_list' => '',
-            'copy_user' => json_encode($copyUser),
-            'start_id' => '',
-            'end_id' => '',
-            'exceed_day' => '',
-            'exceed_holiday_id' => '',
+            'copy_user' => $copyUser,
+            'start_id' => NULL,
+            'end_id' => NULL,
+            'exceed_day' => NULL,
+            'exceed_holiday_id' => NULL
         ];
 
         return  $this->backLeaveData(true, [], $data);
@@ -90,6 +98,18 @@ class Recheck extends Operate implements AttendanceInterface
         return parent::createLeave($leave);
     }
 
+    /**
+     * @param array $leave
+     * @return array
+     */
+    public function updateLeave(array $leave): array
+    {
+        return parent::updateLeave($leave);
+    }
+
+    /**
+     * @param $leave
+     */
     public function setDailyDetail($leave)
     {
         $startDay = strtotime($leave->start_time);
@@ -147,6 +167,9 @@ class Recheck extends Operate implements AttendanceInterface
 
     }
 
+    /**
+     * @param $dailyDetail
+     */
     public function updateSwitchInLeave($dailyDetail)
     {
         $punchHelper = app(PunchHelper::class);
@@ -165,5 +188,36 @@ class Recheck extends Operate implements AttendanceInterface
             $switch->number_day = $deduct;
             $switch->save();
         }
+    }
+
+    /**
+     * @param string $leaveId
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Http\RedirectResponse|\Illuminate\View\View
+     */
+    public function getLeaveView($leaveId = '')
+    {
+        $title = trans('att.补打卡');
+        $reviewUserId = '';
+
+        //申请单重启
+        if(!empty($leaveId) && \Entrust::can(['leave.restart'])) {
+            $leave = Leave::findOrFail($leaveId);
+            if((int)$leave->user_id !== \Auth::user()->user_id || !in_array($leave->status, Leave::$restartList)) {
+                flash('请勿非法操作', 'danger');
+                return redirect()->route('leave.info');
+            }
+            $title = trans('att.重启补打卡');
+        }
+
+        $allUsers = User::where(['status' => 1])->get();
+        $time = date('Y-m-d', time());
+
+        $holidayList = HolidayConfig::where(['apply_type_id' => HolidayConfig::RECHECK])
+            ->orderBy('sort', 'desc')
+            ->get(['holiday_id', 'holiday', 'punch_type']);
+        $daily = DailyDetail::where(['user_id' => \Auth::user()->user_id, 'day' => request()->day])->first();
+
+        return view('attendance.leave.recheck', compact('title', 'time', 'holidayList', 'leave', 'reviewUserId', 'daily', 'allUsers'));
+
     }
 }

@@ -29,6 +29,10 @@ class Leave extends Model
     const LOGIN_INFO = 1;
     const LOGIN_VERIFY_INFO = 2;
 
+    //是否统计
+    const IS_STAT_YES = 0;
+    const IS_STAT_NO = 1;
+
     //审核状态
     const WAIT_REVIEW = 0;
     const ON_REVIEW = 1;
@@ -38,6 +42,9 @@ class Leave extends Model
     const WAIT_EFFECTIVE = 5;
     const SWITCH_REVIEW_ON = 6;
     const SWITCH_REVIEW_OFF = 7;
+    const RETRACT_REVIEW = 8;
+    const RESTART_REVIEW = 9;
+
     //加班/调休时间点
     const WORK_TIME_POINT_1 = 1;
     const WORK_TIME_POINT_2 = 2;
@@ -68,18 +75,6 @@ class Leave extends Model
         self::COPY_LEAVE => '抄送我的申请单',
     ];
 
-    public static $startId = [
-        1 => '09:00',
-        2 => '13:45',
-        3 => '19:00',
-    ];
-
-    public static $endId = [
-        1 => '12:00',
-        2 => '18:00',
-        3 => '20:00',
-    ];
-
     /**
      * 审核状态
      * @var array
@@ -93,14 +88,49 @@ class Leave extends Model
         self::WAIT_EFFECTIVE => '已通过,待生效',
         self::SWITCH_REVIEW_ON => '转换假期生效',
         self::SWITCH_REVIEW_OFF => '转换假期取消',
+        self::RETRACT_REVIEW => '已撤回',
     ];
-    //排除已拒绝的状态
+    //查询排除已拒绝的状态
     public static $statusList = [
         self::WAIT_REVIEW ,
         self::ON_REVIEW ,
         self::PASS_REVIEW ,
-        self::CANCEL_REVIEW ,
         self::WAIT_EFFECTIVE ,
+    ];
+
+    //申请单可撤回的状态
+    public static $retractList = [
+        self::WAIT_REVIEW,
+        self::ON_REVIEW,
+    ];
+    //申请单可取消的状态
+    public static $cancelList = [
+        self::PASS_REVIEW,
+        self::WAIT_EFFECTIVE,
+    ];
+    //申请单可重启的状态
+    public static $restartList = [
+        self::REFUSE_REVIEW,
+        self::CANCEL_REVIEW,
+        self::RETRACT_REVIEW,
+    ];
+
+    //可操作的状态列表
+    public static $optStatus = [
+        self::REFUSE_REVIEW,
+        self::PASS_REVIEW,
+        self::CANCEL_REVIEW,
+        self::RETRACT_REVIEW,
+        self::RESTART_REVIEW,
+    ];
+
+    //操作状态驱动标识
+    public static $driverType = [
+        self::REFUSE_REVIEW => 'refuse',
+        self::PASS_REVIEW => 'pass',
+        self::CANCEL_REVIEW => 'cancel',
+        self::RETRACT_REVIEW => 'retract',
+        self::RESTART_REVIEW => 'restart',
     ];
 
     protected $fillable = [
@@ -122,6 +152,10 @@ class Leave extends Model
         'exceed_day',
         'exceed_holiday_id',
         'step_user',
+
+        'parent_id',
+        'is_stat',
+
     ];
 
     public function holidayConfig() {

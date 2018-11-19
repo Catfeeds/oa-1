@@ -11,6 +11,7 @@ namespace App\Http\Controllers\Admin\Sys;
 use App\Http\Controllers\Controller;
 use App\Models\Sys\Dept;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DeptController extends Controller
 {
@@ -23,9 +24,16 @@ class DeptController extends Controller
     public function index()
     {
         $form['dept'] = \Request::get('dept');
-        $data = Dept::where('dept', 'LIKE', "%{$form['dept']}%")->paginate();
+        $data = Dept::where('dept', 'LIKE', "%{$form['dept']}%")
+            ->whereNull('parent_id')
+            ->paginate();
+        $parent = Dept::whereNotNull('parent_id')
+            ->get(['dept_id', 'parent_id'])
+            ->pluck('parent_id', 'dept_id')
+            ->toArray();
+
         $title = trans('app.部门列表');
-        return view('admin.sys.dept', compact('title', 'data', 'form'));
+        return view('admin.sys.dept', compact('title', 'data', 'form', 'parent'));
     }
 
     public function create()
@@ -37,16 +45,44 @@ class DeptController extends Controller
     public function edit($id)
     {
         $dept = Dept::findOrFail($id);
+
+        $parent = Dept::where(['parent_id' => $dept->dept_id])->get();
+
         $title = trans('app.编辑', ['value' => trans('app.部门')]);
-        return view('admin.sys.dept-edit', compact('title', 'dept'));
+        return view('admin.sys.dept-edit', compact('title', 'dept', 'parent'));
     }
 
     public function store(Request $request)
     {
 
         $this->validate($request, $this->_validateRule);
+        $p = $request->all();
 
-        Dept::create($request->all());
+        $data = [
+            'dept' => $p['dept'],
+        ];
+
+        DB::beginTransaction();
+        try{
+            $dept = Dept::create($data);
+
+            if(!empty($p['child']) && is_array($p['child'])) {
+                foreach ($p['child'] as $k => $v) {
+                    $child = [
+                        'dept' => $v,
+                        'parent_id' => $dept->dept_id
+                    ];
+                    Dept::create($child);
+                }
+            }
+        } catch (\Exception $ex){
+            DB::rollBack();
+            flash(trans('app.添加失败', ['value' => trans('app.部门')]), 'danger');
+            return redirect($this->redirectTo);
+        }
+
+        DB::commit();
+
         flash(trans('app.添加成功', ['value' => trans('app.部门')]), 'success');
 
         return redirect($this->redirectTo);
@@ -54,16 +90,68 @@ class DeptController extends Controller
 
     public function update(Request $request, $id)
     {
+        $p = $request->all();
+
         $dept = Dept::findOrFail($id);
 
         $this->validate($request, array_merge($this->_validateRule, [
             'dept' => 'required|max:50|unique:users_dept,dept,' . $dept->dept_id.',dept_id',
         ]));
 
-        $dept->update($request->all());
+        $data = [
+            'dept' => $p['dept'],
+        ];
+
+        DB::beginTransaction();
+        try{
+            $dept->update($data);
+
+            if(!empty($p['child']) && is_array($p['child'])) {
+                foreach ($p['child'] as $k => $v) {
+                    $child = [
+                        'dept' => $v,
+                        'parent_id' => $dept->dept_id
+                    ];
+                    $check = Dept::where(['dept_id' => $k, 'parent_id' => $dept->dept_id ])->first();
+                    if(!empty($check->dept_id)) {
+                        $check->update($child);
+                    } else {
+                        Dept::create($child);
+                    }
+                }
+            }
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            trans('app.添加失败', ['value' => trans('app.部门')], 'danger');
+            return redirect($this->redirectTo);
+        }
+
+        DB::commit();
 
         flash(trans('app.编辑成功', ['value' => trans('app.部门')]), 'success');
         return redirect($this->redirectTo);
+    }
+
+    public function getChild(Request $request)
+    {
+        $id = $request->get('id');
+        $data = [];
+
+        $dept = Dept::where(['dept_id' => $id])->first();
+
+        if(empty($dept->dept_id)) return response()->json(['data' => $data]);
+
+        $child = Dept::where(['parent_id' => $dept->dept_id])->get()->toArray();
+
+        if(!empty($child)) {
+            foreach ($child as $k => $v) {
+                $data[$k]['dept'] = $v['dept'];
+                $data[$k]['created_at'] = $v['created_at'];
+            }
+        }
+
+        return response()->json(['data' => $data, 'title' => $dept->dept]);
+
     }
 
 }

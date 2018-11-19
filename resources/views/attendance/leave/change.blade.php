@@ -13,7 +13,7 @@
                 <div class="ibox-content">
 
                     {!! Form::open(['class' => 'form-horizontal', 'enctype' => 'multipart/form-data']) !!}
-
+                    {{ Form::hidden('leave_id', $leave->leave_id ?? '') }}
                     <div class="form-group @if (!empty($errors->first('holiday_id'))) has-error @endif">
                         {!! Form::label('holiday_id', trans('att.调休类型'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-2">
@@ -40,7 +40,7 @@
                         <div class="col-sm-3">
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                                {!! Form::text('start_time', $time , [
+                                {!! Form::text('start_time', !empty($leave->start_time) ? date('Y-m-d', strtotime($leave->start_time)) : $time  , [
                                 'class' => 'form-control date',
                                 'required' => true,
                                 ]) !!}
@@ -59,7 +59,7 @@
                         <div class="col-sm-3">
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                                {!! Form::text('end_time', '' , [
+                                {!! Form::text('end_time', $leave->end_time ?? old('start_time') ?? '' , [
                                 'class' => 'form-control date_time',
                                 ]) !!}
                                 <span class="help-block m-b-none">{{ $errors->first('end_time') }}</span>
@@ -73,24 +73,23 @@
                         </div>
                     </div>
 
-                    {{--只有上级才可以显示批量选择人员--}}
-                    @if(Auth::user()->is_leader === 1)
+                    {{--只有审批权限才可以显示批量选择人员--}}
+                    @if($isBatch &&Entrust::can(['leave.batchOvertime']))
                         <div class="hr-line-dashed"></div>
 
                         <div class="form-group @if (!empty($errors->first('dept_users'))) has-error @endif">
                             {!! Form::label('dept_users', trans('att.批量申请人员'), ['class' => 'col-sm-2 control-label']) !!}
-                            <div class="col-sm-5">
-                                <select multiple="multiple" class="js-select2-multiple form-control"
-                                        name="dept_users[]">
-                                    @foreach($deptUsers as $key => $val)
-                                        <option value="{{ $val['user_id'] }}"
-                                                @if (in_array($val['user_id'], $deptUsersSelected ?: old('dept_users') ?? [])) selected @endif>{{ $val['alias'].'('.$val['username'].')' }}</option>
+                            <div class="col-sm-8">
+                                <select name="dept_users[]" class="form-control dual_select" multiple>
+                                    @foreach($deptUsers as $dk => $dv)
+                                        <option value="{{$dk}}">{{$dv}}</option>
                                     @endforeach
                                 </select>
-                                <span class="help-block m-b-none">{{ $errors->first('dept_users') }}</span>
                             </div>
                         </div>
+
                     @endif
+
                     <div class="hr-line-dashed"></div>
 
                     <div class="form-group @if (!empty($errors->first('annex'))) has-error @endif">
@@ -122,7 +121,8 @@
                             <select multiple="multiple" class="js-select2-multiple form-control"
                                     name="copy_user[]">
                                 @foreach($allUsers as $key => $val)
-                                    <option value="{{ $val['user_id'] }}">{{ $val['alias'].'('.$val['username'].')' }}</option>
+                                    <option value="{{ $val['user_id'] }}
+                                    @if (!empty($copyUserIds) && in_array($key, $copyUserIds)) selected @endif">{{ $val['alias'].'('.$val['username'].')' }}</option>
                                 @endforeach
                             </select>
                             <span class="help-block m-b-none">{{ $errors->first('copy_user') }}</span>
@@ -162,9 +162,15 @@
 @include('widget.icheck')
 @include('widget.select2')
 @include('widget.datepicker')
+@include('widget.dual-listbox')
 @section('scripts-last')
     <script>
         $(function() {
+
+            $('.dual_select').bootstrapDualListbox({
+                selectorMinimalHeight: 300
+            });
+
 
             $("#select-thumb-file").change(function(){
                 readURL(this, '#show_thumb_image');
@@ -181,7 +187,6 @@
             $("#start_time").change(function(){
                 inquireStartInfo();
                 inquire();
-
             });
 
             showMemo();
@@ -284,6 +289,7 @@
                 $("#start_id").empty();
                 $('#show_pre').html('');
                 $('#show_memo').hide();
+                $('#show_step').html('');
             }
         }
 

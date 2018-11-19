@@ -11,12 +11,12 @@
     var pluginName = 'bootstrapDualListbox',
         defaults = {
             bootstrap2Compatible: false,
-            filterTextClear: 'show all',
-            filterPlaceHolder: 'Filter',
+            filterTextClear: '显示所有',
+            filterPlaceHolder: '模糊收索',
             moveSelectedLabel: 'Move selected',
-            moveAllLabel: 'Move all',
+            moveAllLabel: '全部添加',
             removeSelectedLabel: 'Remove selected',
-            removeAllLabel: 'Remove all',
+            removeAllLabel: '全部取消',
             moveOnSelect: true,                                                                 // true/false (forced true on androids, see the comment later)
             preserveSelectionOnMove: false,                                                     // 'all' / 'moved' / false
             selectedListLabel: false,                                                           // 'string', false
@@ -26,9 +26,9 @@
             showFilterInputs: true,                                                             // whether to show filter inputs
             nonSelectedFilter: '',                                                              // string, filter the non selected options
             selectedFilter: '',                                                                 // string, filter the selected options
-            infoText: 'Showing all {0}',                                                        // text when all options are visible / false for no info text
-            infoTextFiltered: '<span class="label label-warning">Filtered</span> {0} from {1}', // when not all of the options are visible due to the filter
-            infoTextEmpty: 'Empty list',                                                        // when there are no options present in the list
+            infoText: '成员 {0}',                                                        // text when all options are visible / false for no info text
+            infoTextFiltered: '<span class="label label-warning">匹配到</span> {0} 项,总共 {1}项', // when not all of the options are visible due to the filter
+            infoTextEmpty: '列表为空',                                                        // when there are no options present in the list
             filterOnValues: false,                                                              // filter by selector's values, boolean
             sortByInputOrder: false
         },

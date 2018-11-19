@@ -13,7 +13,7 @@
                 <div class="ibox-content">
 
                     {!! Form::open(['class' => 'form-horizontal', 'enctype' => 'multipart/form-data']) !!}
-
+                    {{ Form::hidden('leave_id', $leave->leave_id ?? '') }}
                     <div class="form-group @if (!empty($errors->first('holiday_id'))) has-error @endif">
                         {!! Form::label('holiday_id', trans('att.补打卡类型'), ['class' => 'col-sm-2 control-label']) !!}
                         @foreach($holidayList as $k => $v)

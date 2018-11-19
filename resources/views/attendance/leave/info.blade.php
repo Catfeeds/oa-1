@@ -136,7 +136,7 @@
                         {!! Form::label('reason', trans('att.审核状态'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-6">
                             <span class="help-block m-b-none">
-                                {{ empty($reviewUserId) ?  \App\Models\Attendance\Leave::$status[$leave->status] : '待['. \App\User::getUsernameAliasList()[$reviewUserId]. ']审核' }}
+                                {{ !in_array($leave->status, \App\Models\Attendance\Leave::$retractList) ?  \App\Models\Attendance\Leave::$status[$leave->status] : '待['. \App\User::getUsernameAliasList()[$reviewUserId]. ']审核' }}
                             </span>
                         </div>
                     </div>
@@ -148,9 +148,9 @@
                             {!! Form::label('reason', trans('att.调休名单'), ['class' => 'col-sm-2 control-label']) !!}
                             <div class="col-sm-6">
                                 <select disabled="disabled" multiple="multiple" class="js-select2-multiple form-control">
-                                    @foreach($deptUsers as $key => $val)
-                                        <option value="{{ $val['user_id'] }}"
-                                                @if (in_array($val['user_id'], $userIds)) selected @endif>{{ $val['alias'].'('.$val['username'].')' }}</option>
+                                    @foreach($users as $key => $val)
+                                        <option value="{{ $key }}"
+                                                @if (in_array($key, $userIds)) selected @endif>{{ $val }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -174,26 +174,23 @@
                             @endforeach
                         </div>
                     </div>
-
                 </div>
 
                     <div class="hr-line-dashed"></div>
 
                     <div class="form-group">
                         <div class="col-sm-4 col-sm-offset-5">
-                            @if(Entrust::can('leave.review'))
-                                @if(in_array($leave->status, [0, 1]))
-                                    @if($leave->review_user_id == Auth::user()->user_id )
-                                        <a id="by_status" data-id=3 class="btn btn-success">{{ trans('att.审核通过') }}</a>
-                                        <a id="refuse_status" data-id=2 class="btn btn-primary">{{ trans('att.拒绝通过') }}</a>
-                                    @endif
-                                @endif
-                            @endif
-                            @if((int)$type === \App\Models\Attendance\Leave::LOGIN_VERIFY_INFO)
-                                <a href="{{route('leave.review.info')}}" class="btn btn-info">{{ trans('att.返回列表') }}</a>
-                            @else
-                                <a href="{{route('leave.info')}}" class="btn btn-info">{{ trans('att.返回列表') }}</a>
-                            @endif
+
+                        @if(in_array($leave->status, \App\Models\Attendance\Leave::$retractList) && $leave->user_id == Auth::user()->user_id && Entrust::can(['leave.retract']) )
+                            <a id="retract_status" data-id='{{\App\Models\Attendance\Leave::RETRACT_REVIEW}}' class="btn btn-danger">{{ trans('att.撤回申请') }}</a>
+                        @endif
+
+                        @if(in_array($leave->status, \App\Models\Attendance\Leave::$restartList) && $leave->user_id == Auth::user()->user_id && Entrust::can(['leave.restart']) )
+                            <a id="restart_status" data-id='{{\App\Models\Attendance\Leave::RESTART_REVIEW}}' class="btn btn-success">{{ trans('att.重启申请') }}</a>
+                        @endif
+
+
+                        <a href="{{route('leave.info')}}" class="btn btn-info">{{ trans('att.返回列表') }}</a>
                         </div>
                     </div>
 
@@ -209,6 +206,7 @@
 @include('widget.icheck')
 @include('widget.select2')
 @include('widget.datepicker')
+
 @section('scripts-last')
     <script>
         $(function() {
@@ -235,31 +233,39 @@
             });
 
 
-            $('#by_status').click(function () {
+            $('#retract_status').click(function () {
                 var status = $(this).data('id');
-                edit_status(status, '是否审核通过!');
+                edit_status(status, '确认撤回申请单?')
             });
 
-            $('#refuse_status').click(function () {
+            $('#restart_status').click(function () {
                 var status = $(this).data('id');
-                edit_status(status, '是否拒绝通过!');
+                edit_status(status, '确认重启申请单?')
             });
-
-            function edit_status(status, $msg){
-                if(confirm($msg)==false) {
-                    return false;
-                }
-
-                $.get('{{ route('leave.review.optStatus',['id' => $leave->leave_id])}}', {status: status}, function ($data) {
-                    if ($data.status == 1) {
-                        bootbox.alert($data.msg);
-                        location.reload();
-                    } else {
-                        bootbox.alert($data.msg);
-                    }
-                })
-            }
 
         });
+
+        function edit_status(status, $msg){
+            bootbox.confirm($msg, function (result) {
+                if (result) {
+                    $.get('{{ route('leave.review.optStatus',['id' => $leave->leave_id])}}', {status: status}, function ($data) {
+                        if ($data.status == 1) {
+                            //重启状态地址跳转
+                            if($data.url != '') {
+                                window.location = $data.url;
+                            } else {
+                                bootbox.alert($data.msg);
+                                location.reload();
+                            }
+
+                        } else {
+                            bootbox.alert($data.msg);
+                        }
+                    })
+                }
+            });
+        }
+
+
     </script>
 @endsection

@@ -37,7 +37,31 @@
                                             ]) !!}
                                             <span class="help-block m-b-none">{{ $errors->first('dept') }}</span>
                                         </div>
+                                        <div class="col-sm-2">
+                                            <div class="col-sm-3 col-sm-offset-1">
+                                                {!! Form::button(trans('att.添加子部门'), ['class' => 'btn btn-info', 'id' => 'add_child']) !!}
+                                            </div>
+                                        </div>
                                     </div>
+                                    @if(!empty($parent))
+                                        @foreach($parent as $k => $v)
+                                            <div class="form-group">
+                                                {!! Form::label('dept', trans('app.子部门名称'), ['class' => 'col-sm-5 control-label']) !!}
+                                                <div class="col-sm-3">
+                                                    {!! Form::text('child['.$v->dept_id.']', $v->dept, [
+                                                    'class' => 'form-control',
+                                                    'placeholder' => trans('app.请输入', ['value' => trans('app.子部门名称')]),
+                                                    'required' => true,
+                                                    ]) !!}
+
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    @endif
+
+
+
+                                    <div id="add_copy" class="form-group"></div>
 
                                     <div class="form-group">
                                         <div class="col-sm-3 col-sm-offset-4">
@@ -53,4 +77,24 @@
             </div>
         </div>
     </div>
+@endsection
+@section('scripts-last')
+    <script>
+        $(function() {
+            var i = 1;
+            $('#add_child').click(function () {
+                var clone = $('.ibox-content').find("#add_copy").clone(true).attr({'id': 'create_div_' + i});
+
+                var html = '<label class="col-sm-5 control-label">子部门名称</label>' +
+                    '<div class="col-sm-3 ">' +
+                    ' <input class="form-control" name="child[]" placeholder="请输入子部门名称" type="text" value="" >' +
+                    '</div>';
+
+                clone.appendTo('#add_copy').html(html);
+                i++;
+            })
+
+        });
+
+    </script>
 @endsection

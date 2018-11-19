@@ -13,14 +13,14 @@
                 <div class="ibox-content">
 
                     {!! Form::open(['class' => 'form-horizontal', 'enctype' => 'multipart/form-data']) !!}
-
+                    {{ Form::hidden('leave_id', $leave->leave_id ?? '') }}
                     <div class="form-group @if (!empty($errors->first('holiday_id'))) has-error @endif">
                         {!! Form::label('holiday_id', trans('att.请假类型'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-2">
                             <select onchange="showMemo()" class="js-select2-single form-control" id="holiday_id" name="holiday_id" >
                                 <option value="">请选择</option>
                                 @foreach($holidayList as $k => $v)
-                                    <option value="{{ $k }}" @if($k === (int)old('holiday_id')) selected="selected" @endif>{{ $v }}</option>
+                                    <option value="{{ $k }}" @if($k === (int)(!empty($leave->holiday_id) ? $leave->holiday_id : old('holiday_id'))) selected="selected" @endif>{{ $v }}</option>
                                 @endforeach
                             </select>
                             <span class="help-block m-b-none">{{ $errors->first('holiday_id') }}</span>
@@ -40,7 +40,7 @@
                         <div class="col-sm-3">
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                                {!! Form::text('start_time', $time , [
+                                {!! Form::text('start_time', !empty($leave->start_time) ? date('Y-m-d', strtotime($leave->start_time)) : $time , [
                                 'class' => 'form-control date',
                                 'id' => 'start_time',
                                 'required' => true,
@@ -60,7 +60,7 @@
                         <div class="col-sm-3">
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                                {!! Form::text('end_time', $time , [
+                                {!! Form::text('end_time', !empty($leave->end_time) ? date('Y-m-d', strtotime($leave->end_time)) : $time  , [
                                 'class' => 'form-control date',
                                 'id' => 'end_time',
                                 'required' => true,
@@ -283,7 +283,15 @@
                                 multiple: false,// 多选
                                 data: $data.start_time //绑定数据
                             });
-                            $("#start_id").val($data.start_time[0]).select2();
+
+
+                            @if(!empty($startId))
+                                start_id = '{{$startId}}';
+                            @else
+                                start_id = $data.start_time[0];
+                            @endif
+
+                            $("#start_id").val(start_id).select2();
 
                         } else {
                             $("#start_id").select2("val", "");
@@ -301,7 +309,13 @@
                                 data: $data.end_time //绑定数据
                             });
 
-                            $("#end_id").val($data.end_time[0]).select2();
+                            @if(!empty($endId))
+                                end_id = '{{$endId}}';
+                            @else
+                                end_id = $data.end_time[0];
+                            @endif
+
+                            $("#end_id").val(end_id).select2();
                         } else {
                             $("#end_id").select2("val", "");
                             $("#end_id").empty();

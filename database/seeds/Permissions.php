@@ -86,6 +86,10 @@ class Permissions extends Seeder
             'leave.create'                      => '申请单管理/申请单添加',
             'leave.edit'                        => '申请单管理/申请单编辑',
             'leave.review'                      => '申请单管理/申请单审核',
+            'leave.batchOvertime'               => '申请单管理/申请单批量申请添加',
+            'leave.retract'                     => '申请单管理/申请单撤回',
+            'leave.cancel'                      => '申请单管理/申请单取消',
+            'leave.restart'                     => '申请单管理/申请单重启',
 
             'daily-detail-all'                  => '考勤管理/员工明细管理',
             'daily-detail'                      => '员工明细管理/考勤明细列表',
@@ -200,7 +204,7 @@ class Permissions extends Seeder
             'crm-all' => '所有权限/CRM管理',
 
             'reconciliation-all' => 'CRM管理/对账管理',
-            'reconciliation-reconciliationAudit.global'                    => '对账管理/全局查看权限',
+            'reconciliation-reconciliationAudit.global'             => '对账管理/全局查看权限',
             'reconciliation-reconciliationAudit'                    => '对账管理/对账列表',
             'reconciliation-reconciliationAudit.edit'               => '对账管理/对账编辑',
             'reconciliation-reconciliationAudit.review'             => '对账管理/对账审核',

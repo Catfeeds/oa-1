@@ -27,8 +27,8 @@ class HolidayConfig extends Model
 
     const LEAVEID = 1;
     const CHANGE = 2;
-    const OVERTIME = 2;
     const RECHECK = 3;
+    const OVERTIME = 4;
 
     const NO_SETTING = 0;
     const GO_WORK = 1;
@@ -76,10 +76,19 @@ class HolidayConfig extends Model
         self::RECHECK => 3,
     ];
 
+    //驱动类型
     public static $driverType = [
         self::LEAVEID => 'leaved',
         self::CHANGE => 'change',
         self::RECHECK => 'recheck',
+        self::OVERTIME => 'batchChange',
+    ];
+    //驱动类型Id
+    public static $driverTypeId = [
+        self::LEAVEID => 1,
+        self::CHANGE => 2,
+        self::RECHECK => 3,
+        self::OVERTIME => 4,
     ];
 
     public static $isShow = [

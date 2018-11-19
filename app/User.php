@@ -150,6 +150,19 @@ class User extends Authenticatable
         return $res;
     }
 
+    public static function getUsernameAliasAndDeptList()
+    {
+        $users = self::with('dept')->where(['status' => self::STATUS_ENABLE])->get()->toArray();
+
+        $res = [];
+        foreach ($users as $k => $v) {
+            $res[$v['user_id']] = $v['dept']['dept'].' -> '.$v['alias'] . '('. $v['username'] . ')';
+        }
+
+        return $res;
+    }
+
+
     public static function getStatusText($status)
     {
         return sprintf('<span class="label label-%s">%s</span>', self::$statusClass[$status], self::$statusList[$status]);

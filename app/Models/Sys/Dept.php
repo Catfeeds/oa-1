@@ -21,6 +21,7 @@ class Dept extends Model
 
     protected $fillable = [
         'dept',
+        'parent_id',
     ];
 
     public static function getDeptList()

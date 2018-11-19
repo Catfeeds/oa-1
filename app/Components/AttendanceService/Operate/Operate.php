@@ -86,7 +86,7 @@ class Operate
                     $dept = ' and dept_id ='.\Auth::user()->dept_id ;
                     if((int)$lv['group_type_id'] === 1) $dept = '';
                     $userLeader = User::whereRaw( $roleId . $dept )->first();
-                    if(empty($userLeader->user_id)) return self::backLeaveData(false, ['holiday_id' => trans('申请失败, 未设置部门主管权限，有疑问请联系人事')]);
+                    if(empty($userLeader->user_id)) return self::backLeaveData(false, ['holiday_id' => trans('申请失败，未设置部门审核人员,有疑问请联系人事')]);
                     $leaderStepUid[$lv['step_order_id']] = $userLeader->user_id;
                 }
             }
@@ -131,12 +131,12 @@ class Operate
             'end_id' => $leave['end_id'],
             'number_day' => $leave['number_day'],
             'reason' => $leave['reason'],
-            'user_list' => $leave['user_list'],
+            'user_list' => $leave['user_list'] ?? NULL,
             'status' => 0, //默认 0 待审批
             'annex' => $leave['image_path'] ?? '',
             'review_user_id' => $leave['review_user_id'],
             'remain_user' => $leave['remain_user'],
-            'copy_user' => $leave['copy_user'],
+            'copy_user' => $leave['copy_user'] ?? NULL,
             'exceed_day' => $leave['exceed_day'] ?? NULL,
             'exceed_holiday_id' => $leave['exceed_holiday_id'] ?? NULL,
             'step_user' => $leave['step_user'] ?? NULL
@@ -145,6 +145,34 @@ class Operate
          $ret = Leave::create($data);
 
          return $this->backLeaveData(true, [], ['leave_id' => $ret->leave_id]);
+    }
+
+    public function updateLeave(array $leave) : array
+    {
+
+        $data = [
+            'holiday_id' => $leave['holiday_id'],
+            'step_id' => $leave['step_id'],
+            'start_time' => $leave['start_time'],
+            'start_id' => $leave['start_id'],
+            'end_time' => $leave['end_time'],
+            'end_id' => $leave['end_id'],
+            'number_day' => $leave['number_day'],
+            'reason' => $leave['reason'],
+            'user_list' => $leave['user_list'] ?? NULL,
+            'status' => 0, //默认 0 待审批
+            'annex' => $leave['image_path'] ?? '',
+            'review_user_id' => $leave['review_user_id'],
+            'remain_user' => $leave['remain_user'],
+            'copy_user' => $leave['copy_user'] ?? NULL,
+            'exceed_day' => $leave['exceed_day'] ?? NULL,
+            'exceed_holiday_id' => $leave['exceed_holiday_id'] ?? NULL,
+            'step_user' => $leave['step_user'] ?? NULL
+        ];
+
+        Leave::where(['leave_id' => $leave['leave_id']])->update($data);
+
+        return $this->backLeaveData(true, [], ['leave_id' => $leave['leave_id']]);
     }
 
     /**

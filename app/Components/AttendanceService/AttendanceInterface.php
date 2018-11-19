@@ -25,6 +25,12 @@ interface AttendanceInterface
      * @return array
      */
     public function createLeave(array $leave) : array;
+    /**
+     * 更新申请单信息
+     * @param array $leave
+     * @return array
+     */
+    public function updateLeave(array $leave) : array;
 
     /**
      * 获取审核步骤

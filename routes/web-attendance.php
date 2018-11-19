@@ -31,13 +31,13 @@ Route::group([
         Route::post('leave/create/{id}', [
             'middleware' => ['permission:leave.create'],
             'uses' => 'LeaveController@store']);
-        Route::get('leave/edit', [
-            'middleware' => ['permission:leave.edit'],
-            'uses' => 'LeaveController@edit'])->name('leave.edit');
-        Route::post('leave/edit', [
-            'middleware' => ['permission:leave.edit'],
+        Route::get('leave/restart/{appId}/{id}', [
+            'middleware' => ['permission:leave.restart'],
+            'uses' => 'LeaveController@edit'])->name('leave.restart');
+        Route::post('leave/restart/{appId}/{id}', [
+            'middleware' => ['permission:leave.restart'],
             'uses' => 'LeaveController@update']);
-        Route::get('leave/optInfo/{id}/{type}', [
+        Route::get('leave/optInfo/{id}', [
             'middleware' => ['permission:leave.edit|leave.create'],
             'uses' => 'LeaveController@optInfo'])->name('leave.optInfo');
         Route::get('leave/show-memo', [
@@ -56,9 +56,9 @@ Route::group([
         Route::get('leave/review/', [
             'middleware' => ['permission:leave.review'],
             'uses' => 'LeaveController@reviewIndex'])->name('leave.review.info');
-        Route::get('leave/review/optInfo/{id}/{type}', [
+        Route::get('leave/review/optInfo/{id}/', [
             'middleware' => ['permission:leave.review'],
-            'uses' => 'LeaveController@optInfo'])->name('leave.review.optInfo');
+            'uses' => 'LeaveController@optReviewInfo'])->name('leave.review.optInfo');
         //批量操作
         Route::get('leave/review/{id}', [
             'middleware' => ['permission:leave.review'],

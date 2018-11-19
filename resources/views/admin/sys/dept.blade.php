@@ -50,6 +50,7 @@
                                             <tr>
                                                 <th>{{ trans('app.部门ID') }}</th>
                                                 <th>{{ trans('app.部门名称') }}</th>
+                                                <th>{{ trans('app.子部门列表') }}</th>
                                                 <th>{{ trans('app.提交时间') }}</th>
                                                 <th>{{ trans('app.操作') }}</th>
                                             </tr>
@@ -59,6 +60,14 @@
                                                 <tr>
                                                     <td>{{ $v['dept_id'] }}</td>
                                                     <td>{{ $v['dept'] }}</td>
+                                                    <td>
+                                                        @if(in_array($v['dept_id'], $parent))
+                                                         <button type="button" class="btn btn-primary btn-xs show-parent"
+                                                             data-id="{{ $v['dept_id'] }}">{{ trans('app.显示子部门') }}</button>
+                                                        @else
+                                                            {{ trans('app.无') }}
+                                                        @endif
+                                                    </td>
                                                     <td>{{ $v['created_at'] }}</td>
                                                     <td>
                                                         @if(Entrust::can(['dept.create']))
@@ -81,5 +90,68 @@
             </div>
         </div>
     </div>
+    {{--客户信息弹窗--}}
+    <div class="modal inmodal" id="child-modal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content animated fadeIn">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span
+                                class="sr-only">Close</span></button>
+                    <h4 class="modal-title"></h4>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped dept-child">
+                            <thead>
+                            <tr>
+                                <th>{{ trans('app.子部门名称') }}</th>
+                                <th>{{ trans('app.提交时间') }}</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{--JQ获取数据写入--}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">{{ trans('app.关闭') }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{--客户信息弹窗end--}}
 
 @endsection
+@push('scripts')
+<script>
+
+    $(function () {
+        $('.show-parent').click(function () {
+            var id = $(this).data('id');
+            show(id);
+        });
+    });
+
+    function show(id) {
+        $.getJSON('{{ route('dept.getChild') }}', {
+            'id': id
+        }, function (data) {
+
+            if(data.data == '') $(this).hide();
+
+            $('.modal-title').text('部门: ' + data.title);
+            var html = '';
+            $.each(data.data, function (k, v) {
+                html += '<tr>' +
+                    '       <td>' + v.dept + '</td>' +
+                            '<td>' + v.created_at + '</td>' +
+                        '</tr>';
+            });
+            $('.dept-child > tbody').html(html);
+            $('#child-modal').modal('show');
+        });
+    }
+
+</script>
+@endpush

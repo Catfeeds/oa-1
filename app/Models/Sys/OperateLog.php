@@ -19,6 +19,13 @@ class OperateLog extends Model
 
     protected $primaryKey = 'id';
 
+    //申请单
+    const LEAVED = 1;
+
+    public static $appId = [
+        self::LEAVED
+    ];
+
     protected $fillable = [
         'type_id',
         'info_id',

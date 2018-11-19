@@ -15,6 +15,7 @@ use App\Models\Attendance\Leave;
 use App\Models\Role;
 use App\Models\Sys\ApprovalStep;
 use App\Models\Sys\Calendar;
+use App\Models\Sys\Dept;
 use App\Models\Sys\HolidayConfig;
 use App\Models\Sys\ReviewStepFlow;
 use App\Models\UserHoliday;
@@ -59,10 +60,9 @@ class AttendanceHelper
      * @param $request
      * @return string
      */
-    public static function setAnnex($request) {
+    public static function setAnnex($request, $imagePath = '') {
 
         $file = 'annex';
-        $imagePath = $imageName = '';
         if ($request->hasFile($file) && $request->file($file)->isValid()) {
             $time = date('Ymd', time());
             $uploadPath = 'assert/images/'. $time;
@@ -71,41 +71,6 @@ class AttendanceHelper
             $imagePath = $uploadPath .'/'. $imageName;
         }
         return $imagePath;
-    }
-
-    /**
-     * 获取调休部门人员和假期ID
-     * @param int $deptId
-     * @return array
-     */
-    public static function getMyChangeLeaveId($deptId)
-    {
-        $leaveIds = $users = $changeWorkLeaveIds =  $changeLeaveIds =[];
-        $user = User::where(['dept_id' => $deptId, 'is_leader' => 1])->first();
-
-        if(empty($user->user_id)) return ['leave_ids' => $leaveIds, 'user_ids' => $users];
-
-        $leave = Leave::with('holidayConfig')->where(['user_id' => $user->user_id])->where('user_list', '!=', '')->get();
-
-        foreach ($leave as $k => $v) {
-            $userList = json_decode($v->user_list);
-
-            if(!empty($userList) && is_array($userList) && in_array(\Auth::user()->user_id, $userList)) {
-                $leaveIds[] = $v->leave_id;
-                $users[] = $userList;
-            }
-
-            if(!empty($userList) && !empty($v->holidayConfig) && $v->holidayConfig->change_type === HolidayConfig::WEEK_WORK && in_array(\Auth::user()->user_id, $userList)){
-                $changeWorkLeaveIds[] = $v->leave_id;
-            }
-
-            if(!empty($userList) && !empty($v->holidayConfig) && $v->holidayConfig->change_type === HolidayConfig::WORK_CHANGE && in_array(\Auth::user()->user_id, $userList)){
-                $changeLeaveIds[] = $v->leave_id;
-            }
-
-        }
-
-        return ['leave_ids' => $leaveIds, 'user_ids' => $users, 'leave_work_ids' => $changeWorkLeaveIds, 'leave_change_ids' => $changeLeaveIds];
     }
 
     /**
@@ -189,52 +154,51 @@ class AttendanceHelper
 
 
     /**
-     * 获取有关自己的调休和抄送人员申请单列表
+     * 获取有关自己抄送人员申请单列表
      * @param null $deptId
-     * @param int $type
-     * @return array
+     * @return string
      */
-    public static function setChangeList($type, $deptId = NULL)
+    public static function getCopyLeaveWhere($scope, $userId, $field)
     {
-        if(empty($deptId)) $deptId = \Auth::user()->dept_id;
-
-        $where = '';
-        $changeLeaveIds = self::getMyChangeLeaveId($deptId);
-        $copyLeaveIds = self::getCopyUser();
-
-        switch ($type) {
-            case Leave::DEPT_LEAVE://调休
-                $leaveIds =  $changeLeaveIds['leave_ids'];
-                if(!empty($leaveIds)) {
-                    $leaveIds = implode(',', $leaveIds);
-                    $where = " AND Leave_id in ($leaveIds)";
-                } else {
-                    $where = " AND Leave_id in (-1)";
-                }
-                break;
-            case Leave::COPY_LEAVE://抄送
-                $leaveIds =  $copyLeaveIds['leave_ids'];
-                if(!empty($leaveIds)) {
-                    $leaveIds = implode(',', $leaveIds);
-                    $where = " AND Leave_id in ($leaveIds)";
-                } else {
-                    $where = " AND Leave_id in (-1)";
-                }
-        }
-        $userIds = $changeLeaveIds['user_ids'] + $copyLeaveIds['user_ids'];
-
-        if(!empty($userIds)) {
-            $users = [];
-            foreach ($userIds as $k => $v) {
-                if(empty($v)) continue;
-                foreach ($v as $vv) {
-                    $users[] = $vv;
-                }
-            }
-            $userIds = array_filter($users);
+        $userIds = [];
+        $res = self::getCopyLeaveId($scope, $userId, $field);
+        if(!empty($res['leave_id'])) {
+            $leaveIds = implode(',', $res['leave_id']);
+            $where = " AND Leave_id in ($leaveIds)";
+            $userIds = $res['user_ids'];
+        } else {
+            $where = " AND Leave_id in (-1)";
         }
 
         return ['where' => $where, 'user_ids' => $userIds];
+    }
+
+
+    /**
+     * 获取调休部门人员和假期ID
+     * @param int $deptId
+     * @return array
+     */
+    public static function getCopyLeaveId($scope, $userId, $field)
+    {
+        $leaveIds = $userIds = [];
+        $leave = Leave::with('holidayConfig')
+            ->where(['user_id' => $userId])
+            ->where($field, '!=', '""')
+            ->whereRaw($scope->where)
+            ->OrwhereRaw( $field . ' != "" and ' . sprintf('JSON_EXTRACT('.$field.', "$.id_%d") = "%d"', $userId, $userId)) //包含由批量申请调休名单
+            ->get();
+
+        if(!empty($leave)) {
+            foreach ($leave as $k => $v) {
+                if(!empty($v->holidayConfig)  && $field == 'copy_list') {
+                    $userIds[$v->leave_id] = json_decode($v->user_list, true);
+                    $leaveIds[] = $v->leave_id;
+                }
+            }
+        }
+
+        return ['leave_id' => $leaveIds, 'user_ids' => $userIds];
     }
 
     /**

@@ -273,7 +273,7 @@ class UserController extends Controller
         if ($form['username']) {
             $where[] = sprintf('username like \'%%%s%%\'', $form['username']);
         }
-
+        //json格式mysql查询语句
         if ($form['role_id']) {
             $where[] = sprintf('JSON_EXTRACT(role_id, "$.id_%d") = "%d"', $form['role_id'], $form['role_id']);
         }

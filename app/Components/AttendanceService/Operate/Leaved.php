@@ -17,6 +17,8 @@ use App\Models\Attendance\Leave;
 use App\Models\Sys\Calendar;
 use App\Models\Sys\HolidayConfig;
 use App\Models\Sys\PunchRules;
+use App\Models\UserExt;
+use App\User;
 
 
 class Leaved extends Operate implements AttendanceInterface
@@ -36,9 +38,8 @@ class Leaved extends Operate implements AttendanceInterface
         //假期配置ID
         $holidayId = $p['holiday_id'];
 
-        //批量调休人员名单
-        $userList = $p['dept_users'] ?? '';
-        $copyUser = $p['copy_user'] ?? '';
+        //抄送人员名单
+        $copyUser = $p['copy_user'] ?? NULL;
         //申请时间
         $startTime = (string)$p['start_time'];
         $endTime = (string)$p['end_time'];
@@ -55,15 +56,14 @@ class Leaved extends Operate implements AttendanceInterface
         if(empty($numberDay)) {
             return $this->backLeaveData(false, ['end_time' => trans('申请失败,时间跨度异常，有疑问请联系人事')]);
         }
-
         //验证是否已经有再提交的请假单,排除已拒绝的请假单
+        $where =  sprintf(' and user_id =%d and status not in(%s)',\Auth::user()->user_id, implode(',', [Leave::REFUSE_REVIEW, Leave::RETRACT_REVIEW]));
         $isLeaves = Leave::whereRaw("
-            status != 2 and 
-            `start_time` BETWEEN '{$startTime}' and '{$endTime}'
-                or 
-            `end_time` BETWEEN '{$startTime}' and '{$endTime}'
-        ")->get();
-
+                `start_time` BETWEEN '{$startTime}' and '{$endTime}'
+                {$where}
+            ")->orWhereRaw("`end_time` BETWEEN '{$startTime}' and '{$endTime}'
+                {$where}
+            ")->get();
         foreach ($isLeaves as $lk => $lv) {
             if(empty($lv->user_id)) continue;
             $diffEndTime = strtotime(AttendanceHelper::spliceLeaveTime($lv->holiday_id, $lv->end_time, $lv->end_id)['time']);
@@ -75,6 +75,7 @@ class Leaved extends Operate implements AttendanceInterface
         $holidayConfig = HolidayConfig::where(['holiday_id' => $holidayId])->first();
         $driver = HolidayConfig::$cypherTypeChar[$holidayConfig->cypher_type];
         $userHoliday = $this->driver($driver)->check($holidayConfig, $numberDay);
+
         //验证是否要上次附件
         if($holidayConfig->is_annex === HolidayConfig::STATUS_ENABLE && empty($p['annex'])) {
             return $this->backLeaveData(false, ['annex' => trans('请上传附件')]);
@@ -101,19 +102,27 @@ class Leaved extends Operate implements AttendanceInterface
         if(!$userHoliday['success']) {
             return $this->backLeaveData(false, $userHoliday['message']);
         }
+
+        //批量抄送组织可查询的JSON数据
+        if(!empty($copyUser)) {
+            $copyIds = [];
+            foreach ($copyUser as $d => $v) {
+                $copyIds['id_' . $v] = $v;
+            }
+            $copyUser = json_encode($copyIds);
+        }
+
         //返回数据
-        $userList = json_encode($userList);
         $data = [
             'start_time' => $startTime,
             'end_time' => $endTime,
             'holiday_id' => $holidayId,
             'number_day' => $numberDay,
-            'user_list' => $userList,
-            'copy_user' => json_encode($copyUser),
+            'copy_user' => $copyUser,
             'start_id' => $p['start_id'],
             'end_id' => $p['end_id'],
-            'exceed_day' => $userHoliday['exceed_day'] ?? NULL,
-            'exceed_holiday_id' => $userHoliday['exceed_day'] ?? NULL
+            'exceed_day' => $userHoliday['data']['exceed_day'] ?? NULL,
+            'exceed_holiday_id' => $userHoliday['data']['exceed_holiday_id'] ?? NULL
         ];
 
         return  $this->backLeaveData(true, [], $data);
@@ -132,6 +141,15 @@ class Leaved extends Operate implements AttendanceInterface
     public function createLeave(array $leave): array
     {
         return parent::createLeave($leave);
+    }
+
+    /**
+     * @param array $leave
+     * @return array
+     */
+    public function updateLeave(array $leave): array
+    {
+        return parent::updateLeave($leave);
     }
 
     /**
@@ -165,5 +183,42 @@ class Leaved extends Operate implements AttendanceInterface
     public function setDailyDetail($leave)
     {
         return parent::setDailyDetail($leave);
+    }
+
+    /**
+     * @param string $leaveId
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Http\RedirectResponse|\Illuminate\View\View
+     */
+    public function getLeaveView($leaveId = '')
+    {
+        $title = trans('att.请假申请');
+        $reviewUserId = $startId = $endId = '';
+
+        //申请单重启
+        if(!empty($leaveId) && \Entrust::can(['leave.restart'])) {
+            $leave = Leave::findOrFail($leaveId);
+            if((int)$leave->user_id !== \Auth::user()->user_id || !in_array($leave->status, Leave::$restartList)) {
+                flash('请勿非法操作', 'danger');
+                return redirect()->route('leave.info');
+            }
+            $startId = $leave->start_id;
+            $endId = $leave->end_id;
+            $title = trans('att.重启请假申请');
+        }
+
+        $allUsers = User::where(['status' => 1])->get();
+        $time = date('Y-m-d', time());
+
+        $holidayList = HolidayConfig::where(['apply_type_id' => HolidayConfig::LEAVEID])
+            ->whereIn('restrict_sex', [\Auth::user()->userExt->sex, UserExt::SEX_NO_RESTRICT])
+            ->where(['is_show' => HolidayConfig::STATUS_ENABLE])
+            ->orderBy('sort', 'desc')
+            ->get(['holiday_id', 'holiday'])
+            ->pluck('holiday', 'holiday_id')
+            ->toArray();
+
+
+        return view('attendance.leave.edit', compact('title', 'time', 'startId', 'endId', 'holidayList', 'leave', 'reviewUserId' ,  'deptUsers', 'allUsers'));
+
     }
 }

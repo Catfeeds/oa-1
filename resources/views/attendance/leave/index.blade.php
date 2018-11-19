@@ -35,6 +35,10 @@
                 <a href="{{ route('leave.create', ['id' => \App\Models\Sys\HolidayConfig::CHANGE]) }}" class="btn btn-success btn-sm">{{ trans('调休申请') }}</a>
                 <a href="{{ route('leave.create', ['id' => \App\Models\Sys\HolidayConfig::RECHECK]) }}" class="btn btn-danger btn-sm">{{ trans('补打卡') }}</a>
             @endif
+            @if(Entrust::can(['leave.batchOvertime']))
+                <a href="{{ route('leave.create', ['id' => \App\Models\Sys\HolidayConfig::OVERTIME]) }}" class="btn btn-info btn-sm">{{ trans('批量申请加班') }}</a>
+
+            @endif
         </div>
     </div>
 
@@ -118,8 +122,14 @@
                                    {{-- @if(Entrust::can(['leave.edit']))
                                         {!! BaseHtml::tooltip(trans('app.设置'), route('leave.edit', ['id' => $v['leave_id']]), 'cog fa-lg') !!}
                                     @endif--}}
-                                    @if(($v['user_id'] == \Auth::user()->user_id || $v['review_user_id'] == \Auth::user()->user_id || in_array(\Auth::user()->user_id, $userIds)) && Entrust::can(['leave.edit', 'leave.review']))
-                                        {!! BaseHtml::tooltip(trans('att.请假详情'), route('leave.optInfo', ['id' => $v['leave_id'], 'type' => \App\Models\Attendance\Leave::LOGIN_INFO]), 'cog fa fa-newspaper-o') !!}
+                                    @if(($v['user_id'] == \Auth::user()->user_id || $v['review_user_id'] == \Auth::user()->user_id || in_array(\Auth::user()->user_id, $userIds[$v['leave_id']] ?? [])) && Entrust::can(['leave.create', 'leave.review']))
+                                       {{--针对批量调休成员查看主订单--}}
+                                        @if(!empty($v['parent_id']))
+                                            {!! BaseHtml::tooltip(trans('att.请假详情'), route('leave.optInfo', ['id' => $v['parent_id']]), 'cog fa fa-newspaper-o') !!}
+                                        @else
+                                            {!! BaseHtml::tooltip(trans('att.请假详情'), route('leave.optInfo', ['id' => $v['leave_id']]), 'cog fa fa-newspaper-o') !!}
+
+                                        @endif
                                     @endif
                                 </td>
                                 @if(Entrust::can('appeal.store'))
@@ -161,7 +171,7 @@
                 info: false,
                 searching: false,
                 fixedHeader: true,
-                "order": [[1, "asc"]],
+                "order": [[7, "desc"]],
                 pageLength: 25,
                 responsive: true,
                 dom: '<"html5buttons"B>lTfgitp',

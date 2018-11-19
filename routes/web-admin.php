@@ -104,6 +104,9 @@ Route::group([
     Route::post('sys/dept/edit/{id}', [
         'middleware' => ['permission:dept.edit'],
         'uses' => 'Sys\DeptController@update']);
+    Route::get('sys/dept/get-child/', [
+        'middleware' => ['permission:dept.edit|dept.create'],
+        'uses' => 'Sys\DeptController@getChild'])->name('dept.getChild');
 
     //岗位管理
     Route::get('sys/job', [
