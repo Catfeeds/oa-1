@@ -15,7 +15,7 @@ use App\Models\Attendance\Leave;
 use App\Models\Sys\HolidayConfig;
 use App\User;
 
-class BatchChange extends Operate implements AttendanceInterface
+class Batchchange extends Operate implements AttendanceInterface
 {
     /**
      * 检验申请单验证
