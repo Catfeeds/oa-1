@@ -221,7 +221,7 @@ class LeaveController extends AttController
      */
     public function optInfo($id)
     {
-        $leave = Leave::with('holidayConfig')->findOrFail($id);
+        $leave = Leave::with('holidayConfig1')->findOrFail($id);
         if(empty($leave->leave_id)) return redirect()->route('leave.info');
         //抄送人员也可以查看
         $copyIds = json_decode($leave->copy_user, true);

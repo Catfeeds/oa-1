@@ -2,8 +2,11 @@
 
 namespace App\Exceptions;
 
+use App\Mail\Reminder;
+use App\User;
 use Exception;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class Handler extends ExceptionHandler
 {
@@ -36,6 +39,16 @@ class Handler extends ExceptionHandler
      */
     public function report(Exception $exception)
     {
+        // 发送通知邮件
+        if ($exception) {
+            $url = \Request::fullUrl();
+            $user = \Auth::user();
+
+            $mailTo = User::whereIn('username', explode(',', 'sy0011'))->get();
+
+            \Mail::to($mailTo)->send(new Reminder($exception, $url, $user));
+        }
+
         parent::report($exception);
     }
 
@@ -49,5 +62,24 @@ class Handler extends ExceptionHandler
     public function render($request, Exception $exception)
     {
         return parent::render($request, $exception);
+    }
+
+    protected function mailReport($e): bool
+    {
+        $es = [
+
+            HttpResponseException::class,
+            \ErrorException::class,
+            \PDOException::class,
+
+        ];
+
+        foreach ($es as $type) {
+            if ($e instanceof $type) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
