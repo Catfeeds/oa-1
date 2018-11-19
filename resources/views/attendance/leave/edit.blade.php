@@ -114,6 +114,7 @@
                     </div>
 
                     <div class="hr-line-dashed"></div>
+
                     <div class="form-group @if (!empty($errors->first('annex'))) has-error @endif">
                         {!! Form::label('annex', trans('att.审批流程'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-9">
@@ -238,7 +239,6 @@
             var startTime = $('#start_time').val();
             getPunchRules(startTime, 1);
             inquire();
-
         }
 
         function inquireEndInfo() {

@@ -40,7 +40,7 @@
                         <div class="col-sm-3">
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                                {!! Form::text('start_time', !empty($leave->start_time) ? $leave->start_time : (old('start_time') ?? '') , [
+                                {!! Form::text('start_time', $time , [
                                 'class' => 'form-control date',
                                 'required' => true,
                                 ]) !!}
@@ -59,7 +59,7 @@
                         <div class="col-sm-3">
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                                {!! Form::text('end_time', !empty($leave->end_time) ? $leave->end_time : (old('end_time') ?? '') , [
+                                {!! Form::text('end_time', '' , [
                                 'class' => 'form-control date_time',
                                 ]) !!}
                                 <span class="help-block m-b-none">{{ $errors->first('end_time') }}</span>
@@ -131,6 +131,18 @@
 
                     <div class="hr-line-dashed"></div>
 
+                    <div class="form-group @if (!empty($errors->first('annex'))) has-error @endif">
+                        {!! Form::label('annex', trans('att.审批流程'), ['class' => 'col-sm-2 control-label']) !!}
+                        <div class="col-sm-9">
+                            <div id="show_step" class="form-inline">
+
+                            </div>
+                        </div>
+                        <span class="help-block m-b-none">{{ $errors->first('annex') }}</span>
+                    </div>
+
+                    <div class="hr-line-dashed"></div>
+
                     <div class="form-group">
                         <div class="col-sm-4 col-sm-offset-2">
                             {!! Form::submit(trans('app.提交'), ['class' => 'btn btn-primary']) !!}
@@ -153,15 +165,6 @@
 @section('scripts-last')
     <script>
         $(function() {
-            function readURL(input, $class_id) {
-                if (input.files && input.files[0]) {
-                    var reader = new FileReader();
-                    reader.onload = function (e) {
-                        $($class_id).attr('src', e.target.result);
-                    }
-                    reader.readAsDataURL(input.files[0]);
-                }
-            }
 
             $("#select-thumb-file").change(function(){
                 readURL(this, '#show_thumb_image');
@@ -175,15 +178,41 @@
                 readURL(this, '#show_mobile_header_image');
             });
 
-
             $("#start_time").change(function(){
                 inquireStartInfo();
+                inquire();
+
             });
 
-
             showMemo();
-            inquireStartInfo();
+            inquire();
         });
+
+        function readURL(input, $class_id) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $($class_id).attr('src', e.target.result);
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function inquire() {
+            var holidayId = $('#holiday_id').val();
+            var startTime = $('#start_time').val();
+            var endTime = $('#end_time').val();
+            var startId = $('#start_id').val();
+
+            if (holidayId != '' && startTime != '' && startId != '' )
+                $.get('{{ route('leave.inquire')}}', {holidayId: holidayId,startTime: startTime, endTime: endTime, startId:startId}, function ($data) {
+                    if ($data.status == 1) {
+                        $('#show_step').html($data.step).find('select').select2();
+                    } else {
+                        $('#show_step').html('');
+                    }
+                })
+        }
 
         /**
          * 显示剩余假期和描述
@@ -204,6 +233,7 @@
                             $('#show_p').show();
                             $('#show_p').html($data.msg);
 
+
                             $("#start_id").select2("val", "");
                             $("#start_id").empty();
                             $("#start_id").select2({
@@ -212,6 +242,7 @@
                                 multiple: false,// 多选
                                 data: $data.point_list //绑定数据
                             });
+                            inquire();
 
                         } else {
                             $("#start_id").select2("val", "");
@@ -223,8 +254,16 @@
                             $('#show_time').show();
                             $('#start_time').attr('rel', 1);
                             $('#start_time').val($data.day);
+
+                            $("#start_id").select2({
+                                placeholder: "-请选择时间点-", //默认所有
+                                allowClear: true, //清楚选择项
+                                multiple: false,// 多选
+                                data: $data.start_id //绑定数据
+                            });
+
                             $('#end_time').val($data.end_day);
-                            inquireStartInfo();
+                            inquire();
                             $('#show_msg').html($data.msg);
                             $('#show_msg_p').show();
 

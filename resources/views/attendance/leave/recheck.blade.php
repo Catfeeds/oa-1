@@ -35,7 +35,7 @@
                             <div class="col-sm-3">
                                 <div class="input-group">
                                     <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                                    {!! Form::text('start_time', !empty($leave->start_time) ? $leave->start_time : (old('start_time') ?? '') , [
+                                    {!! Form::text('start_time', $time . ' 09:00' , [
                                     'class' => 'form-control date_time',
                                     ]) !!}
                                     <span class="help-block m-b-none">{{ $errors->first('start_time') }}</span>
@@ -51,7 +51,7 @@
                             <div class="col-sm-3">
                                 <div class="input-group">
                                     <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                                    {!! Form::text('end_time', !empty($leave->end_time) ? $leave->end_time : (old('end_time') ?? '') , [
+                                    {!! Form::text('end_time', $time . ' 20:00' , [
                                     'class' => 'form-control date_time',
                                     ]) !!}
                                     <span class="help-block m-b-none">{{ $errors->first('end_time') }}</span>
@@ -82,6 +82,33 @@
                             ]) !!}
                         </div>
                         <span class="help-block m-b-none">{{ $errors->first('reason') }}</span>
+                    </div>
+
+                    <div class="hr-line-dashed"></div>
+
+                    <div class="form-group @if (!empty($errors->first('copy_user'))) has-error @endif">
+                        {!! Form::label('copy_user', trans('att.抄送'), ['class' => 'col-sm-2 control-label']) !!}
+                        <div class="col-sm-3">
+                            <select multiple="multiple" class="js-select2-multiple form-control"
+                                    name="copy_user[]">
+                                @foreach($allUsers as $key => $val)
+                                    <option value="{{ $val['user_id'] }}">{{ $val['alias'].'('.$val['username'].')' }}</option>
+                                @endforeach
+                            </select>
+                            <span class="help-block m-b-none">{{ $errors->first('copy_user') }}</span>
+                        </div>
+                    </div>
+
+                    <div class="hr-line-dashed"></div>
+
+                    <div class="form-group @if (!empty($errors->first('annex'))) has-error @endif">
+                        {!! Form::label('annex', trans('att.审批流程'), ['class' => 'col-sm-2 control-label']) !!}
+                        <div class="col-sm-9">
+                            <div id="show_step" class="form-inline">
+
+                            </div>
+                        </div>
+                        <span class="help-block m-b-none">{{ $errors->first('annex') }}</span>
                     </div>
 
                     <div class="hr-line-dashed"></div>
@@ -145,11 +172,14 @@
             };
 
             $('input[type="checkbox"]').on('ifChecked', function () {
+                var arr = $(this).val().split('$$');
                 if ($(this).attr('id') == "recheck_1") {
+                    inquire(arr[0]);
                     $('#onwork_div').show();
                 }
 
                 if ($(this).attr('id') == "recheck_2") {
+                    inquire(arr[0]);
                     $('#offwork_div').show();
                 }
 
@@ -158,13 +188,32 @@
             $('input[type="checkbox"]').on('ifUnchecked', function () {
                 if ($(this).attr('id') == "recheck_1") {
                     $('#onwork_div').hide();
+                    $('show_step').html('');
                 }
 
                 if ($(this).attr('id') == "recheck_2") {
                     $('#offwork_div').hide();
+                    $('show_step').html('');
                 }
 
             });
+
+            function inquire(hid) {
+                var holidayId = hid;
+                var startTime = $('#start_time').val();
+                var endTime = $('#end_time').val();
+
+                if(holidayId != '') {
+                    $.get('{{ route('leave.inquire')}}', {holidayId: holidayId,startTime: startTime, endTime: endTime}, function ($data) {
+                        if ($data.status == 1) {
+                            $('#show_step').html($data.step).find('select').select2();
+                        } else {
+                            $('#show_step').html('');
+                        }
+                    })
+                }
+
+            }
 
             @if(!empty($daily))
                 @if(empty($daily->punch_start_time))

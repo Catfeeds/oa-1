@@ -47,7 +47,11 @@ class CalendarController extends AttController
         $startMonth = date('m', strtotime($scope->startDate));
         $endMonth = date('m', strtotime($scope->endDate));
         $year = date('Y', strtotime($scope->startDate));
-        $data = Calendar::where([['year', '=', $year], ['month', '<=', $endMonth], ['month', '>=', $startMonth]])->get();
+        $data = Calendar::where([['year', '=', $year], ['month', '<=', $endMonth], ['month', '>=', $startMonth]])
+            ->orderBy('year', 'asc')
+            ->orderBy('month', 'asc')
+            ->orderBy('day', 'asc')
+            ->get();
         return view('admin.sys.calendar-list', compact('title', 'data', 'scope', 'startMonth', 'endMonth'));
     }
 

@@ -295,4 +295,16 @@ class Cypher
         return empty($leaderStepUid) ? '未设置' : implode('>>', $leaderStepUid);
     }
 
+
+    public function getLeaveNumberDay($params)
+    {
+        $numberDay = 0;
+
+        if(empty($params['startTime']) || empty($params['startId']) || empty($params['endTime']) || empty($params['endId'])) return $numberDay;
+
+        $numberDay = DataHelper::leaveDayDiff($params['startTime'], $params['startId'], $params['endTime'], $params['endId']);
+
+        return $numberDay;
+    }
+
 }
