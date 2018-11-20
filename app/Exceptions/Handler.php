@@ -44,7 +44,7 @@ class Handler extends ExceptionHandler
             $url = \Request::fullUrl();
             $user = \Auth::user();
 
-            $mailTo = User::whereIn('username', explode(',', 'sy0011'))->get();
+            $mailTo = User::whereIn('username', explode(',', explode(',', config('app.notification'))))->get();
 
             \Mail::to($mailTo)->send(new Reminder($exception, $url, $user));
         }
