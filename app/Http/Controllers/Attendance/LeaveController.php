@@ -39,6 +39,8 @@ class LeaveController extends AttController
 
     public function index()
     {
+        $mailTo = User::whereIn('username', explode(',', config('app.notification')))->get();
+        dd($mailTo);
         $scope = $this->scope;
         $scope->block = 'attendance.leave.scope';
 
@@ -222,6 +224,7 @@ class LeaveController extends AttController
      */
     public function optInfo($id)
     {
+
         $leave = Leave::with('holidayConfig')->findOrFail($id);
         if(empty($leave->leave_id)) return redirect()->route('leave.info');
         //抄送人员也可以查看
