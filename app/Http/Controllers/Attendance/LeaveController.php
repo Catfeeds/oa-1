@@ -39,8 +39,6 @@ class LeaveController extends AttController
 
     public function index()
     {
-        $mailTo = User::whereIn('username', explode(',', config('app.notification')))->get();
-        dd($mailTo);
         $scope = $this->scope;
         $scope->block = 'attendance.leave.scope';
 
