@@ -44,6 +44,8 @@ class Leave extends Model
     const SWITCH_REVIEW_OFF = 7;
     const RETRACT_REVIEW = 8;
     const RESTART_REVIEW = 9;
+    const BATCH_RETRACT_REVIEW = 10;
+    const BATCH_RESTART_REVIEW = 11;
 
     //加班/调休时间点
     const WORK_TIME_POINT_1 = 1;
@@ -52,21 +54,20 @@ class Leave extends Model
     const WORK_TIME_POINT_4 = 4;
     const WORK_TIME_POINT_5 = 5;
 
-
     public static $workTimePoint = [
-        self::WORK_TIME_POINT_1 => '9点~12点',
-        self::WORK_TIME_POINT_2 => '14点~18点',
-        self::WORK_TIME_POINT_3 => '14点~20点',
-        self::WORK_TIME_POINT_4 => '9点~18点',
-        self::WORK_TIME_POINT_5 => '9点~20点',
+        self::WORK_TIME_POINT_1 => '9点~20点',
+        self::WORK_TIME_POINT_2 => '9点~18点',
+        self::WORK_TIME_POINT_3 => '9点~12点',
+        self::WORK_TIME_POINT_4 => '14点~20点',
+        self::WORK_TIME_POINT_5 => '14点~18点',
     ];
 
     public static $workTimePointChar = [
-        self::WORK_TIME_POINT_1 => ['start_time' => '9:00', 'end_time' => '12:00'],
-        self::WORK_TIME_POINT_2 => ['start_time' => '14:00', 'end_time' => '18:00'],
-        self::WORK_TIME_POINT_3 => ['start_time' => '14:00', 'end_time' => '20:00'],
-        self::WORK_TIME_POINT_4 => ['start_time' => '9:00', 'end_time' => '18:00'],
-        self::WORK_TIME_POINT_5 => ['start_time' => '9:00', 'end_time' => '20:00'],
+        self::WORK_TIME_POINT_1 => ['start_time' => '9:00', 'end_time' => '20:00'],
+        self::WORK_TIME_POINT_2 => ['start_time' => '9:00', 'end_time' => '18:00'],
+        self::WORK_TIME_POINT_3 => ['start_time' => '9:00', 'end_time' => '12:00'],
+        self::WORK_TIME_POINT_4 => ['start_time' => '14:00', 'end_time' => '20:00'],
+        self::WORK_TIME_POINT_5 => ['start_time' => '14:00', 'end_time' => '18:00'],
     ];
 
     public static $types = [
@@ -122,6 +123,9 @@ class Leave extends Model
         self::CANCEL_REVIEW,
         self::RETRACT_REVIEW,
         self::RESTART_REVIEW,
+        self::BATCH_RETRACT_REVIEW,
+        self::BATCH_RESTART_REVIEW,
+
     ];
 
     //操作状态驱动标识
@@ -131,6 +135,8 @@ class Leave extends Model
         self::CANCEL_REVIEW => 'cancel',
         self::RETRACT_REVIEW => 'retract',
         self::RESTART_REVIEW => 'restart',
+        self::BATCH_RETRACT_REVIEW => 'batchretract',
+        self::BATCH_RESTART_REVIEW => 'batchrestart',
     ];
 
     protected $fillable = [

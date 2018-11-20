@@ -181,14 +181,26 @@
                     <div class="form-group">
                         <div class="col-sm-4 col-sm-offset-5">
 
-                        @if(in_array($leave->status, \App\Models\Attendance\Leave::$retractList) && $leave->user_id == Auth::user()->user_id && Entrust::can(['leave.retract']) )
+                        @if(in_array($leave->status, \App\Models\Attendance\Leave::$retractList) && $cypherType !== \App\Models\Sys\HolidayConfig::CYPHER_OVERTIME && $leave->user_id == Auth::user()->user_id && Entrust::can(['leave.retract']) )
                             <a id="retract_status" data-id='{{\App\Models\Attendance\Leave::RETRACT_REVIEW}}' class="btn btn-danger">{{ trans('att.撤回申请') }}</a>
                         @endif
 
-                        @if(in_array($leave->status, \App\Models\Attendance\Leave::$restartList) && $leave->user_id == Auth::user()->user_id && Entrust::can(['leave.restart']) )
+                        @if(in_array($leave->status, \App\Models\Attendance\Leave::$restartList) && $cypherType !== \App\Models\Sys\HolidayConfig::CYPHER_OVERTIME && $leave->user_id == Auth::user()->user_id && Entrust::can(['leave.restart']) )
                             <a id="restart_status" data-id='{{\App\Models\Attendance\Leave::RESTART_REVIEW}}' class="btn btn-success">{{ trans('att.重启申请') }}</a>
                         @endif
 
+                        {{--针对批量申请单操作--}}
+                        @if(in_array($leave->status, \App\Models\Attendance\Leave::$retractList) && $cypherType === \App\Models\Sys\HolidayConfig::CYPHER_OVERTIME && $leave->user_id == Auth::user()->user_id && Entrust::can(['leave.retract']) )
+                            <a id="batch_retract_status" data-id='{{\App\Models\Attendance\Leave::BATCH_RETRACT_REVIEW}}' class="btn btn-danger">{{ trans('att.批量撤回申请') }}</a>
+                        @endif
+                        {{--针对批量申请单个人操作--}}
+                        @if(in_array($leave->status, \App\Models\Attendance\Leave::$retractList) && $cypherType === \App\Models\Sys\HolidayConfig::CYPHER_OVERTIME && (!empty($userIds) &&in_array(Auth::user()->user_id, $userIds)) && Entrust::can(['leave.retract']) )
+                            <a id="retract_status" data-id='{{\App\Models\Attendance\Leave::RETRACT_REVIEW}}' class="btn btn-danger">{{ trans('att.个人撤回申请') }}</a>
+                        @endif
+
+                        @if(in_array($leave->status, \App\Models\Attendance\Leave::$restartList) && $cypherType === \App\Models\Sys\HolidayConfig::CYPHER_OVERTIME && $leave->user_id == Auth::user()->user_id && Entrust::can(['leave.restart']) )
+                            <a id="batch_restart_status" data-id='{{\App\Models\Attendance\Leave::BATCH_RESTART_REVIEW}}' class="btn btn-success">{{ trans('att.批量重启申请') }}</a>
+                        @endif
 
                         <a href="{{route('leave.info')}}" class="btn btn-info">{{ trans('att.返回列表') }}</a>
                         </div>
@@ -237,10 +249,18 @@
                 var status = $(this).data('id');
                 edit_status(status, '确认撤回申请单?')
             });
+            $('#batch_retract_status').click(function () {
+                var status = $(this).data('id');
+                edit_status(status, '确认批量撤回申请单?')
+            });
 
             $('#restart_status').click(function () {
                 var status = $(this).data('id');
                 edit_status(status, '确认重启申请单?')
+            });
+            $('#batch_restart_status').click(function () {
+                var status = $(this).data('id');
+                edit_status(status, '确认批量重启申请单?')
             });
 
         });

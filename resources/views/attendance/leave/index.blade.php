@@ -122,7 +122,7 @@
                                    {{-- @if(Entrust::can(['leave.edit']))
                                         {!! BaseHtml::tooltip(trans('app.设置'), route('leave.edit', ['id' => $v['leave_id']]), 'cog fa-lg') !!}
                                     @endif--}}
-                                    @if(($v['user_id'] == \Auth::user()->user_id || $v['review_user_id'] == \Auth::user()->user_id || in_array(\Auth::user()->user_id, $userIds[$v['leave_id']] ?? [])) && Entrust::can(['leave.create', 'leave.review']))
+                                    @if(($v['user_id'] === \Auth::user()->user_id || $v['review_user_id'] == \Auth::user()->user_id || in_array(\Auth::user()->user_id, $userIds[$v['leave_id']] ?? [])) && Entrust::can(['leave.create']))
                                        {{--针对批量调休成员查看主订单--}}
                                         @if(!empty($v['parent_id']))
                                             {!! BaseHtml::tooltip(trans('att.请假详情'), route('leave.optInfo', ['id' => $v['parent_id']]), 'cog fa fa-newspaper-o') !!}

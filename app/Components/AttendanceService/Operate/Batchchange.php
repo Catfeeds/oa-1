@@ -127,6 +127,7 @@ class Batchchange extends Operate implements AttendanceInterface
 
     public function createLeave(array $leave): array
     {
+
        $userList = NULL;
         //批量申请组织可查询的JSON数据
         if(!empty($leave['user_list'])) {
@@ -175,6 +176,67 @@ class Batchchange extends Operate implements AttendanceInterface
     }
 
     /**
+     * @param array $leave
+     * @return array
+     */
+    public function updateLeave(array $leave): array
+    {
+        $userList = NULL;
+        //批量申请组织可查询的JSON数据
+        if(!empty($leave['user_list'])) {
+            $userIds = [];
+            foreach ($leave['user_list'] as $k => $v) {
+                $userIds['id_' . $v] = $v;
+            }
+            $userList = json_encode($userIds);
+        }
+        //基本数据
+        $data = [
+            'holiday_id' => $leave['holiday_id'],
+            'step_id' => $leave['step_id'],
+            'start_time' => $leave['start_time'],
+            'start_id' => $leave['start_id'],
+            'end_time' => $leave['end_time'],
+            'end_id' => $leave['end_id'],
+            'number_day' => $leave['number_day'],
+            'reason' => $leave['reason'],
+            'status' => 0, //默认 0 待审批
+        ];
+
+        //创建批量申请主订单，不纳入统计
+        $parentData = [
+            'user_list' => $userList,
+            'copy_user' => $leave['copy_user'] ?? NULL,
+            'is_stat' => Leave::IS_STAT_NO,
+            'annex' => $leave['image_path'] ?? '',
+            'review_user_id' => $leave['review_user_id'],
+            'remain_user' => $leave['remain_user'],
+            'step_user' => $leave['step_user'] ?? NULL
+        ];
+        Leave::where(['user_id' => \Auth::user()->user_id, 'leave_id' => $leave['leave_id']])
+            ->update($data + $parentData);
+
+        //批量生成调休单成员
+        if(!empty($leave['user_list'])) {
+            foreach ($leave['user_list'] as $uk => $uid) {
+                $user = Leave::where(['user_id' => $uid, 'parent_id' => $leave['leave_id']])
+                    ->first();
+
+                if(empty($user->user_id)) {
+                    $data['user_id'] = $uid;
+                    $data['parent_id'] = $leave['leave_id'];
+                    Leave::create($data);
+                } else {
+
+                    $user->update($data);
+                }
+            }
+        }
+
+        return $this->backLeaveData(true, [], ['leave_id' => $leave['leave_id']]);
+    }
+
+    /**
      * 审核操作
      * @param object $leave
      */
@@ -206,7 +268,8 @@ class Batchchange extends Operate implements AttendanceInterface
     public function getLeaveView($leaveId = '')
     {
         $title = trans('att.批量申请加班');
-        $reviewUserId = '';
+        $reviewUserId = $startId = '';
+        $deptUsersSelected = $copyUserIds = [];
 
         //申请单重启
         if(!empty($leaveId) && \Entrust::can(['leave.restart'])) {
@@ -215,6 +278,10 @@ class Batchchange extends Operate implements AttendanceInterface
                 flash('请勿非法操作', 'danger');
                 return redirect()->route('leave.info');
             }
+            $deptUsersSelected = json_decode($leave->user_list, true);
+            $copyUserIds = json_decode($leave->copy_user, true);
+            $startId = (int)$leave->number_day;
+
             $title = trans('att.重启批量加班申请');
         }
 
@@ -226,12 +293,11 @@ class Batchchange extends Operate implements AttendanceInterface
             ->get(['holiday_id', 'holiday'])
             ->pluck('holiday', 'holiday_id')->toArray();
 
-        $deptUsersSelected = [];
         //获取所有部门员工
         $deptUsers = User::getUsernameAliasAndDeptList();
         $isBatch = true;
 
-        return view('attendance.leave.change', compact('title', 'time', 'holidayList', 'leave', 'reviewUserId' , 'deptUsersSelected', 'deptUsers', 'allUsers', 'isBatch'));
+        return view('attendance.leave.change', compact('title', 'time', 'startId', 'holidayList', 'leave', 'reviewUserId' , 'deptUsersSelected', 'deptUsers', 'copyUserIds', 'allUsers', 'isBatch'));
     }
 
 }
