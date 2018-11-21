@@ -96,18 +96,15 @@ class PunchRulesConfig extends Model
                     $date[] = $v;
                     break;
                 case 1 :
-                    $date[] = $v;
-                    break;
-                case 2 :
                     $date[] = $v * 24 * 60 * 60;
                     break;
-                case 3 :
+                case 2 :
                     $date[] = $v * 60 * 60;
                     break;
-                case 4 :
+                case 3 :
                     $date[] = $v * 60;
                     break;
-                case 5 :
+                default :
                     $date[] = $v;
                     break;
             }
