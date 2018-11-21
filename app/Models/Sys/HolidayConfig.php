@@ -185,11 +185,6 @@ class HolidayConfig extends Model
         'reset_type',
         'duration',
         'change_type',
-
-        //待删除
-        'num',
-        'is_boon',
-        'condition_id',
     ];
 
     public static function getHolidayList($ifIncludeSwitch = false)

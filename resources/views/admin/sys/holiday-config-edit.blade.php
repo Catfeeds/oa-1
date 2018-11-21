@@ -147,7 +147,7 @@
                                     <div class="form-group @if (!empty($errors->first('cypher_type'))) has-error @endif">
                                         {!! Form::label('cypher_type', trans('app.计算类型'), ['class' => 'col-sm-3 control-label']) !!}
                                         <div class="col-sm-2">
-                                            <select onchange="func()" class="js-select2-single form-control" id="cypher_type" name="cypher_type" >
+                                            <select onchange="func()" required="required" class="js-select2-single form-control" id="cypher_type" name="cypher_type" >
                                                 <option value="">{{trans('app.计算类型选择')}}</option>
                                                 @foreach(\App\Models\Sys\HolidayConfig::$cypherType as $k => $v)
                                                     <option value="{{ $k }}" @if($k === $holiday->cypher_type) selected="selected" @endif>{{ $v }}</option>
