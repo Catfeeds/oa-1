@@ -53,7 +53,7 @@ class LeaveController extends AttController
                 break;
             //抄送
             case Leave::COPY_LEAVE :
-                $res = AttendanceHelper::getCopyLeaveWhere($scope,\Auth::user()->user_id, 'copy_list');
+                $res = AttendanceHelper::getCopyLeaveWhere($scope,\Auth::user()->user_id, 'copy_user');
                 $where = $res['where'];
                 $userIds = $res['user_ids'];
                 break;
@@ -161,23 +161,24 @@ class LeaveController extends AttController
         return redirect()->route('leave.info');
     }
 
-    public function update(Request $request)
+    public function update(Request $request, $applyTypeId, $id)
     {
         $p = $request->all();
 
-        if(empty($p['leave_id'])) {
+        //验证是否是有效的请假配置类型和数据
+        if(empty($p['leave_id']) || !in_array((int)$applyTypeId, HolidayConfig::$driverTypeId)) {
             flash('申请失败,请重新提交申请!', 'danger');
             return redirect()->route('leave.info');
         }
 
         $leaveS = Leave::with('holidayConfig')->findOrFail($p['leave_id']);
-
-        if(empty($leaveS->leave_id)) {
+        if(empty($leaveS->leave_id) || $leaveS->leave_id !== (int)$id) {
             flash('申请失败,请重新提交申请!', 'danger');
             return redirect()->route('leave.info');
         }
+
         //驱动
-        $driver = HolidayConfig::$driverType[$leaveS->holidayConfig->apply_type_id];
+        $driver = HolidayConfig::$driverType[$applyTypeId];
         //申请单检验
         $retCheck = \AttendanceService::driver($driver)->checkLeave($request);
         if(!$retCheck['success']) return redirect()->back()->with(['holiday_id' => $p['holiday_id']])->withInput()->withErrors($retCheck['message']);
@@ -213,7 +214,7 @@ class LeaveController extends AttController
         //事物提交
         DB::commit();
 
-        flash(trans('app.重启申请单成功'), 'success');
+        flash(trans('att.重启申请单成功'), 'success');
         return redirect()->route('leave.info');
     }
 
@@ -224,26 +225,31 @@ class LeaveController extends AttController
      */
     public function optInfo($id)
     {
+
         $leave = Leave::with('holidayConfig')->findOrFail($id);
         if(empty($leave->leave_id)) return redirect()->route('leave.info');
         //抄送人员也可以查看
-        $copyIds = json_decode($leave->copy_list, true);
+        $copyIds = json_decode($leave->copy_user, true);
+        $userIds = json_decode($leave->user_list, true);
 
-        if((!empty($copyIds)&&in_array(\Auth::user()->user_id, $copyIds)) || \Auth::user()->user_id === $leave->user_id) {
-            $userIds = json_decode($leave->user_list, true);
+        if((!empty($copyIds) && in_array(\Auth::user()->user_id, $copyIds)) || (!empty($userIds) && in_array(\Auth::user()->user_id, $userIds)) || \Auth::user()->user_id === $leave->user_id) {
             $reviewUserId = $leave->review_user_id;
             $logs = OperateLog::where(['type_id' => OperateLog::LEAVED, 'info_id' => $leave->leave_id])->get();
             $dept = Dept::getDeptList();
             $title = trans('att.申请单详情');
-            $applyTypeId = HolidayConfig::getHolidayApplyList()[$leave->holiday_id];
+            $applyTypeId = $leave->holidayConfig->apply_type_id;
+            $cypherType = $leave->holidayConfig->cypher_type;
             $users = User::getUsernameAliasAndDeptList();
-            return view('attendance.leave.info', compact('title',  'leave', 'dept', 'users', 'reviewUserId',  'logs', 'applyTypeId', 'userIds', 'deptUsers', 'type'));
+            return view('attendance.leave.info', compact('title',  'leave', 'dept', 'users', 'reviewUserId',  'logs', 'applyTypeId', 'userIds', 'deptUsers', 'cypherType'));
         } else {
             return redirect()->route('leave.info');
         }
     }
 
-
+    /**
+     * @param $id
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Http\RedirectResponse|\Illuminate\View\View
+     */
     public function optReviewInfo($id)
     {
         $leave = Leave::with('holidayConfig')->findOrFail($id);
@@ -259,14 +265,13 @@ class LeaveController extends AttController
             $logs = OperateLog::where(['type_id' => OperateLog::LEAVED, 'info_id' => $leave->leave_id])->get();
             $dept = Dept::getDeptList();
             $title = trans('att.申请单详情');
-            $applyTypeId = HolidayConfig::getHolidayApplyList()[$leave->holiday_id];
+            $applyTypeId = $leave->holidayConfig->apply_type_id;
             $users = User::getUsernameAliasAndDeptList();
             return view('attendance.leave.review-info', compact('title',  'leave', 'dept', 'users', 'reviewUserId',  'logs', 'applyTypeId', 'userIds', 'deptUsers'));
         } else {
             return redirect()->route('leave.review.info');
         }
     }
-
 
     /**
      * 审核管理页面

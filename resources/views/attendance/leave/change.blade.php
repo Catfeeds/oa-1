@@ -82,7 +82,8 @@
                             <div class="col-sm-8">
                                 <select name="dept_users[]" class="form-control dual_select" multiple>
                                     @foreach($deptUsers as $dk => $dv)
-                                        <option value="{{$dk}}">{{$dv}}</option>
+                                        <option value="{{$dk}}"
+                                                @if (!empty($deptUsersSelected) && in_array($dk, $deptUsersSelected)) selected @endif>{{$dv}}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -121,8 +122,8 @@
                             <select multiple="multiple" class="js-select2-multiple form-control"
                                     name="copy_user[]">
                                 @foreach($allUsers as $key => $val)
-                                    <option value="{{ $val['user_id'] }}
-                                    @if (!empty($copyUserIds) && in_array($key, $copyUserIds)) selected @endif">{{ $val['alias'].'('.$val['username'].')' }}</option>
+                                    <option value="{{ $val['user_id'] }}"
+                                    @if (!empty($copyUserIds) && in_array($val['user_id'], $copyUserIds)) selected @endif>{{ $val['alias'].'('.$val['username'].')' }}</option>
                                 @endforeach
                             </select>
                             <span class="help-block m-b-none">{{ $errors->first('copy_user') }}</span>
@@ -247,6 +248,12 @@
                                 multiple: false,// 多选
                                 data: $data.point_list //绑定数据
                             });
+
+                            //针对订单重启
+                            @if(!empty($startId))
+                              $("#start_id").select2("val", "{{$startId}}");
+                            @endif
+
                             inquire();
 
                         } else {

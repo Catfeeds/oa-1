@@ -2,17 +2,17 @@
 /**
  * Created by PhpStorm.
  * User: weiming Email: 329403630@qq.com
- * Date: 2018/11/16
- * Time: 17:17
- * 申请单 重启
+ * Date: 2018/11/20
+ * Time: 9:51
  */
 
 namespace App\Components\AttendanceService\OptStatus;
 
-
 use App\Models\Attendance\Leave;
+use App\Models\Sys\HolidayConfig;
+use App\Models\Sys\OperateLog;
 
-class Restart
+class Batchrestart extends Opt
 {
     public function optLeaveStatus($leave, Int $status)
     {
@@ -21,8 +21,10 @@ class Restart
             //自定义报错异常，后续可日子记录
             throw new \Exception('错误操作记录');
 
-        $url = redirect()->route('leave.restart', ['apply_type_id' => $leave->holidayConfig->apply_type_id, 'id' => $leave->leave_id]);
+        $url = redirect()->route('leave.restart', ['apply_type_id' => HolidayConfig::OVERTIME, 'id' => $leave->leave_id]);
+
         if(empty($url)) throw new \Exception('错误操作记录');
+
         //微信通知审核人员
         //OperateLogHelper::sendWXMsg($review_user_id, '测试下');
 

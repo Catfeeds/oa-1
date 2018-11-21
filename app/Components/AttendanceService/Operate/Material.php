@@ -42,7 +42,7 @@ class Material extends Operate
                 $dept = ' and dept_id =' . \Auth::user()->dept_id;
                 if ((int)$lv['group_type_id'] === 1) $dept = '';
                 $userLeader = User::whereRaw($roleId . $dept)->first();
-                if (empty($userLeader->user_id)) return self::backLeaveData(false, ['material' => trans('申请失败, 未设置部门主管权限，有疑问请联系人事')]);
+                if (empty($userLeader->user_id)) return self::backLeaveData(false, ['material' => trans('申请失败, 未设置部门审核人员，有疑问请联系人事')]);
                 $leaderStepUid[$lv['step_order_id']] = $userLeader->user_id;
             }
         }

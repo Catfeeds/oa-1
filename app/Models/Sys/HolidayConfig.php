@@ -91,7 +91,7 @@ class HolidayConfig extends Model
         self::LEAVEID => 'leaved',
         self::CHANGE => 'change',
         self::RECHECK => 'recheck',
-        self::OVERTIME => 'batchChange',
+        self::OVERTIME => 'batchchange',
     ];
     //驱动类型Id
     public static $driverTypeId = [

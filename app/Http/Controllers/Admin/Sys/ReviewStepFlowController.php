@@ -31,7 +31,7 @@ class ReviewStepFlowController extends Controller
 
     public function index()
     {
-        $data = ReviewStepFlow::paginate();
+        $data = ReviewStepFlow::paginate(100);
         $title = trans('app.审核流程配置列表');
         return view('admin.sys.review-step-flow', compact('title', 'data'));
     }

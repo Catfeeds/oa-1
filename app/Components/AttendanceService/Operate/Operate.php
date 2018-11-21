@@ -83,8 +83,8 @@ class Operate
 
                 if((int)$lv['assign_type'] === 1) {
                     $roleId = sprintf('JSON_EXTRACT(role_id, "$.id_%d") = "%d"', $lv['assign_role_id'], $lv['assign_role_id']);
-                    $dept = ' and dept_id ='.\Auth::user()->dept_id ;
-                    if((int)$lv['group_type_id'] === 1) $dept = '';
+                    $dept = ' and dept_id ='. \Auth::user()->dept_id ;
+                    if((int)$lv['group_type_id'] === 1 || empty(\Auth::user()->dept_id)) $dept = '';
                     $userLeader = User::whereRaw( $roleId . $dept )->first();
                     if(empty($userLeader->user_id)) return self::backLeaveData(false, ['holiday_id' => trans('申请失败，未设置部门审核人员,有疑问请联系人事')]);
                     $leaderStepUid[$lv['step_order_id']] = $userLeader->user_id;
