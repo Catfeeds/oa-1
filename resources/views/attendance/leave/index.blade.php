@@ -76,9 +76,10 @@
                 <div class="row">
                     <div class="col-md-2 list-group" style="padding: 10px">
                         <div class="list-group-item"><h4 class="list-group-item-heading">剩余可申请的福利假</h4></div>
-                        <p class="list-group-item">剩余年假: {{ $remainWelfare['year']['number_day'] ?? '尚未配置该福利假' }}</p>
-                        <p class="list-group-item">剩余节假日调休: {{ $remainWelfare['change']['number_day'] ?? '尚未配置该福利假' }}</p>
-                        <p class="list-group-item">剩余探亲假: {{ $remainWelfare['visit']['number_day'] ?? '尚未配置该福利假' }}</p>
+                        @foreach($remainWelfare as $k => $v)
+                            <p class="list-group-item">{!!  $v['holiday_name'] .' : ' .$v['msg']!!}</p>
+                        @endforeach
+
                     </div>
                     <div class="col-md-10 table-responsive pre-scrollable" style="padding-left: 10px; border-left: 1px solid #e7eaec;">
                         <table id="example" class="table  dataTable table-striped tooltip-demo">

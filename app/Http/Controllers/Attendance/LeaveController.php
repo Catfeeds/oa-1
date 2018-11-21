@@ -66,8 +66,15 @@ class LeaveController extends AttController
             ->orderBy('created_at', 'desc')
             ->get();
 
-        $remainWelfare = 0;
+        //申请页面需要显示的剩余假期
+        $holidayConfig = HolidayConfig::whereIn('show_name', ['年假', '调休假', '探亲假'])->get();
+        $remainWelfare = [];
+        foreach ($holidayConfig as $k => $v) {
+            $driver = HolidayConfig::$cypherTypeChar[$v->cypher_type];
+            $remainWelfare[] = \AttendanceService::driver($driver, 'cypher')->getUserHoliday(\Auth::user()->userExt->entry_time, \Auth::user()->user_id, $v);
+        }
 
+        //申诉
         $appealData = Appeal::getAppealResult(Appeal::APPEAL_LEAVE);
 
         $title = trans('att.我的假期详情');
@@ -82,7 +89,6 @@ class LeaveController extends AttController
             flash('申请失败,请勿非法操作', 'danger');
             return redirect()->route('leave.info');
         }
-
         //驱动
         $driver = HolidayConfig::$driverType[$applyTypeId];
         //返回申请不同页面
@@ -90,6 +96,12 @@ class LeaveController extends AttController
         return $res;
     }
 
+    /**
+     * 重启申请单
+     * @param $applyTypeId
+     * @param $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function edit($applyTypeId, $id)
     {
         if(!in_array((int)$applyTypeId, HolidayConfig::$driverTypeId)) {

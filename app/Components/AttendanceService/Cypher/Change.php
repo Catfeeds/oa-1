@@ -49,6 +49,7 @@ class Change extends Cypher
             'memo' => $holidayConfig->memo,
             'number_day' => $leaveInfo,
             'count_num' => $leaveInfo,
+            'holiday_name' => $holidayConfig->show_name,
             'data' => $leaveInfo,
             'point_list' => $pointList,
             'msg' => $msg
