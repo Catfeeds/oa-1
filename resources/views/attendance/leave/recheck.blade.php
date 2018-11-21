@@ -220,6 +220,7 @@
                     $('#recheck_1').iCheck('check');
                     @if(!empty($daily->punch_end_time))
                         $('#recheck_2').parents('.checkbox').remove();
+                        $('#end_time').val("{{ $daily->day }}" + " 20:00:00");
                     @endif
                     $('#start_time').val("{{ $daily->day }}" + " 09:00:00");
                     $('#onwork_div').show();
@@ -229,6 +230,7 @@
                     $('#recheck_2').iCheck('check');
                     @if(!empty($daily->punch_start_time))
                         $('#recheck_1').parents('.checkbox').remove();
+                        $('#start_time').val("{{ $daily->day }}" + " 09:00:00");
                     @endif
                     $('#end_time').val("{{ $daily->day }}" + " 20:00:00");
                     $('#offwork_div').show();

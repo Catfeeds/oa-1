@@ -40,7 +40,7 @@ class Change extends Operate implements AttendanceInterface
             $startTimeS = trim($startTime .' '. $p['start_id']);
             //时间判断
             if(strtotime($startTimeS) > strtotime($endTime)) {
-                return $this->backLeaveData(false, ['end_time' => trans('请选择有效的时间范围')]);
+                //return $this->backLeaveData(false, ['end_time' => trans('请选择有效的时间范围')]);
             }
             //申请时间
             $numberDay = sprintf("%.1f", (strtotime($endTime) - strtotime($startTimeS))/3600) ;

@@ -125,9 +125,9 @@ class ReviewHelper
     public function getDanger($startDate, $endDate, $dailyDetailData)
     {
         $danger = array();
-        $calPunch = app(PunchHelper::class)->getCalendarPunchRules($startDate, $endDate);
+        $formulaCalPunRuleConf = app(PunchHelper::class)->getCalendarPunchRules($startDate, $endDate)['formula'];
         foreach ($dailyDetailData as $datum) {
-            $danger[$datum->day] = $this->getPrDanger($datum->punch_start_time, $datum->punch_end_time, $calPunch[$datum->day]);
+            $danger[$datum->day] = $this->getPrDanger($datum->punch_start_time, $datum->punch_end_time, $formulaCalPunRuleConf[$datum->day]);
             $leaveArr = json_decode($datum->leave_id, true);
             if (!empty($leaveArr)) {
                 //这天若打卡在请假区间,false不显示红色
@@ -159,12 +159,11 @@ class ReviewHelper
      * @param $punchRuleConfigs
      * @return array
      */
-    public function getPrDanger($punch_start, $punch_end, $punchRuleConfigs)
+    public function getPrDanger($punch_start, $punch_end, $formulaCalPunRuleConf)
     {
-        $formulaPunchRules = PunchRulesConfig::getPunchRules($punchRuleConfigs->toArray());
         $isDanger = ['on_work' => false, 'off_work' => false];
 
-        foreach ($formulaPunchRules['sort'] as $key => $value) {//时间段
+        foreach ($formulaCalPunRuleConf['sort'] as $key => $value) {//时间段
             list($startWorkTime, $endWorkTime, $readyTime) = explode('$$', $key);
             list($rt, $et) = DataHelper::timesToNum($readyTime, $endWorkTime);
 

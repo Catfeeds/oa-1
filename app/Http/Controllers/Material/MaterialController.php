@@ -73,10 +73,7 @@ class MaterialController extends Controller
         try {
             $matApply = Apply::create($leave);
             OperateLogHelper::createOperateLog(OperateLogHelper::MATERIAL, $matApply->id, Apply::$stateChar[Apply::APPLY_SUBMIT]);
-            foreach ($inventoryIds as $id) {
-                $appInvData[] = ['apply_id' => $matApply->id, 'inventory_id' => $id];
-            }
-            \DB::table('material_apply_inventory')->insert($appInvData);
+            $matApply->inventory()->attach($inventoryIds);
             Inventory::whereIn('id', $inventoryIds)->update(['inv_remain' => \DB::raw('inv_remain - 1')]);
         } catch (\Exception $exception) {
             \DB::rollBack();
