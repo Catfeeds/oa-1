@@ -1,21 +1,5 @@
 @push('css')
 <link rel='stylesheet' type='text/css' href="{{ asset('fullcalendar/fullcalendar.css') }}"/>
-<style>
-    .fc-ltr .fc-basic-view .fc-day-top .fc-day-number {
-        font-size: 15px;
-        padding: 1px 10px 0 10px;
-    }
-    .fc-day-cnDate, .fc-day-cnTerm {
-        padding: 0 4px 0 0;
-        font-size: xx-small;
-    }
-    .fc-toolbar.fc-header-toolbar {
-        margin-bottom: 0;
-    }
-    .fc-center > h2 {
-        font-size: medium;
-    }
-</style>
 @endpush
 
 <div id="calendar"></div>
@@ -57,7 +41,7 @@
                 center: 'title',
                 right: 'today'
             },
-            height: 'auto',
+            height: window.screen.height * 0.5,
             weekends: true,
             themeSystem: 'bootstrap3',
             events: function (start, end, a, callback) {
