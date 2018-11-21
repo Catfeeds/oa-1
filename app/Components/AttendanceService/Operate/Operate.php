@@ -206,7 +206,11 @@ class Operate
     {
         if (empty($leaveId)) return $idArr;
         $arr = json_decode($idArr);
-        $arr[] = $leaveId;
+        if (is_array($leaveId)) {
+            $arr = array_merge($leaveId);
+        }else {
+            $arr[] = $leaveId;
+        }
         $arr = array_unique($arr);
         return json_encode($arr);
     }

@@ -63,6 +63,9 @@ class LeaveController extends AttController
         }
 
         $data = Leave::whereRaw($scope->getWhere() . $where)
+            ->whereHas('holidayConfig', function ($query) {
+                $query->where('is_show', HolidayConfig::STATUS_ENABLE);
+            })
             ->orderBy('created_at', 'desc')
             ->get();
 

@@ -319,12 +319,17 @@ class DataHelper
         return $arr;
     }
 
-    public static function ifBetween($start, $end, $needleStart, $needleEnd = '')
+    public static function ifBetween($start, $end, $needleStart, $sign = '')
     {
-        if (empty($needleEnd)) {
-            return $needleStart > $start && $needleStart < $end ?  true :  false;
-        }else {
-            return $needleStart < $needleEnd && $needleStart > $start && $needleEnd < $end ? true : false;
+        switch ($sign) {
+            case '=':
+                return $needleStart >= $start && $needleStart <= $end ?  true :  false;
+            case 'l=':
+                return $needleStart >= $start && $needleStart < $end ? true : false;
+            case 'r=':
+                return $needleStart > $start && $needleStart <= $end ? true : false;
+            default:
+                return $needleStart > $start && $needleStart < $end ? true : false;
         }
     }
 }

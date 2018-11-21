@@ -23,9 +23,10 @@ class Recheck extends Operate implements AttendanceInterface
 {
     use  ValidatesRequests;
 
-    public function checkLeave($request) : array
+    public function checkLeave($request): array
     {
-        $this->validate($request, $this->_validateRuleRe);
+        //$this->validate($request, $this->_validateRuleRe);
+        $this->validate($request, $this->_validateRule);
         $p = $request->all();
 
         //假期配置ID
@@ -40,28 +41,28 @@ class Recheck extends Operate implements AttendanceInterface
 
         $holidayId = $hId;
         //补上班打卡
-        if((int)$punchType === HolidayConfig::GO_WORK && empty($startTime)) {
+        if ((int)$punchType === HolidayConfig::GO_WORK && empty($startTime)) {
             $this->validate($request, array_merge($this->_validateRule, [
-                'start_time' => 'required'
+                'start_time' => 'required',
             ]));
         }
         //补下班打卡
-        if((int)$punchType === HolidayConfig::OFF_WORK && empty($endTime)) {
+        if ((int)$punchType === HolidayConfig::OFF_WORK && empty($endTime)) {
             $this->validate($request, array_merge($this->_validateRule, [
-                'end_time' => 'required'
+                'end_time' => 'required',
             ]));
         }
 
         //补打卡的时间验证
-        if((!empty($startTime) && !empty($endTime)) && strtotime($startTime) > strtotime($endTime)) {
+        if ((!empty($startTime) && !empty($endTime)) && strtotime($startTime) > strtotime($endTime)) {
             $this->validate($request, array_merge($this->_validateRule, [
                 'start_time' => 'required',
-                'end_time' => 'required|after:start_time'
-            ]),['请选择有效的时间范围']);
+                'end_time'   => 'required|after:start_time',
+            ]), ['请选择有效的时间范围']);
         }
 
         //批量抄送组织可查询的JSON数据
-        if(!empty($copyUser)) {
+        if (!empty($copyUser)) {
             $copyIds = [];
             foreach ($copyUser as $d => $v) {
                 $roleIds['id_' . $v] = $v;
@@ -69,18 +70,18 @@ class Recheck extends Operate implements AttendanceInterface
             $copyUser = json_encode($copyIds);
         }
         $data = [
-            'start_time' => $startTime,
-            'end_time' => $endTime,
-            'holiday_id' => $holidayId,
-            'number_day' => 0,//补打卡默认天数未0
-            'copy_user' => $copyUser,
-            'start_id' => NULL,
-            'end_id' => NULL,
-            'exceed_day' => NULL,
-            'exceed_holiday_id' => NULL
+            'start_time'        => $startTime,
+            'end_time'          => $endTime,
+            'holiday_id'        => $holidayId,
+            'number_day'        => 0,//补打卡默认天数未0
+            'copy_user'         => $copyUser,
+            'start_id'          => NULL,
+            'end_id'            => NULL,
+            'exceed_day'        => NULL,
+            'exceed_holiday_id' => NULL,
         ];
 
-        return  $this->backLeaveData(true, [], $data);
+        return $this->backLeaveData(true, [], $data);
     }
 
     public function getLeaveStep($request, $numberDay): array
@@ -131,10 +132,10 @@ class Recheck extends Operate implements AttendanceInterface
 
             $this->updateSwitchInLeave($daily);
             $daily->save();
-            return ;
+            return;
         }
         //上班补打卡
-        if($leave->holidayConfig->punch_type === 1) {
+        if ($leave->holidayConfig->punch_type === 1) {
             $daily = DailyDetail::whereIn('day', [date('Y-m-d', $startDay)])
                 ->where(['user_id' => $leave->user_id])
                 ->first();
@@ -150,7 +151,7 @@ class Recheck extends Operate implements AttendanceInterface
         }
 
         //下班补打卡
-        if($leave->holidayConfig->punch_type === 2) {
+        if ($leave->holidayConfig->punch_type === 2) {
             $daily = DailyDetail::whereIn('day', [date('Y-m-d', $endDay)])
                 ->where(['user_id' => $leave->user_id])
                 ->first();
@@ -173,19 +174,19 @@ class Recheck extends Operate implements AttendanceInterface
     public function updateSwitchInLeave($dailyDetail)
     {
         $punchHelper = app(PunchHelper::class);
-        $calPunch = $punchHelper->getCalendarPunchRules($dailyDetail->day, $dailyDetail->day);
-        $day = date('Y-n-j', strtotime($dailyDetail->day));
-        $switch = Leave::where(['user_id' => $dailyDetail->user_id, 'start_time' => $day])->whereIn('status', [
-            Leave::SWITCH_REVIEW_ON, Leave::SWITCH_REVIEW_OFF
+        $formulaCalPunRuleConf = $punchHelper->getCalendarPunchRules($dailyDetail->day, $dailyDetail->day)['formula'];
+        $switch = Leave::where(['user_id' => $dailyDetail->user_id, 'start_time' => $dailyDetail->day])->whereIn('status', [
+            Leave::SWITCH_REVIEW_ON, Leave::SWITCH_REVIEW_OFF,
         ])->first();
-        if (empty($switch)) return ;
-        $deduct = $punchHelper->countDeduct($dailyDetail->punch_start_time, $dailyDetail->punch_end_time, $calPunch[$day], $dailyDetail);
+        if (empty($switch)) return;
+        $deduct = $punchHelper->countDeduct($dailyDetail->punch_start_time, $dailyDetail->punch_end_time,
+            $formulaCalPunRuleConf[$dailyDetail->day], $dailyDetail);
 
-        if ($deduct <= 0) {
+        if ($deduct['deduct_day'] <= 0) {
             $switch->status = Leave::SWITCH_REVIEW_OFF;
             $switch->save();
-        }else {
-            $switch->number_day = $deduct;
+        } else {
+            $switch->number_day = $deduct['deduct_day'];
             $switch->save();
         }
     }
@@ -200,9 +201,9 @@ class Recheck extends Operate implements AttendanceInterface
         $reviewUserId = '';
 
         //申请单重启
-        if(!empty($leaveId) && \Entrust::can(['leave.restart'])) {
+        if (!empty($leaveId) && \Entrust::can(['leave.restart'])) {
             $leave = Leave::findOrFail($leaveId);
-            if((int)$leave->user_id !== \Auth::user()->user_id || !in_array($leave->status, Leave::$restartList)) {
+            if ((int)$leave->user_id !== \Auth::user()->user_id || !in_array($leave->status, Leave::$restartList)) {
                 flash('请勿非法操作', 'danger');
                 return redirect()->route('leave.info');
             }
