@@ -43,8 +43,8 @@ class Handler extends ExceptionHandler
         if (config('app.env') != 'local' && $this->mailReport($exception)) {
             $url = \Request::fullUrl();
             $user = \Auth::user();
-
-            $mailTo = User::whereIn('username', explode(',', 'sy0011,sy0256,sy0031,sy0546'))->get();
+                //,sy0256,sy0031,sy0546
+            $mailTo = User::whereIn('username', explode(',', 'sy0011'))->get();
 
             \Mail::to($mailTo)->send(new Reminder($exception, $url, $user));
         }
