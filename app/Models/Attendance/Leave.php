@@ -185,17 +185,6 @@ class Leave extends Model
             ->whereMonth('start_time', $month);
     }
 
-    //带薪假:关联假期配置表 找出状态为已通过 且是福利假的假期
-    public static function getSalaryLeaves($year, $month)
-    {
-        return self::leaveBuilder($year, $month)
-            ->whereHas('holidayConfig', function ($query) {
-                $query->where('is_boon', 1);
-            })
-            ->groupBy('user_id')
-            ->get([DB::raw('sum(number_day) as s'), 'user_id'])->pluck('s', 'user_id')->toArray();
-    }
-
     public static function noFull($year, $month)
     {
         return self::leaveBuilder($year, $month)

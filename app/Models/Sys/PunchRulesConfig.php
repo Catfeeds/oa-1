@@ -75,11 +75,11 @@ class PunchRulesConfig extends Model
                 'cfg' => $arr, 'sort' => $arr_];
     }
 
-
     public static function resolveFormula($formula)
     {
         $date = json_decode($formula, true);
-        $time = sprintf('%s:%s', !empty($date[4])&&$date[4] > 1 ? $date[4]  : '00',  !empty($date[5])&&$date[5] > 1 ? $date[5]  : '00' );
+
+        $time = sprintf('%s:%s', !empty($date[3])&&$date[3] > 1 ? $date[3]  : '00',  !empty($date[4])&&$date[4] > 1 ? $date[4]  : '00' );
         unset($date);
         return $time;
     }

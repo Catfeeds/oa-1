@@ -184,11 +184,11 @@ class HolidayConfig extends Model
         'is_before_after',
         'reset_type',
         'duration',
+        'change_type',
 
         //待删除
         'num',
         'is_boon',
-        'change_type',
         'condition_id',
     ];
 
