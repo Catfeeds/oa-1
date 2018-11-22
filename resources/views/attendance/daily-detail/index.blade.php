@@ -69,7 +69,6 @@
                                         {{--节日加班不需要补打卡与补假操作--}}
 
                                         @if((empty($v['punch_start_time']) || empty($v['punch_end_time'])))
-                                        )
 
                                             <a href="{{route('leave.create', [
                                                 'id' => \App\Models\Sys\HolidayConfig::RECHECK,

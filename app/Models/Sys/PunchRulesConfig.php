@@ -75,11 +75,11 @@ class PunchRulesConfig extends Model
                 'cfg' => $arr, 'sort' => $arr_];
     }
 
-
     public static function resolveFormula($formula)
     {
         $date = json_decode($formula, true);
-        $time = sprintf('%s:%s', !empty($date[4])&&$date[4] > 1 ? $date[4]  : '00',  !empty($date[5])&&$date[5] > 1 ? $date[5]  : '00' );
+
+        $time = sprintf('%s:%s', !empty($date[3])&&$date[3] > 1 ? $date[3]  : '00',  !empty($date[4])&&$date[4] > 1 ? $date[4]  : '00' );
         unset($date);
         return $time;
     }
@@ -96,18 +96,15 @@ class PunchRulesConfig extends Model
                     $date[] = $v;
                     break;
                 case 1 :
-                    $date[] = $v;
-                    break;
-                case 2 :
                     $date[] = $v * 24 * 60 * 60;
                     break;
-                case 3 :
+                case 2 :
                     $date[] = $v * 60 * 60;
                     break;
-                case 4 :
+                case 3 :
                     $date[] = $v * 60;
                     break;
-                case 5 :
+                default :
                     $date[] = $v;
                     break;
             }

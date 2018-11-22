@@ -34,7 +34,7 @@ class HolidayConfigController extends Controller
 
     public function index()
     {
-        $data = HolidayConfig::orderBy('sort', 'desc')->paginate();
+        $data = HolidayConfig::orderBy('sort', 'asc')->paginate();
         $title = trans('app.申请类型配置列表');
         return view('admin.sys.holiday-config', compact('title', 'data'));
     }
@@ -65,11 +65,6 @@ class HolidayConfigController extends Controller
     {
         $this->validate($request, $this->_validateRule);
         $p = $request->all();
-
-        $p['num'] = 2;
-        $p['is_boon'] = 0;
-        $p['change_type'] = 0;
-
 
         HolidayConfig::create($p);
 

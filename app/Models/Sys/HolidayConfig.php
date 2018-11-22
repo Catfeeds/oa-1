@@ -184,12 +184,7 @@ class HolidayConfig extends Model
         'is_before_after',
         'reset_type',
         'duration',
-
-        //待删除
-        'num',
-        'is_boon',
         'change_type',
-        'condition_id',
     ];
 
     public static function getHolidayList($ifIncludeSwitch = false)

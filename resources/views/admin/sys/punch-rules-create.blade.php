@@ -63,17 +63,17 @@
                                                 <div class="row">
                                                     <div class="col-md-6">
                                                         <div class="input-daterange input-group">
-                                                            {!! Form::text('work['.$key.'][work_start_time]', $punchRules->work_start_time ?? old('work_start_time'), [
+                                                            {!! Form::text('work['.$key.'][work_start_time]', $punchRules->work_start_time ?? (old('work_start_time') ?? '[0,0,0,0,0,0]'), [
                                                             'class' => 'input-sm form-control',
                                                             'id' => 'work_start_time',
                                                             ]) !!}
                                                             <span class="input-group-addon" style="background-color:#eeeeee;">to</span>
-                                                            {!! Form::text('work['.$key.'][work_end_time]', $punchRules->work_end_time ?? old('work_end_time'), [
+                                                            {!! Form::text('work['.$key.'][work_end_time]', $punchRules->work_end_time ?? (old('work_end_time') ?? '[0,0,0,0,0,0]'), [
                                                             'class' => 'input-sm form-control',
                                                             'id' => 'work_end_time',
                                                             ]) !!}
                                                             <span class="input-group-addon" >{!!trans('app.上下班准备时间')!!}</span>
-                                                            {!! Form::text('work['.$key.'][ready_time]', !empty($punchRules->ready_time) ? $punchRules->ready_time : (old('ready_time') ?? '') , [
+                                                            {!! Form::text('work['.$key.'][ready_time]', !empty($punchRules->ready_time) ? $punchRules->ready_time : (old('ready_time') ?? '[0,0,0,0,0,0]') , [
                                                             'class' => 'input-sm form-control',
                                                             'id' => 'ready_time',
                                                              ]) !!}
@@ -105,12 +105,12 @@
                                                                         </select>
 
                                                                         <div class="input-daterange input-group">
-                                                                            {!! Form::text('work['.$key.'][cfg]['.$key.'][start_gap]', $punchRules->start_gap ?? '[0,0,0,0,0,0]', [
+                                                                            {!! Form::text('work['.$key.'][cfg]['.$key.'][start_gap]', $punchRules->start_gap ?? '[0,0,0,0,0]', [
                                                                             'class' => 'input-sm form-control ',
                                                                             'id' => 'start_gap',
                                                                             ]) !!}
                                                                             <span class="input-group-addon" style="background-color:#eeeeee;">to</span>
-                                                                            {!! Form::text('work['.$key.'][cfg]['.$key.'][end_gap]', $punchRules->end_gap ?? '[0,0,0,0,0,0]', [
+                                                                            {!! Form::text('work['.$key.'][cfg]['.$key.'][end_gap]', $punchRules->end_gap ?? '[0,0,0,0,0]', [
                                                                             'class' => 'input-sm form-control ',
                                                                             'id' => 'end_gap',
                                                                             ]) !!}
