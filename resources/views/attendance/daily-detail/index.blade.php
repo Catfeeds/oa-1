@@ -68,9 +68,7 @@
                                     <td>
                                         {{--节日加班不需要补打卡与补假操作--}}
 
-                                        @if((empty($v['punch_start_time']) || empty($v['punch_end_time'])) &&
-                                            !in_array(\App\Models\Sys\HolidayConfig::WEEK_WORK,
-                                            \App\Models\Attendance\Leave::getAttrByLeaveIds(json_decode($v['leave_id']) ?? [], 'change_type'))
+                                        @if((empty($v['punch_start_time']) || empty($v['punch_end_time'])))
                                         )
 
                                             <a href="{{route('leave.create', [

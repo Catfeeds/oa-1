@@ -244,20 +244,20 @@ class PunchHelper
         $ifDeductBuf = 0;
         foreach ($formulaCalPunRuleConf['sort'] as $key => $value) {
             list($startWorkTime, $endWorkTime, $readyTime) = explode('$$', $key);
-                if (DataHelper::ifBetween(strtotime($readyTime), strtotime($endWorkTime), strtotime($startTime), 'r=')) {
-                    $diff = (strtotime($startTime) - strtotime($readyTime)) / 60;
-                    if ($diff >= $buf) {
-                        //迟到时间大于缓冲时间, 缓冲时间直接为0, 上班时间修改为减去缓冲时间的时间去计算
-                        $ret = $this->getDeduct(DataHelper::dateTimeAdd($startTime, 'T'.$buf.'M', 'H:i', 'sub'), $endTime, $formulaCalPunRuleConf);
-                        $buf = 0;
-                    }elseif ($diff > 0) {
-                        //小于缓冲时间,以正常上班的时间去计算
-                        $buf = $buf - $diff;
-                        $ret = $this->getDeduct($readyTime, $endTime, $formulaCalPunRuleConf);
-                    }
-                    $ifDeductBuf = 1;
-                    break;
+            if (DataHelper::ifBetween(strtotime($readyTime), strtotime($endWorkTime), strtotime($startTime), 'r=')) {
+                $diff = (strtotime($startTime) - strtotime($readyTime)) / 60;
+                if ($diff >= $buf) {
+                    //迟到时间大于缓冲时间, 缓冲时间直接为0, 上班时间修改为减去缓冲时间的时间去计算
+                    $ret = $this->getDeduct(DataHelper::dateTimeAdd($startTime, 'T'.$buf.'M', 'H:i', 'sub'), $endTime, $formulaCalPunRuleConf);
+                    $buf = 0;
+                }elseif ($diff > 0) {
+                    //小于缓冲时间,以正常上班的时间去计算
+                    $buf = $buf - $diff;
+                    $ret = $this->getDeduct($readyTime, $endTime, $formulaCalPunRuleConf);
                 }
+                $ifDeductBuf = 1;
+                break;
+            }
         }
         if ($ifDeductBuf === 0) {
             $ret = $this->getDeduct($startTime, $endTime, $formulaCalPunRuleConf);

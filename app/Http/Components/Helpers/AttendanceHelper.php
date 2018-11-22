@@ -294,25 +294,6 @@ class AttendanceHelper
 
     }
 
-    /**
-     * 获取 员工调休/加班天数
-     * @param $userId
-     * @param $holiday
-     * @return array
-     */
-    public static function getUserChangeHoliday($userId, $holiday)
-    {
-        //获取节假日加班ID
-        $changeHoliday = HolidayConfig::where(['change_type' => HolidayConfig::WEEK_WORK])->first();
-        //获取部门批量调休或者加班的申请单ID
-        $leaves = self::getMyChangeLeaveId(\Auth::user()->dept_id);
-        //查询加班的所有记录天数
-        $userWorkChangeDay = self::selectChangeInfo($userId, $changeHoliday->holiday_id, $leaves['leave_work_ids'] ?? []);
-        //查询已经调休过的天数
-        $userUseChangeDay = self::selectChangeInfo($userId, $holiday->holiday_id, $leaves['leave_change_ids'] ?? []);
-
-        return ['change_work_day' => $userWorkChangeDay, 'change_use_day' => $userUseChangeDay];
-    }
 
     /**
      * 查询 员工调休/加班的天数

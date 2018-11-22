@@ -59,4 +59,12 @@ class BulletinController extends Controller
         }
         return 'success';
     }
+
+    public function showBulletin($id)
+    {
+        $b = Bulletin::find($id);
+        $content = $b->content;
+        $title = $b->title;
+        return view('admin.sys.show-bulletin', compact('content', 'title'));
+    }
 }

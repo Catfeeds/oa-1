@@ -20,6 +20,7 @@ class Permissions extends Seeder
         '_oa',
         '_bulletin',
         '_material',
+        '_showInHome',
     ];
 
     public function run()
@@ -278,6 +279,24 @@ class Permissions extends Seeder
             'material.approve-all' => '物料管理/审批申请',
             'material.approve.info' => '审批申请/查看审批申请详情',
             'material.approve.index' => '审批申请/审批申请列表',
+        ];
+    }
+
+    //首页各部件的显示
+    private function _showInHome(): array
+    {
+        return [
+            'home.show-all' => '所有权限/首页部件显示',
+
+            'home.common' =>'首页部件显示/常用功能',
+            'home.remain' =>'首页部件显示/剩余可申请的福利假',
+            'home.apply' =>'首页部件显示/我的假期申请单',
+            'home.recheck' => '首页部件显示/待补齐打卡次数',
+            'home.approve' => '首页部件显示/审批',
+            'home.date' => '首页部件显示/日程',
+            'home.personnel' => '首页部件显示/人事',
+            'home.calendar' => '首页部件显示/工作日历',
+            'home.bulletin' => '首页部件显示/公告',
         ];
     }
 }

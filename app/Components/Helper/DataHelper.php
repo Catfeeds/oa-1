@@ -332,4 +332,16 @@ class DataHelper
                 return $needleStart > $start && $needleStart < $end ? true : false;
         }
     }
+
+    public static function timeDiff($startTime, $endTime)
+    {
+        $start = new \DateTime($startTime);
+        $end = new \DateTime($endTime);
+        $day = $start->diff($end);
+        if ((int)$day->format('%a') >= 1) {
+            return date('Y-m-d', strtotime($startTime));
+        }
+        return (int)$day->format('%h').'小时前';
+    }
+
 }

@@ -217,16 +217,6 @@ class Leave extends Model
             ->get([DB::raw('sum(number_day) as s'), 'user_id'])->pluck('s', 'user_id')->toArray();
     }
 
-    //通过加班调休类型返回请假的id
-    public static function getLeavesIdByChangeTypes($changeTypes, $year, $month)
-    {
-        return self::leaveBuilder($year, $month)
-            ->whereHas('holidayConfig', function ($query) use ($changeTypes) {
-                $query->where('apply_type_id', HolidayConfig::CHANGE)->whereIn('change_type', $changeTypes);
-            })
-            ->groupBy('user_id')
-            ->get([DB::raw('group_concat(leave_id) as ls'), 'user_id'])->pluck('ls', 'user_id')->toArray();
-    }
 
     public static function getAttrByLeaveIds($leaveIds, $attr)
     {

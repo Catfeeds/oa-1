@@ -1,8 +1,13 @@
 @if(Entrust::can(['leave*', 'staff*']))
-    <li @if (Route::is(['leave*', 'daily-detail*', 'appeal*'])) class="active" @endif >
+    <li @if (Route::is(['leave*', 'daily-detail*', 'appeal*', 'attIndex'])) class="active" @endif >
         <a href="#"><i class="fa fa-newspaper-o"></i> <span class="nav-label">{{ trans('att.考勤功能') }}</span><span
                     class="fa arrow"></span></a>
         <ul class="nav nav-second-level">
+            <li @if (Route::is(['attIndex'])) class="active" @endif>
+                <a href="{{ route('attIndex') }}">
+                    <span class="nav-label">{{ trans('app.考勤系统首页') }}</span>
+                </a>
+            </li>
             @if(Entrust::can(['leave', 'leave.edit', 'leave.create']))
                 <li @if (Route::is(['leave.info', 'leave.optInfo', 'leave.edit', 'leave.create']) ) class="active" @endif>
                     <a href="{{ route('leave.info') }}">{{ trans('att.我的申请单') }}</a>

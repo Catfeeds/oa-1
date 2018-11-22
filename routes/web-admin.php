@@ -275,6 +275,9 @@ Route::group([
         'middleware' => ['permission:bulletin.changeShow'],
         'uses' => 'Sys\BulletinController@changeShow'])->name('bulletin.changeShow');
 
+    Route::get('sys/bulletin/show-bulletin/{id}', [
+        'uses' => 'Sys\BulletinController@showBulletin'])->name('bulletin.show');
+
     #资质外借库存配置
     Route::get('sys/inventory', [
         'middleware' => ['permission:material.inventory-list'],
