@@ -70,6 +70,7 @@ class Handler extends ExceptionHandler
             HttpResponseException::class,
             \ErrorException::class,
             \PDOException::class,
+            \RuntimeException::class,
 
         ];
 
