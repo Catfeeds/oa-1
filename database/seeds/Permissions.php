@@ -279,6 +279,7 @@ class Permissions extends Seeder
             'material.approve-all' => '物料管理/审批申请',
             'material.approve.info' => '审批申请/查看审批申请详情',
             'material.approve.index' => '审批申请/审批申请列表',
+            'material.approve.approve' => '审批申请/审批操作',
         ];
     }
 

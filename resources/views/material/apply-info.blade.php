@@ -162,14 +162,14 @@
                                 @if(Entrust::can('material.approve.info') && $type == \App\Models\Attendance\Leave::LOGIN_VERIFY_INFO)
                                     @if(in_array($apply['state'], [
                                         \App\Models\Material\Apply::APPLY_SUBMIT,\App\Models\Material\Apply::APPLY_REVIEW
-                                        ]))
+                                        ]) && Entrust::can('material.approve.approve'))
                                         <a data-id='{{ \App\Models\Material\Apply::APPLY_PASS }}'
                                            class="btn btn-success">{{ trans('material.审核通过') }}</a>
                                         <a data-id='{{ \App\Models\Material\Apply::APPLY_FAIL }}'
                                            class="btn btn-warning">{{ trans('material.拒绝通过') }}</a>
                                     @endif
-                                    @if($apply['state'] == \App\Models\Material\Apply::APPLY_BORROW ||
-                                    $apply['state'] == \App\Models\Material\Apply::APPLY_PART_RETURN)
+                                    @if(($apply['state'] == \App\Models\Material\Apply::APPLY_BORROW ||
+                                    $apply['state'] == \App\Models\Material\Apply::APPLY_PART_RETURN) && Entrust::can('material.approve.approve'))
                                         <a data-id="{{ \App\Models\Material\Apply::APPLY_CANCEL }}"
                                            class="btn btn-info">{{ trans('material.取消申请') }}</a>
                                         <a data-toggle="modal" data-target="#approve-modal" id="return"
