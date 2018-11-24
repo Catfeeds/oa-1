@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Components\Helpers\PunchHelper;
+use App\Http\Controllers\Material\MaterialController;
 use App\Models\Attendance\DailyDetail;
 use App\Models\Attendance\Leave;
 use App\Models\Material\Apply;
@@ -29,6 +31,7 @@ class HomeController extends Controller
         $countRecheck = $this->countRecheck($start);
         $apply = $this->apply($start, [Leave::ON_REVIEW, Leave::PASS_REVIEW]);
         $approve = $this->approve($start, [Leave::ON_REVIEW, Leave::PASS_REVIEW,Leave::WAIT_REVIEW]);
+        //dd($formulaCalPunRuleConf = PunchHelper::getCalendarPunchRules('2018-10-01', '2018-10-31')['formula']);
         return view('home', compact('bullets', 'remainWelfare', 'countRecheck', 'apply', 'approve'));
     }
 
@@ -75,8 +78,9 @@ class HomeController extends Controller
                 ->orderBy('created_at', 'desc')->limit(5)->get()->toArray();
         }
         if (\Entrust::can('material.approve*')) {
-            $materialApprove = Apply::whereBetween('created_at', [$start, date('Y-m-d')])
+            $materialApprove = Apply::whereBetween('created_at', [$start, date('Y-m-d')])->with('inventory')
                 ->where('review_user_id', \Auth::user()->user_id)->orderBy('created_at', 'desc')->limit(5)->get()->toArray();
+            $materialApprove = app(MaterialController::class)->handleData($materialApprove, ['type', 'name']);
         }
         return ['leave' => $leaveApprove, 'material' => $materialApprove];
     }

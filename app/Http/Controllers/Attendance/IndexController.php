@@ -8,6 +8,7 @@
  */
 namespace App\Http\Controllers\Attendance;
 
+use App\Http\Components\Helpers\PunchHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Sys\Calendar;
 use App\Models\Sys\HolidayConfig;
@@ -27,18 +28,20 @@ class IndexController extends Controller
     //接收考勤系统首页发送过来的ajax请求,完成工作日历的显示
     public function getCalendarByAjax(Request $request)
     {
-        $month = (int)$request->input('month');
-        $data = Calendar::where('month', $month)->get();
+        $year = (int)$request->input('year');$month = (int)$request->input('month');
+        $startDate = $year.'-'.$month.'-01';
+        $endDate = date('Y-m-t', strtotime($startDate));
+        $p = PunchHelper::getCalendarPunchRules($startDate, $endDate, true);
+        $formulaCalPunRuleConf = $p['formula'];
         $info = [];
-        foreach ($data as $v) {
-            $punchRules = $v->punchRules;
+        foreach ($formulaCalPunRuleConf as $key => $v) {
             $info[] = [
-                'date' => date('Y-m-d', strtotime($v->year . '-' . $v->month . '-' . $v->day)),
-                'event' => $punchRules->name,
-                'color' => PunchRules::$punchTypeColor[$punchRules->punch_type_id],
-                'content' => "上班准备时间:" . $punchRules->ready_time . '<br>上班时间:' . $punchRules->work_start_time .
-                    '<br>下班时间:' . $punchRules->work_end_time . '<br>备注:'.($v->memo ?? '暂无'),
-                'data_id' => $v->id,
+                'date' => $key,
+                'event' => $p['event'][$key]->name,
+                'color' => PunchRules::$punchTypeColor[$p['event'][$key]->punch_type_id],
+                'content' => "上班准备时间:" . explode('$$', array_first(array_keys($v['sort'])))[2] . '<br>上班时间:' . $v['start_time'][0] .
+                    '<br>下班时间:' . array_last($v['end_time']) . '<br>备注:'.($p['calendar'][$key]->memo ?? '暂无'),
+                'data_id' => $p['calendar'][$key]->id,
             ];
         }
         return $info;

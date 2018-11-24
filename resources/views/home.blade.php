@@ -233,7 +233,6 @@
                                                             <td>{{ $material['reason'] }}</td>
                                                             <td>{{ $material['expect_return_time'] }}</td>
                                                             <td>{{ \App\User::getUserAliasToId($material['user_id'])->alias }}</td>
-                                                            $material
                                                         </tr>
                                                     @endforeach
                                                     </tbody>
