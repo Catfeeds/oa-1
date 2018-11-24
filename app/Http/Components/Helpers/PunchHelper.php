@@ -35,6 +35,10 @@ class PunchHelper
             $key = sprintf("%d-%02d-%02d", $item->year, $item->month, $item->day);
             $calPunchRuleConfArr[$key] = $item->punchRules->config;
             $formulaPunRuleConfArr[$key] = PunchRulesConfig::getPunchRules($calPunchRuleConfArr[$key]->toArray());
+            if ($item->punchRules->punch_type_id != PunchRules::NORMALWORK) {
+                $formulaPunRuleConfArr[$key]['if_rest'] = true;
+            }
+
             if ($calendar === true) {
                 $eventArr[$key] = $item->punchRules;
                 $cal[$key] = $item;
@@ -170,18 +174,28 @@ class PunchHelper
      */
     public function countDeduct($punch_start, $punch_end, $formulaCalPunRuleConf, $dailyDetail, $buffer)
     {
+        $default = ['deduct_day' => 0, 'deduct_score' => [], 'remain_buffer' => $buffer];
+
         if (!empty($dailyDetail->leave_id)) {
             //请假情况的扣除规则
             $leaves = json_decode($dailyDetail->leave_id, true);
             $leaveObjects = Leave::whereIn('leave_id', $leaves)->whereHas('holidayConfig', function ($query) {
-                $query->whereNotIn('cypher_type', [HolidayConfig::CYPHER_RECHECK, HolidayConfig::OVERTIME, HolidayConfig::CYPHER_HOUR]);
+                $query->whereIn('cypher_type', [HolidayConfig::CYPHER_CHANGE, HolidayConfig::CYPHER_PAID, HolidayConfig::CYPHER_UNPAID]);
             })->get();
-            $leaveTime = $this->getLeaveTimes($formulaCalPunRuleConf, $dailyDetail, $leaveObjects);
-            if (isset($leaveTime['unnecessary'])) {
-                return ['deduct_day' => 0, 'deduct_score' => [], 'remain_buffer' => $buffer];
+            $overObjects = Leave::whereIn('leave_id', $leaves)->whereHas('holidayConfig', function ($query) {
+                $query->whereIn('cypher_type', [HolidayConfig::CYPHER_OVERTIME]);
+            })->first();
+
+            if (isset($formulaCalPunRuleConf['if_rest']) && empty($overObjects)) return $default;
+            if (isset($formulaCalPunRuleConf['if_rest']) && !empty($overObjects)) {
+                $formulaCalPunRuleConf = $this->getFormulaOverTimeConf($overObjects);
             }
+
+            $leaveTime = $this->getLeaveTimes($formulaCalPunRuleConf, $dailyDetail, $leaveObjects);
+            if (isset($leaveTime['unnecessary'])) return $default;
             $deducts = $this->dealBuffer($buffer, $formulaCalPunRuleConf, $punch_start, $punch_end, $leaveTime);
         } else {
+            if (isset($formulaCalPunRuleConf['if_rest'])) return $default;
             //正常则按扣除规则
             $deducts = $this->dealBuffer($buffer, $formulaCalPunRuleConf, $punch_start, $punch_end);
         }
@@ -194,6 +208,13 @@ class PunchHelper
         ];
     }
 
+    /**
+     * 存入转换假与小时假
+     * @param $deduct
+     * @param $userId
+     * @param $date
+     * @return array
+     */
     public function storeDeductInLeave($deduct, $userId, $date)
     {
         $data = [
@@ -275,11 +296,11 @@ class PunchHelper
      * 计算扣分的入口
      * @param array $bufferArr 保存剩余缓冲分钟数的数组
      * @param array $u 导入excel之后的数据
-     * @param array $formulaCalPunRuleConf 格式化之后的打卡规则
+     * @param array $formulaCalPunRuleConfArr 格式化之后的打卡规则数组
      * @param DailyDetail $detail 这一天的打卡情况
      * @return array
      */
-    public function fun_($bufferArr, $u, $formulaCalPunRuleConf, $detail)
+    public function fun_($bufferArr, $u, $formulaCalPunRuleConfArr, $detail)
     {
         $index = 'buffer_' . date('Y$$n', strtotime($u['ts'])) . $u['alias'];
         if (isset($bufferArr[$index])) {
@@ -289,7 +310,7 @@ class PunchHelper
             $bufferArr[$index] = $remain_buffer;
         }
         $deducts = $this->countDeduct($u['start_time'], $u['end_time'],
-            $formulaCalPunRuleConf[$u['ts']], $detail, $remain_buffer);
+            $formulaCalPunRuleConfArr[$u['ts']], $detail, $remain_buffer);
         $bufferArr[$index] = $deducts['remain_buffer'];
         return ['deducts' => $deducts, 'bufferArr' => $bufferArr];
     }
@@ -320,5 +341,27 @@ class PunchHelper
             }
         }
         return $leaveTime;
+    }
+
+    /**
+     * 针对节假日加班,按档位重新设置新的规则
+     * @param $overtime
+     * @return array
+     */
+    public function getFormulaOverTimeConf($overtime)
+    {
+        $punchTypeId = '//待添加类型';
+        $new = [];
+        $formulaOverTimeConf = PunchRulesConfig::getPunchRulesCfgToId($punchTypeId);
+        foreach ($formulaOverTimeConf['cfg'] as $key => $value) {
+            list($start, $end) = explode('$$', $key);
+            if (strtotime($overtime->start_id) <= strtotime($start) && strtotime($overtime->end_id) >= strtotime($end)) {
+                $new['start_time'][] = $start;
+                $new['end_time'][] = $end;
+                $new['cfg'][$key] = $value;
+                $new['sort'][$key] = $formulaOverTimeConf['sort'][$key];
+            }
+        }
+        return $new;
     }
 }
