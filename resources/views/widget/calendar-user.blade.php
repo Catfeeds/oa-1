@@ -23,6 +23,25 @@
         bottom: 55%;
         margin-left: 0.5%;
     }
+    .fc-ltr .fc-basic-view .fc-day-top .fc-day-number {
+        text-align: center;
+    }
+    .fc-ltr .fc-basic-view .fc-day-top .fc-day-number {
+        padding-right: 0;
+        padding-left: 0;
+    }
+    .fc-day-cnDate {
+        text-align: center;
+    }
+    .fc-day-cnDate, .fc-day-cnTerm {
+        padding-right: 0;
+    }
+    .fc-day-cnTerm {
+        text-align: center;
+    }
+    .fc-ltr .fc-basic-view .fc-day-top .fc-day-number {
+        padding-top: 8%;
+    }
 </style>
 @endpush
 
