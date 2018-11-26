@@ -9,6 +9,7 @@
 //该路由不受登录限制，主要面对入职人员填写资料
 Route::get('/entry/fill/{token}/{sign}', 'StaffManage\EntryController@fillInfo')->name('entry.send');
 Route::post('/entry/fill/{token}/{sign}', 'StaffManage\EntryController@fill');
+Route::get('/entry/fill/save', 'StaffManage\EntryController@save')->name('entry.save');
 
 Route::group([
     'middleware' => 'auth'

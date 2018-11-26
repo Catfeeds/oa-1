@@ -42,13 +42,6 @@ Route::group([
         'middleware' => ['permission:user.edit'],
         'uses' => 'UserController@sendEmail'])->name('user.sendEmail');
 
-    Route::get('user/ext/{id}', [
-        'middleware' => ['permission:user.edit'],
-        'uses' => 'UserController@editExt'])->name('user.editExt');
-    Route::post('user/ext/{id}', [
-        'middleware' => ['permission:user.edit'],
-        'uses' => 'UserController@updateExt']);
-
     Route::get('user/get-info', [
         'middleware' => ['permission:user'],
         'uses' => 'UserController@getInfoByCalendar'])->name('user.getInfo');

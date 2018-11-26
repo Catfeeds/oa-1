@@ -212,9 +212,9 @@ class Leaved extends Operate implements AttendanceInterface
         $holidayList = HolidayConfig::where(['apply_type_id' => HolidayConfig::LEAVEID])
             ->whereIn('restrict_sex', [\Auth::user()->userExt->sex, UserExt::SEX_NO_RESTRICT])
             ->where(['is_show' => HolidayConfig::STATUS_ENABLE])
-            ->orderBy('sort', 'desc')
-            ->get(['holiday_id', 'holiday'])
-            ->pluck('holiday', 'holiday_id')
+            ->orderBy('sort', 'asc')
+            ->get(['holiday_id', 'show_name'])
+            ->pluck('show_name', 'holiday_id')
             ->toArray();
 
 

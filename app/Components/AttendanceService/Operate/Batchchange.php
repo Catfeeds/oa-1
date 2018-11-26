@@ -289,9 +289,9 @@ class Batchchange extends Operate implements AttendanceInterface
         $time = date('Y-m-d', time());
 
         $holidayList = HolidayConfig::where(['apply_type_id' => HolidayConfig::CHANGE, 'cypher_type' => HolidayConfig::CYPHER_OVERTIME])
-            ->orderBy('sort', 'desc')
-            ->get(['holiday_id', 'holiday'])
-            ->pluck('holiday', 'holiday_id')->toArray();
+            ->orderBy('sort', 'asc')
+            ->get(['holiday_id', 'show_name'])
+            ->pluck('show_name', 'holiday_id')->toArray();
 
         //获取所有部门员工
         $deptUsers = User::getUsernameAliasAndDeptList();

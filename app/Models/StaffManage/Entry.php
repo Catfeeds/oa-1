@@ -36,6 +36,9 @@ class Entry extends Model
         self::REVIEW_REFUSE => '放弃入职',
     ];
 
+
+    const GREGORIAN_CALENDAR = 0;
+    const LUNAR_CALENDAR = 1;
     public static $nature = [
         1 => '全职',
         2 => '兼职',
@@ -45,6 +48,11 @@ class Entry extends Model
     public static $hireTYpe = [
         1 => '社招',
         2 => '校招',
+    ];
+
+    public static $birthdayType = [
+        self::GREGORIAN_CALENDAR => '公历',
+        self::LUNAR_CALENDAR => '农历',
     ];
 
     protected $fillable = [
@@ -91,7 +99,17 @@ class Entry extends Model
         'graduation_time',
         'specialty',
         'degree',
-        'school_id',
+
+        'birthday',
+        'salary_card',
+        'family_num',
+        'work_history',
+        'project_empiric',
+        'awards',
+        'used_email',
+        'birthday_type',
+        'firm_call',
+
 
     ];
 

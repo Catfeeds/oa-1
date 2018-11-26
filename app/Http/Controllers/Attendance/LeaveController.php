@@ -86,6 +86,11 @@ class LeaveController extends AttController
         );
     }
 
+    /**
+     * 创建申请单
+     * @param $applyTypeId
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function create($applyTypeId)
     {
         if(!in_array((int)$applyTypeId, HolidayConfig::$driverTypeId)) {

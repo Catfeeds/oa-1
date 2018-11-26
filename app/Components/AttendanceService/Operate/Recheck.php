@@ -210,12 +210,12 @@ class Recheck extends Operate implements AttendanceInterface
             $title = trans('att.重启补打卡');
         }
 
-        $allUsers = User::where(['status' => 1])->get();
+        $allUsers = User::where(['status' => User::STATUS_ENABLE])->get();
         $time = date('Y-m-d', time());
 
         $holidayList = HolidayConfig::where(['apply_type_id' => HolidayConfig::RECHECK])
-            ->orderBy('sort', 'desc')
-            ->get(['holiday_id', 'holiday', 'punch_type']);
+            ->orderBy('sort', 'asc')
+            ->get(['holiday_id', 'show_name', 'punch_type']);
         $daily = DailyDetail::where(['user_id' => \Auth::user()->user_id, 'day' => request()->day])->first();
 
         return view('attendance.leave.recheck', compact('title', 'time', 'holidayList', 'leave', 'reviewUserId', 'daily', 'allUsers'));

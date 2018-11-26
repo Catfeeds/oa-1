@@ -206,9 +206,9 @@ class Change extends Operate implements AttendanceInterface
         $time = date('Y-m-d', time());
 
         $holidayList = HolidayConfig::where(['apply_type_id' => HolidayConfig::CHANGE])
-            ->orderBy('sort', 'desc')
-            ->get(['holiday_id', 'holiday'])
-            ->pluck('holiday', 'holiday_id')->toArray();
+            ->orderBy('sort', 'asc')
+            ->get(['holiday_id', 'show_name'])
+            ->pluck('show_name', 'holiday_id')->toArray();
 
         $isBatch = false;
 

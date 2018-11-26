@@ -90,7 +90,7 @@
             </div>
         </div>
     </div>
-    {{--客户信息弹窗--}}
+    {{--部门信息弹窗--}}
     <div class="modal inmodal" id="child-modal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content animated fadeIn">
@@ -120,7 +120,7 @@
             </div>
         </div>
     </div>
-    {{--客户信息弹窗end--}}
+    {{--部门信息弹窗end--}}
 
 @endsection
 @push('scripts')

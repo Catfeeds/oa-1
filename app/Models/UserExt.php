@@ -140,6 +140,13 @@ class UserExt extends Model
         'political',
         'urgent_bind',
         'ethnic',
+
+        'birthday',
+        'work_history',
+        'project_empiric',
+        'awards',
+        'birthday_type',
+        'firm_call',
     ];
 
     public static function checkIsConfirm($userId)

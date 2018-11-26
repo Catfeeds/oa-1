@@ -34,7 +34,7 @@ class EntryController extends AttController
     private $_validateRule = [
         'name' => 'required|max:32|min:2',
         'mobile' => 'required|phone_number|max:11',
-        'email' => 'required|email|unique:users,email|max:32',
+        'email' => 'required|email|unique:entry,email|max:32',
         'entry_time' => 'required|date',
         'nature_id' => 'required|integer',
         'hire_id' => 'required|integer',
@@ -50,29 +50,23 @@ class EntryController extends AttController
     ];
 
     private $_validateRuleExt = [
-        'card_id' => 'required|max:20',
-        'card_address' => 'required|max:100',
-        'ethnic' => 'required|max:32',
-        'birthplace' => 'required|max:20',
-        'political' => 'required|max:20',
-        'census' => 'required|max:20',
-        'family_num' => 'required|integer',
-        'marital_status' => 'required|integer',
-        'blood_type' => 'required|integer',
-        'genus_id' => 'required|integer',
-        'constellation_id' => 'required|integer',
-        'height' => 'required|max:3',
-        'weight' => 'required|max:3',
-        'qq' => 'required|max:20',
-        'live_address' => 'required|max:100',
-        'urgent_name' => 'required|max:20',
-        'urgent_bind' => 'required|max:20',
-        'urgent_tel' => 'required|max:11',
-        'education_id' => 'required|integer',
-        'school_id' => 'required|integer',
-        'graduation_time' => 'required|date',
-        'specialty' => 'required|max:20',
-        'degree' => 'required|max:20',
+        'entry.card_id' => 'required|identitycards|max:20',
+        'entry.card_address' => 'required|max:100',
+        'entry.ethnic' => 'required|max:32',
+        'entry.birthplace' => 'required|max:20',
+        'entry.political' => 'required|max:20',
+        'entry.census' => 'required|max:20',
+        'entry.family_num' => 'required',
+        'entry.marital_status' => 'required|integer',
+        'entry.live_address' => 'required|max:100',
+        'entry.urgent_name' => 'required|max:20',
+        'entry.urgent_bind' => 'required|max:20',
+        'entry.urgent_tel' => 'required|max:11',
+        'entry.education_id' => 'required|integer',
+        'entry.school_id' => 'required|integer',
+        'entry.graduation_time' => 'required|date',
+        'entry.specialty' => 'required|max:20',
+        'entry.degree' => 'required|max:20',
     ];
 
     public function index()
@@ -194,19 +188,27 @@ class EntryController extends AttController
     public function fillInfo($token, $sign)
     {
         //sign验证
-        $entry = self::sign($token, $sign);
-        if(empty($entry)) {
+        $entryS = self::sign($token, $sign);
+        if(empty($entryS)) {
             $message = trans('错误的请求');
             return view('staff-manage.entry.error', compact('message'));
         }
 
-        $entry->update(['status' => Entry::FILL_IN]);
+        $entryS->update(['status' => Entry::FILL_IN]);
 
+        $cache = (object)json_decode(Redis::get($entryS->entry_id . '_entry_save'), true);
+
+        //优先缓存为主
+        if(!empty($cache)) {
+            $entry = $cache;
+        }
+
+        //dd($familyNum);
         $school = School::getSchoolList();
         $users = User::getUsernameAliasList();
         $dept = Dept::getDeptList();
         $title = trans('staff.填写入职资料');
-        return view('staff-manage.entry.fill', compact('title', 'users', 'school', 'entry', 'dept'));
+        return view('staff-manage.entry.fill', compact('title', 'users', 'school', 'entry', 'entryS', 'dept', 'sign', 'cache'));
     }
 
     public function del($id)
@@ -231,6 +233,7 @@ class EntryController extends AttController
      */
     public function fill(Request $request, $token, $sign)
     {
+
         $this->validate($request, $this->_validateRuleExt);
         //sign验证
         $res = self::sign($token, $sign);
@@ -239,23 +242,68 @@ class EntryController extends AttController
             return view('staff-manage.entry.error', compact('message'));
         };
 
-        $data = $request->all();
+        $data = $request->all()['entry'];
 
         $data['status'] = Entry::FILL_END;
-        $entry = Entry::findOrFail($res->entry_id);
+        //家庭成员
+        $familyArr = [];
+        foreach ($data['family_num'] as $fk => $fv) {
+            if(empty($fv['name']) || empty($fv['age']) || empty($fv['relation']) || empty($fv['position']) || empty($fv['phone'])) continue;
 
+            $familyArr[] = $fv;
+        }
+        $data['family_num'] = json_encode($familyArr);
+        //工作经历
+        $workArr = [];
+        foreach ($data['work_history'] as $wk => $wv) {
+            if(empty($wv['time']) || empty($wv['deadline']) || empty($wv['work_place']) || empty($wv['position']) || empty($wv['income']) || empty($wv['boss']) || empty($wv['phone'])) continue;
+
+            $workArr[] = $wv;
+        }
+        $data['work_history'] = json_encode($workArr);
+
+
+        $entry = Entry::findOrFail($res->entry_id);
         $entry->update($data);
 
         //企业微信通知管理员
         $msg = '【'.$entry->name.'】 填写完入职资料
                 请前往确认: [<a href = "'.url('/').'/staff/entry">点我前往</a>]';
         $userId = User::getUserAliasToId($entry->creater_id);
-        OperateLogHelper::sendWXMsg($userId->username, $msg);
+        OperateLogHelper::sendWXMsg('sy0011', $msg);
 
         $message = trans('资料填写完成');
         return view('staff-manage.entry.error', compact('message'));
     }
 
+    public function save(Request $request)
+    {
+        $data = $request->all()['entry'] ?? [];
+        if(empty($data)) {
+            return response()->json(['status' => -1, 'msg' => '保存失败']);
+        };
+
+        $entry = Entry::findOrFail((int)$data['fill_id']);
+
+        if(empty($entry->entry_id)) {
+            return response()->json(['status' => -1, 'msg' => '保存失败']);
+        };
+
+        //sign验证
+        $res = self::sign($entry->remember_token, $data['token']);
+        if(empty($res)) {
+            return response()->json(['status' => -1, 'msg' => '保存失败']);
+        };
+
+        $userRedsKey = sprintf('%d_%s', $entry->entry_id, 'entry_save');
+        $userRedsValue = json_encode($data);
+
+        Redis::set($userRedsKey, $userRedsValue, 'EX', 36000);
+
+        return response()->json(['status' => 1, 'msg' => '保存成功']);
+    }
+
+    //信息状态验证
     public function sign($token, $sign)
     {
         //sign验证
@@ -316,7 +364,7 @@ class EntryController extends AttController
             $userData = [
                 'username' => self::setUserName(),
                 'alias' => $entry->name,
-                'email' => $entry->email,
+                'email' => $entry->used_email,
                 'mobile' => $entry->mobile,
                 'password' => bcrypt($pwd),
                 'remember_token' => Str::random(60),
@@ -331,7 +379,6 @@ class EntryController extends AttController
 
             UserExt::create($entry->toArray() + ['user_id' => $user->user_id]);
             $entry->update(['status' => Entry::REVIEW_PASS, 'review_id' => \Auth::user()->user_id]);
-
 
             //保存明文密钥有效期，用于发送用户帐号密钥到邮箱
             if (!empty($pwd)) {

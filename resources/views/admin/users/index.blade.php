@@ -72,9 +72,8 @@
                                             <td>{{ $v['created_at'] }}</td>
                                             <td>{{ $v['updated_at'] }}</td>
                                             <td>
-                                                @if(Auth::user()->user_id != $v['user_id'] && Entrust::can(['user-all', 'user.edit']))
+                                                @if(Auth::user()->user_id != $v['user_id'] && Entrust::can(['user.edit']))
                                                     {!! BaseHtml::tooltip(trans('app.设置'), route('user.edit', ['id' => $v['user_id']])) !!}
-                                                    {!! BaseHtml::tooltip(trans('app.员工详情'), route('user.editExt', ['id' => $v['user_id']]), 'cog fa fa-newspaper-o') !!}
                                                 @endif
 
                                                 @if(\Illuminate\Support\Facades\Redis::exists(md5($v['user_id'] .'_' . $v['username'])))

@@ -5,13 +5,12 @@
         <p><i class="fa fa-user"></i> {{ trans('app.账号') }} ：<strong>{{ $user->username }}</strong></p>
         <p><i class="fa fa-tag"></i> {{ trans('app.姓名') }} ：{{ $user->alias }}</p>
         <p><i class="fa fa-tag"></i> {{ trans('app.部门') }} ：{{ isset($user->dept_id) ?  $dept[$user->dept_id] : '' }}</p>
-        <p><i class="fa fa-tag"></i> {{ trans('app.职务') }} ：{{ isset($user->role_id) ?  $roleList[$user->role_id] : '' }}</p>
-        <p><i class="fa fa-tag"></i> {{ trans('app.岗位') }} ：{{ isset($user->job_id) ?  $job[$user->job_id] : ''  }}</p>
+        <p><i class="fa fa-tag"></i> {{ trans('app.岗位') }} ：{{  $job[$user->job_id] ?? ''  }}</p>
         <p><i class="fa fa-tag"></i> {{ trans('app.邮箱') . '： ' . $user->email }}</p>
         <p><i class="fa fa-tag"></i> {{ trans('app.性别') }} ：{{ isset($userExt->userExt->sex) ?  \App\Models\UserExt::$sex[$userExt->userExt->sex] : '' }}</p>
         <p><i class="fa fa-tag"></i> {{ trans('app.年龄') }} ：{{ isset($userExt->userExt->age) ? $userExt->userExt->age : '' }}</p>
-        <p><i class="fa fa-tag"></i> {{ trans('app.学历') }} ：{{ isset($userExt->userExt->education_id) ? \App\Models\UserExt::$education[$userExt->userExt->education_id] : '' }}</p>
-        <p><i class="fa fa-tag"></i> {{ trans('app.血型') }} ：{{ isset($userExt->userExt->blood_type) ? \App\Models\UserExt::$blood[$userExt->userExt->blood_type] : '' }}</p>
+        <p><i class="fa fa-tag"></i> {{ trans('app.学历') }} ：{{ empty($userExt->userExt->education_id) ? '' : \App\Models\UserExt::$education[$userExt->userExt->education_id]  }}</p>
+        <p><i class="fa fa-tag"></i> {{ trans('app.血型') }} ：{{ empty($userExt->userExt->blood_type) ? '' : \App\Models\UserExt::$blood[$userExt->userExt->blood_type] }}</p>
         <p><i class="fa fa-tag"></i> {{ trans('app.星座') }} ：{{ isset($userExt->userExt->constellation_id) ? \App\Models\UserExt::$constellation[$userExt->userExt->constellation_id] : '' }}</p>
         <p><i class="fa fa-tag"></i> {{ trans('app.婚姻状况') }} ：{{ isset($userExt->userExt->marital_status) ? \App\Models\UserExt::$marital[$userExt->userExt->marital_status] : '' }}</p>
         <p><i class="fa fa-tag"></i> {{ trans('app.毕业学校') }} ：{{ isset($userExt->userExt->school) ? $school[$userExt->userExt->school] : '' }}</p>

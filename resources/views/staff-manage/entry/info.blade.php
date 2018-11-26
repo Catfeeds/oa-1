@@ -158,47 +158,38 @@
                     <div class="hr-line-dashed"></div>
 
                     <div class="form-group">
-                        {!! Form::label('card_id', trans('staff.身份证号码'), ['class' => 'col-sm-4 control-label']) !!}
+                        {!! Form::label('card_id', trans('staff.生日'), ['class' => 'col-sm-4 control-label']) !!}
                         <div class="col-sm-3">
-                            {!! Form::text('card_id', $entry->card_id  ,['class' => 'form-control', 'disabled']) !!}
+                            {!! Form::text('birthday', $entry->birthday ?? ''  ,['class' => 'form-control', 'disabled']) !!}
                         </div>
-
-                    </div>
-
-                    <div class="form-group">
-                        {!! Form::label('card_address', trans('staff.身份证地址'), ['class' => 'col-sm-4 control-label']) !!}
-                        <div class="col-sm-3">
-                            {!! Form::text('card_address', $entry->card_address  ,['class' => 'form-control', 'disabled']) !!}
-                        </div>
+                        @foreach(\App\Models\StaffManage\Entry::$birthdayType as $k => $v)
+                            <label class="radio-inline i-checks">
+                                <input type="radio" disabled name="entry[birthday_type]" value="{{$k}}" @if($k === (int)$entry->birthday_type) checked @endif> {{ $v }}
+                            </label>
+                        @endforeach
                     </div>
 
                     <div class="form-group">
                         {!! Form::label('ethnic', trans('staff.民族'), ['class' => 'col-sm-4 control-label']) !!}
                         <div class="col-sm-3">
-                            {!! Form::text('ethnic', $entry->ethnic, ['class' => 'form-control', 'disabled']) !!}
+                            {!! Form::text('ethnic', $entry->ethnic ?? '', ['class' => 'form-control', 'disabled']) !!}
                         </div>
                     </div>
 
                     <div class="form-group">
                         {!! Form::label('birthplace', trans('staff.籍贯'), ['class' => 'col-sm-4 control-label']) !!}
                         <div class="col-sm-3">
-                            {!! Form::text('birthplace', $entry->birthplace, ['class' => 'form-control', 'disabled']) !!}
+                            {!! Form::text('birthplace', $entry->birthplace ?? '', ['class' => 'form-control', 'disabled']) !!}
                         </div>
                     </div>
 
                     <div class="form-group">
                         {!! Form::label('political', trans('staff.政治面貌'), ['class' => 'col-sm-4 control-label']) !!}
                         <div class="col-sm-3">
-                            {!! Form::text('political', $entry->political, ['class' => 'form-control', 'disabled']) !!}
+                            {!! Form::text('political', $entry->political ?? '', ['class' => 'form-control', 'disabled']) !!}
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        {!! Form::label('census', trans('staff.户籍类型'), ['class' => 'col-sm-4 control-label']) !!}
-                        <div class="col-sm-3">
-                            {!! Form::text('census', $entry->census, ['class' => 'form-control', 'disabled']) !!}
-                        </div>
-                    </div>
 
                     <div class="form-group">
                         {!! Form::label('marital_status', '婚姻状况', ['class' => 'col-sm-4 control-label']) !!}
@@ -264,9 +255,36 @@
                     </div>
 
                     <div class="form-group">
-                        {!! Form::label('family_num', trans('staff.家庭成员人数'), ['class' => 'col-sm-4 control-label']) !!}
-                        <div class="col-sm-3">
-                            {!! Form::text('family_num', $entry->family_num ?? '', ['class' => 'form-control', 'disabled']) !!}
+                        {!! Form::label('family_num', trans('staff.家庭成员'), ['class' => 'col-sm-4 control-label']) !!}
+                        <div class="col-sm-7">
+
+                            <table class="table table-bordered">
+                                <thead>
+                                <tr>
+                                    <th>姓名</th>
+                                    <th>年龄</th>
+                                    <th>与本人关系</th>
+                                    <th>单位/职务</th>
+                                    <th>电话</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+
+                                @if(!empty($entry->family_num))
+                                    @foreach( json_decode($entry->family_num, true) as $k => $v)
+                                        <tr>
+                                            <td>{{$v['name']}}</td>
+                                            <td>{{$v['age']}}</td>
+                                            <td>{{$v['relation']}}</td>
+                                            <td>{{$v['position']}}</td>
+                                            <td>{{$v['phone']}}</td>
+                                        </tr>
+                                    @endforeach
+                                @endif
+                                </tbody>
+                            </table>
+
+
                         </div>
                     </div>
 
@@ -330,6 +348,102 @@
                         {!! Form::label('degree', trans('staff.学位'), ['class' => 'col-sm-4 control-label']) !!}
                         <div class="col-sm-3">
                             {!! Form::text('degree', $entry->degree ?? '', ['class' => 'form-control', 'disabled']) !!}
+                        </div>
+                    </div>
+
+                    {{--工作信息--}}
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label text-navy"><h2>{{trans('staff.工作信息')}}</h2</label>
+                    </div>
+
+                    <div class="hr-line-dashed"></div>
+
+
+                    <div class="form-group">
+                        {!! Form::label('education_id', trans('staff.工作经历'), ['class' => 'col-sm-4 control-label']) !!}
+                        <div class="col-sm-7">
+                            <table class="table table-bordered">
+                                <thead>
+                                <tr>
+                                    <th>起止年月</th>
+                                    <th>期限</th>
+                                    <th>在何处工作</th>
+                                    <th>职务</th>
+                                    <th>月收入</th>
+                                    <th>直属上司</th>
+                                    <th>联系电话</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                @if(!empty($entry->work_history))
+                                    @foreach(json_decode($entry->work_history, true) as $k => $v)
+                                        <tr>
+                                            <td>{{$v['time']}}</td>
+                                            <td>{{$v['deadline']}}</td>
+                                            <td>{{$v['work_place']}}</td>
+                                            <td>{{$v['position']}}</td>
+                                            <td>{{$v['income']}}</td>
+                                            <td>{{$v['boss']}}</td>
+                                            <td>{{$v['phone']}}</td>
+                                        </tr>
+                                    @endforeach
+                                @endif
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        {!! Form::label('project_empiric', trans('staff.项目经验'), ['class' => 'col-sm-4 control-label']) !!}
+                        <div class="col-sm-3">
+                            {!! Form::textarea('project_empiric', $entry->project_empiric ?? '', ['class' => 'form-control', 'disabled']) !!}
+                        </div>
+                    </div>
+
+                    <div class="form-group @if (!empty($errors->first('entry.awards'))) has-error @endif">
+                        {!! Form::label('awards', trans('staff.获奖情况'), ['class' => 'col-sm-4 control-label']) !!}
+                        <div class="col-sm-3">
+                            {!! Form::textarea('awards', $entry->awards ?? '', ['class' => 'form-control', 'disabled']) !!}
+                        </div>
+                    </div>
+
+                    {{--户籍档案信息--}}
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label text-navy"><h2>{{trans('staff.户籍档案信息')}}</h2</label>
+                    </div>
+
+                    <div class="hr-line-dashed"></div>
+
+                    <div class="form-group">
+                        {!! Form::label('card_id', trans('staff.身份证号码'), ['class' => 'col-sm-4 control-label']) !!}
+                        <div class="col-sm-3">
+                            {!! Form::text('card_id', $entry->card_id ?? '', ['class' => 'form-control', 'disabled']) !!}
+                        </div>
+                    </div>
+
+                    <div class="form-group @if (!empty($errors->first('entry.card_address'))) has-error @endif">
+                        {!! Form::label('card_address', trans('staff.身份证地址'), ['class' => 'col-sm-4 control-label']) !!}
+                        <div class="col-sm-3">
+                            {!! Form::text('card_address', $entry->card_address ?? '', ['class' => 'form-control', 'disabled']) !!}
+                        </div>
+                    </div>
+
+                    <div class="form-group @if (!empty($errors->first('entry.census'))) has-error @endif">
+                        {!! Form::label('census', trans('staff.户籍类型'), ['class' => 'col-sm-4 control-label']) !!}
+                        <div class="col-sm-3">
+                            {!! Form::text('census', $entry->census ?? '', ['class' => 'form-control', 'disabled']) !!}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        {!! Form::label('firm_call', trans('app.是否公司挂靠'), ['class' => 'col-sm-4 control-label']) !!}
+                        <div class="col-sm-3">
+
+                            @foreach(\App\Models\UserExt::$firmCall as $k => $v)
+                                <label class="radio-inline i-checks">
+                                    <input type="radio" disabled name="entry[firm_call]" value="{{$k}}" @if($k === (int)($entry->firm_call ?? 0)) checked @endif> {{ $v }}
+                                </label>
+                            @endforeach
                         </div>
                     </div>
 
