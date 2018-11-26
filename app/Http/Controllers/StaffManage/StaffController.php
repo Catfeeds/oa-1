@@ -41,7 +41,7 @@ class StaffController extends AttController
         'birthplace' => 'required|max:20',
         'political' => 'required|max:20',
         'census' => 'required|max:20',
-        'family_num' => 'required|integer',
+        'family_num' => 'required',
         'marital_status' => 'required|integer',
         'blood_type' => 'required|integer',
         'genus_id' => 'required|integer',
@@ -86,7 +86,10 @@ class StaffController extends AttController
         $title = trans('staff.员工信息');
         $userIds = [];
 
-        return view('staff-manage.staff.edit-ext', compact('title', 'user', 'job', 'dept', 'userExt', 'school', 'firm', 'users', 'userIds'));
+        $workHistory = json_decode($user->userExt->work_history, true);
+        $familyNum = json_decode($user->userExt->family_num, true);
+
+        return view('staff-manage.staff.edit-ext', compact('title', 'user', 'job', 'dept', 'userExt', 'school', 'firm', 'users', 'userIds', 'workHistory', 'familyNum'));
     }
 
     public function update(Request $request, $id)
@@ -99,6 +102,24 @@ class StaffController extends AttController
         $user = User::with('userExt')->findOrFail($id);
 
         $user->update($data);
+
+        //家庭成员
+        $familyArr = [];
+        foreach ($data['family_num'] as $fk => $fv) {
+            if(empty($fv['name']) || empty($fv['age']) || empty($fv['relation']) || empty($fv['position']) || empty($fv['phone'])) continue;
+
+            $familyArr[] = $fv;
+        }
+        $data['family_num'] = json_encode($familyArr);
+        //工作经历
+        $workArr = [];
+        foreach ($data['work_history'] as $wk => $wv) {
+            if(empty($wv['time']) || empty($wv['deadline']) || empty($wv['work_place']) || empty($wv['position']) || empty($wv['income']) || empty($wv['boss']) || empty($wv['phone'])) continue;
+
+            $workArr[] = $wv;
+        }
+        $data['work_history'] = json_encode($workArr);
+
         $user->userExt->update($data);
 
         flash(trans('app.编辑成功', ['value' => trans('staff.员工信息')]), 'success');

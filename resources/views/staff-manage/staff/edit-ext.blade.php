@@ -84,13 +84,15 @@
 
                     <div class="form-group  @if (!empty($errors->first('entry_time'))) has-error @endif">
                         {!! Form::label('entry_time', trans('app.入职时间'), ['class' => 'col-sm-4 control-label']) !!}
-                        <div class="input-daterange input-group col-sm-3">
-                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                            {!! Form::text('entry_time', $user->userExt->entry_time ?? old('entry_time'), [
-                            'class' => 'form-control date_time',
-                            'placeholder' => trans('app.请输入', ['value' => trans('app.入职时间')]),
-                            'required' => true,
-                            ]) !!}
+                        <div class="col-sm-3">
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                {!! Form::text('entry_time', $user->userExt->entry_time ?? old('entry_time'), [
+                                'class' => 'form-control date_time',
+                                'placeholder' => trans('app.请输入', ['value' => trans('app.入职时间')]),
+                                'required' => true,
+                                ]) !!}
+                            </div>
                         </div>
                         <span class="help-block m-b-none">{{ $errors->first('entry_time') }}</span>
                     </div>
@@ -230,28 +232,23 @@
 
                     <div class="hr-line-dashed"></div>
 
-                    <div class="form-group @if (!empty($errors->first('card_id'))) has-error @endif">
-                        {!! Form::label('card_id', trans('staff.身份证号码'), ['class' => 'col-sm-4 control-label']) !!}
+                    <div class="form-group @if (!empty($errors->first('birthday'))) has-error @endif">
+                        {!! Form::label('birthday', trans('staff.生日'), ['class' => 'col-sm-4 control-label']) !!}
                         <div class="col-sm-3">
-                            {!! Form::text('card_id', isset($user->userExt->card_id) ? $user->userExt->card_id: old('card_id'), [
-                            'class' => 'form-control',
-                            'placeholder' => trans('app.请输入', ['value' => trans('staff.身份证号码')]),
-                            'required' => true,
-                            ]) !!}
-                            <span class="help-block m-b-none">{{ $errors->first('card_id') }}</span>
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                {!! Form::text('birthday', !empty($user->userExt->birthday) ? date('Y-m-d', strtotime($user->userExt->birthday)) : '', [
+                                'class' => 'form-control date',
+                                'required' => true,
+                                ]) !!}
+                                <span class="help-block m-b-none">{{ $errors->first('birthday') }}</span>
+                            </div>
                         </div>
-                    </div>
-
-                    <div class="form-group @if (!empty($errors->first('card_address'))) has-error @endif">
-                        {!! Form::label('card_address', trans('staff.身份证地址'), ['class' => 'col-sm-4 control-label']) !!}
-                        <div class="col-sm-3">
-                            {!! Form::text('card_address', isset($user->userExt->card_address) ? $user->userExt->card_address: old('card_address'), [
-                            'class' => 'form-control',
-                            'placeholder' => trans('app.请输入', ['value' => trans('staff.身份证地址')]),
-                            'required' => true,
-                            ]) !!}
-                            <span class="help-block m-b-none">{{ $errors->first('card_address') }}</span>
-                        </div>
+                        @foreach(\App\Models\StaffManage\Entry::$birthdayType as $k => $v)
+                            <label class="radio-inline i-checks">
+                                <input type="radio" name="birthday_type" value="{{$k}}" @if($k === (int)($user->userExt->birthday_type ?? \App\Models\StaffManage\Entry::GREGORIAN_CALENDAR)) checked @endif> {{ $v }}
+                            </label>
+                        @endforeach
                     </div>
 
                     <div class="form-group @if (!empty($errors->first('ethnic'))) has-error @endif">
@@ -287,18 +284,6 @@
                             'required' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('political') }}</span>
-                        </div>
-                    </div>
-
-                    <div class="form-group @if (!empty($errors->first('census'))) has-error @endif">
-                        {!! Form::label('census', trans('staff.户籍类型'), ['class' => 'col-sm-4 control-label']) !!}
-                        <div class="col-sm-3">
-                            {!! Form::text('census', isset($user->userExt->census) ? $user->userExt->census: old('census'), [
-                            'class' => 'form-control',
-                            'placeholder' => trans('app.请输入', ['value' => trans('staff.户籍类型')]),
-                            'required' => true,
-                            ]) !!}
-                            <span class="help-block m-b-none">{{ $errors->first('census') }}</span>
                         </div>
                     </div>
 
@@ -416,14 +401,31 @@
                     </div>
 
                     <div class="form-group @if (!empty($errors->first('family_num'))) has-error @endif">
-                        {!! Form::label('family_num', trans('staff.家庭成员人数'), ['class' => 'col-sm-4 control-label']) !!}
-                        <div class="col-sm-3">
-                            {!! Form::text('family_num', isset($user->userExt->family_num) ? $user->userExt->family_num: old('family_num'), [
-                            'class' => 'form-control',
-                            'placeholder' => trans('app.请输入', ['value' => trans('staff.家庭成员人数')]),
-                            'required' => true,
-                            ]) !!}
-                            <span class="help-block m-b-none">{{ $errors->first('family_num') }}</span>
+                        {!! Form::label('family_num', trans('staff.家庭成员'), ['class' => 'col-sm-4 control-label']) !!}
+                        <div class="col-sm-7">
+                            <table class="table table-bordered">
+                                <thead>
+                                <tr>
+                                    <th>姓名</th>
+                                    <th>年龄</th>
+                                    <th>与本人关系</th>
+                                    <th>单位/职务</th>
+                                    <th>电话</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                @for($i = 0; $i <= \App\Models\StaffManage\Entry::CREATE_FAMILY_NUM; $i++)
+                                    <tr>
+                                        <td><input name="family_num[{{$i}}][name]" value="{{!empty($familyNum[$i]['name']) ? $familyNum[$i]['name'] : ''}}" style="width: 6em;" type="text"></td>
+                                        <td><input name="family_num[{{$i}}][age]" value="{{!empty($familyNum[$i]['age']) ? $familyNum[$i]['age'] : ''}}" style="width: 3em;" type="text"></td>
+                                        <td><input name="family_num[{{$i}}][relation]" value="{{!empty($familyNum[$i]['relation']) ? $familyNum[$i]['relation'] : ''}}" style="width: 100%;" type="text"></td>
+                                        <td><input name="family_num[{{$i}}][position]" value="{{!empty($familyNum[$i]['position']) ? $familyNum[$i]['position'] : ''}}" style="width: 6em;" type="text"></td>
+                                        <td><input name="family_num[{{$i}}][phone]" value="{{!empty($familyNum[$i]['phone']) ? $familyNum[$i]['phone'] : ''}}" style="width: 8em;" type="text"></td>
+                                    </tr>
+                                @endfor
+                                </tbody>
+                            </table>
+                            <span class="help-block m-b-none">{{ $errors->first('entry.family_num') }}</span>
                         </div>
                     </div>
 
@@ -496,13 +498,15 @@
 
                     <div class="form-group  @if (!empty($errors->first('graduation_time'))) has-error @endif">
                         {!! Form::label('graduation_time', trans('staff.毕业时间'), ['class' => 'col-sm-4 control-label']) !!}
-                        <div class="input-daterange input-group col-sm-3">
-                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                            {!! Form::text('graduation_time', $user->userExt->graduation_time ?? old('graduation_time'), [
-                            'class' => 'form-control date',
-                            'placeholder' => trans('app.请输入', ['value' => trans('staff.毕业时间')]),
-                            'required' => true,
-                            ]) !!}
+                        <div class="col-sm-3">
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                {!! Form::text('graduation_time', $user->userExt->graduation_time ?? old('graduation_time'), [
+                                'class' => 'form-control date',
+                                'placeholder' => trans('app.请输入', ['value' => trans('staff.毕业时间')]),
+                                'required' => true,
+                                ]) !!}
+                            </div>
                         </div>
                         <span class="help-block m-b-none">{{ $errors->first('entry_time') }}</span>
                     </div>
@@ -522,7 +526,7 @@
                     <div class="form-group @if (!empty($errors->first('degree'))) has-error @endif">
                         {!! Form::label('degree', trans('staff.学位'), ['class' => 'col-sm-4 control-label']) !!}
                         <div class="col-sm-3">
-                            {!! Form::text('degree', isset($user->userExt->degree) ? $user->userExt->degree: old('degree'), [
+                            {!! Form::text('degree', isset($user->userExt->degree) ? $user->userExt->degree : old('degree'), [
                             'class' => 'form-control',
                             'placeholder' => trans('app.请输入', ['value' => trans('staff.学位')]),
                             'required' => true,
@@ -532,6 +536,126 @@
                     </div>
 
                     <div class="hr-line-dashed"></div>
+
+
+                    {{--工作信息--}}
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label text-navy"><h2>{{trans('staff.工作信息')}}</h2</label>
+                    </div>
+
+                    <div class="hr-line-dashed"></div>
+
+                    <div class="form-group">
+                        {!! Form::label('education_id', trans('staff.工作经历'), ['class' => 'col-sm-2 control-label']) !!}
+                        <div class="col-sm-8">
+                            <table class="table table-bordered">
+                                <thead>
+                                <tr>
+                                    <th>起止年月</th>
+                                    <th>期限</th>
+                                    <th>在何处工作</th>
+                                    <th>职务</th>
+                                    <th>月收入</th>
+                                    <th>直属上司</th>
+                                    <th>联系电话</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                @for($i = 0; $i <= \App\Models\StaffManage\Entry::CREATE_WORK_HISTORY_NUM; $i++)
+                                    <tr>
+                                        <td><input name="work_history[{{$i}}][time]" value="{{!empty($workHistory[$i]['time']) ? $workHistory[$i]['time'] : ''}}" style="width: 6em;" type="text"></td>
+                                        <td><input name="work_history[{{$i}}][deadline]" value="{{!empty($workHistory[$i]['deadline']) ? $workHistory[$i]['deadline'] : ''}}" style="width: 3em;" type="text"></td>
+                                        <td><input name="work_history[{{$i}}][work_place]" value="{{!empty($workHistory[$i]['work_place']) ? $workHistory[$i]['work_place'] : ''}}" style="width: 100%;" type="text"></td>
+                                        <td><input name="work_history[{{$i}}][position]" value="{{!empty($workHistory[$i]['position']) ? $workHistory[$i]['position'] : ''}}" style="width: 5em;" type="text"></td>
+                                        <td><input name="work_history[{{$i}}][income]" value="{{!empty($workHistory[$i]['income']) ? $workHistory[$i]['income'] : ''}}" style="width: 4em;" type="text"></td>
+                                        <td><input name="work_history[{{$i}}][boss]" value="{{!empty($workHistory[$i]['boss']) ? $workHistory[$i]['boss'] : ''}}" style="width: 100%;" type="text"></td>
+                                        <td><input name="work_history[{{$i}}][phone]"  value="{{!empty($workHistory[$i]['phone']) ? $workHistory[$i]['phone'] : ''}}" style="width: 8em;" type="text"></td>
+                                    </tr>
+                                @endfor
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="form-group @if (!empty($errors->first('project_empiric'))) has-error @endif">
+                        {!! Form::label('project_empiric', trans('staff.项目经验'), ['class' => 'col-sm-4 control-label']) !!}
+                        <div class="col-sm-5">
+                            {!! Form::textarea('project_empiric', !empty($user->userExt->project_empiric) ? $user->userExt->project_empiric : old('project_empiric'), [
+                            'class' => 'form-control',
+                            'placeholder' => trans('app.请输入', ['value' => trans('staff.项目经验')]),
+                            ]) !!}
+                            <span class="help-block m-b-none">{{ $errors->first('project_empiric') }}</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group @if (!empty($errors->first('awards'))) has-error @endif">
+                        {!! Form::label('awards', trans('staff.获奖情况'), ['class' => 'col-sm-4 control-label']) !!}
+                        <div class="col-sm-5">
+                            {!! Form::textarea('awards', !empty($user->userExt->awards) ? $user->userExt->awards : '', [
+                            'class' => 'form-control',
+                            'placeholder' => trans('app.请输入', ['value' => trans('staff.获奖情况')]),
+                            ]) !!}
+                            <span class="help-block m-b-none">{{ $errors->first('awards') }}</span>
+                        </div>
+                    </div>
+
+
+                    {{--户籍档案信息--}}
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label text-navy"><h2>{{trans('staff.户籍档案信息')}}</h2</label>
+                    </div>
+
+                    <div class="hr-line-dashed"></div>
+
+                    <div class="form-group @if (!empty($errors->first('card_id'))) has-error @endif">
+                        {!! Form::label('card_id', trans('staff.身份证号码'), ['class' => 'col-sm-4 control-label']) !!}
+                        <div class="col-sm-3">
+                            {!! Form::text('card_id', !empty($user->userExt->card_id) ? $user->userExt->card_id : old('card_id'), [
+                            'class' => 'form-control',
+                            'placeholder' => trans('app.请输入', ['value' => trans('staff.身份证号码')]),
+                            'required' => true,
+                            ]) !!}
+                            <span class="help-block m-b-none">{{ $errors->first('card_id') }}</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group @if (!empty($errors->first('card_address'))) has-error @endif">
+                        {!! Form::label('card_address', trans('staff.身份证地址'), ['class' => 'col-sm-4 control-label']) !!}
+                        <div class="col-sm-3">
+                            {!! Form::text('card_address', !empty($user->userExt->card_address) ? $user->userExt->card_address : old('card_address'), [
+                            'class' => 'form-control',
+                            'placeholder' => trans('app.请输入', ['value' => trans('staff.身份证地址')]),
+                            'required' => true,
+                            ]) !!}
+                            <span class="help-block m-b-none">{{ $errors->first('card_address') }}</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group @if (!empty($errors->first('census'))) has-error @endif">
+                        {!! Form::label('census', trans('staff.户籍类型'), ['class' => 'col-sm-4 control-label']) !!}
+                        <div class="col-sm-3">
+                            {!! Form::text('census', !empty($user->userExt->census) ? $user->userExt->census : old('census'), [
+                            'class' => 'form-control',
+                            'placeholder' => trans('app.请输入', ['value' => trans('staff.户籍类型')]),
+                            'required' => true,
+                            ]) !!}
+                            <span class="help-block m-b-none">{{ $errors->first('census') }}</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        {!! Form::label('firm_call', trans('app.是否公司挂靠'), ['class' => 'col-sm-4 control-label']) !!}
+                        <div class="col-sm-3">
+                            @foreach(\App\Models\UserExt::$firmCall as $k => $v)
+                                <label class="radio-inline i-checks">
+                                    <input type="radio" name="firm_call" value="{{$k}}" @if($k === (int)($user->userExt->firm_call ?? 0)) checked @endif> {{ $v }}
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <div class="hr-line-dashed"></div>
+
 
                     <div class="form-group">
                         <div class="col-sm-4 col-sm-offset-5">

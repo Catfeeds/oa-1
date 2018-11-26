@@ -109,11 +109,20 @@
 
                     <div class="hr-line-dashed"></div>
 
+                    <!--弹窗图片窗口-->
+
+                    <!--弹窗图片窗口end-->
+
                     <div class="form-group">
                         {!! Form::label('annex', trans('att.附件图片'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-2">
+                            <div id="outerdiv" style="position:fixed;top:0;left:0;background:rgba(0,0,0,0.7);z-index:2;width:100%;height:100%;display:none;">
+                                <div id="innerdiv" style="position:absolute;">
+                                    <img id="bigimg" style="border:5px solid #fff;" src="" />
+                                </div>
+                            </div>
                             <img height="100px" width="100px" src="{{ !empty($leave->annex) ?  asset($leave->annex) : asset('img/blank.png') }}"
-                                 id="show_associate_image">
+                                 id="show_image">
                         </div>
                     </div>
                 </div>
@@ -218,32 +227,15 @@
 @include('widget.icheck')
 @include('widget.select2')
 @include('widget.datepicker')
+@include('widget.show-img')
 
-@section('scripts-last')
+@push('scripts')
     <script>
         $(function() {
-            function readURL(input, $class_id) {
-                if (input.files && input.files[0]) {
-                    var reader = new FileReader();
-                    reader.onload = function (e) {
-                        $($class_id).attr('src', e.target.result);
-                    }
-                    reader.readAsDataURL(input.files[0]);
-                }
-            }
 
-            $("#select-thumb-file").change(function(){
-                readURL(this, '#show_thumb_image');
+            $('#show_image').click(function () {
+                showImg("#outerdiv", "#innerdiv", "#bigimg", $(this));
             });
-
-            $("#select-associate-file").change(function(){
-                readURL(this, '#show_associate_image');
-            });
-
-            $("#select-mobile-header-file").change(function(){
-                readURL(this, '#show_mobile_header_image');
-            });
-
 
             $('#retract_status').click(function () {
                 var status = $(this).data('id');
@@ -262,8 +254,9 @@
                 var status = $(this).data('id');
                 edit_status(status, '确认批量重启申请单?')
             });
-
         });
+
+
 
         function edit_status(status, $msg){
             bootbox.confirm($msg, function (result) {
@@ -288,4 +281,4 @@
 
 
     </script>
-@endsection
+@endpush

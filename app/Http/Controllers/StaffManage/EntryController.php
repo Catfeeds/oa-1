@@ -270,7 +270,7 @@ class EntryController extends AttController
         $msg = '【'.$entry->name.'】 填写完入职资料
                 请前往确认: [<a href = "'.url('/').'/staff/entry">点我前往</a>]';
         $userId = User::getUserAliasToId($entry->creater_id);
-        OperateLogHelper::sendWXMsg('sy0011', $msg);
+        OperateLogHelper::sendWXMsg($userId->username, $msg);
 
         $message = trans('资料填写完成');
         return view('staff-manage.entry.error', compact('message'));

@@ -78,9 +78,13 @@
                     <div class="form-group @if (!empty($errors->first('annex'))) has-error @endif">
                         {!! Form::label('annex', trans('att.附件图片'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-2">
+                            <div id="outerdiv" style="position:fixed;top:0;left:0;background:rgba(0,0,0,0.7);z-index:2;width:100%;height:100%;display:none;">
+                                <div id="innerdiv" style="position:absolute;">
+                                    <img id="bigimg" style="border:5px solid #fff;" src="" />
+                                </div>
+                            </div>
                             <img height="100px" width="100px" src="{{ !empty($leave->annex) ?  asset($leave->annex) : asset('img/blank.png') }}"
                                  id="show_associate_image">
-
                             <input name="annex" type="file" accept="image/*" id="select-associate-file"/>
                         </div>
                         <span class="help-block m-b-none">{{ $errors->first('annex') }}</span>
@@ -147,30 +151,14 @@
 @include('widget.icheck')
 @include('widget.select2')
 @include('widget.datepicker')
+@include('widget.show-img')
 @section('scripts-last')
     <script>
         $(function() {
             $.fn.select2.defaults.set("theme", "bootstrap");
-            function readURL(input, $class_id) {
-                if (input.files && input.files[0]) {
-                    var reader = new FileReader();
-                    reader.onload = function (e) {
-                        $($class_id).attr('src', e.target.result);
-                    }
-                    reader.readAsDataURL(input.files[0]);
-                }
-            }
 
-            $("#select-thumb-file").change(function(){
-                readURL(this, '#show_thumb_image');
-            });
-
-            $("#select-associate-file").change(function(){
-                readURL(this, '#show_associate_image');
-            });
-
-            $("#select-mobile-header-file").change(function(){
-                readURL(this, '#show_mobile_header_image');
+            $('#show_associate_image').click(function () {
+                showImg("#outerdiv", "#innerdiv", "#bigimg", $(this));
             });
 
             $("#start_time").change(function(){

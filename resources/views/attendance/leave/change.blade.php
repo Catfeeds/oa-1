@@ -96,6 +96,11 @@
                     <div class="form-group @if (!empty($errors->first('annex'))) has-error @endif">
                         {!! Form::label('annex', trans('att.附件图片'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-2">
+                            <div id="outerdiv" style="position:fixed;top:0;left:0;background:rgba(0,0,0,0.7);z-index:2;width:100%;height:100%;display:none;">
+                                <div id="innerdiv" style="position:absolute;">
+                                    <img id="bigimg" style="border:5px solid #fff;" src="" />
+                                </div>
+                            </div>
                             <img height="100px" width="100px" src="{{ !empty($leave->annex) ?  asset($leave->annex) : asset('img/blank.png') }}"
                                  id="show_associate_image">
                             <input name="annex" type="file" accept="image/*" id="select-associate-file"/>
@@ -164,12 +169,17 @@
 @include('widget.select2')
 @include('widget.datepicker')
 @include('widget.dual-listbox')
+@include('widget.show-img')
 @section('scripts-last')
     <script>
         $(function() {
 
             $('.dual_select').bootstrapDualListbox({
                 selectorMinimalHeight: 300
+            });
+
+            $('#show_associate_image').click(function () {
+                showImg("#outerdiv", "#innerdiv", "#bigimg", $(this));
             });
 
 

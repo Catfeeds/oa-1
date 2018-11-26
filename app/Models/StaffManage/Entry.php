@@ -20,6 +20,10 @@ class Entry extends Model
 
     protected $primaryKey = 'entry_id';
 
+    //创建可填写工作经历和家庭成员表格数量
+    const CREATE_WORK_HISTORY_NUM = 2;
+    const CREATE_FAMILY_NUM = 2;
+
     const WAIT_SEND = 0;
     const HAS_SEND = 1;
     const FILL_IN = 2;

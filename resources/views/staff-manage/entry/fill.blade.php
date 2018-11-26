@@ -65,7 +65,6 @@
                                             {!! Form::label('birthday', trans('staff.生日'), ['class' => 'col-sm-4 control-label']) !!}
                                             <div class="col-sm-3">
                                                 <div class="input-group">
-
                                                     <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
                                                     {!! Form::text('entry[birthday]', !empty($entry->birthday) ? date('Y-m-d', strtotime($entry->birthday)) : ($cache->birthday ?? ''), [
                                                     'class' => 'form-control date',
@@ -274,7 +273,7 @@
                                                     </tr>
                                                     </thead>
                                                     <tbody>
-                                                    @for($i = 0; $i <= 2; $i++)
+                                                    @for($i = 0; $i <= \App\Models\StaffManage\Entry::CREATE_FAMILY_NUM; $i++)
                                                         <tr>
                                                             <td><input name="entry[family_num][{{$i}}][name]" value="{{!empty($entry->family_num[$i]['name']) ? $entry->family_num[$i]['name'] : ($cache->family_num[$i]['name'] ?? '')}}" style="width: 6em;" type="text"></td>
                                                             <td><input name="entry[family_num][{{$i}}][age]" value="{{!empty($entry->family_num[$i]['age']) ? $entry->family_num[$i]['age'] : ($cache->family_num[$i]['age'] ?? '')}}" style="width: 3em;" type="text"></td>
@@ -439,7 +438,7 @@
                                                     </tr>
                                                     </thead>
                                                     <tbody>
-                                                    @for($i = 0; $i <= 2; $i++)
+                                                    @for($i = 0; $i <= \App\Models\StaffManage\Entry::CREATE_WORK_HISTORY_NUM; $i++)
                                                         <tr>
                                                             <td><input name="entry[work_history][{{$i}}][time]" value="{{!empty($entry->work_history[$i]['time']) ? $entry->work_history[$i]['time'] : ($cache->work_history[$i]['time'] ?? '')}}" style="width: 6em;" type="text"></td>
                                                             <td><input name="entry[work_history][{{$i}}][deadline]" value="{{!empty($entry->work_history[$i]['deadline']) ? $entry->work_history[$i]['deadline'] : ($cache->work_history[$i]['deadline'] ?? '')}}" style="width: 3em;" type="text"></td>

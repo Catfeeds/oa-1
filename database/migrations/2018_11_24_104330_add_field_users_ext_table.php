@@ -15,11 +15,10 @@ class AddFieldUsersExtTable extends Migration
     {
         Schema::table('users_ext', function (Blueprint $table) {
             $table->text('family_num')->change()->comment = '家庭成员';
-            $table->integer('family_num')->nullable()->change()->comment = '家庭成员';
             $table->timestamp('birthday')->nullable()->comment = '生日';
-            $table->text('work_history')->comment = '工作经历';
-            $table->text('project_empiric')->comment = '项目经验';
-            $table->text('awards')->comment = '获奖情况';
+            $table->text('work_history')->nullable()->comment = '工作经历';
+            $table->text('project_empiric')->nullable()->comment = '项目经验';
+            $table->text('awards')->nullable()->comment = '获奖情况';
             $table->unsignedTinyInteger('birthday_type')->default(0)->comment = '生日类型 默认0 0:公历 1:农历';
         });
     }
