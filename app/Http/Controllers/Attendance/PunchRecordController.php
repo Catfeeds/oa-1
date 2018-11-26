@@ -211,7 +211,7 @@ class PunchRecordController extends Controller
                     }
                     $data[$ts][$v[3]] = $row;
                 }
-                $formulaCalPunRuleConf = PunchHelper::getCalendarPunchRules($minTs, $maxTs)['formula'];
+                $formulaCalPunRuleConfArr = PunchHelper::getCalendarPunchRules($minTs, $maxTs)['formula'];
 
                 if (!$isOK) {
                     //信息记录
@@ -234,12 +234,12 @@ class PunchRecordController extends Controller
                         }
 
                         $detail = DailyDetail::where(['user_id' => $user->user_id, 'day' => $u['ts']])->first();
-                        if (count($formulaCalPunRuleConf[$u['ts']]) === 0) {
+                        if (count($formulaCalPunRuleConfArr[$u['ts']]) === 0) {
                             $msgArr[] = '[' . $u['ts'] . ']这天未有上下班打卡配置,请先配置';
                             continue;
                         }
 
-                        $deducts = $this->punchHelper->fun_($bufferArr, $u, $formulaCalPunRuleConf, $detail);
+                        $deducts = $this->punchHelper->fun_($bufferArr, $u, $formulaCalPunRuleConfArr, $detail);
                         $bufferArr = $deducts['bufferArr'];
                         $switchLeaveIds = $this->punchHelper->storeDeductInLeave($deducts['deducts'], $user->user_id, $u['ts']);
 

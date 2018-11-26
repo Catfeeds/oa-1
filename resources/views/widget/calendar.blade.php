@@ -62,10 +62,11 @@
             weekends: true,
             themeSystem: 'bootstrap3',
             events: function (start, end, a, callback) {
+                var year = this.getDate().format('YYYY');
                 var month = this.getDate().format('MM');
                 $.ajax({
                     url: '{{ route('calIndex') }}',
-                    data: {month: month},
+                    data: {year: year, month: month},
                     dataType: 'json',
                     success: function (info) {
                         var events = [];

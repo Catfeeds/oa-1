@@ -163,6 +163,8 @@ class ReviewHelper
     {
         $isDanger = ['on_work' => false, 'off_work' => false];
 
+        if (isset($formulaCalPunRuleConf['if_rest'])) return $isDanger;
+
         foreach ($formulaCalPunRuleConf['sort'] as $key => $value) {//时间段
             list($startWorkTime, $endWorkTime, $readyTime) = explode('$$', $key);
             list($rt, $et) = DataHelper::timesToNum($readyTime, $endWorkTime);

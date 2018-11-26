@@ -51,7 +51,6 @@ class PunchRulesConfig extends Model
 
     public static function getPunchRules($config)
     {
-
         $list = $arr = $arr_ = [];
         foreach ($config as $k => $v) {
             $sKey = self::resolveFormula($v['work_start_time']);
