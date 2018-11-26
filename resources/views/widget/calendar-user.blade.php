@@ -15,6 +15,14 @@
     .fc-center > h2 {
         font-size: medium;
     }
+    /*td.fc-event-container {
+        position: absolute;
+    }*/
+    .fc-event {
+        position: absolute;
+        bottom: 55%;
+        margin-left: 0.5%;
+    }
 </style>
 @endpush
 
@@ -71,11 +79,12 @@
                         var events = [];
                         $.each(info, function (i, n) {
                             events.push({
-                                title: n.event,
+                                title: n.event_char,
                                 start: n.date,
                                 color: n.color,
                                 content: n.content,
-                                id: 'event_' + i
+                                id: 'event_' + i,
+                                pop_title: n.event,
                             });
 
                         });
@@ -86,7 +95,7 @@
             eventRender: function (event, element) {
                 element.attr('id', event.id).popover({
                     html: true,
-                    title: event.title,
+                    title: event.pop_title,
                     placement: 'top',
                     container: 'body',
                     content: event.content,
