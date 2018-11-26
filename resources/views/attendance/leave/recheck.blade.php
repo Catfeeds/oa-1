@@ -15,47 +15,34 @@
                     {!! Form::open(['class' => 'form-horizontal', 'enctype' => 'multipart/form-data']) !!}
                     {{ Form::hidden('leave_id', $leave->leave_id ?? '') }}
                     <div class="form-group @if (!empty($errors->first('holiday_id'))) has-error @endif">
-                        {!! Form::label('holiday_id', trans('att.补打卡类型'), ['class' => 'col-sm-2 control-label']) !!}
-                        @foreach($holidayList as $k => $v)
-                            <div class="checkbox col-sm-2">
-                                <label>
-                                    <input name="holiday_id" type="checkbox" class="i-checks" value="{{$v->holiday_id .'$$'. $v->punch_type }}" id="recheck_{{$v->punch_type}}">{{$v->holiday}}
+                        {!! Form::label('holiday_id_label', trans('att.补打卡类型'), ['class' => 'col-sm-2 control-label']) !!}
+                        <div class="col-sm-2">
+                            @foreach($holidayList as $k => $v)
+                                <label class="radio-inline i-checks">
+                                    <input type="radio" id="holiday_id" name="holiday_id" value="{{$k}}" @if($k === (int)($leave->holiday_id ?? old('holiday_id'))) checked @endif> {{ $v }}
                                 </label>
-                            </div>
-                        @endforeach
+                            @endforeach
+                        </div>
+                        <div class="col-sm-2">
+                            <span id="show_memo" style="display: none"  class="help-block m-b-none">
+                                <p style="color: red" id="show_p"></p>
+                                <pre style="width: 30em; height: 10em"  id="show_pre"></pre>
+                            </span>
+                        </div>
                         <span class="help-block m-b-none">{{ $errors->first('holiday_id') }}</span>
                     </div>
 
-                    <input type="hidden" id="check_box" value="{{old('holiday_id')}}">
-
-                    <div id="onwork_div" style="display: none">
-                        <div class="hr-line-dashed"></div>
-                        <div class="form-group @if (!empty($errors->first('start_time'))) has-error @endif" >
-                            {!! Form::label('start_time', trans('att.上班补打卡时间'), ['class' => 'col-sm-2 control-label']) !!}
-                            <div class="col-sm-3">
-                                <div class="input-group">
-                                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                                    {!! Form::text('start_time', $time . ' 09:00' , [
-                                    'class' => 'form-control date_time',
-                                    ]) !!}
-                                    <span class="help-block m-b-none">{{ $errors->first('start_time') }}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="offwork_div" style="display: none">
-                        <div class="hr-line-dashed"></div>
-                        <div class="form-group @if (!empty($errors->first('end_time'))) has-error @endif" >
-                            {!! Form::label('end_time', trans('att.下班补打卡时间'), ['class' => 'col-sm-2 control-label']) !!}
-                            <div class="col-sm-3">
-                                <div class="input-group">
-                                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                                    {!! Form::text('end_time', $time . ' 20:00' , [
-                                    'class' => 'form-control date_time',
-                                    ]) !!}
-                                    <span class="help-block m-b-none">{{ $errors->first('end_time') }}</span>
-                                </div>
+                    <div class="hr-line-dashed"></div>
+                    <div class="form-group @if (!empty($errors->first('start_time'))) has-error @endif" >
+                        {!! Form::label('start_time', trans('att.补打卡时间'), ['class' => 'col-sm-2 control-label']) !!}
+                        <div class="col-sm-3">
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                {!! Form::text('start_time', $time, [
+                                'class' => 'form-control date_time',
+                                'id' => 'start_time'
+                                ]) !!}
+                                <span class="help-block m-b-none">{{ $errors->first('start_time') }}</span>
                             </div>
                         </div>
                     </div>
@@ -142,68 +129,15 @@
     <script>
         $(function() {
 
-
             $('#show_associate_image').click(function () {
                 showImg("#outerdiv", "#innerdiv", "#bigimg", $(this));
             });
 
-            if($('#check_box').val() != '') {
-                var arr = $('#check_box').val().split('$$');
+            showMemo();
 
-                if(arr[1] == 1) {
-                    $('#recheck_1').iCheck('check');
-                    $('#onwork_div').show();
-                }
-
-                if(arr[1] == 2) {
-                    $('#recheck_2').iCheck('check');
-                    $('#offwork_div').show();
-                }
-            };
-
-            $('input[type="checkbox"]').on('ifChecked', function () {
-                var arr = $(this).val().split('$$');
-                if ($(this).attr('id') == "recheck_1") {
-                    inquire(arr[0]);
-                    $('#onwork_div').show();
-                }
-
-                if ($(this).attr('id') == "recheck_2") {
-                    inquire(arr[0]);
-                    $('#offwork_div').show();
-                }
-
+            $('input[type="radio"]').on('ifChecked', function () {
+                showMemo();
             });
-
-            $('input[type="checkbox"]').on('ifUnchecked', function () {
-                if ($(this).attr('id') == "recheck_1") {
-                    $('#onwork_div').hide();
-                    $('show_step').html('');
-                }
-
-                if ($(this).attr('id') == "recheck_2") {
-                    $('#offwork_div').hide();
-                    $('show_step').html('');
-                }
-
-            });
-
-            function inquire(hid) {
-                var holidayId = hid;
-                var startTime = $('#start_time').val();
-                var endTime = $('#end_time').val();
-
-                if(holidayId != '') {
-                    $.get('{{ route('leave.inquire')}}', {holidayId: holidayId,startTime: startTime, endTime: endTime}, function ($data) {
-                        if ($data.status == 1) {
-                            $('#show_step').html($data.step).find('select').select2();
-                        } else {
-                            $('#show_step').html('');
-                        }
-                    })
-                }
-
-            }
 
             @if(!empty($daily))
                 @if(empty($daily->punch_start_time))
@@ -227,5 +161,53 @@
                 @endif
             @endif
         });
+
+        /**
+         * 显示剩余假期和描述
+         */
+        function showMemo() {
+            var hid = $('input:radio:checked').val();
+            if(hid != "") {
+                $('#show_pre').html('');
+                $.get('{{ route('leave.showMemo')}}', {id: hid}, function ($data) {
+                    if ($data.status == 1) {
+                        /*显示描述*/
+                        if($data.show_memo) {
+                            $('#show_pre').html($data.memo);
+                            $('#show_memo').show();
+                        }
+                        var html = $data.step;
+                        $('#show_step').html(html).find('select').select2();
+                        inquire(hid);
+
+                    } else {
+                        $('#show_memo').hide();
+                        $('#show_p').hide();
+                        $('#show_pre').html('');
+                    }
+                })
+            } else {
+                $('#show_pre').html('');
+                $('#show_memo').hide();
+            }
+        }
+
+        function inquire(hid) {
+            var holidayId = hid;
+            var startTime = $('#start_time').val();
+
+            if(holidayId != '') {
+                $.get('{{ route('leave.inquire')}}', {holidayId: holidayId,startTime: startTime}, function ($data) {
+                    if ($data.status == 1) {
+                        $('#show_step').html($data.step).find('select').select2();
+                    } else {
+                        $('#show_step').html('');
+                    }
+                })
+            }
+
+        }
+
+
     </script>
 @endsection

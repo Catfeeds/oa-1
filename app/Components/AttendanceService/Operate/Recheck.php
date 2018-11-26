@@ -25,7 +25,8 @@ class Recheck extends Operate implements AttendanceInterface
 
     public function checkLeave($request): array
     {
-        //$this->validate($request, $this->_validateRuleRe);
+        //补打卡不需要end_time
+        unset($this->_validateRule['end_time']);
         $this->validate($request, $this->_validateRule);
         $p = $request->all();
 
@@ -34,31 +35,27 @@ class Recheck extends Operate implements AttendanceInterface
         //批量调休人员名单
         $copyUser = $p['copy_user'] ?? '';
 
-        $startTime = $p['start_time'];
-        $endTime = $p['end_time'];
-
-        list($hId, $punchType) = explode('$$', $holidayId);
-
-        $holidayId = $hId;
-        //补上班打卡
-        if ((int)$punchType === HolidayConfig::GO_WORK && empty($startTime)) {
-            $this->validate($request, array_merge($this->_validateRule, [
-                'start_time' => 'required',
-            ]));
-        }
         //补下班打卡
-        if ((int)$punchType === HolidayConfig::OFF_WORK && empty($endTime)) {
-            $this->validate($request, array_merge($this->_validateRule, [
-                'end_time' => 'required',
-            ]));
-        }
-
-        //补打卡的时间验证
-        if ((!empty($startTime) && !empty($endTime)) && strtotime($startTime) > strtotime($endTime)) {
+        if (empty($startTime)) {
             $this->validate($request, array_merge($this->_validateRule, [
                 'start_time' => 'required',
-                'end_time'   => 'required|after:start_time',
             ]), ['请选择有效的时间范围']);
+        }
+
+        $startTime = $endTime = NULL;
+
+        $config = HolidayConfig::where(['holiday_id' => $holidayId, 'apply_type_id' => HolidayConfig::RECHECK])->first();
+
+        if(empty($config->holiday_id)) {
+            return $this->backLeaveData(false, ['holiday_id' => trans('无效申请ID')]);
+        }
+
+        if($config->punch_type === HolidayConfig::GO_WORK) {
+            $startTime = $p['start_time'];
+        }
+
+        if($config->punch_type === HolidayConfig::OFF_WORK) {
+            $endTime = $p['start_time'];
         }
 
         //批量抄送组织可查询的JSON数据
@@ -72,7 +69,7 @@ class Recheck extends Operate implements AttendanceInterface
         $data = [
             'start_time'        => $startTime,
             'end_time'          => $endTime,
-            'holiday_id'        => $holidayId,
+            'holiday_id'        => (int)$holidayId,
             'number_day'        => 0,//补打卡默认天数未0
             'copy_user'         => $copyUser,
             'start_id'          => NULL,
@@ -202,7 +199,7 @@ class Recheck extends Operate implements AttendanceInterface
 
         //申请单重启
         if (!empty($leaveId) && \Entrust::can(['leave.restart'])) {
-            $leave = Leave::findOrFail($leaveId);
+            $leave = Leave::with('holidayConfig')->findOrFail($leaveId);
             if ((int)$leave->user_id !== \Auth::user()->user_id || !in_array($leave->status, Leave::$restartList)) {
                 flash('请勿非法操作', 'danger');
                 return redirect()->route('leave.info');
@@ -211,11 +208,13 @@ class Recheck extends Operate implements AttendanceInterface
         }
 
         $allUsers = User::where(['status' => User::STATUS_ENABLE])->get();
-        $time = date('Y-m-d', time());
+        $time = date('Y-m-d H:i:s', time());
 
         $holidayList = HolidayConfig::where(['apply_type_id' => HolidayConfig::RECHECK])
             ->orderBy('sort', 'asc')
-            ->get(['holiday_id', 'show_name', 'punch_type']);
+            ->get(['holiday_id', 'show_name'])
+            ->pluck('show_name', 'holiday_id')
+            ->toArray();
         $daily = DailyDetail::where(['user_id' => \Auth::user()->user_id, 'day' => request()->day])->first();
 
         return view('attendance.leave.recheck', compact('title', 'time', 'holidayList', 'leave', 'reviewUserId', 'daily', 'allUsers'));
