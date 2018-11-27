@@ -69,15 +69,12 @@
                                 @elseif($applyTypeId == \App\Models\Sys\HolidayConfig::CHANGE)
                                     {{\App\Http\Components\Helpers\AttendanceHelper::spliceLeaveTime($leave->holiday_id, $leave->start_time, $leave->start_id, $leave->number_day)['time']}}
                                 @elseif($applyTypeId == \App\Models\Sys\HolidayConfig::RECHECK)
-                                    @if(!empty($leave->start_time) && !empty($leave->end_time))
-                                        {{ $leave->start_time }} ~ {{ $leave->end_time }}
-                                    @elseif(!empty($leave->start_time))
-                                        {{ $leave->start_time }}
+                                    @if(!empty($leave->start_time))
+                                        {{ \App\Http\Components\Helpers\AttendanceHelper::spliceLeaveTime($leave->holiday_id, $leave->start_time,$leave->start_id, $leave->number_day)['time']}}
                                     @elseif(!empty($leave->end_time))
-                                        {{ $leave->end_time }}
+                                        {{\App\Http\Components\Helpers\AttendanceHelper::spliceLeaveTime($leave->holiday_id, $leave->end_time, $leave->end_id, $leave->number_day)['time']}}}}
                                     @endif
                                 @endif
-
                             </span>
                             </div>
                         </div>
