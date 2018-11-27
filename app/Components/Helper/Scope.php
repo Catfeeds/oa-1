@@ -35,6 +35,7 @@ class Scope
         }
 
         if($this->displayLastMonth) {
+
             $this->endDate = isset($params['endDate']) ? date('Y-m-t', is_numeric($params['endDate']) ? $params['endDate'] / 1000 : strtotime($params['endDate'])) : date('Y-m-t',strtotime('-1month'));
             $this->startDate = isset($params['startDate'])
                 ? date('Y-m-01', is_numeric($params['startDate']) ? $params['startDate'] / 1000 : strtotime($params['startDate']))
@@ -43,6 +44,11 @@ class Scope
 
             $this->endDate = isset($params['endDate']) ? $params['endDate'] : date('Y-m-t', time());
             $this->startDate = isset($params['startDate']) ? $params['startDate'] : date('Y-m-01', time());
+
+            $this->startDate = strlen($this->startDate) == 13 ? date('Y-m-t', $this->startDate / 1000) : $this->startDate;
+            $this->endDate = strlen($this->endDate) == 13 ? date('Y-m-t', $this->endDate / 1000) : $this->endDate;
+
+
         }
 
         if($this->showDate) {
