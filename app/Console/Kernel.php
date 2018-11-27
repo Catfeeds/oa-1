@@ -29,7 +29,8 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')
         //          ->hourly();
-        $schedule->command("self:proportion")->cron('55 10 1 * *');;
+        $schedule->command("self:proportion")->cron('55 10 1 * *');
+        $schedule->command("punch:run")->daily()->withoutOverlapping();
     }
 
     /**
