@@ -68,6 +68,7 @@ class Handler extends ExceptionHandler
     {
         $es = [
             HttpResponseException::class,
+            \HttpException::class,
             \ErrorException::class,
             \PDOException::class,
             \RuntimeException::class,
