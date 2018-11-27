@@ -127,7 +127,10 @@ class ReviewHelper
         $danger = array();
         $formulaCalPunRuleConf = app(PunchHelper::class)->getCalendarPunchRules($startDate, $endDate)['formula'];
         foreach ($dailyDetailData as $datum) {
-            $danger[$datum->day] = $this->getPrDanger($datum->punch_start_time, $datum->punch_end_time, $formulaCalPunRuleConf[$datum->day]);
+            $danger[$datum->day] = ['on_work' => false, 'off_work' => false];
+            /*if (!empty($formulaCalPunRuleConf[$datum->day])) {
+                $danger[$datum->day] = $this->getPrDanger($datum->punch_start_time, $datum->punch_end_time, $formulaCalPunRuleConf[$datum->day]);
+            }
             $leaveArr = json_decode($datum->leave_id, true);
             if (!empty($leaveArr)) {
                 //这天若打卡在请假区间,false不显示红色
@@ -147,7 +150,7 @@ class ReviewHelper
                         }
                     }
                 }
-            }
+            }*/
         }
         return $danger;
     }

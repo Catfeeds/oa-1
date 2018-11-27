@@ -67,7 +67,6 @@ class ReviewController extends AttController
         /*if (!empty($message)) {
             return ['error', $message];
         }*/
-
         list($year, $month) = explode('-', $scope->startDate);
 
         $holidayConfigArr = $this->reviewHelper->getHolidayConfigByCypherTypes(array_keys(HolidayConfig::$cypherTypeChar));
