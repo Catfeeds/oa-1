@@ -143,7 +143,8 @@ class Operate
             'exceed_holiday_id' => $leave['exceed_holiday_id'] ?? NULL,
             'step_user' => $leave['step_user'] ?? NULL
         ];
-         $ret = Leave::create($data);
+        dd($data);
+        $ret = Leave::create($data);
 
          return $this->backLeaveData(true, [], ['leave_id' => $ret->leave_id]);
     }
