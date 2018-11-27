@@ -9,6 +9,7 @@ use App\Models\Attendance\Leave;
 use App\Models\Material\Apply;
 use App\Models\Sys\Bulletin;
 use App\Models\Sys\HolidayConfig;
+use App\Models\Sys\PunchRulesConfig;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -32,6 +33,10 @@ class HomeController extends Controller
         $apply = $this->apply($start, [Leave::ON_REVIEW, Leave::PASS_REVIEW]);
         $approve = $this->approve($start, [Leave::ON_REVIEW, Leave::PASS_REVIEW,Leave::WAIT_REVIEW]);
         //dd($formulaCalPunRuleConf = PunchHelper::getCalendarPunchRules('2018-10-01', '2018-10-31')['formula']);
+        /*$formulaCalPunRuleConf = PunchHelper::getCalendarPunchRules('2018-10-01', '2018-10-31')['formula']['2018-10-11'];
+        dd(PunchHelper::getFormulaDelayConf(['go' => ['start' => '9:15', 'end' => '9:40'], 'off' => ['start' => '19:25', 'end' => '20:00']], $formulaCalPunRuleConf));*/
+        /*dd(PunchHelper::getFormulaNightConf(['start' => '9:15', 'end' => '15:15'], $formulaCalPunRuleConf));*/
+//        dd(PunchRulesConfig::resolveGapFormula('[0,0,1,0,0]'));
         return view('home', compact('bullets', 'remainWelfare', 'countRecheck', 'apply', 'approve'));
     }
 

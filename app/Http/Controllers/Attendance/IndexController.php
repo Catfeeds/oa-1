@@ -37,7 +37,7 @@ class IndexController extends Controller
         foreach ($formulaCalPunRuleConf as $key => $v) {
             $info[] = [
                 'date' => $key,
-                'event_char' => PunchRules::$punchTypeChar[$p['event'][$key]->id],
+                'event_char' => PunchRules::$punchTypeChar[$p['event'][$key]->punch_type_id],
                 'event' => $p['event'][$key]->name,
                 'color' => PunchRules::$punchTypeColor[$p['event'][$key]->punch_type_id],
                 'content' => "上班准备时间:" . explode('$$', array_first(array_keys($v['sort'])))[2] . '<br>上班时间:' . $v['start_time'][0] .
