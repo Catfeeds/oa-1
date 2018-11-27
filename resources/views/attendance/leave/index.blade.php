@@ -118,7 +118,7 @@
                                 </td>
                                 <td><pre style="height: 3em;width: 10em">{{ $v['reason'] }}</pre></td>
                                 <td>{{ $v['created_at'] }}</td>
-                                <td>{{ \App\Models\Attendance\Leave::$status[$v['status']] }}</td>
+                                <td>{!! \App\Models\Attendance\Leave::leaveColorStatus($v['status']) !!}</td>
                                 <td>
                                    {{-- @if(Entrust::can(['leave.edit']))
                                         {!! BaseHtml::tooltip(trans('app.设置'), route('leave.edit', ['id' => $v['leave_id']]), 'cog fa-lg') !!}

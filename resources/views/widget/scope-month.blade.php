@@ -27,7 +27,6 @@
                         {!! Form::hidden('source', $source, ['id' => 'source']) !!}
                     @endif
                     {!! Form::hidden('scope[startDate]', $scope->startDate, ['id' => 'scope-start-date']) !!}
-                    {!! Form::hidden('scope[endDate]', $scope->endDate, ['id' => 'scope-end-date']) !!}
 
                     {!! Form::close() !!}
                 </div>

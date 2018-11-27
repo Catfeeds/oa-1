@@ -128,6 +128,16 @@ class Leave extends Model
 
     ];
 
+    public static $leaveColor = [
+        self::WAIT_REVIEW => 'badge',
+        self::ON_REVIEW => 'badge badge-primary',
+        self::REFUSE_REVIEW => 'badge badge-danger',
+        self::PASS_REVIEW => 'badge badge-success',
+        self::CANCEL_REVIEW => 'badge badge-danger',
+        self::WAIT_EFFECTIVE => 'badge badge-info',
+        self::RETRACT_REVIEW => 'badge badge-warning',
+    ];
+
     //操作状态驱动标识
     public static $driverType = [
         self::REFUSE_REVIEW => 'refuse',
@@ -215,6 +225,11 @@ class Leave extends Model
             $arr[] = $leaf->holidayConfig->$attr;
         }
         return $arr;
+    }
+
+    public static function leaveColorStatus($status)
+    {
+        return '<span class="'. self::$leaveColor[$status] .'">'.self::$status[$status] .'</span>';
     }
 
 }

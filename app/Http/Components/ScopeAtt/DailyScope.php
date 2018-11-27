@@ -12,16 +12,18 @@ use App\Components\Helper\GeneralScope;
 
 class DailyScope extends GeneralScope
 {
-    public $displayLastMonth = true;
+    public $displayLastMonth = false;
     public $dailyUserId;
     public $dailyAlias;
     public $dailyDept;
+
 
     public function __construct(array $params, $user = null)
     {
         $this->dailyUserId = $params['daily_user_id'] ?? '';
         $this->dailyAlias = $params['daily_alias'] ?? '';
         $this->dailyDept = $params['daily_dept'] ?? '';
+
         parent::__construct($params, $user);
     }
 
