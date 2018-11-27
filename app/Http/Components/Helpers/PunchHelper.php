@@ -84,7 +84,7 @@ class PunchHelper
     }
 
     /**
-     * 正常情况下 上下班时间与对应规则的匹配,进行扣除迟到或早退的时间
+     * 上下班时间与对应规则的匹配,进行扣除迟到或早退的时间
      * @param $punch_start
      * @param $punch_end
      * @param $formulaCalPunRuleConf
@@ -104,10 +104,12 @@ class PunchHelper
                 //上班时间对比各个时间段,若开始时间在该时间段之后或结束时间在该时间段之前都证明不在该段内,扣掉该段的时间差
                 if (empty($ps) || empty($pe) || $compare[0] >= $compare[2] || $compare[1] <= $compare[3]) {
                     $d = DataHelper::leaveDayDiff('2018-01-01', $readyTime, '2018-01-01', $endWorkTime);
+                    //标记小时假,不扣天数
                     if ($compare[2] > 1800 && $d > 0) {
                         $deductScore['if_hour'] = 1;
                         $d = 0;
-                    } //标记小时假,不扣天数
+                    }
+                    //这段不在的时间段是请假的时间段时,不扣天数
                     if (!empty($leaveTime)) {
                         if (strtotime($readyTime) >= strtotime($leaveTime['start']) &&
                             strtotime($endWorkTime) <= strtotime($leaveTime['end'])
@@ -127,7 +129,8 @@ class PunchHelper
                     );
                     //上班规则匹配
                     if ($item['late_type'] == PunchRules::LATE_WORK && $compare[2] <= 1800) {
-                        if (!empty($punch_start) && DataHelper::ifBetween($countArr[0], $countArr[1], (int)str_replace(':', '', $punch_start), 'r=')) {
+                        if (!empty($punch_start) && DataHelper::ifBetween($countArr[0], $countArr[1],
+                                (int)str_replace(':', '', $punch_start), 'r=')) {
                             if ($item['ded_type'] == PunchRulesConfig::DEDUCT_SCORE) {
                                 //扣的分数
                                 $deductScore['score'] = $deductScore['score'] + $item['ded_num'];
@@ -180,20 +183,30 @@ class PunchHelper
             //请假情况的扣除规则
             $leaves = json_decode($dailyDetail->leave_id, true);
             $leaveObjects = Leave::whereIn('leave_id', $leaves)->whereHas('holidayConfig', function ($query) {
-                $query->whereIn('cypher_type', [HolidayConfig::CYPHER_CHANGE, HolidayConfig::CYPHER_PAID, HolidayConfig::CYPHER_UNPAID]);
-            })->get();
+                $query->whereIn('apply_type_id', [HolidayConfig::LEAVEID, HolidayConfig::CHANGE]);
+            })->with('holidayConfig')->get();
             $overObjects = Leave::whereIn('leave_id', $leaves)->whereHas('holidayConfig', function ($query) {
                 $query->whereIn('cypher_type', [HolidayConfig::CYPHER_OVERTIME]);
             })->first();
 
+            //节假日,直接返回默认
             if (isset($formulaCalPunRuleConf['if_rest']) && empty($overObjects)) return $default;
-            if (isset($formulaCalPunRuleConf['if_rest']) && !empty($overObjects)) {
+            //节假日加班, 修改打卡规则
+            if (isset($formulaCalPunRuleConf['if_rest']) && !empty($overObjects))
                 $formulaCalPunRuleConf = $this->getFormulaOverTimeConf($overObjects);
+            //获取这一天因假期不在的时间段
+            $leaveTime = $this->getLeaveTimes($formulaCalPunRuleConf, $dailyDetail, $leaveObjects, $punch_start);
+            //这一整天请假,直接返回默认
+            if (isset($leaveTime['leave_time']['unnecessary'])) return $default;
+            //夜班加班, 修改打卡规则
+            if (!empty($leaveTime['night_time']))
+                $formulaCalPunRuleConf = $this->getFormulaNightConf($leaveTime['night_time'], $formulaCalPunRuleConf);
+            //延迟假, 修改打卡规则
+            if (!empty($leaveTime['delay_time'])) {
+                $formulaCalPunRuleConf = self::getFormulaDelayConf($leaveTime['delay_time'], $formulaCalPunRuleConf);
             }
 
-            $leaveTime = $this->getLeaveTimes($formulaCalPunRuleConf, $dailyDetail, $leaveObjects);
-            if (isset($leaveTime['unnecessary'])) return $default;
-            $deducts = $this->dealBuffer($buffer, $formulaCalPunRuleConf, $punch_start, $punch_end, $leaveTime);
+            $deducts = $this->dealBuffer($buffer, $formulaCalPunRuleConf, $punch_start, $punch_end, $leaveTime['leave_time']);
         } else {
             if (isset($formulaCalPunRuleConf['if_rest'])) return $default;
             //正常则按扣除规则
@@ -322,25 +335,96 @@ class PunchHelper
      * @param $leaveObjects
      * @return array
      */
-    public function getLeaveTimes($formulaCalPunRuleConf, $dailyDetail, $leaveObjects): array
+    public function getLeaveTimes($formulaCalPunRuleConf, $dailyDetail, $leaveObjects, $punchStart = ''): array
     {
-        $leaveTime = [];
+        $leaveTime = $nightTime = $delayTime = [];
         $begin = explode('$$', array_first(array_keys($formulaCalPunRuleConf['sort'])))[0];
         $end = explode('$$', array_last(array_keys($formulaCalPunRuleConf['sort'])))[1];
         foreach ($leaveObjects as $leaveObject) {
             $leaStartDate = strtotime($leaveObject->start_time);
             $leaEndDate = strtotime($leaveObject->end_time);
-            if ($leaEndDate == $leaStartDate) {
-                $leaveTime = ['start' => $leaveObject->start_id, 'end' => $leaveObject->end_id];
-            } elseif ($leaEndDate > $leaStartDate && strtotime($dailyDetail->day) == $leaStartDate) {
-                $leaveTime = ['start' => $leaveObject->start_id, 'end' => $end];
-            } elseif ($leaEndDate > $leaStartDate && strtotime($dailyDetail->day) == $leaEndDate) {
-                $leaveTime = ['start' => $begin, 'end' => $leaveObject->end_id];
-            } elseif (DataHelper::ifBetween($leaStartDate, $leaEndDate, strtotime($dailyDetail->day))) {
-                $leaveTime = ['start' => $begin, 'end' => $end, 'unnecessary' => 1];
+            if ($leaveObject->holidayConfig->cypher_type == HolidayConfig::CYPHER_NIGHT) {
+                $nightTime = $this->getNightTime($begin, $leaveObject);
+            }elseif ($leaveObject->holidayConfig->cypher_type == HolidayConfig::CYPHER_DELAY && !empty($punchStart)) {
+                $delayTime = $this->getDelayTime($leaveObject, $begin, $end, $punchStart);
+            } else {
+                if ($leaEndDate == $leaStartDate) {
+                    $leaveTime = ['start' => $leaveObject->start_id, 'end' => $leaveObject->end_id];
+                } elseif ($leaEndDate > $leaStartDate && strtotime($dailyDetail->day) == $leaStartDate) {
+                    $leaveTime = ['start' => $leaveObject->start_id, 'end' => $end];
+                } elseif ($leaEndDate > $leaStartDate && strtotime($dailyDetail->day) == $leaEndDate) {
+                    $leaveTime = ['start' => $begin, 'end' => $leaveObject->end_id];
+                } elseif (DataHelper::ifBetween($leaStartDate, $leaEndDate, strtotime($dailyDetail->day))) {
+                    $leaveTime = ['start' => $begin, 'end' => $end, 'unnecessary' => 1];
+                }
             }
         }
-        return $leaveTime;
+        return ['leave_time' => $leaveTime, 'night_time' => $nightTime, 'delay_time' => $delayTime];
+    }
+
+    /**
+     * 获取因夜班加班,今天不在的时间段
+     * @param $begin
+     * @param $leaveObject
+     * @return array
+     */
+    public function getNightTime($begin, $leaveObject): array
+    {
+        $nightTime = [
+            'start' => $begin,
+            'end'   => $this->findDiffToCreateNewEnd($leaveObject->start_id, $leaveObject->end_id, $begin, 'H:i'),
+        ];
+        return $nightTime;
+    }
+
+    /**
+     * 获取因延迟假,今天不在的时间段
+     * @param $leaveObject
+     * @param $begin
+     * @param $end
+     * @param $punch_start
+     * @return array
+     */
+    public function getDelayTime($leaveObject, $begin, $end, $punch_start)
+    {
+        $delayTime = ['go' => [], 'off' => []];
+        $timeGap = PunchRulesConfig::resolveGapFormula($leaveObject->holidayConfig->work_relief_formula);
+        $interval = new \DateInterval('PT' . $timeGap . 'S');
+        $dateBegin = new \DateTime($begin);
+        $dateEnd = new \DateTime($end);
+        switch ($leaveObject->holidayConfig->work_relief_type) {
+            case HolidayConfig::NO_SETTING:
+                $datePs = new \DateTime($punch_start);
+                if (strtotime($punch_start) - strtotime($begin) >= $timeGap) {
+                    $delayTime['go'] = [
+                        'start' => $begin,
+                        'end'   => $dateBegin->add($interval)->format('H:i'),
+                    ];
+                    break;
+                }
+                $delayTime['go'] = [
+                    'start' => $begin,
+                    'end'   => $punch_start,
+                ];
+                $delayTime['off'] = [
+                    'start' => $dateEnd->add($dateBegin->diff($datePs))->sub($interval)->format('H:i'),
+                    'end'   => $end,
+                ];
+                break;
+            case HolidayConfig::GO_WORK:
+                $delayTime['go'] = [
+                    'start' => $begin,
+                    'end'   => $dateBegin->add($interval)->format('H:i'),
+                ];
+                break;
+            case HolidayConfig::OFF_WORK:
+                $delayTime['off'] = [
+                    'start' => $dateEnd->sub($interval)->format('H:i'),
+                    'end'   => $end,
+                ];
+                break;
+        }
+        return $delayTime;
     }
 
     /**
@@ -363,5 +447,90 @@ class PunchHelper
             }
         }
         return $new;
+    }
+
+    /**
+     * 针对夜班加班,重新设置新的规则
+     * @param $nighttime
+     * @param $formulaCalPunRuleConf
+     * @return array
+     */
+    public function getFormulaNightConf($nighttime, $formulaCalPunRuleConf)
+    {
+        $new = [];
+        foreach($formulaCalPunRuleConf['cfg'] as $key => $value) {
+            list($start, $end) = explode('$$', $key);
+            if (DataHelper::ifBetween(strtotime($start), strtotime($end), strtotime($nighttime['end']))) {
+                $new['start_time'][] = $nighttime['end'];
+                $new['end_time'][] = $end;
+                $k = $nighttime['end'].'$$'.$end.'$$'.$nighttime['end'];
+                $new['cfg'][$k] = $value;
+                $new['sort'][$k] = strtotime($nighttime['end']);
+            }elseif (strtotime($start) >= strtotime($nighttime['end'])) {
+                $new['start_time'][] = $start;
+                $new['end_time'][] = $end;
+                $new['cfg'][$key] = $value;
+                $new['sort'][$key] = $formulaCalPunRuleConf['sort'][$key];
+            }
+        }
+        return $new;
+    }
+
+    /**
+     * 针对延迟假,重新设置新的规则
+     * @param $delayTimes
+     * @param $formulaCalPunRuleConf
+     * @return array
+     */
+    public static function getFormulaDelayConf($delayTimes, $formulaCalPunRuleConf)
+    {
+        $new = [];$continue = 0;
+        foreach($formulaCalPunRuleConf['cfg'] as $key => $value) {
+            list($start, $end, $ready) = explode('$$', $key);
+            if (!empty($delayTimes['go']) && DataHelper::ifBetween(strtotime($start), strtotime($end), strtotime($delayTimes['go']['end']))) {
+                $new['start_time'][] = $delayTimes['go']['end'];
+                $new['end_time'][] = $end;
+                $k1 = $delayTimes['go']['end'].'$$'.$end.'$$'.$delayTimes['go']['end'];
+                $new['cfg'][$k1] = $value;
+                $new['sort'][$k1] = strtotime($delayTimes['go']['end']);
+                $continue = 1;
+            }
+            if (!empty($delayTimes['off']) &&
+                DataHelper::ifBetween(strtotime($start), strtotime($end), strtotime($delayTimes['off']['start']))
+            ) {
+                $new['start_time'][] = $start;
+                $new['end_time'][] = $delayTimes['off']['start'];
+                $k2 = $start.'$$'.$delayTimes['off']['start'].'$$'.$ready;
+                $new['cfg'][$k2] = $value;
+                $new['sort'][$k2] = $formulaCalPunRuleConf['sort'][$key];
+                $continue = 1;
+            }
+            if ($continue == 1) {
+                $continue = 0; continue;
+            }
+            else {
+                $new['start_time'][] = $start;
+                $new['end_time'][] = $end;
+                $new['cfg'][$key] = $value;
+                $new['sort'][$key] = $formulaCalPunRuleConf['sort'][$key];
+                $continue = 0;
+            }
+        }
+        return $new;
+    }
+
+    /**
+     * 原时间段的差值加上新时间段的开始值等于新时间段的结束值
+     * @param $start
+     * @param $end
+     * @param $newStart
+     * @param $format
+     * @return string
+     */
+    public function findDiffToCreateNewEnd($start, $end, $newStart, $format) {
+        $dateStart = new \DateTime($start);
+        $dateEnd = new \DateTime($end);
+        $dateNewStart = new \DateTime($newStart);
+        return $dateNewStart->add($dateStart->diff($dateEnd))->format($format);
     }
 }
