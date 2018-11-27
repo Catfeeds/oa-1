@@ -121,8 +121,6 @@ class Operate
      */
     public function createLeave(array $leave) : array
     {
-        $leave['end_time'] = date('Y-m-d 00:00:00', strtotime($leave['end_time']));
-
         $data = [
             'user_id' => \Auth::user()->user_id,
             'holiday_id' => $leave['holiday_id'],
