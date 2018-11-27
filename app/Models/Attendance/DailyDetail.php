@@ -26,6 +26,16 @@ class DailyDetail extends Model
 
     protected $primaryKey = 'id';
 
+    const GENERATE_WAIT_IMPORT = 0;
+    const GENERATE_FINISH = 1;
+    const GENERATE_FILL = 2;
+
+    public static $status = [
+        self::GENERATE_WAIT_IMPORT => '待打卡信息录入',
+        self::GENERATE_FINISH => '打卡信息已生成',
+        self::GENERATE_FILL => '打卡信息生成失败',
+    ];
+
     protected $fillable = [
         'user_id',
         'day',
@@ -37,6 +47,7 @@ class DailyDetail extends Model
         'heap_late_num',
         'lave_buffer_num',
         'deduction_num',
+        'status',
     ];
 
     public function leave()
