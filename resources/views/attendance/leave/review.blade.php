@@ -63,7 +63,7 @@
                                     </td>
                                     <td><pre style="height: 5em;width: 20em">{{ $v['reason'] }}</pre></td>
                                     <td>{{ $v['created_at'] }}</td>
-                                    <td>{{ \App\Models\Attendance\Leave::$status[$v['status']] }}</td>
+                                    <td>{!! \App\Models\Attendance\Leave::leaveColorStatus($v['status']) !!} </td>
                                     <td>
                                         {!! BaseHtml::tooltip(trans('att.请假详情'), route('leave.review.optInfo', ['id' => $v['leave_id'], 'type' => \App\Models\Attendance\Leave::LOGIN_VERIFY_INFO]), 'cog fa fa-newspaper-o') !!}
                                     </td>

@@ -145,7 +145,7 @@
                         {!! Form::label('reason', trans('att.审核状态'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-6">
                             <span class="help-block m-b-none">
-                                {{ !in_array($leave->status, \App\Models\Attendance\Leave::$retractList) ?  \App\Models\Attendance\Leave::$status[$leave->status] : '待['. \App\User::getUsernameAliasList()[$reviewUserId]. ']审核' }}
+                                {!! !in_array($leave->status, \App\Models\Attendance\Leave::$retractList) ?  \App\Models\Attendance\Leave::leaveColorStatus($leave->status)  : '待['. \App\User::getUsernameAliasList()[$reviewUserId]. ']审核' !!}
                             </span>
                         </div>
                     </div>
