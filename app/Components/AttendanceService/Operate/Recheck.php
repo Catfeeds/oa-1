@@ -29,7 +29,7 @@ class Recheck extends Operate implements AttendanceInterface
         unset($this->_validateRule['end_time']);
         $this->validate($request, $this->_validateRule);
         $p = $request->all();
-
+        dump($p);
         //假期配置ID
         $holidayId = $p['holiday_id'] ?? '';
         //批量调休人员名单
@@ -77,7 +77,7 @@ class Recheck extends Operate implements AttendanceInterface
             'exceed_day'        => NULL,
             'exceed_holiday_id' => NULL,
         ];
-
+        dd($data);
         return $this->backLeaveData(true, [], $data);
     }
 
