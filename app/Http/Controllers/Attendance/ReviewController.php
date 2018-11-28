@@ -88,9 +88,13 @@ class ReviewController extends AttController
         $affectFull = Leave::noFull($year, $month);
 
         //获取用户对通知信息的状态
-        $confirmStates = ConfirmAttendance::getConfirmState($year, $month);
+        $confirmStates = ConfirmAttendance::getConfirmState($year, $month, $scope->status);
+        $userIds = '';
 
-        $users = User::whereRaw($scope->getwhere())->get();
+        if(!empty($confirmStates)) $userIds = ' and user_id in(' . implode(',' , array_keys($confirmStates)) . ')';
+        if(empty($confirmStates) && in_array($scope->status, [ConfirmAttendance::SENT, ConfirmAttendance::CONFIRM])) $userIds = ' and user_id=""';
+
+        $users = User::whereRaw($scope->getwhere() . $userIds)->get();
         $info = [];
 
         foreach ($users as $user) {
@@ -184,8 +188,7 @@ class ReviewController extends AttController
                 $infoAll = [];
                 var_dump("使用所有用户缓存");
                 foreach ($info as $k => $item) {
-                    if ($item['user_id'] == ($scope->dailyUserId ?: true) &&
-                        $item['user_alias'] == ($scope->dailyAlias ?: true) &&
+                    if ($item['user_id'] == ($scope->userId ?: true) &&
                         $item['user_dept'] == (Dept::getDeptList()[$scope->dailyDept ?: 0] ?? true)
                     ) {
                         $infoAll[] = $item;

@@ -21,7 +21,6 @@ class Recheck extends Cypher
         return parent::getUserHoliday($entryTime, $userId, $holidayConfig);
     }
 
-
     /**
      * 获取申请天数
      * @param $params

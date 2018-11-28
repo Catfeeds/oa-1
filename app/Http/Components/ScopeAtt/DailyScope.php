@@ -13,15 +13,15 @@ use App\Components\Helper\GeneralScope;
 class DailyScope extends GeneralScope
 {
     public $displayLastMonth = false;
-    public $dailyUserId;
-    public $dailyAlias;
+    public $userId;
+    public $status;
     public $dailyDept;
 
 
     public function __construct(array $params, $user = null)
     {
-        $this->dailyUserId = $params['daily_user_id'] ?? '';
-        $this->dailyAlias = $params['daily_alias'] ?? '';
+        $this->userId = $params['user_id'] ?? '';
+        $this->status = $params['status'] ?? NULL;
         $this->dailyDept = $params['daily_dept'] ?? '';
 
         parent::__construct($params, $user);
@@ -29,12 +29,10 @@ class DailyScope extends GeneralScope
 
     public function setWhere($tableAlias = null)
     {
-        if (!empty($this->dailyUserId)){
-            $where[] = sprintf("user_id = %d", $this->dailyUserId);
+        if (!empty($this->userId)){
+            $where[] = sprintf("user_id = %d", $this->userId);
         }
-        if (!empty($this->dailyAlias)){
-            $where[] = sprintf("alias = '%s'", $this->dailyAlias);
-        }
+
         if (!empty($this->dailyDept)){
             $where[] = sprintf("dept_id = %d", $this->dailyDept);
         }

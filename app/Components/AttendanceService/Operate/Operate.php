@@ -118,6 +118,7 @@ class Operate
     /**
      * 创建申请单
      * @param array $leave
+     * @return array
      */
     public function createLeave(array $leave) : array
     {
@@ -146,6 +147,11 @@ class Operate
         return $this->backLeaveData(true, [], ['leave_id' => $ret->leave_id]);
     }
 
+    /**
+     * 更新申请单
+     * @param array $leave
+     * @return array
+     */
     public function updateLeave(array $leave) : array
     {
 
@@ -202,6 +208,11 @@ class Operate
         return new $className();
     }
 
+    /**
+     * @param $leaveId
+     * @param null $idArr
+     * @return null|string
+     */
     public function addLeaveId($leaveId, $idArr = NULL)
     {
         if (empty($leaveId)) return $idArr;
@@ -241,6 +252,11 @@ class Operate
         return array_merge($arr1, $arr2);
     }*/
 
+    /**
+     * 设置每日考勤信息
+     * @param $leave
+     * @return bool
+     */
     public function setDailyDetail($leave)
     {
         $startDay = strtotime($leave->start_time);

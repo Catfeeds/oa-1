@@ -1,9 +1,22 @@
 <div class="form-group">
-    {!! Form::text('scope[daily_user_id]', '', [ 'class' => 'form-control', 'placeholder' => trans('app.账号') ]) !!}
+    <select class="js-select2-single form-control" name="scope[user_id]" >
+        <option value="">全部员工</option>
+        @foreach( \App\User::getUsernameAliasList() as $k => $v)
+            <option value="{{ $k }}" @if($k == ($a = $scope->userId ?? old("scope[user_id]")) && $a !== NULL) selected="selected" @endif>{{ $v }}</option>
+        @endforeach
+    </select>
 </div>
+
 <div class="form-group">
-    {!! Form::text('scope[daily_alias]', '', [ 'class' => 'form-control', 'placeholder' => trans('app.名称') ]) !!}
+    <select class="js-select2-single form-control" name="scope[status]" >
+        <option value="">确认状态</option>
+        @foreach( \App\Models\Attendance\ConfirmAttendance::$stateAdmin as $k => $v)
+            <option value="{{ $k }}" @if($k == ($a = $scope->status ?? old("scope[status]")) && $a !== NULL) selected="selected" @endif>{{ $v }}</option>
+        @endforeach
+    </select>
 </div>
+
+
 <div class="form-group">
     <select class="js-select2-single form-control" name="scope[daily_dept]" id="dept" style="width: 120px">
         <option value="">部门</option>

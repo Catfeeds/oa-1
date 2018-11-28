@@ -13,14 +13,14 @@ class ConfirmAttendance extends Model
     //根据confirm字段在页面上展示的文字是:
     //从管理员角度是:
     public static $stateAdmin = [
-        self::SEND    => '发送',
+        self::SEND    => '待发送',
         self::SENT    => '已发送',
         self::CONFIRM => '已确认',
     ];
     //从用户角度是:
     public static $stateUser = [
-        self::SEND    => '未结算',
-        self::SENT    => '已结算,请确认',
+        self::SEND    => '未出考勤单',
+        self::SENT    => '已出考勤单,请确认',
         self::CONFIRM => '确认成功',
     ];
 
@@ -30,8 +30,8 @@ class ConfirmAttendance extends Model
         'id', 'user_id', 'year', 'month', 'confirm',
     ];
 
-    public static function getConfirmState($year, $month)
+    public static function getConfirmState($year, $month, $status)
     {
-        return self::where(['year' => $year, 'month' => $month])->get()->pluck('confirm', 'user_id')->toArray();
+        return self::where(['year' => $year, 'month' => $month, 'confirm' => $status])->get()->pluck('confirm', 'user_id')->toArray();
     }
 }
