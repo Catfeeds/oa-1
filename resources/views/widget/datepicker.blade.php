@@ -31,6 +31,16 @@
             todayHighlight: 1,
             todayBtn: 1
         });
+        $('.date_time_hi').datetimepicker({
+            language: "{{ Lang::locale() }}",
+            format: 'yyyy-mm-dd hh:ii',
+            weekStart: 1,
+            autoclose: 1,
+            startView: 2,
+            todayHighlight: 1,
+            todayBtn: 1
+        });
+
         $('.date_month').datetimepicker({
             language: "{{ Lang::locale() }}",
             format: 'yyyy-mm',

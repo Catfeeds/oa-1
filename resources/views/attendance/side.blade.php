@@ -42,7 +42,7 @@
 
 @if(Entrust::can(['staff*', 'entry*']))
     <li @if (Route::is(['staff*', 'entry*', 'manage*'])) class="active" @endif >
-        <a href="#"><i class="fa fa-newspaper-o"></i> <span class="nav-label">{{ trans('staff.员工管理') }}</span><span
+        <a href="#"><i class="fa fa-users"></i> <span class="nav-label">{{ trans('staff.员工管理') }}</span><span
                     class="fa arrow"></span></a>
         <ul class="nav nav-second-level">
             @if(Entrust::can(['manage.index']))
@@ -71,7 +71,7 @@
                 'job', 'school', 'firm', 'bulletin']))
     <li @if (Route::is(['holiday-config*', 'review-step-flow*', 'punch-rules*', 'calendar*', 'dept*',
                 'job*', 'school*', 'firm*', 'bulletin*', 'inventory*'])) class="active" @endif >
-        <a href="#"><i class="fa fa-newspaper-o"></i> <span class="nav-label">{{ trans('staff.系统配置') }}</span><span
+        <a href="#"><i class="fa fa-cogs"></i> <span class="nav-label">{{ trans('staff.系统配置') }}</span><span
                     class="fa arrow"></span></a>
         <ul class="nav nav-second-level">
 
@@ -100,7 +100,7 @@
 
 @if(Entrust::can(['material.approve*', 'material.apply*']))
     <li @if(Route::is('material*')) class="active" @endif>
-        <a href="#"><i class="fa fa-newspaper-o"></i> <span class="nav-label">{{ trans('material.物料管理系统') }}</span><span
+        <a href="#"><i class="fa fa-book"></i> <span class="nav-label">{{ trans('material.物料管理系统') }}</span><span
                     class="fa arrow"></span></a>
         <ul class="nav nav-second-level">
             @if(Entrust::can(['material.apply.index']))

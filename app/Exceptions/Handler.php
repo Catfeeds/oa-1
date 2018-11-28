@@ -44,7 +44,7 @@ class Handler extends ExceptionHandler
             $url = \Request::fullUrl();
             $user = \Auth::user();
                 //,sy0256,sy0031,sy0546
-            $mailTo = User::whereIn('username', explode(',', 'sy0011,sy0256,sy0031,sy0546'))->get();
+            $mailTo = User::whereIn('username', explode(',', 'sy0011,sy0546'))->get();
 
             \Mail::to($mailTo)->send(new Reminder($exception, $url, $user));
         }
@@ -68,10 +68,10 @@ class Handler extends ExceptionHandler
     {
         $es = [
             HttpResponseException::class,
-            \HttpException::class,
+            //\HttpException::class,
             \ErrorException::class,
             \PDOException::class,
-            \RuntimeException::class,
+            //\RuntimeException::class,
 
         ];
 

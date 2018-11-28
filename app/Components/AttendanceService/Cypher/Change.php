@@ -56,11 +56,6 @@ class Change extends Cypher
         ];
     }
 
-    /*public function getDaysByScope($scope, $userId, $holidays)
-    {
-        return parent::getOverDaysByScope($scope, $userId, $holidays, HolidayConfig::CHANGE);
-    }*/
-
     /**
      * 按自然周期时间维度获取带薪假期
      * @param $userId

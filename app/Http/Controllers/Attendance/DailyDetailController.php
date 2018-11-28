@@ -34,6 +34,7 @@ class DailyDetailController extends AttController
     public function index()
     {
         $monthInfo = $this->getMonthAttendance(\Auth::user()->user_id);
+
         if ($this->review->reviewHelper->errorRedirect($monthInfo)) return redirect()->route('holiday-config');
 
         $scope = $this->scope;
@@ -55,7 +56,7 @@ class DailyDetailController extends AttController
     public function getMonthAttendance($id)
     {
         $param = $this->setScopeParams();
-        $param['daily_user_id'] = $id;
+        $param['user_id'] = $id;
         $this->scope = new $this->scopeClass($param, null);
         return $this->review->dealAttendance($this->scope, $id);
     }

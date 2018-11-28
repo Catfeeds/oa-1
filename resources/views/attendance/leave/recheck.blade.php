@@ -39,7 +39,7 @@
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
                                 {!! Form::text('start_time', $time, [
-                                'class' => 'form-control date_time',
+                                'class' => 'form-control date_time_hi',
                                 'id' => 'start_time'
                                 ]) !!}
                                 <span class="help-block m-b-none">{{ $errors->first('start_time') }}</span>

@@ -121,25 +121,26 @@ class AttendanceHelper
     {
         $holidayCfg =  HolidayConfig::getHolidayApplyList();
 
-        $time = DataHelper::dateTimeFormat($time, 'Y-m-d');
+        $day = DataHelper::dateTimeFormat($time, 'Y-m-d');
+
         $msg = '天';
         switch ($holidayCfg[$holidayId]) {
             case HolidayConfig::LEAVEID:
                 return [
-                    'time'=> DataHelper::dateTimeFormat($time .' '. $timeId, 'Y-m-d H:i'),
+                    'time'=> DataHelper::dateTimeFormat($day .' '. $timeId, 'Y-m-d H:i'),
                     'number_day' => $numberDay . $msg
                 ];
                 break;
             case HolidayConfig::CHANGE:
                 return [
-                    'time'=> $time,
+                    'time'=> $day,
                     'number_day' => Leave::$workTimePoint[(int)$numberDay] ?? '数据异常',
                 ];
                 break;
             case HolidayConfig::RECHECK:
                 return [
-                    'time'=> $time,
-                    'number_day' => $numberDay . $msg
+                    'time'=> $day,
+                    'number_day' => DataHelper::dateTimeFormat($time, 'H:i')
                 ];
                 break;
             default:

@@ -208,7 +208,7 @@ class Recheck extends Operate implements AttendanceInterface
         }
 
         $allUsers = User::where(['status' => User::STATUS_ENABLE])->get();
-        $time = date('Y-m-d H:i:s', time());
+        $time = date('Y-m-d H:i', time());
 
         $holidayList = HolidayConfig::where(['apply_type_id' => HolidayConfig::RECHECK])
             ->orderBy('sort', 'asc')

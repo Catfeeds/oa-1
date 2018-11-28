@@ -296,7 +296,7 @@ class LeaveController extends AttController
     public function reviewIndex()
     {
         $scope = $this->scope;
-        $scope->block = 'attendance.leave.scope';
+        $scope->block = 'attendance.leave.scope-review';
 
         $ids = OperateLogHelper::getLogInfoIdToUid(\Auth::user()->user_id);
 

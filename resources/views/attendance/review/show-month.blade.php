@@ -74,9 +74,9 @@
             </tr>
             </thead>
             <tbody>
-            <?php $i = 0;?>
+            <?php $exp_id = 0;?>
             @foreach($monthInfo[1] as $k => $v)
-                <tr id="{{ $i }}">
+                <tr id="{{ $exp_id }}">
                     <td>{{ $v['date'] }}</td>
                     <td>{{ $v['user_name'] }}</td>
                     <td>{{ $v['user_alias'] }}</td>
@@ -123,12 +123,12 @@
 
                     @if(Entrust::can(['daily-detail.review.export']))
                         <td>
-                            {!! Form::checkbox('export', $i) !!}
+                            {!! Form::checkbox('export', $exp_id) !!}
                         </td>
                     @endif
 
                 </tr>
-                <?php $i++;?>
+                <?php $exp_id++;?>
             @endforeach
             </tbody>
         </table>
@@ -292,7 +292,7 @@
             if ($(this).is(':checked')) {
                 exportArr.push($(this).val());
             } else {
-                exportArr.pop($(this).val());
+                exportArr.splice(exportArr.indexOf($(this).val()), 1);
             }
         });
 
