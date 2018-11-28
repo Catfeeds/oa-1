@@ -92,10 +92,12 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
+        unset($this->_validateRule['sex']);
         $this->validate($request, array_merge($this->_validateRule, [
             'username' => 'required|unique:users,username|max:32|min:3',
             'email' => 'required|email|unique:users,email|max:32',
         ]));
+
 
         if(!empty($request->dept_id) && !empty($request->is_leader)) {
             $checkUser = User::where(['dept_id' => $request->dept_id, 'is_leader' => User::IS_LEADER_TRUE])->first();
@@ -111,12 +113,6 @@ class UserController extends Controller
 
         if(!empty($user->user_id)) {
             UserExt::create(['user_id' => $user->user_id]);
-        }
-
-        // 权限方面
-        if (!empty($user->role_id)) {
-            $permissionRole = Role::findOrFail($user->role_id);
-            $user->attachRole($permissionRole);
         }
 
         $userRedsKey = sprintf('%d_%s', $user->user_id, $user->username);;
