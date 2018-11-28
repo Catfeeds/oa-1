@@ -43,7 +43,7 @@ class EntryController extends AttController
         'job_name' => 'required',
         'leader_id' => 'required|integer',
         'tutor_id' => 'required|integer',
-        'friend_id' => 'required|integer',
+        'friend_id' => 'nullable|integer',
         'copy_users' => 'required|array',
         'sex' => 'required|in:' . UserExt::SEX_BOY . ',' . UserExt::SEX_GIRL,
     ];
@@ -102,6 +102,21 @@ class EntryController extends AttController
         $this->validate($request, $this->_validateRule);
         $data = $request->all();
 
+        if(empty($data['username'])) {
+            return redirect()->back()->withInput()->withErrors(['username' => '请输入工号']);
+        }
+
+        $check = Entry::where(['username' => $data['username']])->whereNotIn('status', [Entry::REVIEW_REFUSE])->first();
+
+        if(!empty($check->entry_id)) {
+            return redirect()->back()->withInput()->withErrors(['username' => '工号已存在']);
+        }
+
+        if(empty($data['username'])) {
+            return redirect()->back()->withInput()->withErrors(['username' => '请输入工号']);
+        }
+
+
         $data['creater_id'] = \Auth::user()->user_id;
         $data['copy_user'] = json_encode($data['copy_users']);
         $data['remember_token'] = Str::random(60);
@@ -134,6 +149,7 @@ class EntryController extends AttController
     {
         $this->validate($request, array_merge($this->_validateRule, [
             'email' => 'required|email|unique:entry,email,'. $id .',entry_id|max:32',
+            'username' => 'required|unique:entry,username,'. $id .',entry_id|max:20',
         ]));
 
         $data = $request->all();

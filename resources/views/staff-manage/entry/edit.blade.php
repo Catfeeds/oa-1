@@ -231,11 +231,9 @@
                             {!! Form::select('friend_id', $users, isset($entry->friend_id) ? $entry->friend_id: old('friend_id'), [
                             'class' => 'form-control',
                             'placeholder' => trans('app.请选择', ['value' => trans('staff.基友')]),
-                            'required' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('friend_id') }}</span>
                         </div>
-                        <i style="color: red">*</i>
                     </div>
 
                     <div class="form-group @if (!empty($errors->first('place'))) has-error @endif">
@@ -299,7 +297,6 @@
             $('#tutor_id').select2();
             $('#copy_users').select2();
             $('#nature_id').select2();
-
         });
     </script>
 @endsection
