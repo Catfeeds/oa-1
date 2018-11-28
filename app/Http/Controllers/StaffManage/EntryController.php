@@ -386,7 +386,7 @@ class EntryController extends AttController
 
             $pwd = DataHelper::randString(10);
             $userData = [
-                'username' => self::setUserName(),
+                'username' => $entry->username,
                 'alias' => $entry->name,
                 'email' => $entry->used_email,
                 'mobile' => $entry->mobile,
