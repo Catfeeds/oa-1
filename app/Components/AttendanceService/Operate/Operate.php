@@ -121,8 +121,6 @@ class Operate
      */
     public function createLeave(array $leave) : array
     {
-        $leave['end_time'] = date('Y-m-d 00:00:00', strtotime($leave['end_time']));
-
         $data = [
             'user_id' => \Auth::user()->user_id,
             'holiday_id' => $leave['holiday_id'],
@@ -150,7 +148,6 @@ class Operate
 
     public function updateLeave(array $leave) : array
     {
-
         $data = [
             'holiday_id' => $leave['holiday_id'],
             'step_id' => $leave['step_id'],
@@ -217,36 +214,10 @@ class Operate
         return json_encode($arr);
     }
 
-    /**
-     * 审核通过后, 上班打卡字段与下班打卡字段的设置
-     * @param $leave
-     * @param $startDay
-     * @param $endDay
-     */
-    /*public static function getPunch($leave, $startDay, $endDay)
-    {
-        $ps = (int)str_replace(':', '', Leave::$startId[$leave->start_id]);
-        $pe = (int)str_replace(':', '', Leave::$endId[$leave->end_id]);
-        $arr1 = [
-            //大于13:45,意味下午请假,则上班打卡字段为空,为后面打卡记录导入的上班打卡留位置
-            'punch_start_time' => $ps >= 1345 ? NULL : Leave::$startId[$leave->start_id],
-            //不等于20点,意味晚上还要回来上班,下班打卡字段为空,为后面打卡记录导入的下班打卡留位置
-            'punch_end_time' => $pe != 2000 ? NULL : Leave::$endId[$leave->end_id]
-        ];
-
-        $arr2 = [
-            'punch_start_time_num' => empty($arr1['punch_start_time']) ?
-                NULL : strtotime(date('Y-m-d', $startDay) . ' ' . $arr1['punch_start_time']),
-            'punch_end_time_num' => empty($arr1['punch_end_time']) ?
-                NULL : strtotime(date('Y-m-d', $endDay) . ' ' . $arr1['punch_end_time']),
-        ];
-        return array_merge($arr1, $arr2);
-    }*/
-
     public function setDailyDetail($leave)
     {
-        $startDay = strtotime($leave->start_time);
-        $endDay = strtotime($leave->end_time);
+        $startDay = strtotime(date('Y-m-d', strtotime($leave->start_time)));
+        $endDay = strtotime(date('Y-m-d', strtotime($leave->end_time)));
 
         $ifNeedUpdate = DailyDetail::whereBetween(\DB::raw('DATE_FORMAT(day, "%Y-%m-%d")'),
             [date('Y-m-d', $startDay), date('Y-m-d', $endDay)])->where('user_id', $leave->user_id)->get();
