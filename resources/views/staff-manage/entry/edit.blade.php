@@ -19,6 +19,26 @@
                     </div>
                     <div class="hr-line-dashed"></div>
 
+                    <div class="form-group @if (!empty($errors->first('username'))) has-error @endif">
+                        {!! Form::label('username', trans('app.工号'), ['class' => 'col-sm-4 control-label']) !!}
+                        <div class="col-sm-3">
+                            {!! Form::text('username', empty($username) ? $entry->username : $username, [
+                            'class' => 'form-control',
+                            'placeholder' => trans('app.请输入', ['value' => trans('app.工号')]),
+                            'required' => true,
+                            ]) !!}
+                            <span class="help-block m-b-none">{{ $errors->first('username') }}</span>
+                        </div>
+
+                        <div class="col-sm-2">
+                            <span class="help-block m-b-none">
+                                <i class="fa fa-info-circle"></i> {{'系统当前最新工号: '. $maxUsername }}
+                                <i style="color: red">*</i>
+                            </span>
+                        </div>
+
+                    </div>
+
                     <div class="form-group @if (!empty($errors->first('name'))) has-error @endif">
                         {!! Form::label('name', trans('app.姓名'), ['class' => 'col-sm-4 control-label']) !!}
                         <div class="col-sm-3">
@@ -81,13 +101,15 @@
 
                     <div class="form-group  @if (!empty($errors->first('entry_time'))) has-error @endif">
                         {!! Form::label('entry_time', trans('app.入职时间'), ['class' => 'col-sm-4 control-label']) !!}
-                        <div class="input-daterange input-group col-sm-3">
-                            <span class="input-group-addon" style="color: red"><i class="fa fa-calendar"></i></span>
-                            {!! Form::text('entry_time', $entry->entry_time ?? old('entry_time'), [
-                            'class' => 'form-control date_time',
-                            'placeholder' => trans('app.请输入', ['value' => trans('app.入职时间')]),
-                            'required' => true,
-                            ]) !!}
+                        <div class="col-sm-3">
+                            <div class="input-group">
+                                <span class="input-group-addon" style="color: red"><i class="fa fa-calendar"></i></span>
+                                {!! Form::text('entry_time', $entry->entry_time ?? old('entry_time'), [
+                                'class' => 'form-control date_time',
+                                'placeholder' => trans('app.请输入', ['value' => trans('app.入职时间')]),
+                                'required' => true,
+                                ]) !!}
+                            </div>
                         </div>
                         <span class="help-block m-b-none">{{ $errors->first('entry_time') }}</span>
                     </div>

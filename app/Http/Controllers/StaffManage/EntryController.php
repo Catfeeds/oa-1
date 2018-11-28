@@ -34,7 +34,6 @@ class EntryController extends AttController
     private $_validateRule = [
         'name' => 'required|max:32|min:2',
         'mobile' => 'required|phone_number|max:11',
-        'email' => 'required|email|unique:entry,email|max:32',
         'entry_time' => 'required|date',
         'nature_id' => 'required|integer',
         'hire_id' => 'required|integer',
@@ -92,7 +91,10 @@ class EntryController extends AttController
         $firm = Firm::getFirmList();
         $title = trans('staff.添加待入职');
 
-        return view('staff-manage.entry.edit', compact('title', 'users', 'job', 'dept', 'firm', 'userIds'));
+        $maxUsername = self::getMaxUserName()[0];
+        $username = sprintf('sy%04d', (int)str_replace('sy', '', $maxUsername) + 1);
+
+        return view('staff-manage.entry.edit', compact('title', 'users', 'job', 'dept', 'firm', 'userIds', 'username', 'maxUsername'));
     }
 
     public function store(Request $request)
@@ -120,13 +122,19 @@ class EntryController extends AttController
         $firm = Firm::getFirmList();
 
         $userIds = json_decode($entry->copy_user);
+
+        $maxUsername = self::getMaxUserName()[0];
+        $username = '';
+
         $title = trans('app.编辑', ['value' => trans('staff.待入职人员')]);
-        return view('staff-manage.entry.edit', compact('title', 'users', 'job', 'dept', 'firm', 'entry', 'userIds'));
+        return view('staff-manage.entry.edit', compact('title', 'users', 'job', 'dept', 'firm', 'entry', 'userIds', 'username', 'maxUsername'));
     }
 
     public function update(Request $request, $id)
     {
-        $this->validate($request, $this->_validateRule);
+        $this->validate($request, array_merge($this->_validateRule, [
+            'email' => 'required|email|unique:entry,email,'. $id .',entry_id|max:32',
+        ]));
 
         $data = $request->all();
 
@@ -423,6 +431,17 @@ class EntryController extends AttController
         $username = sprintf('sy%04d', (int)str_replace('sy', '', $maxId['username']) + 1);
 
         return $username;
+    }
+
+    public function getMaxUserName()
+    {
+        $userMaxId = User::orderBy('username', 'desc')->get(['username'])->pluck('username')->toArray();
+        $entryMaxId = Entry::whereNotIn('status', [Entry::REVIEW_REFUSE])->orderBy('username', 'desc')->get(['username'])->pluck('username')->toArray();
+
+        $usernameS = array_merge($userMaxId, $entryMaxId);
+        arsort($usernameS);
+        $usernameS = array_values($usernameS);
+        return $usernameS;
     }
 
     public function showInfo($id)

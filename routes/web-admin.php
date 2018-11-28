@@ -24,10 +24,10 @@ Route::group([
         'middleware' => ['permission:user'],
         'uses' => 'UserController@index'])->name('user');
     Route::get('user/create', [
-        'middleware' => ['permission:user.create'],
+        'middleware' => ['permission:user.edit'],
         'uses' => 'UserController@create'])->name('user.create');
     Route::post('user/create', [
-        'middleware' => ['permission:user.create'],
+        'middleware' => ['permission:user.edit'],
         'uses' => 'UserController@store']);
     Route::get('user/edit/{id}', [
         'middleware' => ['permission:user.edit'],

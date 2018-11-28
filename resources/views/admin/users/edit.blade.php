@@ -117,7 +117,7 @@
                                     <select name="role_id[]" multiple="multiple" class="js-select2-multiple form-control">
                                         @foreach($roleList as $key => $val)
                                             <option value="{{ $key}}"
-                                                    @if (in_array($key, json_decode($user->role_id, true) ?: old('dept_users') ?? [])) selected @endif>{{ $val}}</option>
+                                                    @if (isset($user->role_id) && in_array($key, json_decode($user->role_id, true) ? : old('dept_users') ?? [])) selected @endif>{{ $val}}</option>
                                         @endforeach
                                     </select>
                                     <span class="help-block m-b-none">{{ $errors->first('role_id') }}</span>
@@ -195,6 +195,7 @@
                             <div class="form-group">
                                 <div class="col-sm-6 col-sm-offset-3">
                                     {!! Form::submit(trans('app.提交'), ['class' => 'btn btn-primary']) !!}
+                                    <a href="{{route('user')}}" class="btn btn-info">{{ trans('att.返回列表') }}</a>
                                 </div>
                             </div>
 

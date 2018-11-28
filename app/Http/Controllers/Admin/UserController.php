@@ -86,7 +86,8 @@ class UserController extends Controller
         $title = trans('app.添加账号');
         $job = Job::getJobList();
         $dept = Dept::getDeptList();
-        return view('admin.users.edit', compact('title', 'roleList', 'job', 'dept'));
+        $user = '';
+        return view('admin.users.edit', compact('title', 'roleList', 'job', 'dept', 'user'));
     }
 
     public function store(Request $request)

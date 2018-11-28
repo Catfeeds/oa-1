@@ -114,7 +114,7 @@ class Entry extends Model
         'birthday_type',
         'firm_call',
 
-
+        'username'
     ];
 
 
