@@ -119,7 +119,7 @@
                         <div class="col-sm-3">
                             {!! Form::select('nature_id', \App\Models\StaffManage\Entry::$nature, isset($entry->nature_id) ? $entry->nature_id: old('nature_id'), [
                             'class' => 'form-control',
-                            'placeholder' => trans('app.请选择', ['value' => trans('staff.所属公司')]),
+                            'placeholder' => trans('app.请选择', ['value' => trans('staff.工作性质')]),
                             'required' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('nature_id') }}</span>
