@@ -251,7 +251,7 @@ class LeaveController extends AttController
 
         if((!empty($copyIds) && in_array(\Auth::user()->user_id, $copyIds)) || (!empty($userIds) && in_array(\Auth::user()->user_id, $userIds)) || \Auth::user()->user_id === $leave->user_id) {
             $reviewUserId = $leave->review_user_id;
-            $logs = OperateLog::where(['type_id' => OperateLog::LEAVED, 'info_id' => $leave->leave_id])->get();
+            $logs = OperateLog::where(['type_id1' => OperateLog::LEAVED, 'info_id' => $leave->leave_id])->get();
             $dept = Dept::getDeptList();
             $title = trans('att.申请单详情');
             $applyTypeId = $leave->holidayConfig->apply_type_id;
