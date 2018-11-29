@@ -82,7 +82,7 @@ class LeaveController extends AttController
 
         $title = trans('att.我的假期详情');
         return view('attendance.leave.index',
-            compact('title', 'data', 'scope', 'holidayList', 'userIds', 'types', 'type', 'remainWelfare', 'appealData', 'userIds')
+            compact('title', 'data', 'scope', 'holidayList', 'userIds', 'types', 'type', 'remainWelfare', 'appealData')
         );
     }
 

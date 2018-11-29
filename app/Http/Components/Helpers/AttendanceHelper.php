@@ -151,9 +151,6 @@ class AttendanceHelper
         }
     }
 
-
-
-
     /**
      * 获取有关自己抄送人员申请单列表
      * @param null $deptId
@@ -192,7 +189,7 @@ class AttendanceHelper
         if(!empty($leave)) {
             foreach ($leave as $k => $v) {
                 if(!empty($v->holidayConfig)  && $field == 'copy_user') {
-                    $userIds[$v->leave_id] = json_decode($v->user_list, true);
+                    $userIds[$v->leave_id] = json_decode($v->copy_user, true);
                     $leaveIds[] = $v->leave_id;
                 }
             }
