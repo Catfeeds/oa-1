@@ -275,7 +275,7 @@ class LeaveController extends AttController
         $logUserIds = OperateLogHelper::getLogUserIdToInId($leave->leave_id);
         $logUserIds[] = $leave->user_id;
         $logUserIds[] = $leave->review_user_id;
-
+        dump($logUserIds);
         if((in_array(\Auth::user()->user_id, $logUserIds) || $leave->user_id === \Auth::user()->user_id ) && !empty($leave->leave_id) ) {
             $userIds = json_decode($leave->user_list, true);
             $reviewUserId = $leave->review_user_id;
