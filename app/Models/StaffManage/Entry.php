@@ -60,6 +60,7 @@ class Entry extends Model
     ];
 
     protected $fillable = [
+        'role_id',
         'name',
         'sex',
         'mobile',
@@ -83,9 +84,9 @@ class Entry extends Model
         'send_time',
         'card_id',
         'card_address',
-        'ethnic',
+        'ethnic_id',
         'birthplace',
-        'political',
+        'political_id',
         'census',
         'family_num',
         'marital_status',

@@ -50,7 +50,7 @@ class UserExt extends Model
         7 => '天秤座',
         8 => '天蝎座',
         9 => '射手座',
-        10 => '魔蝎座',
+        10 => '摩羯座',
         11 => '水瓶座',
         12 => '双鱼座',
     ];
@@ -88,12 +88,31 @@ class UserExt extends Model
     public static $marital = [
         0 => '未婚',
         1 => '已婚',
+        2 => '丧偶',
+        3 => '离婚',
     ];
 
     //是否公司挂靠
     public static $firmCall = [
         0 => '否',
         1 => '是',
+    ];
+
+    //政治面貌
+    public static $political = [
+        0 => '普通居民',
+        1 => '中共预备党员',
+        2 => '共青团员',
+        3 => '民革党员',
+        4 => '民盟盟员',
+        5 => '民建会员',
+        6 => '民进会员',
+        7 => '农工党党员',
+        8 => '致公党党员',
+        9 => '九三学社社员',
+        10 => '台盟盟员',
+        11 => '无党派人士',
+        12 => '中共党员',
     ];
 
     protected $fillable = [
@@ -137,9 +156,9 @@ class UserExt extends Model
         'hire_id',
         'firm_id',
         'place',
-        'political',
+        'political_id',
         'urgent_bind',
-        'ethnic',
+        'ethnic_id',
 
         'birthday',
         'work_history',

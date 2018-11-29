@@ -73,23 +73,27 @@
                                                     <span class="help-block m-b-none">{{ $errors->first('entry.birthday') }}</span>
                                                 </div>
                                             </div>
-                                            @foreach(\App\Models\StaffManage\Entry::$birthdayType as $k => $v)
-                                                <label class="radio-inline i-checks">
-                                                    <input type="radio" name="entry[birthday_type]" value="{{$k}}" @if($k === (int)($cache->birthday_type ?? \App\Models\StaffManage\Entry::GREGORIAN_CALENDAR)) checked @endif> {{ $v }}
-                                                </label>
-                                            @endforeach
-                                            <i style="color: red">*</i>
+                                            <div class="row">
+                                                <i style="color: red">*</i>
+                                                @foreach(\App\Models\StaffManage\Entry::$birthdayType as $k => $v)
+                                                    <label style="margin-left: 1em" class="radio-inline i-checks">
+                                                        <input type="radio" name="entry[birthday_type]" value="{{$k}}" @if($k === (int)($cache->birthday_type ?? \App\Models\StaffManage\Entry::GREGORIAN_CALENDAR)) checked @endif> {{ $v }}
+                                                    </label>
+                                                @endforeach
+                                            </div>
+
                                         </div>
 
-                                        <div class="form-group @if (!empty($errors->first('entry.ethnic'))) has-error @endif">
-                                            {!! Form::label('ethnic', trans('staff.民族'), ['class' => 'col-sm-4 control-label']) !!}
+                                        <div class="form-group @if (!empty($errors->first('entry.ethnic_id'))) has-error @endif">
+                                            {!! Form::label('ethnic_id', trans('staff.民族'), ['class' => 'col-sm-4 control-label']) !!}
                                             <div class="col-sm-3">
-                                                {!! Form::text('entry[ethnic]', !empty($entry->ethnic) ? $entry->ethnic : ($cache->ethnic ?? ''), [
-                                                'class' => 'form-control',
-                                                'placeholder' => trans('app.请输入', ['value' => trans('staff.民族')]),
+                                                {!! Form::select('entry[ethnic_id]', $ethnic, !empty($entry->ethnic_id) ? $entry->ethnic_id : ($cache->ethnic_id ?? ''), [
+                                                'class' => 'form-control js-select2-single',
+                                                'placeholder' => trans('app.请选择', ['value' => trans('staff.民族')]),
                                                 'required' => true,
                                                 ]) !!}
-                                                <span class="help-block m-b-none">{{ $errors->first('entry.ethnic') }}</span>
+
+                                                <span class="help-block m-b-none">{{ $errors->first('entry.ethnic_id') }}</span>
                                             </div>
                                             <i style="color: red">*</i>
                                         </div>
@@ -107,15 +111,15 @@
                                             <i style="color: red">*</i>
                                         </div>
 
-                                        <div class="form-group @if (!empty($errors->first('entry.political'))) has-error @endif">
-                                            {!! Form::label('political', trans('staff.政治面貌'), ['class' => 'col-sm-4 control-label']) !!}
+                                        <div class="form-group @if (!empty($errors->first('entry.political_id'))) has-error @endif">
+                                            {!! Form::label('political_id', trans('staff.政治面貌'), ['class' => 'col-sm-4 control-label']) !!}
                                             <div class="col-sm-3">
-                                                {!! Form::text('entry[political]', !empty($entry->political) ? $entry->political: ($cache->political ?? ''), [
-                                                'class' => 'form-control',
-                                                'placeholder' => trans('app.请输入', ['value' => trans('staff.政治面貌')]),
+                                                {!! Form::select('entry[political_id]', \App\Models\UserExt::$political, !empty($entry->political_id) ? $entry->political_id : ($cache->political_id ?? ''), [
+                                                'class' => 'form-control js-select2-single',
+                                                'placeholder' => trans('app.请选择', ['value' => trans('staff.政治面貌')]),
                                                 'required' => true,
                                                 ]) !!}
-                                                <span class="help-block m-b-none">{{ $errors->first('entry.political') }}</span>
+                                                <span class="help-block m-b-none">{{ $errors->first('entry.political_id') }}</span>
                                             </div>
                                             <i style="color: red">*</i>
                                         </div>
@@ -123,7 +127,7 @@
                                         <div class="form-group @if (!empty($errors->first('entry.marital_status'))) has-error @endif">
                                             {!! Form::label('marital_status', trans('staff.婚姻状况'), ['class' => 'col-sm-4 control-label']) !!}
                                             <div class="col-sm-3">
-                                                {!! Form::select('entry[marital_status]', \App\Models\UserExt::$marital, !empty($entry->marital_status) ? $entry->marital_status: ($cache->marital_status ?? ''), [
+                                                {!! Form::select('entry[marital_status]', \App\Models\UserExt::$marital, !empty($entry->marital_status) ? $entry->marital_status : ($cache->marital_status ?? ''), [
                                                 'class' => 'form-control js-select2-single',
                                                 'placeholder' => trans('app.请选择', ['value' => trans('staff.婚姻状况')]),
                                                 'required' => true,
@@ -169,9 +173,10 @@
                                         <div class="form-group @if (!empty($errors->first('entry.height'))) has-error @endif">
                                             {!! Form::label('dept', trans('staff.身高'), ['class' => 'col-sm-4 control-label']) !!}
                                             <div class="col-sm-3">
-                                                {!! Form::text('entry[height]', !empty($entry->height) ? $entry->height: ($cache->height ?? ''), [
+                                                {!! Form::number('entry[height]', !empty($entry->height) ? $entry->height: ($cache->height ?? ''), [
                                                 'class' => 'form-control',
                                                 'placeholder' => trans('app.请输入', ['value' => trans('staff.身高')]),
+                                                'step' => 0.1
                                                 ]) !!}
                                                 <span class="help-block m-b-none">{{ $errors->first('entry.height') }}</span>
                                             </div>
@@ -185,9 +190,10 @@
                                         <div class="form-group @if (!empty($errors->first('entry.weight'))) has-error @endif">
                                             {!! Form::label('weight', trans('staff.体重'), ['class' => 'col-sm-4 control-label']) !!}
                                             <div class="col-sm-3">
-                                                {!! Form::text('entry[weight]', !empty($entry->weight) ? $entry->weight: ($cache->weight ?? ''), [
+                                                {!! Form::number('entry[weight]', !empty($entry->weight) ? $entry->weight: ($cache->weight ?? ''), [
                                                 'class' => 'form-control',
                                                 'placeholder' => trans('app.请输入', ['value' => trans('staff.体重')]),
+                                                'step' => 0.1
                                                 ]) !!}
                                                 <span class="help-block m-b-none">{{ $errors->first('entry.weight') }}</span>
                                             </div>
@@ -196,7 +202,6 @@
                                                     <i class="fa fa-info-circle"></i> {{ trans('单位：公斤/千克(kg)') }}
                                                 </span>
                                             </div>
-
                                         </div>
 
                                         <div class="form-group @if (!empty($errors->first('entry.salary_card'))) has-error @endif">
@@ -209,7 +214,10 @@
                                                 ]) !!}
                                                 <span class="help-block m-b-none">{{ $errors->first('entry.salary_card') }}</span>
                                             </div>
-                                            <i style="color: red">*</i>
+                                            <div class="row">
+                                                <i style="color: red">*</i>
+                                                <i style="margin-left: 1em" class="fa fa-info-circle"></i> {{ trans('请填写本人招商银行广州储蓄卡账号') }}
+                                            </div>
                                         </div>
                                             {{--保存信息--}}
                                             <div class="form-group">
@@ -599,21 +607,7 @@
 @section('scripts-last')
     <script>
         $(function() {
-            $('#sex').select2();
-            $('#marital_status').select2();
-            $('#blood_type').select2();
-            $('#genus_id').select2();
-            $('#constellation_id').select2();
-            $('#education_id').select2();
-            $('#school_id').select2();
-            $('#hire_id').select2();
-            $('#firm_id').select2();
-            $('#job_id').select2();
-            $('#leader_id').select2();
-            $('#friend_id').select2();
-            $('#tutor_id').select2();
-            $('#copy_users').select2();
-            $('#nature_id').select2();
+            $('#js-select2-single').select2();
 
             $('#show_admit_modal').click(function () {
                 $('#admit-modal').modal('show');

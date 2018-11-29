@@ -7,7 +7,7 @@
  * 申请单 重启
  */
 
-namespace App\Components\AttendanceService\OptStatus;
+namespace App\Components\AttendanceService\Optstatus;
 
 
 use App\Models\Attendance\Leave;

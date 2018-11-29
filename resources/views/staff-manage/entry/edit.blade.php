@@ -20,7 +20,7 @@
                     <div class="hr-line-dashed"></div>
 
                     <div class="form-group @if (!empty($errors->first('username'))) has-error @endif">
-                        {!! Form::label('username', trans('app.工号'), ['class' => 'col-sm-4 control-label']) !!}
+                        {!! Form::label('username', trans('app.工号'), ['class' => 'col-sm-4 control-label'])  !!}
                         <div class="col-sm-3">
                             {!! Form::text('username', empty($username) ? $entry->username : $username, [
                             'class' => 'form-control',
@@ -29,14 +29,24 @@
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('username') }}</span>
                         </div>
-
-                        <div class="col-sm-2">
-                            <span class="help-block m-b-none">
-                                <i class="fa fa-info-circle"></i> {{'系统当前最新工号: '. $maxUsername }}
-                                <i style="color: red">*</i>
-                            </span>
+                        <div class="row">
+                            <i style="color: red">*</i>
+                            <i style="margin-left: 2em" class="fa fa-info-circle"></i> {{'系统当前最新工号: '. $maxUsername }}
                         </div>
+                    </div>
 
+                    <div class="form-group @if (!empty($errors->first('role_id'))) has-error @endif">
+                        {!! Form::label('role_id', trans('app.权限'), ['class' => 'col-sm-4 control-label']) !!}
+                        <div class="col-sm-3">
+                            <select name="role_id[]" required="required" multiple="multiple" class="js-select2-multiple form-control">
+                                @foreach($roleList as $key => $val)
+                                    <option value="{{ $key}}"
+                                            @if (isset($entry->role_id) && in_array($key, json_decode($entry->role_id, true) ? : old('role_id') ?? [])) selected @endif>{{ $val}}</option>
+                                @endforeach
+                            </select>
+                            <span class="help-block m-b-none">{{ $errors->first('role_id') }}</span>
+                        </div>
+                        <i style="color: red">*</i>
                     </div>
 
                     <div class="form-group @if (!empty($errors->first('name'))) has-error @endif">

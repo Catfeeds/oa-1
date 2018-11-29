@@ -12,9 +12,11 @@ use App\Components\Helper\DataHelper;
 use App\Http\Components\Helpers\OperateLogHelper;
 use App\Http\Components\ScopeStaff\EntryScope;
 use App\Http\Controllers\Attendance\AttController;
+use App\Models\Role;
 use App\Models\StaffManage\Firm;
 use App\Models\StaffManage\Entry;
 use App\Models\Sys\Dept;
+use App\Models\Sys\Ethnic;
 use App\Models\Sys\Job;
 use App\Models\Sys\School;
 use App\Models\UserExt;
@@ -89,12 +91,14 @@ class EntryController extends AttController
         $dept = Dept::getDeptList();
         $users = User::getUsernameAliasList();
         $firm = Firm::getFirmList();
+        $ethnic = Ethnic::getEthnicList();
+        $roleList = Role::getRoleTextList();
         $title = trans('staff.添加待入职');
 
         $maxUsername = self::getMaxUserName()[0];
         $username = sprintf('sy%04d', (int)str_replace('sy', '', $maxUsername) + 1);
 
-        return view('staff-manage.entry.edit', compact('title', 'users', 'job', 'dept', 'firm', 'userIds', 'username', 'maxUsername'));
+        return view('staff-manage.entry.edit', compact('title', 'roleList', 'ethnic', 'users', 'job', 'dept', 'firm', 'userIds', 'username', 'maxUsername'));
     }
 
     public function store(Request $request)
@@ -135,6 +139,7 @@ class EntryController extends AttController
         $dept = Dept::getDeptList();
         $users = User::getUsernameAliasList();
         $firm = Firm::getFirmList();
+        $ethnic = Ethnic::getEthnicList();
 
         $userIds = json_decode($entry->copy_user);
 
@@ -142,7 +147,7 @@ class EntryController extends AttController
         $username = '';
 
         $title = trans('app.编辑', ['value' => trans('staff.待入职人员')]);
-        return view('staff-manage.entry.edit', compact('title', 'users', 'job', 'dept', 'firm', 'entry', 'userIds', 'username', 'maxUsername'));
+        return view('staff-manage.entry.edit', compact('title', 'ethnic', 'users', 'job', 'dept', 'firm', 'entry', 'userIds', 'username', 'maxUsername'));
     }
 
     public function update(Request $request, $id)
@@ -231,8 +236,9 @@ class EntryController extends AttController
         $school = School::getSchoolList();
         $users = User::getUsernameAliasList();
         $dept = Dept::getDeptList();
+        $ethnic = Ethnic::getEthnicList();
         $title = trans('staff.填写入职资料');
-        return view('staff-manage.entry.fill', compact('title', 'users', 'school', 'entry', 'entryS', 'dept', 'sign', 'cache'));
+        return view('staff-manage.entry.fill', compact('title', 'ethnic', 'users', 'school', 'entry', 'entryS', 'dept', 'sign', 'cache'));
     }
 
     public function del($id)
@@ -468,9 +474,10 @@ class EntryController extends AttController
         $job = Job::getJobList();
         $dept = Dept::getDeptList();
         $firm = Firm::getFirmList();
+        $ethnic = Ethnic::getEthnicList();
         $userIds = json_decode($entry->copy_user);
         $title = trans('staff.入职信息确认');
 
-        return view('staff-manage.entry.info', compact('title', 'users', 'school', 'entry', 'job', 'dept', 'firm', 'userIds'));
+        return view('staff-manage.entry.info', compact('title', 'users', 'school', 'entry', 'job', 'dept', 'firm', 'userIds', 'ethnic'));
     }
 }

@@ -260,6 +260,26 @@ Route::group([
         'middleware' => ['permission:firm.del'],
         'uses' => 'Sys\FirmController@del'])->name('firm.del');
 
+    # 民族配置
+    Route::get('sys/ethnic', [
+        'middleware' => ['permission:ethnic'],
+        'uses' => 'Sys\EthnicController@index'])->name('ethnic');
+    Route::get('sys/ethnic/create', [
+        'middleware' => ['permission:ethnic.create'],
+        'uses' => 'Sys\EthnicController@create'])->name('ethnic.create');
+    Route::post('sys/ethnic/create', [
+        'middleware' => ['permission:ethnic.create'],
+        'uses' => 'Sys\EthnicController@store']);
+    Route::get('sys/ethnic/edit/{id}', [
+        'middleware' => ['permission:ethnic.edit'],
+        'uses' => 'Sys\EthnicController@edit'])->name('ethnic.edit');
+    Route::post('sys/ethnic/edit/{id}', [
+        'middleware' => ['permission:ethnic.edit'],
+        'uses' => 'Sys\EthnicController@update']);
+    Route::get('sys/ethnic/del/{id}', [
+        'middleware' => ['permission:ethnic.del'],
+        'uses' => 'Sys\EthnicController@del'])->name('ethnic.del');
+
 
     #公告栏配置
     Route::get('sys/bulletin', [

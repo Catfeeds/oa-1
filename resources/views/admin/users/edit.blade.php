@@ -112,12 +112,12 @@
                             </div>
 
                             <div class="form-group @if (!empty($errors->first('role_id'))) has-error @endif">
-                                {!! Form::label('role_id', trans('app.职务'), ['class' => 'col-sm-3 control-label']) !!}
+                                {!! Form::label('role_id', trans('app.权限'), ['class' => 'col-sm-3 control-label']) !!}
                                 <div class="col-sm-6">
                                     <select name="role_id[]" multiple="multiple" class="js-select2-multiple form-control">
                                         @foreach($roleList as $key => $val)
                                             <option value="{{ $key}}"
-                                                    @if (isset($user->role_id) && in_array($key, json_decode($user->role_id, true) ? : old('dept_users') ?? [])) selected @endif>{{ $val}}</option>
+                                                    @if (isset($user->role_id) && in_array($key, json_decode($user->role_id, true) ? : old('role_id') ?? [])) selected @endif>{{ $val}}</option>
                                         @endforeach
                                     </select>
                                     <span class="help-block m-b-none">{{ $errors->first('role_id') }}</span>

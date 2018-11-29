@@ -329,7 +329,7 @@
                             {!! Form::select('constellation_id', \App\Models\UserExt::$constellation, isset($user->userExt->constellation_id) ? $user->userExt->constellation_id: old('constellation_id'), [
                             'class' => 'form-control',
                             'placeholder' => trans('app.请选择', ['value' => trans('staff.星座')]),
-                            'required' => true,
+                            'onkeyup' => "value=value.replace(/^(0+)|[^\d]+/g,'')"
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('constellation_id') }}</span>
                         </div>
@@ -338,10 +338,10 @@
                     <div class="form-group @if (!empty($errors->first('height'))) has-error @endif">
                         {!! Form::label('dept', trans('staff.身高'), ['class' => 'col-sm-4 control-label']) !!}
                         <div class="col-sm-3">
-                            {!! Form::text('height', isset($user->userExt->height) ? $user->userExt->height: old('height'), [
+                            {!! Form::number('height', isset($user->userExt->height) ? $user->userExt->height: old('height'), [
                             'class' => 'form-control',
                             'placeholder' => trans('app.请输入', ['value' => trans('staff.身高')]),
-                            'required' => true,
+                            'step' => 0.1
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('height') }}</span>
                         </div>
@@ -355,10 +355,10 @@
                     <div class="form-group @if (!empty($errors->first('weight'))) has-error @endif">
                         {!! Form::label('weight', trans('staff.体重'), ['class' => 'col-sm-4 control-label']) !!}
                         <div class="col-sm-3">
-                            {!! Form::text('weight', isset($user->userExt->weight) ? $user->userExt->weight: old('weight'), [
+                            {!! Form::number('weight', isset($user->userExt->weight) ? $user->userExt->weight: old('weight'), [
                             'class' => 'form-control',
                             'placeholder' => trans('app.请输入', ['value' => trans('staff.体重')]),
-                            'required' => true,
+                            'step' => 0.1
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('weight') }}</span>
                         </div>

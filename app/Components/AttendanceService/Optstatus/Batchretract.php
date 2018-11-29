@@ -6,7 +6,7 @@
  * Time: 9:51
  */
 
-namespace App\Components\AttendanceService\OptStatus;
+namespace App\Components\AttendanceService\Optstatus;
 
 
 use App\Models\Attendance\Leave;

@@ -68,9 +68,9 @@
 @endif
 
 @if(Entrust::can(['holiday-config', 'approval-step', 'punch-rules', 'calendar', 'dept',
-                'job', 'school', 'firm', 'bulletin']))
+                'job', 'school', 'firm', 'bulletin', 'ethnic']))
     <li @if (Route::is(['holiday-config*', 'review-step-flow*', 'punch-rules*', 'calendar*', 'dept*',
-                'job*', 'school*', 'firm*', 'bulletin*', 'inventory*'])) class="active" @endif >
+                'job*', 'school*', 'firm*', 'bulletin*', 'inventory*', 'ethnic*'])) class="active" @endif >
         <a href="#"><i class="fa fa-cogs"></i> <span class="nav-label">{{ trans('staff.系统配置') }}</span><span
                     class="fa arrow"></span></a>
         <ul class="nav nav-second-level">
@@ -79,7 +79,7 @@
                 <a href="{{ route('holiday-config') }}">{{ trans('staff.考勤信息配置') }}</a>
             </li>
 
-            <li @if (Route::is(['dept*', 'job*', 'school*', 'firm*']) ) class="active" @endif>
+            <li @if (Route::is(['dept*', 'job*', 'school*', 'firm*', 'ethnic*']) ) class="active" @endif>
                 <a href="{{ route('dept') }}">{{ trans('staff.员工信息配置') }}</a>
             </li>
 

@@ -144,9 +144,6 @@ class Permissions extends Seeder
         ];
     }
 
-
-
-
     // 员工管理
     private function _staff(): array
     {
@@ -198,6 +195,12 @@ class Permissions extends Seeder
             'job.create'       => '岗位类型配置管理/岗位类型配置添加',
             'job.edit'         => '岗位类型配置管理/岗位类型配置编辑',
             'job.del'          => '岗位类型配置管理/岗位类型配置删除',
+
+            'ethnic-all'       => '员工信息配置管理/民族配置管理',
+            'ethnic'           => '民族配置管理/民族配置列表',
+            'ethnic.create'    => '民族配置管理/民族配置添加',
+            'ethnic.edit'      => '民族配置管理/民族配置编辑',
+            'ethnic.del'       => '民族配置管理/民族配置删除',
 
         ];
     }

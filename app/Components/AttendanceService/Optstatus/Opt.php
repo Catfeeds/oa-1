@@ -7,7 +7,7 @@
  * 操作状态类
  */
 
-namespace App\Components\AttendanceService\OptStatus;
+namespace App\Components\AttendanceService\Optstatus;
 
 
 use App\Http\Components\Helpers\OperateLogHelper;
