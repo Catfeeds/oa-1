@@ -8,6 +8,9 @@
  */
 namespace App\Models\Sys;
 
+use App\Models\StaffManage\Entry;
+
+use App\User;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -27,6 +30,16 @@ class Dept extends Model
     public static function getDeptList()
     {
         return self::get(['dept_id', 'dept'])->pluck('dept', 'dept_id')->toArray();
+    }
+
+    public function users()
+    {
+        return $this->hasMany(User::class, 'dept_id', 'dept_id');
+    }
+
+    public function entry()
+    {
+        return $this->hasMany(Entry::class, 'dept_id', 'dept_id');
     }
 
 }

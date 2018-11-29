@@ -70,10 +70,13 @@
                                                     </td>
                                                     <td>{{ $v['created_at'] }}</td>
                                                     <td>
-                                                        @if(Entrust::can(['dept.create']))
+                                                        @if(Entrust::can(['dept.edit']))
                                                             {!!
                                                                 BaseHtml::tooltip(trans('app.设置'), route('dept.edit', ['id' => $v['dept_id']]))
                                                             !!}
+                                                        @endif
+                                                        @if(Entrust::can(['dept.del']))
+                                                            {!! BaseHtml::tooltip(trans('app.删除'), route('dept.del', ['id' => $v['dept_id']]), ' fa-times text-danger fa-lg confirmation', ['data-confirm' => trans('确认删除['.$v['dept'].']信息?')]) !!}
                                                         @endif
                                                     </td>
                                                 </tr>
@@ -123,6 +126,7 @@
     {{--部门信息弹窗end--}}
 
 @endsection
+@include('widget.bootbox')
 @push('scripts')
 <script>
 

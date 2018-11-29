@@ -53,13 +53,13 @@
                                                     'placeholder' => trans('app.请输入', ['value' => trans('app.子部门名称')]),
                                                     'required' => true,
                                                     ]) !!}
-
                                                 </div>
+                                                @if( !empty($v->dept_id) && Entrust::can(['dept.del']))
+                                                    {!! BaseHtml::tooltip(trans('app.删除'), route('dept.del', ['id' => $v->dept_id]), ' fa-times text-danger fa-lg confirmation', ['data-confirm' => trans('确认删除['.$v->dept.']信息?')]) !!}
+                                                @endif
                                             </div>
                                         @endforeach
                                     @endif
-
-
 
                                     <div id="add_copy" class="form-group"></div>
 
@@ -78,6 +78,7 @@
         </div>
     </div>
 @endsection
+@include('widget.bootbox')
 @section('scripts-last')
     <script>
         $(function() {

@@ -84,10 +84,3 @@
 @include('widget.bootbox')
 @include('widget.review-batch-operation')
 
-@push('scripts')
-<script type="text/javascript">
-    $(function () {
-
-    });
-</script>
-@endpush

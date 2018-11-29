@@ -100,6 +100,9 @@ Route::group([
     Route::get('sys/dept/get-child/', [
         'middleware' => ['permission:dept.edit|dept.create'],
         'uses' => 'Sys\DeptController@getChild'])->name('dept.getChild');
+    Route::get('sys/dept/del/{id}', [
+        'middleware' => ['permission:dept.del'],
+        'uses' => 'Sys\DeptController@del'])->name('dept.del');
 
     //岗位管理
     Route::get('sys/job', [
@@ -117,6 +120,9 @@ Route::group([
     Route::post('sys/job/edit/{id}', [
         'middleware' => ['permission:job.edit'],
         'uses' => 'Sys\JobController@update']);
+    Route::get('sys/job/del/{id}', [
+        'middleware' => ['permission:job.del'],
+        'uses' => 'Sys\JobController@del'])->name('job.del');
 
     //学校管理
     Route::get('sys/school', [
@@ -134,6 +140,9 @@ Route::group([
     Route::post('sys/school/edit/{id}', [
         'middleware' => ['permission:school.edit'],
         'uses' => 'Sys\SchoolController@update']);
+    Route::get('sys/school/del/{id}', [
+        'middleware' => ['permission:school.del'],
+        'uses' => 'Sys\SchoolController@del'])->name('school.del');
 
     //假期配置管理
     Route::get('sys/holiday-config', [
@@ -247,6 +256,10 @@ Route::group([
     Route::post('sys/firm/edit/{id}', [
         'middleware' => ['permission:firm.edit'],
         'uses' => 'Sys\FirmController@update']);
+    Route::get('sys/firm/del/{id}', [
+        'middleware' => ['permission:firm.del'],
+        'uses' => 'Sys\FirmController@del'])->name('firm.del');
+
 
     #公告栏配置
     Route::get('sys/bulletin', [

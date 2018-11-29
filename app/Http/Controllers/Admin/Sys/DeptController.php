@@ -151,7 +151,40 @@ class DeptController extends Controller
         }
 
         return response()->json(['data' => $data, 'title' => $dept->dept]);
+    }
 
+    public function del($id)
+    {
+        $dept = Dept::with('users', 'entry')->where(['dept_id' => $id])->first();
+        if(empty($dept->dept_id)) {
+            flash('删除失败,无效的数据ID!', 'danger');
+            return redirect($this->redirectTo);
+        }
+
+        if(!empty($dept->users->toArray()) || !empty($dept->entry->toArray())) {
+            flash('删除失败,['.$dept->dept. ']还有在使用中!', 'danger');
+            return redirect($this->redirectTo);
+        }
+
+        $child = Dept::with('users', 'entry')->where(['parent_id' => $id])->first();
+
+        if(!empty($child->users->toArray()) || !empty($child->entry->toArray())) {
+            flash('删除失败,['.$child->dept. ']还有在使用中!', 'danger');
+            return redirect($this->redirectTo);
+        }
+
+        DB::beginTransaction();
+        try{
+            Dept::where(['dept_id' => $dept->dept_id])->orWhere(['parent_id' => $dept->dept_id])->delete();
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            flash('删除失败!', 'danger');
+            return redirect($this->redirectTo);
+        }
+        DB::commit();
+
+        flash(trans('app.删除成功', ['value' => trans('app.部门')]), 'success');
+        return redirect($this->redirectTo);
     }
 
 }

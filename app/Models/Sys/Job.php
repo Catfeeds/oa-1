@@ -8,6 +8,8 @@
  */
 namespace App\Models\Sys;
 
+use App\Models\StaffManage\Entry;
+use App\User;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -26,6 +28,17 @@ class Job extends Model
     public static function getJobList()
     {
         return self::get(['job_id', 'job'])->pluck('job', 'job_id')->toArray();
+    }
+
+    public function users()
+    {
+
+        return $this->hasMany(User::class, 'job_id', 'job_id');
+    }
+
+    public function entry()
+    {
+        return $this->hasMany(Entry::class, 'job_id', 'job_id');
     }
 
 }

@@ -70,6 +70,10 @@
                                                                 BaseHtml::tooltip(trans('app.设置'), route('school.edit', ['id' => $v['school_id']]))
                                                             !!}
                                                         @endif
+
+                                                        @if(Entrust::can(['school.del']))
+                                                            {!! BaseHtml::tooltip(trans('app.删除'), route('school.del', ['id' => $v['school_id']]), ' fa-times text-danger fa-lg confirmation', ['data-confirm' => trans('确认删除['.$v['school'].']信息?')]) !!}
+                                                        @endif
                                                     </td>
                                                 </tr>
                                             @endforeach
@@ -84,6 +88,6 @@
                 </div>
             </div>
         </div>
-    </div>
-
+    </div>s
 @endsection
+@include('widget.bootbox')

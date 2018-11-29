@@ -12,6 +12,7 @@ namespace App\Http\Controllers\Admin\Sys;
 use App\Http\Controllers\Controller;
 use App\Models\Sys\Job;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class JobController extends Controller
 {
@@ -63,6 +64,33 @@ class JobController extends Controller
         $job->update($request->all());
 
         flash(trans('app.编辑成功', ['value' => trans('app.岗位')]), 'success');
+        return redirect($this->redirectTo);
+    }
+
+    public function del($id)
+    {
+        $job = Job::with('users', 'entry')->where(['job_id' => $id])->first();
+        if(empty($job->job_id)) {
+            flash('删除失败,无效的数据ID!', 'danger');
+            return redirect($this->redirectTo);
+        }
+
+        if(!empty($job->users->toArray()) || !empty($job->entry->toArray())) {
+            flash('删除失败,['.$job->job. ']还有在使用中!', 'danger');
+            return redirect($this->redirectTo);
+        }
+
+        DB::beginTransaction();
+        try{
+            Job::where(['job_id' => $job->job_id])->delete();
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            flash('删除失败!', 'danger');
+            return redirect($this->redirectTo);
+        }
+        DB::commit();
+
+        flash(trans('app.删除成功', ['value' => trans('app.岗位')]), 'success');
         return redirect($this->redirectTo);
     }
 }

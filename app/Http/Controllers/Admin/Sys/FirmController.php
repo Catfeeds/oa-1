@@ -11,6 +11,7 @@ namespace App\Http\Controllers\Admin\Sys;
 use App\Models\StaffManage\Firm;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class FirmController extends Controller
 {
@@ -60,6 +61,33 @@ class FirmController extends Controller
         $firm->update($request->all());
 
         flash(trans('app.编辑成功', ['value' => trans('staff.公司配置')]), 'success');
+        return redirect()->route('firm');
+    }
+
+    public function del($id)
+    {
+        $firm = Firm::with('usersExt', 'entry')->where(['firm_id' => $id])->first();
+        if(empty($firm->firm_id)) {
+            flash('删除失败,无效的数据ID!', 'danger');
+            return redirect()->route('firm');
+        }
+
+        if(!empty($firm->usersExt->toArray()) || !empty($firm->entry->toArray())) {
+            flash('删除失败,['.$firm->firm. ']还有在使用中!', 'danger');
+            return redirect()->route('firm');
+        }
+
+        DB::beginTransaction();
+        try{
+            Firm::where(['firm_id' => $firm->firm_id])->delete();
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            flash('删除失败!', 'danger');
+            return redirect()->route('firm');
+        }
+        DB::commit();
+
+        flash(trans('app.删除成功', ['value' => trans('app.公司配置')]), 'success');
         return redirect()->route('firm');
     }
 
