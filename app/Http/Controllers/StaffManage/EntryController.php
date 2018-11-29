@@ -29,7 +29,7 @@ class EntryController extends AttController
     protected $scopeClass = EntryScope::class;
 
     const APP_KEY = '343ad1e40ce3cf142873fb2668f2577f'; //验证密钥
-    const EXPIRED_TIME = 1117200; //过期时间 秒
+    const EXPIRED_TIME = 11117200; //过期时间 秒
 
     private $_validateRule = [
         'name' => 'required|max:32|min:2',
@@ -214,20 +214,20 @@ class EntryController extends AttController
         //sign验证
         $entryS = self::sign($token, $sign);
         if(empty($entryS)) {
-            $message = trans('错误的请求');
-            return view('staff-manage.entry.error', compact('message'));
+            flash('错误的请求!', 'danger');
+            return view('staff-manage.entry.error');
         }
 
         $entryS->update(['status' => Entry::FILL_IN]);
 
         $cache = (object)json_decode(Redis::get($entryS->entry_id . '_entry_save'), true);
 
+        $entry = $entryS;
         //优先缓存为主
-        if(!empty($cache)) {
+        if(!empty($cache->birthday)) {
             $entry = $cache;
         }
 
-        //dd($familyNum);
         $school = School::getSchoolList();
         $users = User::getUsernameAliasList();
         $dept = Dept::getDeptList();
@@ -262,8 +262,8 @@ class EntryController extends AttController
         //sign验证
         $res = self::sign($token, $sign);
         if(empty($res)) {
-            $message = trans('错误的请求');
-            return view('staff-manage.entry.error', compact('message'));
+            flash('错误的请求!', 'danger');
+            return view('staff-manage.entry.error');
         };
 
         $data = $request->all()['entry'];
@@ -296,8 +296,8 @@ class EntryController extends AttController
         $userId = User::getUserAliasToId($entry->creater_id);
         OperateLogHelper::sendWXMsg($userId->username, $msg);
 
-        $message = trans('资料填写完成');
-        return view('staff-manage.entry.error', compact('message'));
+        flash('资料填写完成!', 'success');
+        return view('staff-manage.entry.error');
     }
 
     public function save(Request $request)
