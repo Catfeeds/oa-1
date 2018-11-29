@@ -163,6 +163,7 @@ class AttendanceHelper
     {
         $userIds = [];
         $res = self::getCopyLeaveId($scope, $userId, $field);
+
         if(!empty($res['leave_id'])) {
             $leaveIds = implode(',', $res['leave_id']);
             $where = " AND Leave_id in ($leaveIds)";
@@ -176,7 +177,7 @@ class AttendanceHelper
 
 
     /**
-     * 获取调休部门人员和假期ID
+     * 获取抄送者ID，和申请单ID
      * @param int $deptId
      * @return array
      */
@@ -184,15 +185,13 @@ class AttendanceHelper
     {
         $leaveIds = $userIds = [];
         $leave = Leave::with('holidayConfig')
-            ->where(['user_id' => $userId])
-            ->where($field, '!=', '""')
             ->whereRaw($scope->where)
-            ->OrwhereRaw( $field . ' != "" and ' . sprintf('JSON_EXTRACT('.$field.', "$.id_%d") = "%d"', $userId, $userId)) //包含由批量申请调休名单
+            ->whereRaw( $field . ' != "" and ' . sprintf('JSON_EXTRACT('.$field.', "$.id_%d") = "%d"', $userId, $userId))
             ->get();
 
         if(!empty($leave)) {
             foreach ($leave as $k => $v) {
-                if(!empty($v->holidayConfig)  && $field == 'copy_list') {
+                if(!empty($v->holidayConfig)  && $field == 'copy_user') {
                     $userIds[$v->leave_id] = json_decode($v->user_list, true);
                     $leaveIds[] = $v->leave_id;
                 }

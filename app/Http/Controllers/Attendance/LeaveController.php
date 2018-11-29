@@ -53,7 +53,7 @@ class LeaveController extends AttController
                 break;
             //抄送
             case Leave::COPY_LEAVE :
-                $res = AttendanceHelper::getCopyLeaveWhere($scope,\Auth::user()->user_id, 'copy_user');
+                $res = AttendanceHelper::getCopyLeaveWhere($scope, \Auth::user()->user_id, 'copy_user');
                 $where = $res['where'];
                 $userIds = $res['user_ids'];
                 break;

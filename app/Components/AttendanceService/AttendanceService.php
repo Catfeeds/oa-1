@@ -21,7 +21,6 @@ class AttendanceService
      */
     public function driver(string $driver, $file = 'operate')
     {
-
         $file = ucfirst(strtolower($file));
         $driver = ucfirst(strtolower($driver));
 
