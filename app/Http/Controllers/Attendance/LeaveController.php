@@ -299,7 +299,7 @@ class LeaveController extends AttController
         $scope->block = 'attendance.leave.scope-review';
 
         $ids = OperateLogHelper::getLogInfoIdToUid(\Auth::user()->user_id);
-        dump($ids);
+
         $data = Leave::where(function ($query) use ($ids){
             $query->whereIn('leave_id', $ids)->orWhereRaw('review_user_id = '.\Auth::user()->user_id);
         })
