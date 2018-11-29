@@ -41,11 +41,10 @@ class OperateLogHelper
      * @param array $optName
      * @return array
      */
-    public static function getLogInfoIdToUid($userId, $typeId = OperateLogHelper::LEAVE_TYPE_ID , $optName = ['审核通过', '拒绝通过'])
+    public static function getLogInfoIdToUid($userId, $typeId = OperateLogHelper::LEAVE_TYPE_ID )
     {
         $infoIds = OperateLog::where(['opt_uid' => $userId])
             ->where('type_id', $typeId)
-            ->whereIn('opt_name', $optName)
             ->get(['info_id'])
             ->pluck('info_id')
             ->toArray();
