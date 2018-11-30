@@ -104,6 +104,7 @@ class Entry extends Model
         'graduation_time',
         'specialty',
         'degree',
+        'school_id',
 
         'birthday',
         'salary_card',
@@ -118,9 +119,4 @@ class Entry extends Model
         'username'
     ];
 
-
-    public static function getSchoolList()
-    {
-        return self::get(['school_id', 'school'])->pluck('school', 'school_id')->toArray();
-    }
 }

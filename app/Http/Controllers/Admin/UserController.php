@@ -215,7 +215,7 @@ class UserController extends Controller
 
         $roleId = json_decode($user->role_id, true);
         // 权限方面
-        if (!empty($roleId)) {
+        if (!empty($roleId) && is_array($roleId)) {
             $role = Role::whereIn('id', array_values($roleId))->get();
             // 去除权限角色
             foreach ($role as $k => $r) {
@@ -235,7 +235,7 @@ class UserController extends Controller
         $user->update($data);
 
         $roleId = json_decode($user->role_id, true);
-        if (!empty($roleId)) {
+        if (!empty($roleId) && is_array($roleId)) {
             $role = Role::whereIn('id', array_values($roleId))->get();
             foreach ($role as $k => $r)
             if (!$user->hasRole($r->name)) {

@@ -63,12 +63,18 @@
                                         @endif
 
                                         @if(Entrust::can(['entry.edit']) && !in_array($v['status'], [\App\Models\StaffManage\Entry::REVIEW_PASS, \App\Models\StaffManage\Entry::REVIEW_REFUSE]))
-                                            {!! BaseHtml::tooltip(trans('staff.调整入职信息'), route('entry.edit', ['id' => $v['entry_id']]), ' fa-cog text-success fa-lg') !!}
+                                           {!! BaseHtml::tooltip(trans('staff.调整入职信息'), route('entry.edit', ['id' => $v['entry_id']]), ' fa-cog text-success fa-lg') !!}
                                         @endif
 
                                         @if(Entrust::can(['entry.del']) && !in_array($v['status'], [\App\Models\StaffManage\Entry::REVIEW_PASS]))
-                                            {!! BaseHtml::tooltip(trans('staff.删除'), route('entry.del', ['id' => $v['entry_id']]), ' fa-times text-danger fa-lg confirmation', ['data-confirm' => trans('staff.确认删除该员工入职信息?')]) !!}
+                                            <div class="btn-group">
+                                                <button data-toggle="dropdown" class="btn btn-default btn-xs dropdown-toggle"><span class="caret"></span></button>
+                                                <ul style="min-width: 60px;max-height: 40px" class="dropdown-menu">
+                                                    <li style="width: 1em">{!! BaseHtml::tooltip(trans('staff.删除'), route('entry.del', ['id' => $v['entry_id']]), ' fa-times text-danger fa-lg confirmation', ['data-confirm' => trans('staff.确认删除该员工入职信息?')]) !!}</li>
+                                                </ul>
+                                            </div>
                                         @endif
+
                                     </td>
                                 </tr>
                             @endforeach

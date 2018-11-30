@@ -61,6 +61,18 @@
 
                     <div class="hr-line-dashed"></div>
 
+                    <div class="form-group">
+                        {!! Form::label('role_id', trans('app.权限'), ['class' => 'col-sm-4 control-label']) !!}
+                        <div class="col-sm-3">
+                            <select disabled  multiple="multiple" name="copy_users[]" id="copy_users" class="js-select2-multiple form-control">
+                                @foreach($roleList as $key => $val)
+                                    <option value="{{ $key }}"
+                                            @if (in_array($key, json_decode($entry->role_id, true) ?: old('role_id') ?? [])) selected @endif>{{ $val }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
                     <div class="form-group ">
                         {!! Form::label('entry_time', trans('app.入职时间'), ['class' => 'col-sm-4 control-label']) !!}
                         <div class="col-sm-3">
@@ -172,7 +184,7 @@
                     <div class="form-group">
                         {!! Form::label('ethnic', trans('staff.民族'), ['class' => 'col-sm-4 control-label']) !!}
                         <div class="col-sm-3">
-                            {!! Form::text('ethnic', $entry->ethnic ?? '', ['class' => 'form-control', 'disabled']) !!}
+                            {!! Form::text('ethnic', $ethnic[$entry->ethnic_id] ?? '', ['class' => 'form-control', 'disabled']) !!}
                         </div>
                     </div>
 
@@ -186,7 +198,7 @@
                     <div class="form-group">
                         {!! Form::label('political', trans('staff.政治面貌'), ['class' => 'col-sm-4 control-label']) !!}
                         <div class="col-sm-3">
-                            {!! Form::text('political', $entry->political ?? '', ['class' => 'form-control', 'disabled']) !!}
+                            {!! Form::text('political', \App\Models\UserExt::$political[$entry->political_id] ?? '', ['class' => 'form-control', 'disabled']) !!}
                         </div>
                     </div>
 
@@ -241,6 +253,13 @@
                     <div class="hr-line-dashed"></div>
 
                     <div class="form-group">
+                        {!! Form::label('used_mail', trans('staff.QQ邮箱'), ['class' => 'col-sm-4 control-label']) !!}
+                        <div class="col-sm-3">
+                            {!! Form::text('used_mail', $entry->used_mail ?? '', ['class' => 'form-control', 'disabled']) !!}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
                         {!! Form::label('qq', trans('staff.QQ号码'), ['class' => 'col-sm-4 control-label']) !!}
                         <div class="col-sm-3">
                             {!! Form::text('qq', $entry->qq ?? '', ['class' => 'form-control', 'disabled']) !!}
@@ -270,7 +289,7 @@
                                 </thead>
                                 <tbody>
 
-                                @if(!empty($entry->family_num))
+                                @if(!empty(json_decode($entry->family_num, true)) && is_array(json_decode($entry->family_num, true)))
                                     @foreach( json_decode($entry->family_num, true) as $k => $v)
                                         <tr>
                                             <td>{{$v['name']}}</td>
@@ -375,7 +394,7 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                @if(!empty($entry->work_history))
+                                @if(!empty(json_decode($entry->work_history, true)) && is_array(json_decode($entry->family_num, true)))
                                     @foreach(json_decode($entry->work_history, true) as $k => $v)
                                         <tr>
                                             <td>{{$v['time']}}</td>
@@ -452,8 +471,11 @@
                     <div class="form-group">
                         <div class="col-sm-4 col-sm-offset-5">
                             @if(Entrust::can(['entry.review']) && in_array($entry->status, [\App\Models\StaffManage\Entry::FILL_END]))
-                                <a id="pass" class="btn btn-success">{{ trans('staff.确认入职') }}</a>
+                                <button id="pass"  class="btn btn-success">{{ trans('staff.确认入职') }}</button>
                             @endif
+                                @if(Entrust::can(['entry.edit', 'entry.review']) && in_array($entry->status, [\App\Models\StaffManage\Entry::FILL_END]))
+                                    <a href="{{ route('entry.editInfo', ['id' => $entry->entry_id]) }}"  class="btn btn-primary">{{ trans('staff.编辑入职信息') }}</a>
+                                @endif
                             <a href="{{ route('entry.list') }}"
                                class="btn btn-info">{{ trans('att.返回列表') }}</a>
                         </div>
@@ -476,18 +498,20 @@
             $('#copy_users').select2();
 
             $('#pass').click(function () {
-                if(confirm('确认办理入职')==false) return false;
-
-                $.get('{{ route('entry.pass', ['id' => $entry->entry_id])}}', function ($data) {
-                    if ($data.status == 1) {
-                        bootbox.alert($data.msg);
-                        location.reload();
-                    } else {
-                        bootbox.alert($data.msg);
+                $(this).attr('disabled', true);
+                bootbox.confirm('确认办理入职', function (result) {
+                    if (result) {
+                        $.get('{{ route('entry.pass', ['id' => $entry->entry_id])}}', function ($data) {
+                            if ($data.status == 1) {
+                                bootbox.alert($data.msg);
+                                location.reload();
+                            } else {
+                                bootbox.alert($data.msg);
+                            }
+                        })
                     }
-                })
+                });
             });
-
         });
     </script>
 @endsection

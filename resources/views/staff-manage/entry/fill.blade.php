@@ -232,13 +232,18 @@
                                         <div class="hr-line-dashed"></div>
 
                                         <div class="form-group @if (!empty($errors->first('entry.used_email'))) has-error @endif">
-                                            {!! Form::label('used_email', trans('staff.邮箱'), ['class' => 'col-sm-4 control-label']) !!}
+                                            {!! Form::label('used_email', trans('staff.QQ邮箱'), ['class' => 'col-sm-4 control-label']) !!}
                                             <div class="col-sm-3">
                                                 {!! Form::email('entry[used_email]', !empty($entry->used_email) ? $entry->used_email: ($cache->used_email ?? ''), [
                                                 'class' => 'form-control',
-                                                'placeholder' => trans('app.请输入', ['value' => trans('staff.邮箱')]),
+                                                'placeholder' => trans('app.请输入', ['value' => trans('staff.QQ邮箱')]),
+                                                'required' => true,
                                                 ]) !!}
                                                 <span class="help-block m-b-none">{{ $errors->first('entry.used_email') }}</span>
+                                            </div>
+                                            <div class="row">
+                                                <i style="color: red">*</i>
+                                                <i class="fa fa-info-circle"></i> {{ trans('此QQ邮箱将与工作邮箱绑定') }}
                                             </div>
                                         </div>
 

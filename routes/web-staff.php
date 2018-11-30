@@ -37,8 +37,9 @@ Route::group([
         Route::get('exportAll', [
             'middleware' => ['permission:staff.export'],
             'uses' => 'StaffController@exportAll'])->name('staff.exportAll');
-
-
+        Route::get('edit/info/{id}', [
+            'middleware' => ['permission:staff.info'],
+            'uses' => 'StaffController@info'])->name('staff.info');
 
         # 员工入职
         Route::get('entry', [
@@ -56,6 +57,13 @@ Route::group([
         Route::post('entry/edit/{id}', [
             'middleware' => ['permission:entry.edit'],
             'uses' => 'EntryController@update']);
+
+        Route::get('entry/edit-info/{id}', [
+            'middleware' => ['permission:entry.edit'],
+            'uses' => 'EntryController@editInfo'])->name('entry.editInfo');
+        Route::post('entry/edit-info/{id}', [
+            'middleware' => ['permission:entry.edit'],
+            'uses' => 'EntryController@updateInfo']);
 
         Route::get('entry/create-send-info/{id}', [
             'middleware' => ['permission:entry.edit|entry.create|entry.sendMail'],

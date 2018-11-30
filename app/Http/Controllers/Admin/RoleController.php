@@ -93,7 +93,6 @@ class RoleController extends Controller
         if(empty($data['nodesJson'])) {
             return response()->json(['status' => -1, 'url' => $this->redirectTo]);
         }
-
         $nodesJson = json_decode($data['nodesJson']);
         $ps = [];
         $except = Permission::getPemAllName();
@@ -117,7 +116,7 @@ class RoleController extends Controller
         $role->detachPermissions($disables);
 
         flash(trans('app.编辑成功', ['value' => trans('app.权限')]), 'success');
-        return response()->json(['status' => 1, 'url' => $this->redirectTo]);
+        return response()->json(['status' => 1, 'url' => route('role.appoint', ['id' => $id])]);
     }
 
     public function getAppoint($id)

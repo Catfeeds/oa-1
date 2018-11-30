@@ -10,6 +10,7 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="ibox float-e-margins">
+                        @include('flash::message')
                         <div class="ibox-title">
                             <h5>{{ $title }}</h5>
 
@@ -34,8 +35,8 @@
                                 <div class="col-lg-12">
                                     <div class="form-group">
                                         <div class="col-sm-4">
-                                            <button class="btn btn-primary btn-sm" id="didClick" type="button">提交</button>
-                                            <button class="btn btn-white btn-sm" type="reset">取消</button>
+                                            <button class="btn btn-success btn-sm"  id="didClick" type="button">提交</button>
+                                            <a href="{{route('role')}}" class="btn btn-info btn-sm">{{ trans('att.返回列表') }}</a>
                                         </div>
                                     </div>
                                 </div>
@@ -76,6 +77,7 @@
         $(function() {
             createTree('#tree');
             $('#didClick').click(function () {
+                $(this).attr('disabled', true);
                  $.ajax({
                      url: '{{ route('role.appointUpdate', ['id' => $id])}}',
                     type: 'POST',
