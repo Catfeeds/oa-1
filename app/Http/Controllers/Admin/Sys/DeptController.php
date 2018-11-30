@@ -167,7 +167,7 @@ class DeptController extends Controller
             return redirect($this->redirectTo);
         }
 
-        $child = Dept::with('users', 'entry')->where(['parent_id' => $id])->first()->toArray();
+        $child = Dept::with('users', 'entry')->where(['parent_id' => $id])->first();
 
         if(!empty($child['users']) && !empty($child['entry']) ) {
             flash('删除失败,['. $child['dept'] . ']还有在使用中!', 'danger');
