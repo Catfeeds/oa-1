@@ -6,7 +6,7 @@
             @include('flash::message')
             <div class="ibox">
                 <div class="ibox-title">
-                    <h5>{{ trans('material.近期前5条申请记录') }}</h5>
+                    <h5>{{ trans('material.近期申请记录') }}</h5>
                     <div class="ibox-tools">
                         <a href="{{ route('material.apply.index-all') }}" style="color: #0a568c">{{ trans('material.显示更多') }}>></a>
                     </div>

@@ -183,4 +183,9 @@ class User extends Authenticatable
     {
         return self::where(['user_id' => $userId])->first();
     }
+
+    public static function getIdListByUserName()
+    {
+        return self::get(['user_id', 'username'])->pluck('user_id', 'username')->toArray();
+    }
 }
