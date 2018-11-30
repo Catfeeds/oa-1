@@ -18,10 +18,10 @@
 
 
 <div class="form-group">
-    <select class="js-select2-single form-control" name="scope[daily_dept]" id="dept" style="width: 120px">
+    <select class="js-select2-single form-control" name="scope[dept]" id="dept" style="width: 120px">
         <option value="">部门</option>
-        @foreach(\App\Models\Sys\Dept::getDeptList() as $dept_id => $dept)
-            <option value="{{ $dept_id }}" {{--@if($k == $scope->deptId ?? old("scope[dept]")) selected="selected" @endif--}}>{{ $dept }}</option>
+        @foreach(\App\Models\Sys\Dept::getDeptList() as $k => $dept)
+            <option value="{{ $k }}" @if($k == $scope->dept ?? old("scope[dept]")) selected="selected" @endif>{{ $dept }}</option>
         @endforeach
     </select>
 </div>

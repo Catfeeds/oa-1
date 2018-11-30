@@ -15,14 +15,14 @@ class DailyScope extends GeneralScope
     public $displayLastMonth = false;
     public $userId;
     public $status;
-    public $dailyDept;
+    public $dept;
 
 
     public function __construct(array $params, $user = null)
     {
         $this->userId = $params['user_id'] ?? '';
         $this->status = $params['status'] ?? NULL;
-        $this->dailyDept = $params['daily_dept'] ?? '';
+        $this->dept = $params['dept'] ?? '';
 
         parent::__construct($params, $user);
     }
@@ -33,8 +33,8 @@ class DailyScope extends GeneralScope
             $where[] = sprintf("user_id = %d", $this->userId);
         }
 
-        if (!empty($this->dailyDept)){
-            $where[] = sprintf("dept_id = %d", $this->dailyDept);
+        if (!empty($this->dept)){
+            $where[] = sprintf("dept_id = %d", $this->dept);
         }
         $this->where = empty($where) ? '1 = 1' : implode(' AND ', $where);
     }
