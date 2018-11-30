@@ -155,27 +155,28 @@ class DeptController extends Controller
 
     public function del($id)
     {
-        $dept = Dept::with('users', 'entry')->where(['dept_id' => $id])->first();
-        if(empty($dept->dept_id)) {
+        $dept = Dept::with('users', 'entry')->where(['dept_id' => $id])->first()->toArray();
+
+        if(empty($dept['dept_id'])) {
             flash('删除失败,无效的数据ID!', 'danger');
             return redirect($this->redirectTo);
         }
 
-        if(!empty($dept->users->toArray()) || !empty($dept->entry->toArray())) {
-            flash('删除失败,['.$dept->dept. ']还有在使用中!', 'danger');
+        if(!empty($dept['users']) || !empty($dept['entry'])) {
+            flash('删除失败,['. $dept['dept']. ']还有在使用中!', 'danger');
             return redirect($this->redirectTo);
         }
 
-        $child = Dept::with('users', 'entry')->where(['parent_id' => $id])->first();
+        $child = Dept::with('users', 'entry')->where(['parent_id' => $id])->first()->toArray();
 
-        if(!empty($child->users->toArray()) || !empty($child->entry->toArray())) {
-            flash('删除失败,['.$child->dept. ']还有在使用中!', 'danger');
+        if(!empty($child['users']) && !empty($child['entry']) ) {
+            flash('删除失败,['. $child['dept'] . ']还有在使用中!', 'danger');
             return redirect($this->redirectTo);
         }
 
         DB::beginTransaction();
         try{
-            Dept::where(['dept_id' => $dept->dept_id])->orWhere(['parent_id' => $dept->dept_id])->delete();
+            Dept::where(['dept_id' => $dept['dept_id']])->orWhere(['parent_id' => $dept['dept_id']])->delete();
         } catch (\Exception $ex) {
             DB::rollBack();
             flash('删除失败!', 'danger');
