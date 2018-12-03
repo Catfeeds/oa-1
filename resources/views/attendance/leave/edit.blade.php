@@ -163,6 +163,7 @@
 
             $("#start_time").change(function(){
                 inquireStartInfo();
+
             });
             $("#end_time").change(function(){
                 inquireEndInfo();
@@ -177,6 +178,7 @@
         });
 
         function startChange() {
+
             inquire();
         }
 
@@ -242,14 +244,17 @@
             var endTime = $('#end_time').val();
             var startId = $('#start_id').val();
             var endId = $('#end_id').val();
-            if (holidayId != '' && startTime != '' && endTime != '' && startId != '' && endId != '' )
-            $.get('{{ route('leave.inquire')}}', {holidayId: holidayId,startTime: startTime, endTime: endTime, startId:startId, endId:endId}, function ($data) {
-                if ($data.status == 1) {
-                    $('#show_step').html($data.step).find('select').select2();
-                } else {
-                    $('#show_step').html('');
-                }
-            })
+
+            if (holidayId != ''  && startTime != '' && endTime != '' && startId != '' && startId != null && endId != '' && endId != null ) {
+                $.get('{{ route('leave.inquire')}}', {holidayId: holidayId,startTime: startTime, endTime: endTime, startId:startId, endId:endId}, function ($data) {
+                    if ($data.status == 1) {
+                        $('#show_step').html($data.step).find('select').select2();
+                    } else {
+                        $('#show_step').html('');
+                    }
+                })
+            }
+
         }
 
         /**
@@ -279,7 +284,7 @@
                                 start_id = $data.start_time[0];
                             @endif
 
-                            $("#start_id").val(start_id).select2();
+                            $("#start_id").attr(start_id).select2();
 
                         } else {
                             $("#start_id").select2("val", "");
@@ -303,7 +308,7 @@
                                 end_id = $data.end_time[0];
                             @endif
 
-                            $("#end_id").val(end_id).select2();
+                            $("#end_id").attr(end_id).select2();
                         } else {
                             $("#end_id").select2("val", "");
                             $("#end_id").empty();

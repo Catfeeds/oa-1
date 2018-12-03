@@ -183,18 +183,6 @@
             });
 
 
-            $("#select-thumb-file").change(function(){
-                readURL(this, '#show_thumb_image');
-            });
-
-            $("#select-associate-file").change(function(){
-                readURL(this, '#show_associate_image');
-            });
-
-            $("#select-mobile-header-file").change(function(){
-                readURL(this, '#show_mobile_header_image');
-            });
-
             $("#start_time").change(function(){
                 inquireStartInfo();
                 inquire();
@@ -204,23 +192,13 @@
             inquire();
         });
 
-        function readURL(input, $class_id) {
-            if (input.files && input.files[0]) {
-                var reader = new FileReader();
-                reader.onload = function (e) {
-                    $($class_id).attr('src', e.target.result);
-                }
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
         function inquire() {
             var holidayId = $('#holiday_id').val();
             var startTime = $('#start_time').val();
             var endTime = $('#end_time').val();
             var startId = $('#start_id').val();
 
-            if (holidayId != '' && startTime != '' && startId != '' )
+            if (holidayId != '' && startTime != '' && startId != '' && startId != null ) {
                 $.get('{{ route('leave.inquire')}}', {holidayId: holidayId,startTime: startTime, endTime: endTime, startId:startId}, function ($data) {
                     if ($data.status == 1) {
                         $('#show_step').html($data.step).find('select').select2();
@@ -228,6 +206,7 @@
                         $('#show_step').html('');
                     }
                 })
+            }
         }
 
         /**
