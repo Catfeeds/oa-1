@@ -318,7 +318,7 @@ class PunchHelper
     }
 
     /**
-     * 获取这天请假的时间段
+     * 获取这天请假的时间段(待作为驱动进行优化)
      * @param $formulaCalPunRuleConf
      * @param $dailyDetail
      * @param $leaveObjects
@@ -326,7 +326,7 @@ class PunchHelper
      */
     public function getApplyTimes($formulaCalPunRuleConf, $dailyDetail, $leaveObjects, $punchStart): array
     {
-        $leaveTime = $nightTime = $delayTime = [];
+        $leaveTime = $nightTime = $delayTime = $hourTime = [];
         $begin = explode('$$', array_first(array_keys($formulaCalPunRuleConf['sort'])))[0];
         $end = explode('$$', array_last(array_keys($formulaCalPunRuleConf['sort'])))[1];
         foreach ($leaveObjects as $leaveObject) {
@@ -334,11 +334,13 @@ class PunchHelper
                 $nightTime[] = $this->getNightTime($leaveObject, $begin, $end, $formulaCalPunRuleConf);
             }elseif ($leaveObject->holidayConfig->cypher_type == HolidayConfig::CYPHER_DELAY) {
                 $delayTime = $this->getDelayTime($leaveObject, $begin, $end, $punchStart);
-            } else {
+            }elseif ($leaveObject->holidayConfig->cypher_type == HolidayConfig::CYPHER_HOUR) {
+                $hourTime[] = $this->getHourTime($leaveObject);
+            }else {
                 $leaveTime[] = $this->getLeaveTime($dailyDetail, $leaveObject, $end, $begin);
             }
         }
-        return ['leave_time' => $leaveTime, 'night_time' => $nightTime, 'delay_time' => $delayTime];
+        return ['leave_time' => $leaveTime, 'night_time' => $nightTime, 'delay_time' => $delayTime, 'hour_time' => $hourTime];
     }
 
     /**
@@ -349,13 +351,11 @@ class PunchHelper
      */
     public function getNightTime($leaveObject, $begin, $end, $formulaCalPunRuleConf): array
     {
-//        $numberDay = $leaveObject->number_day * 3600;
-        $lastDaily = DailyDetail::where('day', strtotime('-1 day '.$leaveObject->start_time))->first();
-        dd($lastDaily, $leaveObject->number_day);
+        $lastDaily = DailyDetail::where('day', date('Y-m-d', strtotime($leaveObject->start_time)))->first();
         if (empty($lastDaily)) return NULL;
         $lpe = explode(':', $lastDaily->punch_end_time);
-        if ($lpe > 2400) {
-            $m = substr_replace($lpe - 2400, ':', strlen($lpe - 2400) - 2, 0);
+        if ($lpe[0] > 24) {
+            $m = ($lpe[0] - 24).':'.$lpe[1];
             $numberDay = strtotime('+1 day '.$lastDaily->day.' '.$m) - strtotime($lastDaily->day.' '.$leaveObject->start_id);
         }else {
             $numberDay = strtotime($lastDaily->day.' '.$lastDaily->punch_end_time) - strtotime($lastDaily->day.' '.$leaveObject->start_id);
@@ -366,6 +366,7 @@ class PunchHelper
             list($v1, $v2) = explode('$$', $key);
             $duration = strtotime($v2) - strtotime($v1) + $duration;
         }
+
         //加班的工作时长小于正常一天的工作时长,正常上班偏移加班的时长为不在时间
         if ($numberDay < $duration) {
             return [
@@ -376,6 +377,11 @@ class PunchHelper
         }
         //大于正常一天的工作时长,这一整天设为不在时间
         return ['start' => $begin, 'end' => $end];
+    }
+
+    public function getHourTime($leaveObject)
+    {
+        return ['start' => $leaveObject->start_id, 'end' => $leaveObject->end_id];
     }
 
     /**
@@ -429,6 +435,31 @@ class PunchHelper
     }
 
     /**
+     * 获取因带薪假/无薪假,当天不在的时间段
+     * @param $dailyDetail
+     * @param $leaveObject
+     * @param $end
+     * @param $begin
+     * @return array
+     */
+    public function getLeaveTime($dailyDetail, $leaveObject, $end, $begin): array
+    {
+        $leaveTime = [];
+        $leaStartDate = strtotime($leaveObject->start_time);
+        $leaEndDate = strtotime($leaveObject->end_time);
+        if ($leaEndDate == $leaStartDate) {
+            $leaveTime = ['start' => $leaveObject->start_id, 'end' => $leaveObject->end_id];
+        } elseif ($leaEndDate > $leaStartDate && strtotime($dailyDetail->day) == $leaStartDate) {
+            $leaveTime = ['start' => $leaveObject->start_id, 'end' => $end];
+        } elseif ($leaEndDate > $leaStartDate && strtotime($dailyDetail->day) == $leaEndDate) {
+            $leaveTime = ['start' => $begin, 'end' => $leaveObject->end_id];
+        } elseif (DataHelper::ifBetween($leaStartDate, $leaEndDate, strtotime($dailyDetail->day))) {
+            $leaveTime = ['start' => $begin, 'end' => $end, 'unnecessary' => 1];
+        }
+        return $leaveTime;
+    }
+
+    /**
      * 对多个重叠的时间段进行合并, 形成这一整天因多种假期导致不在的时间段的时间合并
      * @param $leaveTimes
      * @return array
@@ -478,76 +509,6 @@ class PunchHelper
         return $new;
     }
 
-    /**
-     * 针对夜班加班,重新设置新的规则
-     * @param $nighttime
-     * @param $formulaCalPunRuleConf
-     * @return array
-     */
-    /*public function getFormulaNightConf($nighttime, $formulaCalPunRuleConf)
-    {
-        $new = [];
-        foreach($formulaCalPunRuleConf['cfg'] as $key => $value) {
-            list($start, $end) = explode('$$', $key);
-            if (DataHelper::ifBetween(strtotime($start), strtotime($end), strtotime($nighttime['end']))) {
-                $new['start_time'][] = $nighttime['end'];
-                $new['end_time'][] = $end;
-                $k = $nighttime['end'].'$$'.$end.'$$'.$nighttime['end'];
-                $new['cfg'][$k] = $value;
-                $new['sort'][$k] = strtotime($nighttime['end']);
-            }elseif (strtotime($start) >= strtotime($nighttime['end'])) {
-                $new['start_time'][] = $start;
-                $new['end_time'][] = $end;
-                $new['cfg'][$key] = $value;
-                $new['sort'][$key] = $formulaCalPunRuleConf['sort'][$key];
-            }
-        }
-        return $new;
-    }*///to be
-
-    /**
-     * 针对延迟假,重新设置新的规则
-     * @param $delayTimes
-     * @param $formulaCalPunRuleConf
-     * @return array
-     */
-    /*public static function getFormulaDelayConf($delayTimes, $formulaCalPunRuleConf)
-    {
-        $new = [];$continue = 0;
-        foreach($formulaCalPunRuleConf['cfg'] as $key => $value) {
-            list($start, $end, $ready) = explode('$$', $key);
-            if (!empty($delayTimes['go']) && DataHelper::ifBetween(strtotime($start), strtotime($end), strtotime($delayTimes['go']['end']))) {
-                $new['start_time'][] = $delayTimes['go']['end'];
-                $new['end_time'][] = $end;
-                $k1 = $delayTimes['go']['end'].'$$'.$end.'$$'.$delayTimes['go']['end'];
-                $new['cfg'][$k1] = $value;
-                $new['sort'][$k1] = strtotime($delayTimes['go']['end']);
-                $continue = 1;
-            }
-            if (!empty($delayTimes['off']) &&
-                DataHelper::ifBetween(strtotime($start), strtotime($end), strtotime($delayTimes['off']['start']))
-            ) {
-                $new['start_time'][] = $start;
-                $new['end_time'][] = $delayTimes['off']['start'];
-                $k2 = $start.'$$'.$delayTimes['off']['start'].'$$'.$ready;
-                $new['cfg'][$k2] = $value;
-                $new['sort'][$k2] = $formulaCalPunRuleConf['sort'][$key];
-                $continue = 1;
-            }
-            if ($continue == 1) {
-                $continue = 0; continue;
-            }
-            else {
-                $new['start_time'][] = $start;
-                $new['end_time'][] = $end;
-                $new['cfg'][$key] = $value;
-                $new['sort'][$key] = $formulaCalPunRuleConf['sort'][$key];
-                $continue = 0;
-            }
-        }
-        return $new;
-    }*///to be
-
     public static function getFormulaCombineConf($combineTimes, $formulaCalPunRuleConf)
     {
         if (empty($combineTimes)) return $formulaCalPunRuleConf;
@@ -585,30 +546,6 @@ class PunchHelper
         return $dateNewStart->add($dateStart->diff($dateEnd))->format($format);
     }
 
-    /**
-     * @param $dailyDetail
-     * @param $leaveObject
-     * @param $end
-     * @param $begin
-     * @return array
-     */
-    public function getLeaveTime($dailyDetail, $leaveObject, $end, $begin): array
-    {
-        $leaveTime = [];
-        $leaStartDate = strtotime($leaveObject->start_time);
-        $leaEndDate = strtotime($leaveObject->end_time);
-        if ($leaEndDate == $leaStartDate) {
-            $leaveTime = ['start' => $leaveObject->start_id, 'end' => $leaveObject->end_id];
-        } elseif ($leaEndDate > $leaStartDate && strtotime($dailyDetail->day) == $leaStartDate) {
-            $leaveTime = ['start' => $leaveObject->start_id, 'end' => $end];
-        } elseif ($leaEndDate > $leaStartDate && strtotime($dailyDetail->day) == $leaEndDate) {
-            $leaveTime = ['start' => $begin, 'end' => $leaveObject->end_id];
-        } elseif (DataHelper::ifBetween($leaStartDate, $leaEndDate, strtotime($dailyDetail->day))) {
-            $leaveTime = ['start' => $begin, 'end' => $end, 'unnecessary' => 1];
-        }
-        return $leaveTime;
-    }
-
     public function getLastDayEnd($v, $boundary)
     {
         $lastDayEndTime = '00:00';$j = 0;
@@ -628,13 +565,13 @@ class PunchHelper
         return [$lastDayEndTime, $startTime];
     }
 
-    public function dealLastDayEnd($ts, $v, $userIds)
+    public function dealLastDayEnd($ts, $v, $userIds, $nightConf)
     {
         $lastDay = DataHelper::dateTimeAdd($ts, '1D', 'Y-m-d 00:00:00', 'sub');
-        $night = Leave::where(['user_id' => $userIds[$v[1]], 'start_time' => $lastDay, 'status' => Leave::WAIT_EFFECTIVE])
-            ->whereHas('holidayConfig', function ($query) {
-                $query->where('cypher_type', HolidayConfig::CYPHER_NIGHT);
-            })->first();
+        $night = Leave::where([
+            'user_id' => $userIds[$v[1]], 'start_time' => $lastDay, 'status' => Leave::WAIT_EFFECTIVE,
+            'holiday_id' => $nightConf->holiday_id
+        ])->select('end_time')->first();
 
         if (!empty($night)) {
             $nightDate = explode(' ', $night->end_time);

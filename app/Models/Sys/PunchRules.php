@@ -47,15 +47,15 @@ class PunchRules extends Model
         self::HOLIDAY => '节假日',
     ];
 
+    public static $lateType = [
+        self::LATE_WORK => '上班迟到',
+        self::LATE_OFF_WORK => '下班早退'
+    ];
+
     public static $punchTypeChar = [
         self::NORMALWORK => '班',
         self::RESTDAY => '休',
         self::HOLIDAY => '假',
-    ];
-
-    public static $lateType = [
-        self::LATE_WORK => '上班迟到',
-        self::LATE_OFF_WORK => '下班早退'
     ];
 
     public static $punchTypeColor = [
