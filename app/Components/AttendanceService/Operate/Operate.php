@@ -217,7 +217,7 @@ class Operate
         if (empty($leaveId)) return $idArr;
         $arr = json_decode($idArr, true);
         if (is_array($leaveId)) {
-            $arr = array_merge($leaveId, $arr);
+            $arr = array_merge($leaveId, $arr ?? []);
         }else {
             $arr[] = $leaveId;
         }
