@@ -451,8 +451,8 @@
 
                     <div class="form-group @if (!empty($errors->first('live_address'))) has-error @endif">
                         {!! Form::label('live_address', trans('staff.目前住址'), ['class' => 'col-sm-4 control-label']) !!}
-                        <div class="col-sm-3">
-                            {!! Form::text('entry[live_address]', isset($entry->live_address) ? $entry->live_address: old('live_address'), [
+                        <div class="col-sm-5">
+                            {!! Form::textarea('entry[live_address]', isset($entry->live_address) ? $entry->live_address: old('live_address'), [
                             'class' => 'form-control',
                             'placeholder' => trans('app.请输入', ['value' => trans('staff.目前住址')]),
                             'required' => true,
