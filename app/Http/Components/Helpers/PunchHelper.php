@@ -568,10 +568,12 @@ class PunchHelper
     public function dealLastDayEnd($ts, $v, $userIds, $nightConf)
     {
         $lastDay = DataHelper::dateTimeAdd($ts, '1D', 'Y-m-d 00:00:00', 'sub');
-        $night = Leave::where([
-            'user_id' => $userIds[$v[1]], 'start_time' => $lastDay, 'status' => Leave::WAIT_EFFECTIVE,
-            'holiday_id' => $nightConf->holiday_id
-        ])->select('end_time')->first();
+        if (!empty($userIds[$v[3]])) {
+            $night = Leave::where([
+                'user_id' => $userIds[$v[3]], 'start_time' => $lastDay, 'status' => Leave::WAIT_EFFECTIVE,
+                'holiday_id' => $nightConf->holiday_id
+            ])->select('end_time')->first();
+        }
 
         if (!empty($night)) {
             $nightDate = explode(' ', $night->end_time);

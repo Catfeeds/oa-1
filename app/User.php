@@ -186,6 +186,6 @@ class User extends Authenticatable
 
     public static function getIdListByUserName()
     {
-        return self::get(['user_id', 'username'])->pluck('user_id', 'username')->toArray();
+        return self::get(['user_id', 'alias'])->pluck('user_id', 'alias')->toArray();
     }
 }
