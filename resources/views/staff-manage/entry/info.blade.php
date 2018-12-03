@@ -269,7 +269,7 @@
                     <div class="form-group">
                         {!! Form::label('live_address', trans('staff.目前住址'), ['class' => 'col-sm-4 control-label']) !!}
                         <div class="col-sm-3">
-                            {!! Form::text('live_address', $entry->live_address ?? '', ['class' => 'form-control', 'disabled']) !!}
+                            {!! Form::textarea('live_address', $entry->live_address ?? '', ['class' => 'form-control', 'disabled']) !!}
                         </div>
                     </div>
 
