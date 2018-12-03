@@ -11,6 +11,7 @@ namespace App\Components\AttendanceService\Operate;
 
 use App\Components\AttendanceService\AttendanceInterface;
 use App\Components\Helper\DataHelper;
+use App\Models\Attendance\DailyDetail;
 use App\Models\Attendance\Leave;
 use App\Models\Sys\HolidayConfig;
 use App\User;
@@ -46,6 +47,8 @@ class Change extends Operate implements AttendanceInterface
             $numberDay = sprintf("%.1f", (strtotime($endTime) - strtotime($startTimeS))/3600) ;
             $startId = $p['start_id'];
             $endId = DataHelper::dateTimeFormat($p['end_time'], 'H:i');
+
+
 
         } else {
             //加班调休获得的时间点范围ID,可查看leave模型里面配置的$workTimePoint
@@ -110,7 +113,8 @@ class Change extends Operate implements AttendanceInterface
             'start_id' => $startId,
             'end_id' => $endId,
             'exceed_day' => $userHoliday['data']['exceed_day'] ?? NULL,
-            'exceed_holiday_id' => $userHoliday['data']['exceed_holiday_id'] ?? NULL
+            'exceed_holiday_id' => $userHoliday['data']['exceed_holiday_id'] ?? NULL,
+
         ];
 
         return  $this->backLeaveData(true, [], $data);
@@ -175,6 +179,29 @@ class Change extends Operate implements AttendanceInterface
      */
     public function setDailyDetail($leave)
     {
+        //夜班加班情况,添加隔天的明细
+        if ($leave->holidayConfig->cypher_type == HolidayConfig::CYPHER_NIGHT) {
+            $leave->start_time = date('Y-m-d', strtotime('+1 day', strtotime($leave->start_time)));
+            $leave->end_time = date('Y-m-d', strtotime('+1 day', strtotime($leave->end_time)));
+
+            $ifNeedUpdate = DailyDetail::where(\DB::raw('DATE_FORMAT(day, "%Y-%m-%d")'), $leave->start_time)
+                ->where('user_id', $leave->user_id)->first();
+            if (empty($ifNeedUpdate)) {
+                DailyDetail::create([
+                    'user_id' => $leave->user_id,
+                    'day' => $leave->start_time,
+                    'leave_id' => self::addLeaveId($leave->leave_id),
+                    'punch_start_time' => NULL,
+                    'punch_start_time_num' => NULL,
+                    'punch_end_time' => NULL,
+                    'punch_end_time_num' => NULL,
+                ]);
+            }else {
+                $ifNeedUpdate->leave_id = self::addLeaveId($leave->leave_id, $ifNeedUpdate->leave_id);
+                $ifNeedUpdate->save();
+            }
+            return true;
+        }
         return parent::setDailyDetail($leave);
     }
 

@@ -83,13 +83,21 @@
                                 <div class="ibox-content profile-content">
                                     <div class="table-responsive">
                                         <div id="calendar_show">
-                                            @if(($year = date('Y', strtotime($scope->startDate))) == date('Y', strtotime($scope->endDate)))
+                                            {{--@if(($year = date('Y', strtotime($scope->startDate))) == date('Y', strtotime($scope->endDate)))
                                                 @for($i = $startMonth; $i <=  $endMonth; $i ++)
                                                     <div class="col-xs-6 col-xs-offset-3">
                                                         @include('widget.calendar', ['date' => "$year-$i"])
                                                     </div>
                                                 @endfor
-                                            @endif
+                                            @endif--}}
+                                            <?php $sd = strtotime(date('Y-m-01', strtotime($scope->startDate)));
+                                            $ed = strtotime(date('Y-m-01', strtotime($scope->endDate)));
+                                            ?>
+                                            @for($y = $sd; $y <= $ed; $y = strtotime('+1 month', $y))
+                                                <div class="col-xs-6 col-xs-offset-3">
+                                                    @include('widget.calendar', ['date' => date('Y-m', $y)])
+                                                </div>
+                                            @endfor
                                         </div>
                                     </div>
                                 </div>
@@ -108,15 +116,15 @@
     //点击星期几,就选中星期几的日历列
     $('[name=week_num]').on('ifChecked', function () {
         var val = $(this).val();
-        @for($i = $startMonth; $i <= $endMonth; $i ++)
-            $('#' + '{{ "calendar_$year-$i" }}').find('td.fc-day').each(function (index, ele) {
-                var date = new Date($(ele).attr('data-date'));
-                var week = date.getDay() == 0 ? 7 : date.getDay();
-                 if (week == val && date.getMonth() + 1 == '{{ $i }}' && $.inArray($(ele).attr('data-date'), selectDate[val]) == -1) {
-                    $(ele).css('background-color', '#e4edf5');
-                    selectDate[val].push($(ele).attr('data-date'));
-                }
-            });
+        @for($y = $sd; $y <= $ed; $y = strtotime('+1 month', $y))
+            $('#' + '{{ "calendar_".date('Y-m', $y) }}').find('td.fc-day').each(function (index, ele) {
+            var date = new Date($(ele).attr('data-date'));
+            var week = date.getDay() == 0 ? 7 : date.getDay();
+            if (week == val && date.getMonth() + 1 == '{{ date('m', $y) }}' && $.inArray($(ele).attr('data-date'), selectDate[val]) == -1) {
+                $(ele).css('background-color', '#e4edf5');
+                selectDate[val].push($(ele).attr('data-date'));
+            }
+        });
         @endfor
     });
 

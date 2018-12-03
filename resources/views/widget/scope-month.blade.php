@@ -15,9 +15,11 @@
                         <div class="form-group">
                             <input class="form-control date_month start-date" id="startDate" type="text"
                                    value="{{ date('Y-m', strtotime($scope->startDate)) }}">
-                            {{ trans('app.到') }}
-                            <input class="form-control date_month end-date" id="endDate" type="text"
-                                   value="{{ date('Y-m', strtotime($scope->endDate)) }}">
+                            @if(empty($unDouble))
+                                {{ trans('app.到') }}
+                                <input class="form-control date_month end-date" id="endDate" type="text"
+                                       value="{{ date('Y-m', strtotime($scope->endDate)) }}">
+                            @endif
                         </div>
                     @endif
                     <input type="button" class="btn btn-primary btn-submit" value="{{ trans('app.提交') }}">
@@ -27,7 +29,9 @@
                         {!! Form::hidden('source', $source, ['id' => 'source']) !!}
                     @endif
                     {!! Form::hidden('scope[startDate]', $scope->startDate, ['id' => 'scope-start-date']) !!}
-
+                    @if(empty($unDouble))
+                        {!! Form::hidden('scope[endDate]', $scope->startDate, ['id' => 'scope-end-date']) !!}
+                    @endif
                     {!! Form::close() !!}
                 </div>
             </div>

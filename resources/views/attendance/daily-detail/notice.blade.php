@@ -8,7 +8,7 @@
 
 <div class="ibox-title">
     <h4 style="float: left">考勤确认记录</h4>
-    @include('widget.scope-month', ['scope' => $scope])
+    @include('widget.scope-month', ['scope' => $scope, 'unDouble' => true])
 </div>
 
 <div class="ibox-content" style="margin-bottom: 20px">
@@ -147,10 +147,10 @@
         });
 
         //对widget进行修改
-        $('#startDate').parent('div').contents().filter(function () {
-            return this.nodeType === 3
-        }).remove();
-        $('#endDate').remove();
+        /*$('#startDate').parent('div').contents().filter(function () {
+         return this.nodeType === 3
+         }).remove();
+         $('#endDate').remove();*/
     });
 </script>
 @endpush

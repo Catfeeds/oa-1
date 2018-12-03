@@ -21,7 +21,7 @@
 
     @include('flash::message')
     <div class="row">
-        @include('widget.scope-month', ['scope' => $scope])
+        @include('widget.scope-month', ['scope' => $scope, 'unDouble' => true])
         <div class="col-lg-12">
             <div class="ibox float-e-margins">
                 <div class="ibox-title">

@@ -24,6 +24,11 @@
                             <a aria-expanded="false" role="button" href="{{route('attIndex')}}">{{ trans('app.考勤系统') }}</a>
                         </li>
                         @endif
+                        @if(Entrust::can(['holiday-config', 'approval-step', 'punch-rules', 'calendar']))
+                        <li>
+                            <a aria-expanded="false" role="button" href="{{ route('holiday-config') }}">{{ trans('staff.系统配置') }}</a>
+                        </li>
+                        @endif
                         @if(Entrust::can(['staff*', 'entry*']))
                         <li>
                             <a aria-expanded="false" role="button" href="{{ route('manage.index') }}">{{ trans('app.员工管理') }}</a>
