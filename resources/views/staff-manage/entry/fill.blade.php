@@ -73,23 +73,27 @@
                                                     <span class="help-block m-b-none">{{ $errors->first('entry.birthday') }}</span>
                                                 </div>
                                             </div>
-                                            @foreach(\App\Models\StaffManage\Entry::$birthdayType as $k => $v)
-                                                <label class="radio-inline i-checks">
-                                                    <input type="radio" name="entry[birthday_type]" value="{{$k}}" @if($k === (int)($cache->birthday_type ?? \App\Models\StaffManage\Entry::GREGORIAN_CALENDAR)) checked @endif> {{ $v }}
-                                                </label>
-                                            @endforeach
-                                            <i style="color: red">*</i>
+                                            <div class="row">
+                                                <i style="color: red">*</i>
+                                                @foreach(\App\Models\StaffManage\Entry::$birthdayType as $k => $v)
+                                                    <label style="margin-left: 1em" class="radio-inline i-checks">
+                                                        <input type="radio" name="entry[birthday_type]" value="{{$k}}" @if($k === (int)($cache->birthday_type ?? \App\Models\StaffManage\Entry::GREGORIAN_CALENDAR)) checked @endif> {{ $v }}
+                                                    </label>
+                                                @endforeach
+                                            </div>
+
                                         </div>
 
-                                        <div class="form-group @if (!empty($errors->first('entry.ethnic'))) has-error @endif">
-                                            {!! Form::label('ethnic', trans('staff.民族'), ['class' => 'col-sm-4 control-label']) !!}
+                                        <div class="form-group @if (!empty($errors->first('entry.ethnic_id'))) has-error @endif">
+                                            {!! Form::label('ethnic_id', trans('staff.民族'), ['class' => 'col-sm-4 control-label']) !!}
                                             <div class="col-sm-3">
-                                                {!! Form::text('entry[ethnic]', !empty($entry->ethnic) ? $entry->ethnic : ($cache->ethnic ?? ''), [
-                                                'class' => 'form-control',
-                                                'placeholder' => trans('app.请输入', ['value' => trans('staff.民族')]),
+                                                {!! Form::select('entry[ethnic_id]', $ethnic, !empty($entry->ethnic_id) ? $entry->ethnic_id : ($cache->ethnic_id ?? ''), [
+                                                'class' => 'form-control js-select2-single',
+                                                'placeholder' => trans('app.请选择', ['value' => trans('staff.民族')]),
                                                 'required' => true,
                                                 ]) !!}
-                                                <span class="help-block m-b-none">{{ $errors->first('entry.ethnic') }}</span>
+
+                                                <span class="help-block m-b-none">{{ $errors->first('entry.ethnic_id') }}</span>
                                             </div>
                                             <i style="color: red">*</i>
                                         </div>
@@ -107,15 +111,15 @@
                                             <i style="color: red">*</i>
                                         </div>
 
-                                        <div class="form-group @if (!empty($errors->first('entry.political'))) has-error @endif">
-                                            {!! Form::label('political', trans('staff.政治面貌'), ['class' => 'col-sm-4 control-label']) !!}
+                                        <div class="form-group @if (!empty($errors->first('entry.political_id'))) has-error @endif">
+                                            {!! Form::label('political_id', trans('staff.政治面貌'), ['class' => 'col-sm-4 control-label']) !!}
                                             <div class="col-sm-3">
-                                                {!! Form::text('entry[political]', !empty($entry->political) ? $entry->political: ($cache->political ?? ''), [
-                                                'class' => 'form-control',
-                                                'placeholder' => trans('app.请输入', ['value' => trans('staff.政治面貌')]),
+                                                {!! Form::select('entry[political_id]', \App\Models\UserExt::$political, !empty($entry->political_id) ? $entry->political_id : ($cache->political_id ?? ''), [
+                                                'class' => 'form-control js-select2-single',
+                                                'placeholder' => trans('app.请选择', ['value' => trans('staff.政治面貌')]),
                                                 'required' => true,
                                                 ]) !!}
-                                                <span class="help-block m-b-none">{{ $errors->first('entry.political') }}</span>
+                                                <span class="help-block m-b-none">{{ $errors->first('entry.political_id') }}</span>
                                             </div>
                                             <i style="color: red">*</i>
                                         </div>
@@ -123,7 +127,7 @@
                                         <div class="form-group @if (!empty($errors->first('entry.marital_status'))) has-error @endif">
                                             {!! Form::label('marital_status', trans('staff.婚姻状况'), ['class' => 'col-sm-4 control-label']) !!}
                                             <div class="col-sm-3">
-                                                {!! Form::select('entry[marital_status]', \App\Models\UserExt::$marital, !empty($entry->marital_status) ? $entry->marital_status: ($cache->marital_status ?? ''), [
+                                                {!! Form::select('entry[marital_status]', \App\Models\UserExt::$marital, !empty($entry->marital_status) ? $entry->marital_status : ($cache->marital_status ?? ''), [
                                                 'class' => 'form-control js-select2-single',
                                                 'placeholder' => trans('app.请选择', ['value' => trans('staff.婚姻状况')]),
                                                 'required' => true,
@@ -169,9 +173,10 @@
                                         <div class="form-group @if (!empty($errors->first('entry.height'))) has-error @endif">
                                             {!! Form::label('dept', trans('staff.身高'), ['class' => 'col-sm-4 control-label']) !!}
                                             <div class="col-sm-3">
-                                                {!! Form::text('entry[height]', !empty($entry->height) ? $entry->height: ($cache->height ?? ''), [
+                                                {!! Form::number('entry[height]', !empty($entry->height) ? $entry->height: ($cache->height ?? ''), [
                                                 'class' => 'form-control',
                                                 'placeholder' => trans('app.请输入', ['value' => trans('staff.身高')]),
+                                                'step' => 0.1
                                                 ]) !!}
                                                 <span class="help-block m-b-none">{{ $errors->first('entry.height') }}</span>
                                             </div>
@@ -185,9 +190,10 @@
                                         <div class="form-group @if (!empty($errors->first('entry.weight'))) has-error @endif">
                                             {!! Form::label('weight', trans('staff.体重'), ['class' => 'col-sm-4 control-label']) !!}
                                             <div class="col-sm-3">
-                                                {!! Form::text('entry[weight]', !empty($entry->weight) ? $entry->weight: ($cache->weight ?? ''), [
+                                                {!! Form::number('entry[weight]', !empty($entry->weight) ? $entry->weight: ($cache->weight ?? ''), [
                                                 'class' => 'form-control',
                                                 'placeholder' => trans('app.请输入', ['value' => trans('staff.体重')]),
+                                                'step' => 0.1
                                                 ]) !!}
                                                 <span class="help-block m-b-none">{{ $errors->first('entry.weight') }}</span>
                                             </div>
@@ -196,7 +202,6 @@
                                                     <i class="fa fa-info-circle"></i> {{ trans('单位：公斤/千克(kg)') }}
                                                 </span>
                                             </div>
-
                                         </div>
 
                                         <div class="form-group @if (!empty($errors->first('entry.salary_card'))) has-error @endif">
@@ -209,7 +214,10 @@
                                                 ]) !!}
                                                 <span class="help-block m-b-none">{{ $errors->first('entry.salary_card') }}</span>
                                             </div>
-                                            <i style="color: red">*</i>
+                                            <div class="row">
+                                                <i style="color: red">*</i>
+                                                <i style="margin-left: 1em" class="fa fa-info-circle"></i> {{ trans('请填写本人招商银行广州储蓄卡账号') }}
+                                            </div>
                                         </div>
                                             {{--保存信息--}}
                                             <div class="form-group">
@@ -224,13 +232,18 @@
                                         <div class="hr-line-dashed"></div>
 
                                         <div class="form-group @if (!empty($errors->first('entry.used_email'))) has-error @endif">
-                                            {!! Form::label('used_email', trans('staff.邮箱'), ['class' => 'col-sm-4 control-label']) !!}
+                                            {!! Form::label('used_email', trans('staff.QQ邮箱'), ['class' => 'col-sm-4 control-label']) !!}
                                             <div class="col-sm-3">
                                                 {!! Form::email('entry[used_email]', !empty($entry->used_email) ? $entry->used_email: ($cache->used_email ?? ''), [
                                                 'class' => 'form-control',
-                                                'placeholder' => trans('app.请输入', ['value' => trans('staff.邮箱')]),
+                                                'placeholder' => trans('app.请输入', ['value' => trans('staff.QQ邮箱')]),
+                                                'required' => true,
                                                 ]) !!}
                                                 <span class="help-block m-b-none">{{ $errors->first('entry.used_email') }}</span>
+                                            </div>
+                                            <div class="row">
+                                                <i style="color: red">*</i>
+                                                <i class="fa fa-info-circle"></i> {{ trans('此QQ邮箱将与工作邮箱绑定') }}
                                             </div>
                                         </div>
 
@@ -273,13 +286,14 @@
                                                     </tr>
                                                     </thead>
                                                     <tbody>
+
                                                     @for($i = 0; $i <= \App\Models\StaffManage\Entry::CREATE_FAMILY_NUM; $i++)
                                                         <tr>
-                                                            <td><input name="entry[family_num][{{$i}}][name]" value="{{!empty($entry->family_num[$i]['name']) ? $entry->family_num[$i]['name'] : ($cache->family_num[$i]['name'] ?? '')}}" style="width: 6em;" type="text"></td>
-                                                            <td><input name="entry[family_num][{{$i}}][age]" value="{{!empty($entry->family_num[$i]['age']) ? $entry->family_num[$i]['age'] : ($cache->family_num[$i]['age'] ?? '')}}" style="width: 3em;" type="text"></td>
-                                                            <td><input name="entry[family_num][{{$i}}][relation]" value="{{!empty($entry->family_num[$i]['relation']) ? $entry->family_num[$i]['relation'] : ($cache->family_num[$i]['relation'] ?? '')}}" style="width: 100%;" type="text"></td>
-                                                            <td><input name="entry[family_num][{{$i}}][position]" value="{{!empty($entry->family_num[$i]['position']) ? $entry->family_num[$i]['position'] : ($cache->family_num[$i]['position'] ?? '')}}" style="width: 6em;" type="text"></td>
-                                                            <td><input name="entry[family_num][{{$i}}][phone]" value="{{!empty($entry->family_num[$i]['phone']) ? $entry->family_num[$i]['phone'] : ($cache->family_num[$i]['phone'] ?? '')}}" style="width: 8em;" type="text"></td>
+                                                            <td><input name="entry[family_num][{{$i}}][name]" value="{{!is_array($entry->family_num) && !empty(json_decode($entry->family_num, true)[$i]['name']) ? json_decode($entry->family_num, true)[$i]['name'] : ($cache->family_num[$i]['name'] ?? '')}}" style="width: 6em;" type="text"></td>
+                                                            <td><input name="entry[family_num][{{$i}}][age]" value="{{!is_array($entry->family_num) &&!empty(json_decode($entry->family_num, true)[$i]['age']) ? json_decode($entry->family_num, true)[$i]['age'] : ($cache->family_num[$i]['age'] ?? '')}}" style="width: 3em;" type="text"></td>
+                                                            <td><input name="entry[family_num][{{$i}}][relation]" value="{{!is_array($entry->family_num) &&!empty(json_decode($entry->family_num, true)[$i]['relation']) ? json_decode($entry->family_num, true)[$i]['relation'] : ($cache->family_num[$i]['relation'] ?? '')}}" style="width: 100%;" type="text"></td>
+                                                            <td><input name="entry[family_num][{{$i}}][position]" value="{{!is_array($entry->family_num) &&!empty(json_decode($entry->family_num, true)[$i]['position']) ? json_decode($entry->family_num, true)[$i]['position'] : ($cache->family_num[$i]['position'] ?? '')}}" style="width: 6em;" type="text"></td>
+                                                            <td><input name="entry[family_num][{{$i}}][phone]" value="{{!is_array($entry->family_num) &&!empty(json_decode($entry->family_num, true)[$i]['phone']) ? json_decode($entry->family_num, true)[$i]['phone'] : ($cache->family_num[$i]['phone'] ?? '')}}" style="width: 8em;" type="text"></td>
                                                         </tr>
                                                     @endfor
 
@@ -440,13 +454,13 @@
                                                     <tbody>
                                                     @for($i = 0; $i <= \App\Models\StaffManage\Entry::CREATE_WORK_HISTORY_NUM; $i++)
                                                         <tr>
-                                                            <td><input name="entry[work_history][{{$i}}][time]" value="{{!empty($entry->work_history[$i]['time']) ? $entry->work_history[$i]['time'] : ($cache->work_history[$i]['time'] ?? '')}}" style="width: 6em;" type="text"></td>
-                                                            <td><input name="entry[work_history][{{$i}}][deadline]" value="{{!empty($entry->work_history[$i]['deadline']) ? $entry->work_history[$i]['deadline'] : ($cache->work_history[$i]['deadline'] ?? '')}}" style="width: 3em;" type="text"></td>
-                                                            <td><input name="entry[work_history][{{$i}}][work_place]" value="{{!empty($entry->work_history[$i]['work_place']) ? $entry->work_history[$i]['work_place'] : ($cache->work_history[$i]['work_place'] ?? '')}}" style="width: 100%;" type="text"></td>
-                                                            <td><input name="entry[work_history][{{$i}}][position]" value="{{!empty($entry->work_history[$i]['position']) ? $entry->work_history[$i]['position'] : ($cache->work_history[$i]['position'] ?? '')}}" style="width: 5em;" type="text"></td>
-                                                            <td><input name="entry[work_history][{{$i}}][income]" value="{{!empty($entry->work_history[$i]['income']) ? $entry->work_history[$i]['income'] : ($cache->work_history[$i]['income'] ?? '')}}" style="width: 4em;" type="text"></td>
-                                                            <td><input name="entry[work_history][{{$i}}][boss]" value="{{!empty($entry->work_history[$i]['boss']) ? $entry->work_history[$i]['boss'] : ($cache->work_history[$i]['boss'] ?? '')}}" style="width: 100%;" type="text"></td>
-                                                            <td><input name="entry[work_history][{{$i}}][phone]"  value="{{!empty($entry->work_history[$i]['phone']) ? $entry->work_history[$i]['phone'] : ($cache->work_history[$i]['phone'] ?? '')}}" style="width: 8em;" type="text"></td>
+                                                            <td><input name="entry[work_history][{{$i}}][time]" value="{{!is_array($entry->work_history) && !empty(json_decode($entry->work_history, true)[$i]['time']) ? json_decode($entry->work_history, true)[$i]['time'] : ($cache->work_history[$i]['time'] ?? '')}}" style="width: 6em;" type="text"></td>
+                                                            <td><input name="entry[work_history][{{$i}}][deadline]" value="{{!is_array($entry->work_history) && !empty(json_decode($entry->work_history, true)[$i]['deadline']) ? json_decode($entry->work_history, true)[$i]['deadline'] : ($cache->work_history[$i]['deadline'] ?? '')}}" style="width: 3em;" type="text"></td>
+                                                            <td><input name="entry[work_history][{{$i}}][work_place]" value="{{!is_array($entry->work_history) && !empty(json_decode($entry->work_history, true)[$i]['work_place']) ? json_decode($entry->work_history, true)[$i]['work_place'] : ($cache->work_history[$i]['work_place'] ?? '')}}" style="width: 100%;" type="text"></td>
+                                                            <td><input name="entry[work_history][{{$i}}][position]" value="{{!is_array($entry->work_history) && !empty(json_decode($entry->work_history, true)[$i]['position']) ? json_decode($entry->work_history, true)[$i]['position'] : ($cache->work_history[$i]['position'] ?? '')}}" style="width: 5em;" type="text"></td>
+                                                            <td><input name="entry[work_history][{{$i}}][income]" value="{{!is_array($entry->work_history) && !empty(json_decode($entry->work_history, true)[$i]['income']) ? json_decode($entry->work_history, true)[$i]['income'] : ($cache->work_history[$i]['income'] ?? '')}}" style="width: 4em;" type="text"></td>
+                                                            <td><input name="entry[work_history][{{$i}}][boss]" value="{{!is_array($entry->work_history) && !empty(json_decode($entry->work_history, true)[$i]['boss']) ? json_decode($entry->work_history, true)[$i]['boss'] : ($cache->work_history[$i]['boss'] ?? '')}}" style="width: 100%;" type="text"></td>
+                                                            <td><input name="entry[work_history][{{$i}}][phone]"  value="{{!is_array($entry->work_history) && !empty(json_decode($entry->work_history, true)[$i]['phone']) ? json_decode($entry->work_history, true)[$i]['phone'] : ($cache->work_history[$i]['phone'] ?? '')}}" style="width: 8em;" type="text"></td>
                                                         </tr>
                                                     @endfor
                                                     </tbody>
@@ -598,21 +612,7 @@
 @section('scripts-last')
     <script>
         $(function() {
-            $('#sex').select2();
-            $('#marital_status').select2();
-            $('#blood_type').select2();
-            $('#genus_id').select2();
-            $('#constellation_id').select2();
-            $('#education_id').select2();
-            $('#school_id').select2();
-            $('#hire_id').select2();
-            $('#firm_id').select2();
-            $('#job_id').select2();
-            $('#leader_id').select2();
-            $('#friend_id').select2();
-            $('#tutor_id').select2();
-            $('#copy_users').select2();
-            $('#nature_id').select2();
+            $('#js-select2-single').select2();
 
             $('#show_admit_modal').click(function () {
                 $('#admit-modal').modal('show');

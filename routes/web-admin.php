@@ -24,10 +24,10 @@ Route::group([
         'middleware' => ['permission:user'],
         'uses' => 'UserController@index'])->name('user');
     Route::get('user/create', [
-        'middleware' => ['permission:user.create'],
+        'middleware' => ['permission:user.edit'],
         'uses' => 'UserController@create'])->name('user.create');
     Route::post('user/create', [
-        'middleware' => ['permission:user.create'],
+        'middleware' => ['permission:user.edit'],
         'uses' => 'UserController@store']);
     Route::get('user/edit/{id}', [
         'middleware' => ['permission:user.edit'],
@@ -46,7 +46,7 @@ Route::group([
         'middleware' => ['permission:user'],
         'uses' => 'UserController@getInfoByCalendar'])->name('user.getInfo');
 
-    // 职务管理
+    // 权限管理
     Route::get('role', [
         'middleware' => ['permission:role'],
         'uses' => 'RoleController@index'])->name('role');
@@ -100,6 +100,9 @@ Route::group([
     Route::get('sys/dept/get-child/', [
         'middleware' => ['permission:dept.edit|dept.create'],
         'uses' => 'Sys\DeptController@getChild'])->name('dept.getChild');
+    Route::get('sys/dept/del/{id}', [
+        'middleware' => ['permission:dept.del'],
+        'uses' => 'Sys\DeptController@del'])->name('dept.del');
 
     //岗位管理
     Route::get('sys/job', [
@@ -117,6 +120,9 @@ Route::group([
     Route::post('sys/job/edit/{id}', [
         'middleware' => ['permission:job.edit'],
         'uses' => 'Sys\JobController@update']);
+    Route::get('sys/job/del/{id}', [
+        'middleware' => ['permission:job.del'],
+        'uses' => 'Sys\JobController@del'])->name('job.del');
 
     //学校管理
     Route::get('sys/school', [
@@ -134,6 +140,9 @@ Route::group([
     Route::post('sys/school/edit/{id}', [
         'middleware' => ['permission:school.edit'],
         'uses' => 'Sys\SchoolController@update']);
+    Route::get('sys/school/del/{id}', [
+        'middleware' => ['permission:school.del'],
+        'uses' => 'Sys\SchoolController@del'])->name('school.del');
 
     //假期配置管理
     Route::get('sys/holiday-config', [
@@ -247,6 +256,30 @@ Route::group([
     Route::post('sys/firm/edit/{id}', [
         'middleware' => ['permission:firm.edit'],
         'uses' => 'Sys\FirmController@update']);
+    Route::get('sys/firm/del/{id}', [
+        'middleware' => ['permission:firm.del'],
+        'uses' => 'Sys\FirmController@del'])->name('firm.del');
+
+    # 民族配置
+    Route::get('sys/ethnic', [
+        'middleware' => ['permission:ethnic'],
+        'uses' => 'Sys\EthnicController@index'])->name('ethnic');
+    Route::get('sys/ethnic/create', [
+        'middleware' => ['permission:ethnic.create'],
+        'uses' => 'Sys\EthnicController@create'])->name('ethnic.create');
+    Route::post('sys/ethnic/create', [
+        'middleware' => ['permission:ethnic.create'],
+        'uses' => 'Sys\EthnicController@store']);
+    Route::get('sys/ethnic/edit/{id}', [
+        'middleware' => ['permission:ethnic.edit'],
+        'uses' => 'Sys\EthnicController@edit'])->name('ethnic.edit');
+    Route::post('sys/ethnic/edit/{id}', [
+        'middleware' => ['permission:ethnic.edit'],
+        'uses' => 'Sys\EthnicController@update']);
+    Route::get('sys/ethnic/del/{id}', [
+        'middleware' => ['permission:ethnic.del'],
+        'uses' => 'Sys\EthnicController@del'])->name('ethnic.del');
+
 
     #公告栏配置
     Route::get('sys/bulletin', [

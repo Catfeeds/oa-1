@@ -13,6 +13,7 @@ use App\Http\Components\ScopeStaff\StaffScope;
 use App\Http\Controllers\Attendance\AttController;
 use App\Models\StaffManage\Firm;
 use App\Models\Sys\Dept;
+use App\Models\Sys\Ethnic;
 use App\Models\Sys\Job;
 use App\Models\Sys\School;
 use App\Models\UserExt;
@@ -83,13 +84,33 @@ class StaffController extends AttController
         $school = School::getSchoolList();
         $firm = Firm::getFirmList();
         $users = User::getUsernameAliasList();
+        $ethnic = Ethnic::getEthnicList();
         $title = trans('staff.员工信息');
         $userIds = [];
 
         $workHistory = json_decode($user->userExt->work_history, true);
         $familyNum = json_decode($user->userExt->family_num, true);
 
-        return view('staff-manage.staff.edit-ext', compact('title', 'user', 'job', 'dept', 'userExt', 'school', 'firm', 'users', 'userIds', 'workHistory', 'familyNum'));
+        return view('staff-manage.staff.edit-ext', compact('title', 'ethnic', 'user', 'job', 'dept', 'userExt', 'school', 'firm', 'users', 'userIds', 'workHistory', 'familyNum'));
+    }
+
+    public function info($id)
+    {
+        $user = User::with('userExt')->findOrFail($id);
+        $job = Job::getJobList();
+        $dept = Dept::getDeptList();
+        $school = School::getSchoolList();
+        $firm = Firm::getFirmList();
+        $users = User::getUsernameAliasList();
+        $ethnic = Ethnic::getEthnicList();
+        $title = trans('staff.员工信息');
+        $userIds = [];
+
+        $workHistory = json_decode($user->userExt->work_history, true);
+        $familyNum = json_decode($user->userExt->family_num, true);
+
+        return view('staff-manage.staff.info', compact('title', 'ethnic', 'user', 'job', 'dept', 'userExt', 'school', 'firm', 'users', 'userIds', 'workHistory', 'familyNum'));
+
     }
 
     public function update(Request $request, $id)

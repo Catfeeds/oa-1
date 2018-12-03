@@ -86,15 +86,18 @@ class UserController extends Controller
         $title = trans('app.添加账号');
         $job = Job::getJobList();
         $dept = Dept::getDeptList();
-        return view('admin.users.edit', compact('title', 'roleList', 'job', 'dept'));
+        $user = '';
+        return view('admin.users.edit', compact('title', 'roleList', 'job', 'dept', 'user'));
     }
 
     public function store(Request $request)
     {
+        unset($this->_validateRule['sex']);
         $this->validate($request, array_merge($this->_validateRule, [
             'username' => 'required|unique:users,username|max:32|min:3',
             'email' => 'required|email|unique:users,email|max:32',
         ]));
+
 
         if(!empty($request->dept_id) && !empty($request->is_leader)) {
             $checkUser = User::where(['dept_id' => $request->dept_id, 'is_leader' => User::IS_LEADER_TRUE])->first();
@@ -110,12 +113,6 @@ class UserController extends Controller
 
         if(!empty($user->user_id)) {
             UserExt::create(['user_id' => $user->user_id]);
-        }
-
-        // 权限方面
-        if (!empty($user->role_id)) {
-            $permissionRole = Role::findOrFail($user->role_id);
-            $user->attachRole($permissionRole);
         }
 
         $userRedsKey = sprintf('%d_%s', $user->user_id, $user->username);;
@@ -218,7 +215,7 @@ class UserController extends Controller
 
         $roleId = json_decode($user->role_id, true);
         // 权限方面
-        if (!empty($roleId)) {
+        if (!empty($roleId) && is_array($roleId)) {
             $role = Role::whereIn('id', array_values($roleId))->get();
             // 去除权限角色
             foreach ($role as $k => $r) {
@@ -238,7 +235,7 @@ class UserController extends Controller
         $user->update($data);
 
         $roleId = json_decode($user->role_id, true);
-        if (!empty($roleId)) {
+        if (!empty($roleId) && is_array($roleId)) {
             $role = Role::whereIn('id', array_values($roleId))->get();
             foreach ($role as $k => $r)
             if (!$user->hasRole($r->name)) {

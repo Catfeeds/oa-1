@@ -34,4 +34,9 @@ class ConfirmAttendance extends Model
     {
         return self::where(['year' => $year, 'month' => $month, 'confirm' => $status])->get()->pluck('confirm', 'user_id')->toArray();
     }
+
+    public static function getConfirmList($year, $month)
+    {
+        return self::where(['year' => $year, 'month' => $month])->get()->pluck('confirm', 'user_id')->toArray();
+    }
 }

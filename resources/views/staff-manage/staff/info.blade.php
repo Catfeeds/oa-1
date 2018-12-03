@@ -32,7 +32,7 @@
                             {!! Form::text('alias', isset($user->alias) ? $user->alias : old('alias'), [
                             'class' => 'form-control',
                             'placeholder' => trans('app.请输入', ['value' => trans('app.姓名')]),
-                            'required' => true,
+                            'disabled' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('alias') }}</span>
                         </div>
@@ -44,7 +44,7 @@
                             {!! Form::select('sex', \App\Models\UserExt::$sex, isset($user->userExt->sex) ? $user->userExt->sex: old('sex'), [
                             'class' => 'form-control js-select2-single',
                             'placeholder' => trans('app.请选择', ['value' => trans('app.性别')]),
-                            'required' => true,
+                            'disabled' => true,
                             'id' => 'sex'
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('sex') }}</span>
@@ -57,7 +57,7 @@
                             {!! Form::text('mobile', isset($user->mobile) ? $user->mobile : old('mobile'), [
                             'class' => 'form-control',
                             'placeholder' => trans('app.请输入', ['value' => trans('app.手机号码')]),
-                            'required' => true,
+                            'disabled' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('mobile') }}</span>
                         </div>
@@ -69,7 +69,7 @@
                             {!! Form::text('email', isset($user->email) ? $user->email : old('email'), [
                             'class' => 'form-control',
                             'placeholder' => trans('app.请输入', ['value' => trans('staff.个人邮箱')]),
-                            'required' => true,
+                            'disabled' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('email') }}</span>
                         </div>
@@ -90,7 +90,7 @@
                                 {!! Form::text('entry_time', $user->userExt->entry_time ?? old('entry_time'), [
                                 'class' => 'form-control date_time',
                                 'placeholder' => trans('app.请输入', ['value' => trans('app.入职时间')]),
-                                'required' => true,
+                                'disabled' => true,
                                 ]) !!}
                             </div>
                         </div>
@@ -103,7 +103,7 @@
                             {!! Form::select('nature_id', \App\Models\StaffManage\Entry::$nature, isset($user->userExt->nature_id) ? $user->userExt->nature_id: old('nature_id'), [
                             'class' => 'form-control js-select2-single',
                             'placeholder' => trans('app.请选择', ['value' => trans('staff.工作性质')]),
-                            'required' => true,
+                            'disabled' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('nature_id') }}</span>
                         </div>
@@ -115,7 +115,7 @@
                             {!! Form::select('hire_id', \App\Models\StaffManage\Entry::$hireTYpe, isset($user->userExt->hire_id) ? $user->userExt->hire_id: old('hire_id'), [
                             'class' => 'form-control js-select2-single',
                             'placeholder' => trans('app.请选择', ['value' => trans('staff.招聘类型')]),
-                            'required' => true,
+                            'disabled' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('hire_id') }}</span>
                         </div>
@@ -127,7 +127,7 @@
                             {!! Form::select('firm_id', $firm, isset($user->userExt->firm_id) ? $user->userExt->firm_id: old('firm_id'), [
                             'class' => 'form-control js-select2-single',
                             'placeholder' => trans('app.请选择', ['value' => trans('staff.所属公司')]),
-                            'required' => true,
+                            'disabled' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('firm_id') }}</span>
                         </div>
@@ -139,7 +139,7 @@
                             {!! Form::select('dept_id', $dept, isset($user->dept_id) ? $user->dept_id: old('dept_id'), [
                             'class' => 'form-control js-select2-single',
                             'placeholder' => trans('app.请选择', ['value' => trans('app.部门')]),
-                            'required' => true,
+                            'disabled' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('dept_id') }}</span>
                         </div>
@@ -151,11 +151,11 @@
                             {!! Form::select('job_id', $job, isset($user->job_id) ? $user->job_id: old('job_id'), [
                             'class' => 'form-control js-select2-single',
                             'placeholder' => trans('app.请选择', ['value' => trans('staff.岗位类型')]),
-                            'required' => true,
+                            'disabled' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('job_id') }}</span>
                         </div>
-                        
+
                     </div>
 
                     <div class="form-group @if (!empty($errors->first('job_name'))) has-error @endif">
@@ -164,7 +164,7 @@
                             {!! Form::text('job_name', isset($user->userExt->job_name) ? $user->userExt->job_name : old('job_name'), [
                             'class' => 'form-control',
                             'placeholder' => trans('app.请输入', ['value' => trans('staff.岗位名称')]),
-                            'required' => true,
+                            'disabled' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('job_name') }}</span>
                         </div>
@@ -183,7 +183,7 @@
                             {!! Form::select('leader_id', $users, isset($user->userExt->leader_id) ? $user->userExt->leader_id: old('leader_id'), [
                             'class' => 'form-control js-select2-single',
                             'placeholder' => trans('app.请选择', ['value' => trans('staff.直属上级')]),
-                            'required' => true,
+                            'disabled' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('leader_id') }}</span>
                         </div>
@@ -195,6 +195,7 @@
                             {!! Form::select('tutor_id', $users, isset($user->userExt->tutor_id) ? $user->userExt->tutor_id: old('tutor_id'), [
                             'class' => 'form-control js-select2-single',
                             'placeholder' => trans('app.请选择', ['value' => trans('staff.导师')]),
+                            'disabled' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('tutor_id') }}</span>
                         </div>
@@ -206,7 +207,7 @@
                             {!! Form::select('friend_id', $users, isset($user->userExt->friend_id) ? $user->userExt->friend_id: old('friend_id'), [
                             'class' => 'form-control js-select2-single',
                             'placeholder' => trans('app.请选择', ['value' => trans('staff.基友')]),
-                            'required' => true,
+                            'disabled' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('friend_id') }}</span>
                         </div>
@@ -218,7 +219,7 @@
                             {!! Form::text('place', isset($user->userExt->place) ? $user->userExt->place : old('place'), [
                             'class' => 'form-control',
                             'placeholder' => trans('app.请输入', ['value' => trans('staff.工作位置')]),
-                            'required' => true,
+                            'disabled' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('place') }}</span>
                         </div>
@@ -238,14 +239,14 @@
                                 <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
                                 {!! Form::text('birthday', !empty($user->userExt->birthday) ? date('Y-m-d', strtotime($user->userExt->birthday)) : '', [
                                 'class' => 'form-control date',
-                                'required' => true,
+                                'disabled' => true,
                                 ]) !!}
                                 <span class="help-block m-b-none">{{ $errors->first('birthday') }}</span>
                             </div>
                         </div>
                         @foreach(\App\Models\StaffManage\Entry::$birthdayType as $k => $v)
                             <label class="radio-inline i-checks">
-                                <input type="radio" name="birthday_type" value="{{$k}}" @if($k === (int)($user->userExt->birthday_type ?? \App\Models\StaffManage\Entry::GREGORIAN_CALENDAR)) checked @endif> {{ $v }}
+                                <input type="radio"  disabled="disabled" name="birthday_type" value="{{$k}}" @if($k === (int)($user->userExt->birthday_type ?? \App\Models\StaffManage\Entry::GREGORIAN_CALENDAR)) checked @endif> {{ $v }}
                             </label>
                         @endforeach
                     </div>
@@ -254,11 +255,10 @@
                         {!! Form::label('ethnic', trans('staff.民族'), ['class' => 'col-sm-4 control-label']) !!}
                         <div class="col-sm-3">
                             {!! Form::select('ethnic_id', $ethnic, !empty($user->userExt->ethnic_id) ? $user->userExt->ethnic_id : old('ethnic_id'), [
-                             'class' => 'form-control js-select2-single',
-                             'placeholder' => trans('app.请选择', ['value' => trans('staff.民族')]),
-                             'required' => true,
-                             ]) !!}
-
+                            'class' => 'form-control js-select2-single',
+                            'placeholder' => trans('app.请选择', ['value' => trans('staff.民族')]),
+                            'disabled' => true,
+                            ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('ethnic') }}</span>
                         </div>
                     </div>
@@ -269,7 +269,7 @@
                             {!! Form::text('birthplace', isset($user->userExt->birthplace) ? $user->userExt->birthplace: old('birthplace'), [
                             'class' => 'form-control',
                             'placeholder' => trans('app.请输入', ['value' => trans('staff.籍贯')]),
-                            'required' => true,
+                            'disabled' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('birthplace') }}</span>
                         </div>
@@ -279,10 +279,10 @@
                         {!! Form::label('political', trans('staff.政治面貌'), ['class' => 'col-sm-4 control-label']) !!}
                         <div class="col-sm-3">
                             {!! Form::select('political_id', \App\Models\UserExt::$political, !empty($user->userExt->political_id) ? $user->userExt->political_id : old('political_id'), [
-                            'class' => 'form-control js-select2-single',
-                            'placeholder' => trans('app.请选择', ['value' => trans('staff.政治面貌')]),
-                            'required' => true,
-                            ]) !!}
+                           'class' => 'form-control js-select2-single',
+                           'placeholder' => trans('app.请选择', ['value' => trans('staff.政治面貌')]),
+                           'disabled' => true,
+                           ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('political') }}</span>
                         </div>
                     </div>
@@ -293,7 +293,7 @@
                             {!! Form::select('marital_status', \App\Models\UserExt::$marital, isset($user->userExt->marital_status) ? $user->userExt->marital_status: old('marital_status'), [
                             'class' => 'form-control js-select2-single',
                             'placeholder' => trans('app.请选择', ['value' => trans('staff.婚姻状况')]),
-                            'required' => true,
+                            'disabled' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('marital_status') }}</span>
                         </div>
@@ -305,7 +305,7 @@
                             {!! Form::select('blood_type', \App\Models\UserExt::$blood, isset($user->userExt->blood_type) ? $user->userExt->blood_type: old('blood_type'), [
                             'class' => 'form-control js-select2-single',
                             'placeholder' => trans('app.请选择', ['value' => trans('staff.血型')]),
-                            'required' => true,
+                            'disabled' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('blood_type') }}</span>
                         </div>
@@ -317,7 +317,7 @@
                             {!! Form::select('genus_id', \App\Models\UserExt::$genus, isset($user->userExt->genus_id) ? $user->userExt->genus_id: old('genus_id'), [
                             'class' => 'form-control js-select2-single',
                             'placeholder' => trans('app.请选择', ['value' => trans('staff.属相')]),
-                            'required' => true,
+                            'disabled' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('genus_id') }}</span>
                         </div>
@@ -341,7 +341,8 @@
                             {!! Form::number('height', isset($user->userExt->height) ? $user->userExt->height: old('height'), [
                             'class' => 'form-control',
                             'placeholder' => trans('app.请输入', ['value' => trans('staff.身高')]),
-                            'step' => 0.1
+                            'step' => 0.1,
+                            'disabled' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('height') }}</span>
                         </div>
@@ -358,7 +359,8 @@
                             {!! Form::number('weight', isset($user->userExt->weight) ? $user->userExt->weight: old('weight'), [
                             'class' => 'form-control',
                             'placeholder' => trans('app.请输入', ['value' => trans('staff.体重')]),
-                            'step' => 0.1
+                            'step' => 0.1,
+                            'disabled' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('weight') }}</span>
                         </div>
@@ -382,6 +384,7 @@
                             {!! Form::text('qq', isset($user->userExt->qq) ? $user->userExt->qq: old('qq'), [
                             'class' => 'form-control',
                             'placeholder' => trans('app.请输入', ['value' => trans('staff.QQ号码')]),
+                            'disabled' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('qq') }}</span>
                         </div>
@@ -393,7 +396,7 @@
                             {!! Form::text('live_address', isset($user->userExt->live_address) ? $user->userExt->live_address: old('live_address'), [
                             'class' => 'form-control',
                             'placeholder' => trans('app.请输入', ['value' => trans('staff.目前住址')]),
-                            'required' => true,
+                            'disabled' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('live_address') }}</span>
                         </div>
@@ -415,11 +418,11 @@
                                 <tbody>
                                 @for($i = 0; $i <= \App\Models\StaffManage\Entry::CREATE_FAMILY_NUM; $i++)
                                     <tr>
-                                        <td><input name="family_num[{{$i}}][name]" value="{{!empty($familyNum[$i]['name']) ? $familyNum[$i]['name'] : ''}}" style="width: 6em;" type="text"></td>
-                                        <td><input name="family_num[{{$i}}][age]" value="{{!empty($familyNum[$i]['age']) ? $familyNum[$i]['age'] : ''}}" style="width: 3em;" type="text"></td>
-                                        <td><input name="family_num[{{$i}}][relation]" value="{{!empty($familyNum[$i]['relation']) ? $familyNum[$i]['relation'] : ''}}" style="width: 100%;" type="text"></td>
-                                        <td><input name="family_num[{{$i}}][position]" value="{{!empty($familyNum[$i]['position']) ? $familyNum[$i]['position'] : ''}}" style="width: 6em;" type="text"></td>
-                                        <td><input name="family_num[{{$i}}][phone]" value="{{!empty($familyNum[$i]['phone']) ? $familyNum[$i]['phone'] : ''}}" style="width: 8em;" type="text"></td>
+                                        <td>{{!empty($familyNum[$i]['name']) ? $familyNum[$i]['name'] : ''}}</td>
+                                        <td>{{!empty($familyNum[$i]['age']) ? $familyNum[$i]['age'] : ''}}</td>
+                                        <td>{{!empty($familyNum[$i]['relation']) ? $familyNum[$i]['relation'] : ''}}</td>
+                                        <td>{{!empty($familyNum[$i]['position']) ? $familyNum[$i]['position'] : ''}}</td>
+                                        <td>{{!empty($familyNum[$i]['phone']) ? $familyNum[$i]['phone'] : ''}}</td>
                                     </tr>
                                 @endfor
                                 </tbody>
@@ -434,7 +437,7 @@
                             {!! Form::text('urgent_name', isset($user->userExt->urgent_name) ? $user->userExt->urgent_name: old('urgent_name'), [
                             'class' => 'form-control',
                             'placeholder' => trans('app.请输入', ['value' => trans('staff.紧急联系人姓名')]),
-                            'required' => true,
+                            'disabled' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('urgent_name') }}</span>
                         </div>
@@ -446,7 +449,7 @@
                             {!! Form::text('urgent_bind', isset($user->userExt->urgent_bind) ? $user->userExt->urgent_bind: old('urgent_bind'), [
                             'class' => 'form-control',
                             'placeholder' => trans('app.请输入', ['value' => trans('staff.与紧急联系人的关系')]),
-                            'required' => true,
+                            'disabled' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('urgent_bind') }}</span>
                         </div>
@@ -458,7 +461,7 @@
                             {!! Form::text('urgent_tel', isset($user->userExt->urgent_tel) ? $user->userExt->urgent_tel: old('urgent_tel'), [
                             'class' => 'form-control',
                             'placeholder' => trans('app.请输入', ['value' => trans('staff.紧急联系人电话')]),
-                            'required' => true,
+                            'disabled' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('urgent_tel') }}</span>
                         </div>
@@ -477,7 +480,7 @@
                             {!! Form::select('education_id', \App\Models\UserExt::$education, isset($user->userExt->education_id) ? $user->userExt->education_id: old('education_id'), [
                             'class' => 'form-control js-select2-single',
                             'placeholder' => trans('app.请选择', ['value' => trans('staff.最高学历')]),
-                            'required' => true,
+                            'disabled' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('education_id') }}</span>
                         </div>
@@ -489,7 +492,7 @@
                             {!! Form::select('school_id', $school, isset($user->userExt->school_id) ? $user->userExt->school_id: old('school_id'), [
                             'class' => 'form-control js-select2-single',
                             'placeholder' => trans('app.请选择', ['value' => trans('staff.毕业学校')]),
-                            'required' => true,
+                            'disabled' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('school_id') }}</span>
                         </div>
@@ -503,7 +506,7 @@
                                 {!! Form::text('graduation_time', $user->userExt->graduation_time ?? old('graduation_time'), [
                                 'class' => 'form-control date',
                                 'placeholder' => trans('app.请输入', ['value' => trans('staff.毕业时间')]),
-                                'required' => true,
+                                'disabled' => true,
                                 ]) !!}
                             </div>
                         </div>
@@ -516,7 +519,7 @@
                             {!! Form::text('specialty', isset($user->userExt->specialty) ? $user->userExt->specialty: old('specialty'), [
                             'class' => 'form-control',
                             'placeholder' => trans('app.请输入', ['value' => trans('staff.专业')]),
-                            'required' => true,
+                            'disabled' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('specialty') }}</span>
                         </div>
@@ -528,7 +531,7 @@
                             {!! Form::text('degree', isset($user->userExt->degree) ? $user->userExt->degree : old('degree'), [
                             'class' => 'form-control',
                             'placeholder' => trans('app.请输入', ['value' => trans('staff.学位')]),
-                            'required' => true,
+                            'disabled' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('degree') }}</span>
                         </div>
@@ -562,13 +565,13 @@
                                 <tbody>
                                 @for($i = 0; $i <= \App\Models\StaffManage\Entry::CREATE_WORK_HISTORY_NUM; $i++)
                                     <tr>
-                                        <td><input name="work_history[{{$i}}][time]" value="{{!empty($workHistory[$i]['time']) ? $workHistory[$i]['time'] : ''}}" style="width: 6em;" type="text"></td>
-                                        <td><input name="work_history[{{$i}}][deadline]" value="{{!empty($workHistory[$i]['deadline']) ? $workHistory[$i]['deadline'] : ''}}" style="width: 3em;" type="text"></td>
-                                        <td><input name="work_history[{{$i}}][work_place]" value="{{!empty($workHistory[$i]['work_place']) ? $workHistory[$i]['work_place'] : ''}}" style="width: 100%;" type="text"></td>
-                                        <td><input name="work_history[{{$i}}][position]" value="{{!empty($workHistory[$i]['position']) ? $workHistory[$i]['position'] : ''}}" style="width: 5em;" type="text"></td>
-                                        <td><input name="work_history[{{$i}}][income]" value="{{!empty($workHistory[$i]['income']) ? $workHistory[$i]['income'] : ''}}" style="width: 4em;" type="text"></td>
-                                        <td><input name="work_history[{{$i}}][boss]" value="{{!empty($workHistory[$i]['boss']) ? $workHistory[$i]['boss'] : ''}}" style="width: 100%;" type="text"></td>
-                                        <td><input name="work_history[{{$i}}][phone]"  value="{{!empty($workHistory[$i]['phone']) ? $workHistory[$i]['phone'] : ''}}" style="width: 8em;" type="text"></td>
+                                        <td>{{!empty($workHistory[$i]['time']) ? $workHistory[$i]['time'] : ''}}</td>
+                                        <td>{{!empty($workHistory[$i]['deadline']) ? $workHistory[$i]['deadline'] : ''}}</td>
+                                        <td>{{!empty($workHistory[$i]['work_place']) ? $workHistory[$i]['work_place'] : ''}}</td>
+                                        <td>{{!empty($workHistory[$i]['position']) ? $workHistory[$i]['position'] : ''}}</td>
+                                        <td>{{!empty($workHistory[$i]['income']) ? $workHistory[$i]['income'] : ''}}</td>
+                                        <td>{{!empty($workHistory[$i]['boss']) ? $workHistory[$i]['boss'] : ''}}</td>
+                                        <td>{{!empty($workHistory[$i]['phone']) ? $workHistory[$i]['phone'] : ''}}</td>
                                     </tr>
                                 @endfor
                                 </tbody>
@@ -582,6 +585,7 @@
                             {!! Form::textarea('project_empiric', !empty($user->userExt->project_empiric) ? $user->userExt->project_empiric : old('project_empiric'), [
                             'class' => 'form-control',
                             'placeholder' => trans('app.请输入', ['value' => trans('staff.项目经验')]),
+                            'disabled' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('project_empiric') }}</span>
                         </div>
@@ -593,6 +597,7 @@
                             {!! Form::textarea('awards', !empty($user->userExt->awards) ? $user->userExt->awards : '', [
                             'class' => 'form-control',
                             'placeholder' => trans('app.请输入', ['value' => trans('staff.获奖情况')]),
+                            'disabled' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('awards') }}</span>
                         </div>
@@ -612,7 +617,7 @@
                             {!! Form::text('card_id', !empty($user->userExt->card_id) ? $user->userExt->card_id : old('card_id'), [
                             'class' => 'form-control',
                             'placeholder' => trans('app.请输入', ['value' => trans('staff.身份证号码')]),
-                            'required' => true,
+                            'disabled' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('card_id') }}</span>
                         </div>
@@ -624,7 +629,7 @@
                             {!! Form::text('card_address', !empty($user->userExt->card_address) ? $user->userExt->card_address : old('card_address'), [
                             'class' => 'form-control',
                             'placeholder' => trans('app.请输入', ['value' => trans('staff.身份证地址')]),
-                            'required' => true,
+                            'disabled' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('card_address') }}</span>
                         </div>
@@ -636,7 +641,7 @@
                             {!! Form::text('census', !empty($user->userExt->census) ? $user->userExt->census : old('census'), [
                             'class' => 'form-control',
                             'placeholder' => trans('app.请输入', ['value' => trans('staff.户籍类型')]),
-                            'required' => true,
+                            'disabled' => true,
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('census') }}</span>
                         </div>
@@ -647,7 +652,7 @@
                         <div class="col-sm-3">
                             @foreach(\App\Models\UserExt::$firmCall as $k => $v)
                                 <label class="radio-inline i-checks">
-                                    <input type="radio" name="firm_call" value="{{$k}}" @if($k === (int)($user->userExt->firm_call ?? 0)) checked @endif> {{ $v }}
+                                    <input type="radio" disabled="disabled" name="firm_call" value="{{$k}}" @if($k === (int)($user->userExt->firm_call ?? 0)) checked @endif> {{ $v }}
                                 </label>
                             @endforeach
                         </div>
@@ -655,10 +660,8 @@
 
                     <div class="hr-line-dashed"></div>
 
-
                     <div class="form-group">
                         <div class="col-sm-4 col-sm-offset-5">
-                            {!! Form::submit(trans('app.提交'), ['class' => 'btn btn-primary']) !!}
                             <a href="{{ route('staff.list') }}"
                                class="btn btn-info">{{ trans('att.返回列表') }}</a>
                         </div>
@@ -676,11 +679,4 @@
 @include('widget.icheck')
 @include('widget.select2')
 @include('widget.datepicker')
-@section('scripts-last')
-    <script>
-        $(function() {
-
-        });
-    </script>
-@endsection
 

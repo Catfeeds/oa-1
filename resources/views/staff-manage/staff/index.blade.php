@@ -58,6 +58,10 @@
                                         @if(Auth::user()->user_id != $v['user_id'] && Entrust::can(['staff.edit']))
                                             {!! BaseHtml::tooltip(trans('app.设置'), route('staff.edit', ['id' => $v['user_id']]), 'cog fa fa-lg') !!}
                                         @endif
+                                        @if(Auth::user()->user_id != $v['user_id'] && Entrust::can(['staff.info']))
+                                            {!! BaseHtml::tooltip(trans('app.查看信息'), route('staff.info', ['id' => $v['user_id']]), 'cog fa fa-newspaper-o') !!}
+                                        @endif
+
                                     </td>
                                 </tr>
                             @endforeach

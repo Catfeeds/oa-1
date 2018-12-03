@@ -14,18 +14,17 @@ namespace App\Components\AttendanceService;
 class AttendanceService
 {
     /**
-     * 接口驱动 php Java C等
+     * 接口驱动 php
      * 文件首字母为大写，后面统一为小写
      * @param string $driver 驱动类型
      * @return // Operate\Leave
      */
     public function driver(string $driver, $file = 'operate')
     {
-        //获取游戏后端语言，目前只支持erl，后期考虑动态支持其他语言
-        $lang = ucfirst(strtolower($file));
+        $file = ucfirst(strtolower($file));
         $driver = ucfirst(strtolower($driver));
 
-        $className = __NAMESPACE__ . "\\" . $lang . "\\" . $driver;
+        $className = __NAMESPACE__ . "\\" . $file . "\\" . $driver;
         return new $className();
     }
 }

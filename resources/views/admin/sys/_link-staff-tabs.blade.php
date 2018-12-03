@@ -21,3 +21,9 @@
         <a href="{{ route('firm') }}">{{ trans('staff.公司配置') }}</a>
     </li>
 @endif
+
+@if(Entrust::can(['ethnic']))
+    <li @if (Route::is(['ethnic*']) ) class="active" @endif>
+        <a href="{{ route('ethnic') }}">{{ trans('staff.民族配置') }}</a>
+    </li>
+@endif

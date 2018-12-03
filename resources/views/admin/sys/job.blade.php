@@ -70,7 +70,10 @@
                                                             BaseHtml::tooltip(trans('app.设置'), route('job.edit', ['id' => $v['job_id']]))
                                                         !!}
                                                         @endif
-                                                    </td>
+                                                        @if(Entrust::can(['job.del']))
+                                                            {!! BaseHtml::tooltip(trans('app.删除'), route('job.del', ['id' => $v['job_id']]), ' fa-times text-danger fa-lg confirmation', ['data-confirm' => trans('确认删除['.$v['job'].']信息?')]) !!}
+                                                        @endif
+                                                </td>
                                                 </tr>
                                             @endforeach
                                             </tbody>
@@ -86,3 +89,4 @@
         </div>
     </div>
 @endsection
+@include('widget.bootbox')

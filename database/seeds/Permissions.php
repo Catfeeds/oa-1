@@ -144,9 +144,6 @@ class Permissions extends Seeder
         ];
     }
 
-
-
-
     // 员工管理
     private function _staff(): array
     {
@@ -179,21 +176,31 @@ class Permissions extends Seeder
             'firm'             => '公司配置管理/公司配置列表',
             'firm.create'      => '公司配置管理/公司配置添加',
             'firm.edit'        => '公司配置管理/公司配置编辑',
+            'firm.del'         => '公司配置管理/公司配置删除',
 
             'school-all'       => '员工信息配置管理/学校配置管理',
-            'school'           => '学校配置管理/学习配置列表',
-            'school.create'    => '学校配置管理/学习配置添加',
-            'school.edit'      => '学校配置管理/学习配置编辑',
+            'school'           => '学校配置管理/学校配置列表',
+            'school.create'    => '学校配置管理/学校配置添加',
+            'school.edit'      => '学校配置管理/学校配置编辑',
+            'school.del'       => '学校配置管理/学校配置删除',
 
             'dept-all'         => '员工信息配置管理/部门配置管理',
             'dept'             => '部门配置管理/部门配置列表',
             'dept.create'      => '部门配置管理/部门配置添加',
             'dept.edit'        => '部门配置管理/部门配置编辑',
+            'dept.del'         => '部门配置管理/部门配置删除',
 
             'job-all'          => '员工信息配置管理/岗位类型配置管理',
             'job'              => '岗位类型配置管理/岗位类型配置列表',
             'job.create'       => '岗位类型配置管理/岗位类型配置添加',
             'job.edit'         => '岗位类型配置管理/岗位类型配置编辑',
+            'job.del'          => '岗位类型配置管理/岗位类型配置删除',
+
+            'ethnic-all'       => '员工信息配置管理/民族配置管理',
+            'ethnic'           => '民族配置管理/民族配置列表',
+            'ethnic.create'    => '民族配置管理/民族配置添加',
+            'ethnic.edit'      => '民族配置管理/民族配置编辑',
+            'ethnic.del'       => '民族配置管理/民族配置删除',
 
         ];
     }

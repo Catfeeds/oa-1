@@ -7,7 +7,7 @@
  * Time: 10:28
  * 申请单 撤回申请
  */
-namespace App\Components\AttendanceService\OptStatus;
+namespace App\Components\AttendanceService\Optstatus;
 
 use App\Models\Attendance\Leave;
 use App\Models\Sys\HolidayConfig;

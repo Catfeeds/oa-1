@@ -10,6 +10,7 @@
 
 namespace App\Models\StaffManage;
 
+use App\Models\UserExt;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -29,5 +30,15 @@ class Firm extends Model
     public static function getFirmList()
     {
         return self::get(['firm_id', 'firm'])->pluck('firm', 'firm_id')->toArray();
+    }
+
+    public function usersExt()
+    {
+        return $this->hasMany(UserExt::class, 'firm_id', 'firm_id');
+    }
+
+    public function entry()
+    {
+        return $this->hasMany(Entry::class, 'firm_id', 'firm_id');
     }
 }

@@ -53,7 +53,7 @@ class LeaveController extends AttController
                 break;
             //抄送
             case Leave::COPY_LEAVE :
-                $res = AttendanceHelper::getCopyLeaveWhere($scope,\Auth::user()->user_id, 'copy_user');
+                $res = AttendanceHelper::getCopyLeaveWhere($scope, \Auth::user()->user_id, 'copy_user');
                 $where = $res['where'];
                 $userIds = $res['user_ids'];
                 break;
@@ -82,7 +82,7 @@ class LeaveController extends AttController
 
         $title = trans('att.我的假期详情');
         return view('attendance.leave.index',
-            compact('title', 'data', 'scope', 'holidayList', 'userIds', 'types', 'type', 'remainWelfare', 'appealData', 'userIds')
+            compact('title', 'data', 'scope', 'holidayList', 'userIds', 'types', 'type', 'remainWelfare', 'appealData')
         );
     }
 
@@ -163,7 +163,7 @@ class LeaveController extends AttController
                 OperateLogHelper::createOperateLog(OperateLogHelper::LEAVE_TYPE_ID, $retLeave['data']['leave_id'], '提交申请');
             }
             //微信通知审核人员
-            //OperateLogHelper::sendWXMsg($review_user_id, '测试下');
+            OperateLogHelper::sendWXMsg('sy0011', '测试下');
 
         } catch (Exception $ex) {
             //事物回滚
@@ -374,7 +374,7 @@ class LeaveController extends AttController
             //驱动
             $driver = Leave::$driverType[$status];
             //申请单状态操作
-            $res = \AttendanceService::driver($driver, 'optStatus')->optLeaveStatus($leave, $status);
+            $res = \AttendanceService::driver($driver, 'optstatus')->optLeaveStatus($leave, $status);
 
         } catch (Exception $ex) {
             //mysql事物回滚

@@ -12,9 +12,11 @@ use App\Components\Helper\DataHelper;
 use App\Http\Components\Helpers\OperateLogHelper;
 use App\Http\Components\ScopeStaff\EntryScope;
 use App\Http\Controllers\Attendance\AttController;
+use App\Models\Role;
 use App\Models\StaffManage\Firm;
 use App\Models\StaffManage\Entry;
 use App\Models\Sys\Dept;
+use App\Models\Sys\Ethnic;
 use App\Models\Sys\Job;
 use App\Models\Sys\School;
 use App\Models\UserExt;
@@ -29,12 +31,11 @@ class EntryController extends AttController
     protected $scopeClass = EntryScope::class;
 
     const APP_KEY = '343ad1e40ce3cf142873fb2668f2577f'; //验证密钥
-    const EXPIRED_TIME = 1117200; //过期时间 秒
+    const EXPIRED_TIME = 11117200; //过期时间 秒
 
     private $_validateRule = [
         'name' => 'required|max:32|min:2',
         'mobile' => 'required|phone_number|max:11',
-        'email' => 'required|email|unique:entry,email|max:32',
         'entry_time' => 'required|date',
         'nature_id' => 'required|integer',
         'hire_id' => 'required|integer',
@@ -44,19 +45,23 @@ class EntryController extends AttController
         'job_name' => 'required',
         'leader_id' => 'required|integer',
         'tutor_id' => 'required|integer',
-        'friend_id' => 'required|integer',
-        'copy_users' => 'required|array',
+        'friend_id' => 'nullable|integer',
+        'copy_user' => 'required|array',
+        'role_id'  => 'required|array',
         'sex' => 'required|in:' . UserExt::SEX_BOY . ',' . UserExt::SEX_GIRL,
     ];
 
     private $_validateRuleExt = [
         'entry.card_id' => 'required|identitycards|max:20',
         'entry.card_address' => 'required|max:100',
-        'entry.ethnic' => 'required|max:32',
+        'entry.ethnic_id' => 'required|max:32',
         'entry.birthplace' => 'required|max:20',
-        'entry.political' => 'required|max:20',
+        'entry.political_id' => 'required|max:20',
         'entry.census' => 'required|max:20',
         'entry.family_num' => 'required',
+        'entry.firm_call' => 'required',
+        'entry.birthday' => 'required',
+        'entry.birthday_type' => 'required',
         'entry.marital_status' => 'required|integer',
         'entry.live_address' => 'required|max:100',
         'entry.urgent_name' => 'required|max:20',
@@ -67,6 +72,7 @@ class EntryController extends AttController
         'entry.graduation_time' => 'required|date',
         'entry.specialty' => 'required|max:20',
         'entry.degree' => 'required|max:20',
+        'entry.used_email' => 'required',
     ];
 
     public function index()
@@ -90,9 +96,14 @@ class EntryController extends AttController
         $dept = Dept::getDeptList();
         $users = User::getUsernameAliasList();
         $firm = Firm::getFirmList();
+        $ethnic = Ethnic::getEthnicList();
+        $roleList = Role::getRoleTextList();
         $title = trans('staff.添加待入职');
 
-        return view('staff-manage.entry.edit', compact('title', 'users', 'job', 'dept', 'firm', 'userIds'));
+        $maxUsername = self::getMaxUserName()[0];
+        $username = sprintf('sy%04d', (int)str_replace('sy', '', $maxUsername) + 1);
+
+        return view('staff-manage.entry.edit', compact('title', 'roleList', 'ethnic', 'users', 'job', 'dept', 'firm', 'userIds', 'username', 'maxUsername'));
     }
 
     public function store(Request $request)
@@ -100,10 +111,25 @@ class EntryController extends AttController
         $this->validate($request, $this->_validateRule);
         $data = $request->all();
 
+        if(empty($data['username'])) {
+            return redirect()->back()->withInput()->withErrors(['username' => '请输入工号']);
+        }
+
+        $check = Entry::where(['username' => $data['username']])->whereNotIn('status', [Entry::REVIEW_REFUSE])->first();
+
+        if(!empty($check->entry_id)) {
+            return redirect()->back()->withInput()->withErrors(['username' => '工号已存在']);
+        }
+
+        if(empty($data['username'])) {
+            return redirect()->back()->withInput()->withErrors(['username' => '请输入工号']);
+        }
+
         $data['creater_id'] = \Auth::user()->user_id;
         $data['copy_user'] = json_encode($data['copy_users']);
         $data['remember_token'] = Str::random(60);
         $data['send_time'] = date('Y-m-d H:i:s', time());
+        $data['role_id'] = json_encode($data['role_id']);
 
         Entry::create($data);
         flash(trans('app.添加成功', ['value' => trans('staff.待入职人员')]), 'success');
@@ -118,17 +144,28 @@ class EntryController extends AttController
         $dept = Dept::getDeptList();
         $users = User::getUsernameAliasList();
         $firm = Firm::getFirmList();
+        $ethnic = Ethnic::getEthnicList();
+        $roleList = Role::getRoleTextList();
 
         $userIds = json_decode($entry->copy_user);
+
+        $maxUsername = self::getMaxUserName()[0];
+        $username = '';
+
         $title = trans('app.编辑', ['value' => trans('staff.待入职人员')]);
-        return view('staff-manage.entry.edit', compact('title', 'users', 'job', 'dept', 'firm', 'entry', 'userIds'));
+        return view('staff-manage.entry.edit', compact('title', 'ethnic', 'roleList', 'users', 'job', 'dept', 'firm', 'entry', 'userIds', 'username', 'maxUsername'));
     }
 
     public function update(Request $request, $id)
     {
-        $this->validate($request, $this->_validateRule);
+        $this->validate($request, array_merge($this->_validateRule, [
+            'email' => 'required|email|unique:entry,email,'. $id .',entry_id|max:32',
+            'username' => 'required|unique:entry,username,'. $id .',entry_id|max:20',
+        ]));
 
         $data = $request->all();
+        $data['role_id'] = json_encode($data['role_id']);
+        $data['copy_user'] = json_encode($data['copy_user']);
 
         $entry = Entry::findOrFail($id);
 
@@ -136,6 +173,63 @@ class EntryController extends AttController
         flash(trans('app.编辑成功', ['value' => trans('staff.待入职人员')]), 'success');
 
         return redirect()->route('entry.list');
+    }
+
+    public function editInfo($id)
+    {
+        $entry = Entry::findOrFail($id);
+        $job = Job::getJobList();
+        $dept = Dept::getDeptList();
+        $users = User::getUsernameAliasList();
+        $firm = Firm::getFirmList();
+        $ethnic = Ethnic::getEthnicList();
+        $roleList = Role::getRoleTextList();
+        $userIds = json_decode($entry->copy_user);
+        $maxUsername = self::getMaxUserName()[0];
+        $workHistory = json_decode($entry->work_history, true);
+        $familyNum = json_decode($entry->family_num, true);
+        $school = School::getSchoolList();
+
+        $title = trans('app.编辑', ['value' => trans('staff.入职信息')]);
+        return view('staff-manage.entry.edit-info', compact('title', 'workHistory', 'familyNum', 'school', 'ethnic', 'roleList', 'users', 'job', 'dept', 'firm', 'entry', 'userIds', 'maxUsername'));
+    }
+
+    public function updateInfo(Request $request, $id)
+    {
+        $this->validate($request, array_merge($this->_validateRule, $this->_validateRuleExt, [
+            'email' => 'required|email|unique:entry,email,'. $id .',entry_id|max:32',
+        ]));
+
+        $data = $request->all();
+        $entryArr = $data['entry'];
+        unset($data['entry']);
+
+        $data['role_id'] = json_encode($data['role_id']);
+        $data['copy_user'] = json_encode($data['copy_user']);
+
+        //家庭成员
+        $familyArr = [];
+        foreach ($entryArr['family_num'] as $fk => $fv) {
+            if(empty($fv['name']) || empty($fv['age']) || empty($fv['relation']) || empty($fv['position']) || empty($fv['phone'])) continue;
+
+            $familyArr[] = $fv;
+        }
+        $entryArr['family_num'] = json_encode($familyArr);
+        //工作经历
+        $workArr = [];
+        foreach ($entryArr['work_history'] as $wk => $wv) {
+            if(empty($wv['time']) || empty($wv['deadline']) || empty($wv['work_place']) || empty($wv['position']) || empty($wv['income']) || empty($wv['boss']) || empty($wv['phone'])) continue;
+
+            $workArr[] = $wv;
+        }
+        $entryArr['work_history'] = json_encode($workArr);
+
+        $entry = Entry::findOrFail($id);
+
+        $entry->update($data + $entryArr);
+        flash(trans('app.编辑成功', ['value' => trans('staff.待入职人员')]), 'success');
+
+        return redirect()->route('entry.showInfo', ['id' => $entry->entry_id]);
     }
 
     /**
@@ -190,25 +284,26 @@ class EntryController extends AttController
         //sign验证
         $entryS = self::sign($token, $sign);
         if(empty($entryS)) {
-            $message = trans('错误的请求');
-            return view('staff-manage.entry.error', compact('message'));
+            flash('错误的请求!', 'danger');
+            return view('staff-manage.entry.error');
         }
 
         $entryS->update(['status' => Entry::FILL_IN]);
 
         $cache = (object)json_decode(Redis::get($entryS->entry_id . '_entry_save'), true);
 
+        $entry = $entryS;
         //优先缓存为主
-        if(!empty($cache)) {
+        if(!empty($cache->birthday)) {
             $entry = $cache;
         }
 
-        //dd($familyNum);
         $school = School::getSchoolList();
         $users = User::getUsernameAliasList();
         $dept = Dept::getDeptList();
+        $ethnic = Ethnic::getEthnicList();
         $title = trans('staff.填写入职资料');
-        return view('staff-manage.entry.fill', compact('title', 'users', 'school', 'entry', 'entryS', 'dept', 'sign', 'cache'));
+        return view('staff-manage.entry.fill', compact('title', 'ethnic', 'users', 'school', 'entry', 'entryS', 'dept', 'sign', 'cache'));
     }
 
     public function del($id)
@@ -238,8 +333,8 @@ class EntryController extends AttController
         //sign验证
         $res = self::sign($token, $sign);
         if(empty($res)) {
-            $message = trans('错误的请求');
-            return view('staff-manage.entry.error', compact('message'));
+            flash('错误的请求!', 'danger');
+            return view('staff-manage.entry.error');
         };
 
         $data = $request->all()['entry'];
@@ -264,6 +359,7 @@ class EntryController extends AttController
 
 
         $entry = Entry::findOrFail($res->entry_id);
+
         $entry->update($data);
 
         //企业微信通知管理员
@@ -272,8 +368,8 @@ class EntryController extends AttController
         $userId = User::getUserAliasToId($entry->creater_id);
         OperateLogHelper::sendWXMsg($userId->username, $msg);
 
-        $message = trans('资料填写完成');
-        return view('staff-manage.entry.error', compact('message'));
+        flash('恭喜你完成了个人资料填写，请等待管理员审核。', 'success');
+        return view('staff-manage.entry.error');
     }
 
     public function save(Request $request)
@@ -361,8 +457,21 @@ class EntryController extends AttController
             }
 
             $pwd = DataHelper::randString(10);
+
+            $roleId = json_decode($entry->role_id, true);
+
+            $roleIds = [];
+
+            if (!empty($roleId) && is_array($roleId)) {
+                $ids = [];
+                foreach ($roleId as $d => $v) {
+                    $ids['id_' . $v] = $v;
+                }
+                $roleIds = json_encode($ids);
+            }
+
             $userData = [
-                'username' => self::setUserName(),
+                'username' => $entry->username,
                 'alias' => $entry->name,
                 'email' => $entry->used_email,
                 'mobile' => $entry->mobile,
@@ -372,10 +481,21 @@ class EntryController extends AttController
                 'job_id' => $entry->job_id,
                 'is_leader' => 0,
                 'is_mobile' => 0,
+                'role_id' => $roleIds,
                 'creater_id' => \Auth::user()->user_id,
             ];
 
             $user = User::create($userData);
+
+            $roleId = json_decode($user->role_id, true);
+            if (!empty($roleId) && is_array($roleId)) {
+                $role = Role::whereIn('id', array_values($roleId))->get();
+                foreach ($role as $k => $r)
+                    if (!$user->hasRole($r->name)) {
+                        // 设置权限角色
+                        $user->attachRole($r->id);
+                    }
+            }
 
             UserExt::create($entry->toArray() + ['user_id' => $user->user_id]);
             $entry->update(['status' => Entry::REVIEW_PASS, 'review_id' => \Auth::user()->user_id]);
@@ -425,6 +545,24 @@ class EntryController extends AttController
         return $username;
     }
 
+    /***
+     * @return array
+     */
+    public function getMaxUserName()
+    {
+        $userMaxId = User::orderBy('username', 'desc')->get(['username'])->pluck('username')->toArray();
+        $entryMaxId = Entry::whereNotIn('status', [Entry::REVIEW_REFUSE])->orderBy('username', 'desc')->get(['username'])->pluck('username')->toArray();
+
+        $usernameS = array_merge($userMaxId, $entryMaxId);
+        arsort($usernameS);
+        $usernameS = array_values($usernameS);
+        return $usernameS;
+    }
+
+    /**
+     * @param $id
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
     public function showInfo($id)
     {
         $entry = Entry::findOrFail($id);
@@ -433,9 +571,11 @@ class EntryController extends AttController
         $job = Job::getJobList();
         $dept = Dept::getDeptList();
         $firm = Firm::getFirmList();
+        $ethnic = Ethnic::getEthnicList();
         $userIds = json_decode($entry->copy_user);
+        $roleList = Role::getRoleTextList();
         $title = trans('staff.入职信息确认');
 
-        return view('staff-manage.entry.info', compact('title', 'users', 'school', 'entry', 'job', 'dept', 'firm', 'userIds'));
+        return view('staff-manage.entry.info', compact('title', 'roleList','users', 'school', 'entry', 'job', 'dept', 'firm', 'userIds', 'ethnic'));
     }
 }

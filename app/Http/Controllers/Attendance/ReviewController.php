@@ -86,9 +86,9 @@ class ReviewController extends AttController
 
         //申请的假期中影响全勤的假期数
         $affectFull = Leave::noFull($year, $month);
-
         //获取用户对通知信息的状态
         $confirmStates = ConfirmAttendance::getConfirmState($year, $month, $scope->status);
+        $confirmList = ConfirmAttendance::getConfirmList($year, $month);
         $userIds = '';
 
         if(!empty($confirmStates)) $userIds = ' and user_id in(' . implode(',' , array_keys($confirmStates)) . ')';
@@ -139,7 +139,7 @@ class ReviewController extends AttController
                 'remain_year_holiday' => $remainWelfare['year']['number_day'] ?? 0,
                 'remain_visit'        => $remainWelfare['visit']['number_day'] ?? 0,
                 'remain_change'       => $leaveInfo['userLeaveInfo'],
-                'send'                => $confirmStates[$user->user_id] ?? 0,
+                'send'                => $confirmList[$user->user_id] ?? 0,
             ];
         }
         return ['success', $info];

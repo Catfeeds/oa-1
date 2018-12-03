@@ -13,7 +13,7 @@
                         <div class="ibox-title">
                             <h5>{{ $title }}</h5>
 
-                            @if(Entrust::can(['user-all', 'user.create']))
+                            @if(Entrust::can(['user.edit']))
                                 <div class="ibox-tools">
                                     <a class="btn btn-xs btn-primary" href="{{ route('user.create') }}">
                                         {{ trans('app.添加员工') }}

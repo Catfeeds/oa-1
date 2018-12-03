@@ -12,6 +12,7 @@ namespace App\Http\Controllers\Admin\Sys;
 use App\Http\Controllers\Controller;
 use App\Models\Sys\School;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SchoolController extends Controller
 {
@@ -63,6 +64,33 @@ class SchoolController extends Controller
         $school->update($request->all());
 
         flash(trans('app.编辑成功', ['value' => trans('app.学校')]), 'success');
+        return redirect($this->redirectTo);
+    }
+
+    public function del($id)
+    {
+        $school = School::with('usersExt', 'entry')->where(['school_id' => $id])->first();
+        if(empty($school->school_id)) {
+            flash('删除失败,无效的数据ID!', 'danger');
+            return redirect($this->redirectTo);
+        }
+
+        if(!empty($school->usersExt->toArray()) || !empty($school->entry->toArray())) {
+            flash('删除失败,['.$school->school. ']还有在使用中!', 'danger');
+            return redirect($this->redirectTo);
+        }
+
+        DB::beginTransaction();
+        try{
+            School::where(['school_id' => $school->school_id])->delete();
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            flash('删除失败!', 'danger');
+            return redirect($this->redirectTo);
+        }
+        DB::commit();
+
+        flash(trans('app.删除成功', ['value' => trans('app.学校')]), 'success');
         return redirect($this->redirectTo);
     }
 

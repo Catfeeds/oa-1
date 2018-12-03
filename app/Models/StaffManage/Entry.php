@@ -60,6 +60,7 @@ class Entry extends Model
     ];
 
     protected $fillable = [
+        'role_id',
         'name',
         'sex',
         'mobile',
@@ -83,9 +84,9 @@ class Entry extends Model
         'send_time',
         'card_id',
         'card_address',
-        'ethnic',
+        'ethnic_id',
         'birthplace',
-        'political',
+        'political_id',
         'census',
         'family_num',
         'marital_status',
@@ -103,6 +104,7 @@ class Entry extends Model
         'graduation_time',
         'specialty',
         'degree',
+        'school_id',
 
         'birthday',
         'salary_card',
@@ -114,12 +116,7 @@ class Entry extends Model
         'birthday_type',
         'firm_call',
 
-
+        'username'
     ];
 
-
-    public static function getSchoolList()
-    {
-        return self::get(['school_id', 'school'])->pluck('school', 'school_id')->toArray();
-    }
 }
