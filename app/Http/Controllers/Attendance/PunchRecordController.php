@@ -135,9 +135,9 @@ class PunchRecordController extends Controller
         try {*/
         //reader读取excel内容
         \Excel::load(storage_path($punchRecord->annex), function ($reader) use ($punchRecord, $isOK, $nightConf) {
-
             $reader = $reader->getSheet(0);
             $reader = $reader->toarray();
+
             $data = $msgArr = $bufferArr = [];
             $minTs = '2300-12-31';
             $maxTs = '2001-01-01';
@@ -220,6 +220,9 @@ class PunchRecordController extends Controller
                 $punchRuleEndTime = strtotime($dk . ' ' . $calendar->punchRules->work_end_time);*/
 
                 foreach ($dv as $u) {
+                    
+                    if (empty($u['ts']) || empty($u['alias'])) continue;
+
                     $user = User::where(['alias' => $u['alias']])->first();
                     if (empty($user->alias)) {
                         $msgArr[] = '未找到[' . $u['alias'] . ']员工信息!';
