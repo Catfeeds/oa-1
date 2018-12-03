@@ -131,8 +131,8 @@ class PunchRecordController extends Controller
         }
         $isOK = true;
         //事务开启
-        DB::beginTransaction();
-        try {
+        /*DB::beginTransaction();
+        try {*/
         //reader读取excel内容
         \Excel::load(storage_path($punchRecord->annex), function ($reader) use ($punchRecord, $isOK, $nightConf) {
 
@@ -292,7 +292,7 @@ class PunchRecordController extends Controller
             file_put_contents($logFile, $strArr, LOCK_EX);
             $punchRecord->update(['log_file' => $logFile, 'status' => 3]);
         });
-         } catch (\Exception $e) {
+        /* } catch (\Exception $e) {
              //事务回滚
              DB::rollBack();
              $punchRecord->update(['status' => 2]);
@@ -303,7 +303,7 @@ class PunchRecordController extends Controller
          //事务提交
          DB::commit();
          flash(trans('att.生成成功员工每日打卡明细'), 'success');
-         return redirect()->route('daily-detail.review.import.info');
+         return redirect()->route('daily-detail.review.import.info');*/
     }
 
     public function log($id)
