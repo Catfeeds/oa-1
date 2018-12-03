@@ -41,7 +41,7 @@
                             <select name="role_id[]" required="required" multiple="multiple" class="js-select2-multiple form-control js-select2-single">
                                 @foreach($roleList as $key => $val)
                                     <option value="{{ $key}}"
-                                            @if (isset($entry->role_id) && in_array($key, json_decode($entry->role_id, true) ? : old('role_id') ?? [])) selected @endif>{{ $val}}</option>
+                                            @if (isset($entry->role_id) && in_array($key, json_decode($entry->role_id, true)) || $key === \App\Models\Role::getDefaultRole()->id) selected @endif>{{ $val}}</option>
                                 @endforeach
                             </select>
                             <span class="help-block m-b-none">{{ $errors->first('role_id') }}</span>

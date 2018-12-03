@@ -408,11 +408,11 @@
                             <table class="table table-bordered">
                                 <thead>
                                 <tr>
-                                    <th>姓名</th>
-                                    <th>年龄</th>
-                                    <th>与本人关系</th>
-                                    <th>单位/职务</th>
-                                    <th>电话</th>
+                                    <th style="width: 6em;">姓名</th>
+                                    <th style="width: 3em;">年龄</th>
+                                    <th style="width: 6em;">与本人关系</th>
+                                    <th style="width: 10em;">单位/职务</th>
+                                    <th style="width: 8em;">电话</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -553,13 +553,13 @@
                             <table class="table table-bordered">
                                 <thead>
                                 <tr>
-                                    <th>起止年月</th>
-                                    <th>期限</th>
-                                    <th>在何处工作</th>
-                                    <th>职务</th>
-                                    <th>月收入</th>
-                                    <th>直属上司</th>
-                                    <th>联系电话</th>
+                                    <th style="width: 5em;">起止年月</th>
+                                    <th style="width: 2em;">期限</th>
+                                    <th style="width: 12em;">在何处工作</th>
+                                    <th style="width: 5em;">职务</th>
+                                    <th style="width: 3em;">月收入</th>
+                                    <th style="width: 12em;">直属上司</th>
+                                    <th style="width: 8em;">联系电话</th>
                                 </tr>
                                 </thead>
                                 <tbody>

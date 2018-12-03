@@ -210,6 +210,7 @@
                                                 {!! Form::text('entry[salary_card]', !empty($entry->salary_card) ? $entry->salary_card : ($cache->salary_card ?? ''), [
                                                 'class' => 'form-control',
                                                 'placeholder' => trans('app.请输入', ['value' => trans('app.工资卡')]),
+                                                'data-mask' => '9999 9999 9999 9999'
 
                                                 ]) !!}
                                                 <span class="help-block m-b-none">{{ $errors->first('entry.salary_card') }}</span>
@@ -253,7 +254,7 @@
                                                 {!! Form::text('entry[qq]', !empty($entry->qq) ? $entry->qq : ($cache->qq ?? ''), [
                                                 'class' => 'form-control',
                                                 'placeholder' => trans('app.请输入', ['value' => trans('staff.QQ号码')]),
-
+                                                'onkeyup' => "this.value=this.value.replace(/\D/g,'')"
                                                 ]) !!}
                                                 <span class="help-block m-b-none">{{ $errors->first('entry.qq') }}</span>
                                             </div>
@@ -278,22 +279,22 @@
                                                 <table class="table table-bordered">
                                                     <thead>
                                                     <tr>
-                                                        <th>姓名</th>
-                                                        <th>年龄</th>
-                                                        <th>与本人关系</th>
-                                                        <th>单位/职务</th>
-                                                        <th>电话</th>
+                                                        <th style="width: 6em;">姓名</th>
+                                                        <th style="width: 3em;">年龄</th>
+                                                        <th style="width: 6em;">与本人关系</th>
+                                                        <th style="width: 10em;">单位/职务</th>
+                                                        <th style="width: 8em;">电话</th>
                                                     </tr>
                                                     </thead>
                                                     <tbody>
 
                                                     @for($i = 0; $i <= \App\Models\StaffManage\Entry::CREATE_FAMILY_NUM; $i++)
                                                         <tr>
-                                                            <td><input name="entry[family_num][{{$i}}][name]" value="{{!is_array($entry->family_num) && !empty(json_decode($entry->family_num, true)[$i]['name']) ? json_decode($entry->family_num, true)[$i]['name'] : ($cache->family_num[$i]['name'] ?? '')}}" style="width: 6em;" type="text"></td>
-                                                            <td><input name="entry[family_num][{{$i}}][age]" value="{{!is_array($entry->family_num) &&!empty(json_decode($entry->family_num, true)[$i]['age']) ? json_decode($entry->family_num, true)[$i]['age'] : ($cache->family_num[$i]['age'] ?? '')}}" style="width: 3em;" type="text"></td>
+                                                            <td><input name="entry[family_num][{{$i}}][name]" value="{{!is_array($entry->family_num) && !empty(json_decode($entry->family_num, true)[$i]['name']) ? json_decode($entry->family_num, true)[$i]['name'] : ($cache->family_num[$i]['name'] ?? '')}}" style="width: 100%;" type="text"></td>
+                                                            <td><input name="entry[family_num][{{$i}}][age]" value="{{!is_array($entry->family_num) &&!empty(json_decode($entry->family_num, true)[$i]['age']) ? json_decode($entry->family_num, true)[$i]['age'] : ($cache->family_num[$i]['age'] ?? '')}}" style="width: 100%;" type="text"></td>
                                                             <td><input name="entry[family_num][{{$i}}][relation]" value="{{!is_array($entry->family_num) &&!empty(json_decode($entry->family_num, true)[$i]['relation']) ? json_decode($entry->family_num, true)[$i]['relation'] : ($cache->family_num[$i]['relation'] ?? '')}}" style="width: 100%;" type="text"></td>
-                                                            <td><input name="entry[family_num][{{$i}}][position]" value="{{!is_array($entry->family_num) &&!empty(json_decode($entry->family_num, true)[$i]['position']) ? json_decode($entry->family_num, true)[$i]['position'] : ($cache->family_num[$i]['position'] ?? '')}}" style="width: 6em;" type="text"></td>
-                                                            <td><input name="entry[family_num][{{$i}}][phone]" value="{{!is_array($entry->family_num) &&!empty(json_decode($entry->family_num, true)[$i]['phone']) ? json_decode($entry->family_num, true)[$i]['phone'] : ($cache->family_num[$i]['phone'] ?? '')}}" style="width: 8em;" type="text"></td>
+                                                            <td><input name="entry[family_num][{{$i}}][position]" value="{{!is_array($entry->family_num) &&!empty(json_decode($entry->family_num, true)[$i]['position']) ? json_decode($entry->family_num, true)[$i]['position'] : ($cache->family_num[$i]['position'] ?? '')}}" style="width: 100%;" type="text"></td>
+                                                            <td><input maxlength="11" onkeyup="this.value=this.value.replace(/\D/g,'')"  name="entry[family_num][{{$i}}][phone]" value="{{!is_array($entry->family_num) &&!empty(json_decode($entry->family_num, true)[$i]['phone']) ? json_decode($entry->family_num, true)[$i]['phone'] : ($cache->family_num[$i]['phone'] ?? '')}}" style="width: 100%;" type="text"></td>
                                                         </tr>
                                                     @endfor
 
@@ -337,6 +338,8 @@
                                                 'class' => 'form-control',
                                                 'placeholder' => trans('app.请输入', ['value' => trans('staff.紧急联系人电话')]),
                                                 'required' => true,
+                                                'maxlength' => 11,
+                                                'onkeyup' => "this.value=this.value.replace(/\D/g,'')"
                                                 ]) !!}
                                                 <span class="help-block m-b-none">{{ $errors->first('entry.urgent_tel') }}</span>
                                             </div>
@@ -442,25 +445,25 @@
                                                 <table class="table table-bordered">
                                                     <thead>
                                                     <tr>
-                                                        <th>起止年月</th>
-                                                        <th>期限</th>
-                                                        <th>在何处工作</th>
-                                                        <th>职务</th>
-                                                        <th>月收入</th>
-                                                        <th>直属上司</th>
-                                                        <th>联系电话</th>
+                                                        <th style="width: 5em;">起止年月</th>
+                                                        <th style="width: 2em;">期限</th>
+                                                        <th style="width: 12em;">在何处工作</th>
+                                                        <th style="width: 5em;">职务</th>
+                                                        <th style="width: 3em;">月收入</th>
+                                                        <th style="width: 12em;">直属上司</th>
+                                                        <th style="width: 8em;">联系电话</th>
                                                     </tr>
                                                     </thead>
                                                     <tbody>
                                                     @for($i = 0; $i <= \App\Models\StaffManage\Entry::CREATE_WORK_HISTORY_NUM; $i++)
                                                         <tr>
-                                                            <td><input name="entry[work_history][{{$i}}][time]" value="{{!is_array($entry->work_history) && !empty(json_decode($entry->work_history, true)[$i]['time']) ? json_decode($entry->work_history, true)[$i]['time'] : ($cache->work_history[$i]['time'] ?? '')}}" style="width: 6em;" type="text"></td>
-                                                            <td><input name="entry[work_history][{{$i}}][deadline]" value="{{!is_array($entry->work_history) && !empty(json_decode($entry->work_history, true)[$i]['deadline']) ? json_decode($entry->work_history, true)[$i]['deadline'] : ($cache->work_history[$i]['deadline'] ?? '')}}" style="width: 3em;" type="text"></td>
+                                                            <td><input name="entry[work_history][{{$i}}][time]" value="{{!is_array($entry->work_history) && !empty(json_decode($entry->work_history, true)[$i]['time']) ? json_decode($entry->work_history, true)[$i]['time'] : ($cache->work_history[$i]['time'] ?? '')}}" style="width: 100%;" type="text"></td>
+                                                            <td><input name="entry[work_history][{{$i}}][deadline]" value="{{!is_array($entry->work_history) && !empty(json_decode($entry->work_history, true)[$i]['deadline']) ? json_decode($entry->work_history, true)[$i]['deadline'] : ($cache->work_history[$i]['deadline'] ?? '')}}" style="width: 100%;" type="text"></td>
                                                             <td><input name="entry[work_history][{{$i}}][work_place]" value="{{!is_array($entry->work_history) && !empty(json_decode($entry->work_history, true)[$i]['work_place']) ? json_decode($entry->work_history, true)[$i]['work_place'] : ($cache->work_history[$i]['work_place'] ?? '')}}" style="width: 100%;" type="text"></td>
-                                                            <td><input name="entry[work_history][{{$i}}][position]" value="{{!is_array($entry->work_history) && !empty(json_decode($entry->work_history, true)[$i]['position']) ? json_decode($entry->work_history, true)[$i]['position'] : ($cache->work_history[$i]['position'] ?? '')}}" style="width: 5em;" type="text"></td>
-                                                            <td><input name="entry[work_history][{{$i}}][income]" value="{{!is_array($entry->work_history) && !empty(json_decode($entry->work_history, true)[$i]['income']) ? json_decode($entry->work_history, true)[$i]['income'] : ($cache->work_history[$i]['income'] ?? '')}}" style="width: 4em;" type="text"></td>
+                                                            <td><input name="entry[work_history][{{$i}}][position]" value="{{!is_array($entry->work_history) && !empty(json_decode($entry->work_history, true)[$i]['position']) ? json_decode($entry->work_history, true)[$i]['position'] : ($cache->work_history[$i]['position'] ?? '')}}" style="width: 100%;" type="text"></td>
+                                                            <td><input name="entry[work_history][{{$i}}][income]" value="{{!is_array($entry->work_history) && !empty(json_decode($entry->work_history, true)[$i]['income']) ? json_decode($entry->work_history, true)[$i]['income'] : ($cache->work_history[$i]['income'] ?? '')}}" style="width: 100%;" type="text"></td>
                                                             <td><input name="entry[work_history][{{$i}}][boss]" value="{{!is_array($entry->work_history) && !empty(json_decode($entry->work_history, true)[$i]['boss']) ? json_decode($entry->work_history, true)[$i]['boss'] : ($cache->work_history[$i]['boss'] ?? '')}}" style="width: 100%;" type="text"></td>
-                                                            <td><input name="entry[work_history][{{$i}}][phone]"  value="{{!is_array($entry->work_history) && !empty(json_decode($entry->work_history, true)[$i]['phone']) ? json_decode($entry->work_history, true)[$i]['phone'] : ($cache->work_history[$i]['phone'] ?? '')}}" style="width: 8em;" type="text"></td>
+                                                            <td><input maxlength="11" onkeyup="this.value=this.value.replace(/\D/g,'')" name="entry[work_history][{{$i}}][phone]"  value="{{!is_array($entry->work_history) && !empty(json_decode($entry->work_history, true)[$i]['phone']) ? json_decode($entry->work_history, true)[$i]['phone'] : ($cache->work_history[$i]['phone'] ?? '')}}" style="width: 100%;" type="text"></td>
                                                         </tr>
                                                     @endfor
                                                     </tbody>
@@ -508,6 +511,7 @@
                                                 'class' => 'form-control',
                                                 'placeholder' => trans('app.请输入', ['value' => trans('staff.身份证号码')]),
                                                 'required' => true,
+                                                'maxlength' => 18,
                                                 ]) !!}
                                                 <span class="help-block m-b-none">{{ $errors->first('entry.card_id') }}</span>
                                             </div>

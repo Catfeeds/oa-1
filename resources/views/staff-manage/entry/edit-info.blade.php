@@ -396,6 +396,24 @@
                         </div>
                     </div>
 
+                    <div class="form-group @if (!empty($errors->first('entry.salary_card'))) has-error @endif">
+                        {!! Form::label('salary_card', trans('app.工资卡'), ['class' => 'col-sm-4 control-label']) !!}
+                        <div class="col-sm-3">
+                            {!! Form::text('entry[salary_card]', !empty($entry->salary_card) ? $entry->salary_card : old('salary_card'), [
+                            'class' => 'form-control',
+                            'placeholder' => trans('app.请输入', ['value' => trans('app.工资卡')]),
+                            'data-mask' => '9999 9999 9999 9999'
+
+                            ]) !!}
+                            <span class="help-block m-b-none">{{ $errors->first('entry.salary_card') }}</span>
+                        </div>
+                        <div class="row">
+                            <i style="color: red">*</i>
+                            <i style="margin-left: 1em" class="fa fa-info-circle"></i> {{ trans('请填写本人招商银行广州储蓄卡账号') }}
+                        </div>
+                    </div>
+
+
                     {{--联系信息--}}
                     <div class="form-group">
                         <label class="col-sm-2 control-label text-navy"><h2>{{trans('staff.联系信息')}}</h2</label>
@@ -425,7 +443,7 @@
                             {!! Form::text('entry[qq]', isset($entry->qq) ? $entry->qq: old('qq'), [
                             'class' => 'form-control',
                             'placeholder' => trans('app.请输入', ['value' => trans('staff.QQ号码')]),
-
+                            'onkeyup' => "this.value=this.value.replace(/\D/g,'')"
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('qq') }}</span>
                         </div>
@@ -449,11 +467,11 @@
                             <table class="table table-bordered">
                                 <thead>
                                 <tr>
-                                    <th>姓名</th>
-                                    <th>年龄</th>
-                                    <th>与本人关系</th>
-                                    <th>单位/职务</th>
-                                    <th>电话</th>
+                                    <th style="width: 6em;">姓名</th>
+                                    <th style="width: 3em;">年龄</th>
+                                    <th style="width: 6em;">与本人关系</th>
+                                    <th style="width: 10em;">单位/职务</th>
+                                    <th style="width: 8em;">电话</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -463,7 +481,7 @@
                                         <td><input name="entry[family_num][{{$i}}][age]" value="{{!empty($familyNum[$i]['age']) ? $familyNum[$i]['age'] : ''}}" style="width: 3em;" type="text"></td>
                                         <td><input name="entry[family_num][{{$i}}][relation]" value="{{!empty($familyNum[$i]['relation']) ? $familyNum[$i]['relation'] : ''}}" style="width: 100%;" type="text"></td>
                                         <td><input name="entry[family_num][{{$i}}][position]" value="{{!empty($familyNum[$i]['position']) ? $familyNum[$i]['position'] : ''}}" style="width: 6em;" type="text"></td>
-                                        <td><input name="entry[family_num][{{$i}}][phone]" value="{{!empty($familyNum[$i]['phone']) ? $familyNum[$i]['phone'] : ''}}" style="width: 8em;" type="text"></td>
+                                        <td><input maxlength="11" onkeyup="this.value=this.value.replace(/\D/g,'')" name="entry[family_num][{{$i}}][phone]" value="{{!empty($familyNum[$i]['phone']) ? $familyNum[$i]['phone'] : ''}}" style="width: 8em;" type="text"></td>
                                     </tr>
                                 @endfor
                                 </tbody>
@@ -503,6 +521,8 @@
                             'class' => 'form-control',
                             'placeholder' => trans('app.请输入', ['value' => trans('staff.紧急联系人电话')]),
                             'required' => true,
+                            'maxlength' => 11,
+                            'onkeyup' => "this.value=this.value.replace(/\D/g,'')"
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('urgent_tel') }}</span>
                         </div>
@@ -594,13 +614,13 @@
                             <table class="table table-bordered">
                                 <thead>
                                 <tr>
-                                    <th>起止年月</th>
-                                    <th>期限</th>
-                                    <th>在何处工作</th>
-                                    <th>职务</th>
-                                    <th>月收入</th>
-                                    <th>直属上司</th>
-                                    <th>联系电话</th>
+                                    <th style="width: 5em;">起止年月</th>
+                                    <th style="width: 2em;">期限</th>
+                                    <th style="width: 12em;">在何处工作</th>
+                                    <th style="width: 5em;">职务</th>
+                                    <th style="width: 3em;">月收入</th>
+                                    <th style="width: 12em;">直属上司</th>
+                                    <th style="width: 8em;">联系电话</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -612,7 +632,7 @@
                                         <td><input name="entry[work_history][{{$i}}][position]" value="{{!empty($workHistory[$i]['position']) ? $workHistory[$i]['position'] : ''}}" style="width: 5em;" type="text"></td>
                                         <td><input name="entry[work_history][{{$i}}][income]" value="{{!empty($workHistory[$i]['income']) ? $workHistory[$i]['income'] : ''}}" style="width: 4em;" type="text"></td>
                                         <td><input name="entry[work_history][{{$i}}][boss]" value="{{!empty($workHistory[$i]['boss']) ? $workHistory[$i]['boss'] : ''}}" style="width: 100%;" type="text"></td>
-                                        <td><input name="entry[work_history][{{$i}}][phone]"  value="{{!empty($workHistory[$i]['phone']) ? $workHistory[$i]['phone'] : ''}}" style="width: 8em;" type="text"></td>
+                                        <td><input maxlength="11" onkeyup="this.value=this.value.replace(/\D/g,'')" name="entry[work_history][{{$i}}][phone]"  value="{{!empty($workHistory[$i]['phone']) ? $workHistory[$i]['phone'] : ''}}" style="width: 8em;" type="text"></td>
                                     </tr>
                                 @endfor
                                 </tbody>

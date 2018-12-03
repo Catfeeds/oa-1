@@ -9,6 +9,7 @@
  */
 namespace App\Models\StaffManage;
 
+use App\Models\Role;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -118,5 +119,10 @@ class Entry extends Model
 
         'username'
     ];
+
+    public function roles()
+    {
+        return $this->hasMany(Role::class, 'role_id', 'role_id');
+    }
 
 }

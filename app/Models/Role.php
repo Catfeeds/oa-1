@@ -41,7 +41,6 @@ class Role extends EntrustRole
 
     public static function getRoleText($id) {
         $list = self::getRoleTextList();
-        dd($list);
         return isset($list[$id]) ? $list[$id] : '';
     }
 
@@ -62,6 +61,16 @@ class Role extends EntrustRole
     public function leaveStep()
     {
         return $this->hasMany(RoleLeaveStep::class, 'role_id', 'id');
+    }
+
+    /**
+     * 办理入职默认分配给员工权限
+     * @return $this
+     */
+    public static function getDefaultRole()
+    {
+
+        return self::where(['name' => '普通员工默认权限'])->first();
     }
 
 }
