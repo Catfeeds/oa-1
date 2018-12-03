@@ -49,7 +49,7 @@
                             </div>
                         </div>
                         <div class="col-sm-2">
-                            <select onchange="startChange()" class="js-select2-single form-control" id="start_id" name="start_id" > </select>
+                            <select onchange="inquire()" class="js-select2-single form-control" id="start_id" name="start_id" > </select>
                         </div>
                     </div>
 
@@ -69,7 +69,7 @@
                             </div>
                         </div>
                         <div class="col-sm-2">
-                            <select onchange="endChange()" class="js-select2-single form-control" id="end_id" name="end_id" ></select>
+                            <select onchange="inquire()" class="js-select2-single form-control" id="end_id" name="end_id" ></select>
                         </div>
                     </div>
 
@@ -172,19 +172,8 @@
             showMemo();
             inquireStartInfo();
             inquireEndInfo();
-            startChange();
-            endChange();
-
+            inquire();
         });
-
-        function startChange() {
-
-            inquire();
-        }
-
-        function endChange() {
-            inquire();
-        }
 
         /**
          * 显示剩余假期和描述
@@ -245,7 +234,7 @@
             var startId = $('#start_id').val();
             var endId = $('#end_id').val();
 
-            if (holidayId != ''  && startTime != '' && endTime != '' && startId != '' && startId != null && endId != '' && endId != null ) {
+            if (endTime >= startTime && holidayId != ''  && startTime != '' && endTime != '' && startId != '' && startId != null && endId != '' && endId != null ) {
                 $.get('{{ route('leave.inquire')}}', {holidayId: holidayId,startTime: startTime, endTime: endTime, startId:startId, endId:endId}, function ($data) {
                     if ($data.status == 1) {
                         $('#show_step').html($data.step).find('select').select2();
@@ -254,7 +243,6 @@
                     }
                 })
             }
-
         }
 
         /**
@@ -276,7 +264,6 @@
                                 multiple: false,// 多选
                                 data: $data.start_time //绑定数据
                             });
-
 
                             @if(!empty($startId))
                                 start_id = '{{$startId}}';
