@@ -123,77 +123,12 @@ class DataHelper
     }
 
     /**
-     * 请假天数
      * @param $startTime
+     * @param $startId
      * @param $endTime
-     * @return float|int|string
+     * @param $endId
+     * @return number
      */
-    public static function diffTime($startTime, $endTime)
-    {
-
-        $startTime = strtotime($startTime);
-        $endTime = strtotime($endTime);
-
-        $day = '';
-
-        //时间为空的时候
-        if ($startTime > 946656000 && $startTime <= $endTime) {
-        $day = floor($endTime - $startTime)/86400;
-            switch ($day) {
-                case $day > 0 && $day < 0.3 :
-                    $day = 0.5;
-                    break;
-                case $day > 0.3 && $day < 1 :
-                    $day = 1;
-                    break;
-                case $day > 1.1 && $day < 1.3 :
-                    $day = 1.5;
-                    break;
-                case $day > 1.3 && $day < 2 :
-                    $day = 2;
-                    break;
-                case $day > 2.1 && $day < 2.3 :
-                    $day = 2.5;
-                    break;
-                case $day > 2.3 && $day < 3 :
-                    $day = 3;
-                    break;
-                case $day > 3.1 && $day < 3.3 :
-                    $day = 3.5;
-                    break;
-                case $day > 3.3 && $day < 4 :
-                    $day = 4;
-                    break;
-                case $day > 4.1 && $day < 4.3 :
-                    $day = 4.5;
-                    break;
-                case $day > 4.3 && $day < 5 :
-                    $day = 4.5;
-                    break;
-                case $day > 5.1 && $day < 5.3 :
-                    $day = 5;
-                    break;
-                case $day > 5.3 && $day < 6 :
-                    $day = 5.5;
-                    break;
-                case $day > 6.1 && $day < 6.3 :
-                    $day = 6;
-                    break;
-                case $day > 6.3 && $day < 7 :
-                    $day = 6.5;
-                    break;
-                case $day > 7.1 && $day < 7.3 :
-                    $day = 7;
-                    break;
-                default :
-                    $day = (int)(($endTime - $startTime) / 86400);
-                    break;
-            }
-        }
-        return $day;
-
-    }
-
     public static function leaveDayDiff($startTime, $startId, $endTime, $endId)
     {
         $startTime = new \DateTime($startTime);
@@ -225,7 +160,6 @@ class DataHelper
         }
         return array_unique($day);
     }
-
 
     /**
      * 对一个 DateTime 对象加上一定量的 日、月、年、小时、分钟和秒。

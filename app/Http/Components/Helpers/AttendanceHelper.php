@@ -94,29 +94,6 @@ class AttendanceHelper
         return ['leave_ids' => $leaveIds, 'user_ids' => $users];
     }
 
-
-    /**
-     * 回退功能暂时不用
-     * 申请单 拒绝/取消 福利天数回退
-     * @param object $leave 申请单信息
-     */
-    public static function leaveNumBack($leave)
-    {
-        //拒绝之后，是福利假的话假期天数回退
-        $holidayConfig = HolidayConfig::where(['holiday_id' => $leave->holiday_id])->first();
-        $userConfig = UserHoliday::where(['user_id' => $leave->user_id, 'holiday_id' => $holidayConfig->holiday_id])->first();
-        if(!empty($userConfig->num) && $holidayConfig->num >= $userConfig->num) {
-            $startTime = date('Y-m-d', strtotime($leave->start_time)) .' '. Leave::$startId[$leave->start_id];
-            $endTime = date('Y-m-d', strtotime($leave->end_time)) .' '. Leave::$endId[$leave->end_id];
-            //时间天数分配
-            $day = DataHelper::diffTime($startTime, $endTime);
-            $num = $userConfig->num + $day;
-            if($num > $holidayConfig->num) $num = $holidayConfig->num;
-
-            $userConfig->update(['num' => $num]);
-        }
-    }
-
     public static function spliceLeaveTime($holidayId, $time, $timeId, $numberDay = 0)
     {
         $holidayCfg =  HolidayConfig::getHolidayApplyList();

@@ -328,11 +328,11 @@
                                         </div>
 
                                         <div class="form-group @if (!empty($errors->first('work_relief_cycle_num'))) has-error @endif">
-                                            {!! Form::label('work_relief_cycle_num', trans('app.上下班时间循环周期'), ['class' => 'col-sm-3 control-label']) !!}
+                                            {!! Form::label('work_relief_cycle_num', trans('app.上下班时间循环周期次数'), ['class' => 'col-sm-3 control-label']) !!}
                                             <div class="col-sm-3">
-                                                {!! Form::text('work_relief_cycle_num', isset($holiday->work_relief_cycle_num) ? $holiday->work_relief_cycle_num: old('work_relief_cycle_num'), [
+                                                {!! Form::number('work_relief_cycle_num', isset($holiday->work_relief_cycle_num) ? $holiday->work_relief_cycle_num: old('work_relief_cycle_num'), [
                                                 'class' => 'form-control',
-                                                'placeholder' => trans('app.请输入', ['value' => trans('app.上下班时间循环周期')]),
+                                                'placeholder' => trans('app.请输入', ['value' => trans('app.上下班时间循环周期次数')]),
                                                 ]) !!}
                                                 <span class="help-block m-b-none">{{ $errors->first('work_relief_cycle_num') }}</span>
                                             </div>
