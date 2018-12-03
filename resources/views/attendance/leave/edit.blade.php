@@ -284,7 +284,7 @@
                                 start_id = $data.start_time[0];
                             @endif
 
-                            $("#start_id").attr(start_id).select2();
+                            $("#start_id").val(start_id).select2();
 
                         } else {
                             $("#start_id").select2("val", "");
@@ -308,7 +308,7 @@
                                 end_id = $data.end_time[0];
                             @endif
 
-                            $("#end_id").attr(end_id).select2();
+                            $("#end_id").val(end_id).select2();
                         } else {
                             $("#end_id").select2("val", "");
                             $("#end_id").empty();
