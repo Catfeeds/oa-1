@@ -216,7 +216,7 @@
             var val = $('#holiday_id').children('option:selected').val();
             $('#start_time').attr('rel', '');
             $('#end_time').val('');
-            if(val != "") {
+            if(val != "" && val != null) {
                 $('#show_pre').html('');
                 $.get('{{ route('leave.showMemo')}}', {id: val}, function ($data) {
                     if ($data.status == 1) {

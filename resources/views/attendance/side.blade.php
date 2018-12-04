@@ -25,7 +25,7 @@
                 </li>
             @endif
 
-            @if(Entrust::can(['daily-detail.*']))
+            @if(Entrust::can(['daily-detail.review.*']))
                 <li @if (Route::is(['daily-detail.review.*']) ) class="active" @endif>
                     <a href="{{ route('daily-detail.review.info') }}">{{ trans('att.考勤管理') }}</a>
                 </li>

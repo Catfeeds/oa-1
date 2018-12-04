@@ -24,29 +24,35 @@
                             <a aria-expanded="false" role="button" href="{{route('attIndex')}}">{{ trans('app.考勤系统') }}</a>
                         </li>
                         @endif
+
                         @if(Entrust::can(['holiday-config', 'approval-step', 'punch-rules', 'calendar']))
                         <li>
                             <a aria-expanded="false" role="button" href="{{ route('holiday-config') }}">{{ trans('staff.系统配置') }}</a>
                         </li>
                         @endif
+
                         @if(Entrust::can(['staff*', 'entry*']))
                         <li>
                             <a aria-expanded="false" role="button" href="{{ route('manage.index') }}">{{ trans('app.员工管理') }}</a>
                         </li>
                         @endif
+
                         @if(Entrust::can(['material.approve*', 'material.apply*']))
                         <li>
                             <a aria-expanded="false" role="button" href="{{ route('material.apply.index') }}">{{ trans('app.物料管理') }}</a>
                         </li>
                         @endif
-                        <li>
-                            <a aria-expanded="false" role="button" href="{{ route('CrmIndex') }}">{{ trans('app.CRM系统') }}</a>
-                        </li>
+
+                        @if(Entrust::can(['reconciliation-*']))
+                            <li>
+                                <a aria-expanded="false" role="button" href="{{ route('CrmIndex') }}">{{ trans('app.CRM系统') }}</a>
+                            </li>
+                        @endif
 
                         @if(Entrust::can(['user']))
-                        <li @if(Route::is('user*')) class="active" @endif>
-                            <a aria-expanded="false" role="button" href="{{ route('user') }}">{{ trans('app.账号管理') }}</a>
-                        </li>
+                            <li @if(Route::is('user*')) class="active" @endif>
+                                <a aria-expanded="false" role="button" href="{{ route('user') }}">{{ trans('app.账号管理') }}</a>
+                            </li>
                         @endif
 
                         @if(Entrust::can(['role']))

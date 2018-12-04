@@ -167,7 +167,7 @@
          */
         function showMemo() {
             var hid = $('input:radio:checked').val();
-            if(hid != "") {
+            if(hid != "" && val != null) {
                 $('#show_pre').html('');
                 $.get('{{ route('leave.showMemo')}}', {id: hid}, function ($data) {
                     if ($data.status == 1) {

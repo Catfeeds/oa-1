@@ -395,6 +395,8 @@ class LeaveController extends AttController
     public function showMemo(Request $request)
     {
         $p = $request->all();
+        if(empty($p['id'])) return response()->json(['status' => -1, 'memo' => '', 'day' => 0]);
+
         $holidayConfig = HolidayConfig::checkHolidayToId($p['id']);
         if(empty($holidayConfig->holiday_id))  return response()->json(['status' => -1, 'memo' => '', 'day' => 0]);
 
