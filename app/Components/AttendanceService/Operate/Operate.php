@@ -12,6 +12,7 @@ namespace App\Components\AttendanceService\Operate;
 use App\Components\Helper\DataHelper;
 use App\Models\Attendance\DailyDetail;
 use App\Models\Sys\ApprovalStep;
+use App\Models\Sys\Dept;
 use App\Models\Sys\ReviewStepFlow;
 use App\User;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -84,8 +85,14 @@ class Operate
 
                 if((int)$lv['assign_type'] === 1) {
                     $roleId = sprintf('JSON_EXTRACT(role_id, "$.id_%d") = "%d"', $lv['assign_role_id'], $lv['assign_role_id']);
-                    $dept = ' and dept_id ='. \Auth::user()->dept_id ;
-                    if((int)$lv['group_type_id'] === 1 || empty(\Auth::user()->dept_id)) $dept = '';
+                    //查询部门,如果有存在2级部门时，主部门也成员要查询
+                    $checkDept = Dept::where(['dept_id' => \Auth::user()->dept_id])->first();
+                    if(empty($checkDept->dept_id)) continue;
+                    $deptIds = [\Auth::user()->dept_id];
+                    if(!empty($checkDept->parent_id)) $deptIds = [\Auth::user()->dept_id, $checkDept->parent_id];
+                    $dept =  sprintf(' and dept_id in (%s)', implode(',', $deptIds));
+
+                    if((int)$lv['group_type_id'] === 1) $dept = '';
                     $userLeader = User::whereRaw( $roleId . $dept )->first();
                     //中间未配置审核人，跳过该审核步骤
                     //if(empty($userLeader->user_id)) return self::backLeaveData(false, ['holiday_id' => trans('申请失败，未设置部门审核人员,有疑问请联系人事')]);

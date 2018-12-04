@@ -11,6 +11,7 @@ namespace App\Components\AttendanceService\Cypher;
 use App\Components\Helper\DataHelper;
 use App\Http\Components\Helpers\AttendanceHelper;
 use App\Models\Attendance\Leave;
+use App\Models\Sys\Dept;
 use App\Models\Sys\ReviewStepFlow;
 use App\User;
 
@@ -263,13 +264,16 @@ class Cypher
                     $leaderStepUid[$lv['step_order_id']] = (User::getUsernameAliasList()[$lv['assign_uid']] ?? '')
                         .' <input type="hidden" name="step_user['.$lv['step_order_id'].']" value="'.$lv['assign_uid'].'">';
                 }
-
-                //指定角色类型
-                $dept = ' and dept_id ='.\Auth::user()->dept_id ;
+                //查询部门,如果有存在2级部门时，主部门也成员要查询
+                $checkDept = Dept::where(['dept_id' => \Auth::user()->dept_id])->first();
+                if(empty($checkDept->dept_id)) continue;
+                $deptIds = [\Auth::user()->dept_id];
+                if(!empty($checkDept->parent_id)) $deptIds = [\Auth::user()->dept_id, $checkDept->parent_id];
+                $dept =  sprintf(' and dept_id in (%s)', implode(',', $deptIds));
                 if((int)$lv['group_type_id'] === 1) $dept = '';
-
+                //指定角色类型
                 $roleId = sprintf('JSON_EXTRACT(role_id, "$.id_%d") = "%d"', $lv['assign_role_id'], $lv['assign_role_id']);
-                $userLeader = User::whereRaw($roleId . $dept)->get()->toArray();
+                $userLeader = User::where(['status' => User::STATUS_ENABLE])->whereRaw($roleId . $dept)->get()->toArray();
                 if((int)$lv['assign_type'] === 1 && empty($userLeader)) $leaderStepUid[$lv['step_order_id']]  = '';
                 if((int)$lv['assign_type'] === 1 && !empty($userLeader)) {
                     //是否可以修改审批人 角色分配大于等于2人
