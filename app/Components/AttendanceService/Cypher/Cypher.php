@@ -260,7 +260,7 @@ class Cypher
             foreach ($step['config'] as $lk => $lv) {
                 //指定人类型
                 if((int)$lv['assign_type'] === 0) {
-                    $leaderStepUid[$lv['step_order_id']] = (User::getUsernameAliasList()[$lv['assign_uid']] ?? '无')
+                    $leaderStepUid[$lv['step_order_id']] = (User::getUsernameAliasList()[$lv['assign_uid']] ?? '')
                         .' <input type="hidden" name="step_user['.$lv['step_order_id'].']" value="'.$lv['assign_uid'].'">';
                 }
 
@@ -270,7 +270,7 @@ class Cypher
 
                 $roleId = sprintf('JSON_EXTRACT(role_id, "$.id_%d") = "%d"', $lv['assign_role_id'], $lv['assign_role_id']);
                 $userLeader = User::whereRaw($roleId . $dept)->get()->toArray();
-                if((int)$lv['assign_type'] === 1 && empty($userLeader)) $leaderStepUid[$lv['step_order_id']]  = '无';
+                if((int)$lv['assign_type'] === 1 && empty($userLeader)) $leaderStepUid[$lv['step_order_id']]  = '';
                 if((int)$lv['assign_type'] === 1 && !empty($userLeader)) {
                     //是否可以修改审批人 角色分配大于等于2人
                     if((int)$step['is_modify'] === ReviewStepFlow::MODIFY_YES && count($userLeader) >= 2) {
@@ -284,13 +284,14 @@ class Cypher
                             .'</select> <input type="hidden" name="is_edit_step" value="'.ReviewStepFlow::MODIFY_YES.'">
                             <input type="hidden" name="step_id" value="'.$step['step_id'].'">';
                     } else {
-                        $leaderStepUid[$lv['step_order_id']] = (User::getUsernameAliasList()[$userLeader[0]['user_id']] ?? '无')
+                        $leaderStepUid[$lv['step_order_id']] = (User::getUsernameAliasList()[$userLeader[0]['user_id']] ?? '')
                             .' <input type="hidden" name="step_user['.$lv['step_order_id'].']" value="'.$lv['assign_uid'].'">';;
                     }
                 }
             }
         }
 
+        $leaderStepUid = array_filter($leaderStepUid);
         ksort($leaderStepUid);
         return empty($leaderStepUid) ? '未设置' : implode('>>', $leaderStepUid);
     }

@@ -44,7 +44,7 @@ class Operate
     {
         $holidayId = $request['holiday_id'];
 
-        //可编辑审核人的情况下,请求数据，在渠道Cypher->showLeaveStep 方法生成
+        //可编辑审核人的情况下,请求数据，在计算类型Cypher->showLeaveStep 方法生成
         if(!empty($request['step_id']) && !empty($request['step_user']) && !empty($request['is_edit_step']) && (int)$request['is_edit_step'] === ReviewStepFlow::MODIFY_YES) {
             $stepId = $request['step_id'];
 
@@ -63,6 +63,7 @@ class Operate
             $remainUser = json_encode($leaderStepUid);
 
         } else {
+            //获取系统配置审核步骤
             $steps = ReviewStepFlow::with('config')->where(['child_id' => $holidayId])->get()->toArray();
             $step = [];
             foreach ($steps as $sk => $sv) {
@@ -86,10 +87,15 @@ class Operate
                     $dept = ' and dept_id ='. \Auth::user()->dept_id ;
                     if((int)$lv['group_type_id'] === 1 || empty(\Auth::user()->dept_id)) $dept = '';
                     $userLeader = User::whereRaw( $roleId . $dept )->first();
-                    if(empty($userLeader->user_id)) return self::backLeaveData(false, ['holiday_id' => trans('申请失败，未设置部门审核人员,有疑问请联系人事')]);
+                    //中间未配置审核人，跳过该审核步骤
+                    //if(empty($userLeader->user_id)) return self::backLeaveData(false, ['holiday_id' => trans('申请失败，未设置部门审核人员,有疑问请联系人事')]);
+                    if(empty($userLeader->user_id)) continue;
                     $leaderStepUid[$lv['step_order_id']] = $userLeader->user_id;
                 }
             }
+
+            //申请单都未配置一个审核人，拒绝通过
+            if(empty($leaderStepUid)) return self::backLeaveData(false, ['holiday_id' => trans('申请失败，未设置部门审核人员,有疑问请联系人事')]);
 
             ksort($leaderStepUid);
             $stepUser = json_encode($leaderStepUid);
