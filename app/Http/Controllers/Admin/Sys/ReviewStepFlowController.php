@@ -34,7 +34,6 @@ class ReviewStepFlowController extends Controller
         $data = ReviewStepFlow::paginate(100);
 
         $step = ReviewStepFlowConfig::showReviewUser();
-        dd($step);
         $title = trans('app.审核流程配置列表');
         return view('admin.sys.review-step-flow', compact('title', 'data', 'step'));
     }
