@@ -10,6 +10,9 @@
 namespace App\Models\Sys;
 
 
+use App\Models\Role;
+use App\Models\RoleLeaveStep;
+use App\User;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -21,6 +24,9 @@ class ReviewStepFlowConfig extends Model
 
     protected $primaryKey = 'id';
 
+    const ASSIGN_USER = 0;
+    const ASSIGN_ROLE = 1;
+
     protected $fillable = [
         'step_id',
         'step_order_id',
@@ -29,4 +35,28 @@ class ReviewStepFlowConfig extends Model
         'group_type_id',
         'assign_role_id',
     ];
+
+    /**
+     * 显示审核步骤人员
+     */
+    public static function showReviewUser()
+    {
+        $config = self::all();
+
+        $users = User::getUsernameAliasAndDeptList();
+
+        $leaderStepUid = [];
+        foreach ($config as $lk => $lv) {
+            if((int)$lv['assign_type'] === self::ASSIGN_USER) {
+                $leaderStepUid[$lv['step_id']][$lv['step_order_id']] = $users[$lv['assign_uid']] ?? '未设置';
+            }
+
+            if((int)$lv['assign_type'] === self::ASSIGN_ROLE) {
+                $roles = Role::findOrFail($lv['assign_role_id']);
+                if(empty($roles->id)) continue;
+                $leaderStepUid[$lv['step_id']][$lv['step_order_id']] = $roles->name;
+            }
+        }
+        return $leaderStepUid;
+    }
 }

@@ -14,6 +14,7 @@ use App\Models\Attendance\DailyDetail;
 use App\Models\Sys\ApprovalStep;
 use App\Models\Sys\Dept;
 use App\Models\Sys\ReviewStepFlow;
+use App\Models\Sys\ReviewStepFlowConfig;
 use App\User;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use App\Models\Attendance\Leave;
@@ -78,12 +79,12 @@ class Operate
 
             $leaderStepUid = [];
             foreach ($step['config'] as $lk => $lv) {
-
-                if((int)$lv['assign_type'] === 0) {
+                //指定人
+                if((int)$lv['assign_type'] === ReviewStepFlowConfig::ASSIGN_USER) {
                     $leaderStepUid[$lv['step_order_id']] = $lv['assign_uid'];
                 }
-
-                if((int)$lv['assign_type'] === 1) {
+                //指定组 角色权限
+                if((int)$lv['assign_type'] === ReviewStepFlowConfig::ASSIGN_ROLE) {
                     $roleId = sprintf('JSON_EXTRACT(role_id, "$.id_%d") = "%d"', $lv['assign_role_id'], $lv['assign_role_id']);
                     //查询部门,如果有存在2级部门时，主部门也成员要查询
                     $checkDept = Dept::where(['dept_id' => \Auth::user()->dept_id])->first();
@@ -92,8 +93,8 @@ class Operate
                     if(!empty($checkDept->parent_id)) $deptIds = [\Auth::user()->dept_id, $checkDept->parent_id];
                     $dept =  sprintf(' and dept_id in (%s)', implode(',', $deptIds));
 
-                    if((int)$lv['group_type_id'] === 1) $dept = '';
-                    $userLeader = User::whereRaw( $roleId . $dept )->first();
+                    if((int)$lv['group_type_id'] === ReviewStepFlow::GROUP_UN) $dept = '';
+                    $userLeader = User::whereRaw($roleId . $dept)->first();
                     //中间未配置审核人，跳过该审核步骤
                     //if(empty($userLeader->user_id)) return self::backLeaveData(false, ['holiday_id' => trans('申请失败，未设置部门审核人员,有疑问请联系人事')]);
                     if(empty($userLeader->user_id)) continue;

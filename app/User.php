@@ -156,7 +156,7 @@ class User extends Authenticatable
 
         $res = [];
         foreach ($users as $k => $v) {
-            $res[$v['user_id']] = $v['dept']['dept'].' -> '.$v['alias'] . '('. $v['username'] . ')';
+            $res[$v['user_id']] = $v['dept']['dept'].'【'.$v['alias'] . '('. $v['username'] . ')】';
         }
 
         return $res;

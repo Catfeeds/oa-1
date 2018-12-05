@@ -87,14 +87,14 @@
                                                             <option value="{{ $k }}" @if($k === ($sv->step_order_id ?? old('step_order_id') ?? '')) selected="selected" @endif>{{ $v }}</option>
                                                         @endforeach
                                                     </select>
-                                                    <input id="assign_type" name="step[{{$sk}}][assign_type]" type="radio" value="0" @if($sv['assign_type'] === 0) checked="checked" @endif> {{trans('app.指定人')}}
+                                                    <input id="assign_type" name="step[{{$sk}}][assign_type]" type="radio" value="{{\App\Models\Sys\ReviewStepFlowConfig::ASSIGN_USER}}" @if($sv['assign_type'] === \App\Models\Sys\ReviewStepFlowConfig::ASSIGN_USER) checked="checked" @endif> {{trans('app.指定人')}}
                                                     <select id="assign_uid" name="step[{{$sk}}][assign_uid]" >
                                                         <option value="">{{trans('app.不指定')}}</option>
                                                         @foreach($userList as $k => $v)
                                                             <option value="{{ $k }}" @if($k === ($sv->assign_uid ?? old('assign_uid') ?? '')) selected="selected" @endif>{{ $v }}</option>
                                                         @endforeach
                                                     </select>
-                                                    <input id="assign_type"  name="step[{{$sk}}][assign_type]" type="radio" value="1" @if($sv['assign_type'] === 1) checked="checked" @endif > {{trans('app.指定组')}}
+                                                    <input id="assign_type"  name="step[{{$sk}}][assign_type]" type="radio" value="{{\App\Models\Sys\ReviewStepFlowConfig::ASSIGN_ROLE}}" @if($sv['assign_type'] === \App\Models\Sys\ReviewStepFlowConfig::ASSIGN_ROLE) checked="checked" @endif > {{trans('app.指定组')}}
 
                                                     <select id="group_type_id"  name="step[{{$sk}}][group_type_id]" >
                                                         @foreach(\App\Models\Sys\ApprovalStep::$groupType as $k => $v)
