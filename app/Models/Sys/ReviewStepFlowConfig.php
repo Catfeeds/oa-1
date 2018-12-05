@@ -52,7 +52,7 @@ class ReviewStepFlowConfig extends Model
             }
 
             if((int)$lv['assign_type'] === self::ASSIGN_ROLE) {
-                $roles = Role::findOrFail($lv['assign_role_id']);
+                $roles = Role::where(['id' => $lv['assign_role_id']])->first();
                 if(empty($roles->id)) continue;
                 $leaderStepUid[$lv['step_id']][$lv['step_order_id']] = $roles->name;
             }
