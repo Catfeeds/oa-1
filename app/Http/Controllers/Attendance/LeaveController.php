@@ -444,7 +444,7 @@ HTML;
         $config = PunchRulesConfig::getPunchRulesCfgToId($punchRules->punch_rules_id);
 
         if(!empty($config)) {
-            return response()->json(['status' => 1, 'start_time' => $config['start_time'], 'end_time' => $config['end_time'], 'last_time' => [ end($config['end_time'])] ]);
+            return response()->json(['status' => 1, 'start_time' => $config['show_start_time'], 'end_time' => $config['show_end_time'], 'last_time' => [ end($config['end_time'])] ]);
         } else {
             return response()->json(['status' => -1, 'start_time' => '', 'end_time' => '']);
         }

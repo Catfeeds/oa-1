@@ -180,7 +180,7 @@
          */
         function showMemo() {
             var val = $('#holiday_id').children('option:selected').val();
-            if(val != "" && val != null) {
+            if(val != "" && val != null  ) {
                 $('#show_pre').html('');
                 $.get('{{ route('leave.showMemo')}}', {id: val}, function ($data) {
                     if ($data.status == 1) {

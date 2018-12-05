@@ -58,30 +58,36 @@
                                         <div class="panel panel-default">
                                             <div class="panel-heading">
                                                 <h3 id="h3_a" class="panel-title col-sm-1 control-label">
-                                                    <a href="#collapseOne" data-toggle="collapse0" data-parent="#accordion">上下班时间</a>
+                                                    <a href="#collapseOne" data-toggle="collapse0" data-parent="#accordion">{{trans('上下班时间')}}</a>
                                                 </h3>
                                                 <div class="row">
-                                                    <div class="col-md-6">
-                                                        <div class="input-daterange input-group">
+                                                    <div class="col-md-8">
+                                                        <div class="form-inline">
+                                                            <label>{{trans('上班时间显示:')}}</label>
+                                                            <input id="show_start_yes" name="work[{{$key}}][is_show_start]" type="radio" value="0" @if(empty($punchRules->is_show_start)) checked="checked" @endif> 是
+                                                            <input id="show_start_no" name="work[{{$key}}][is_show_start]" type="radio" value="1" @if(!empty($punchRules->is_show_start)) checked="checked" @endif> 否
                                                             {!! Form::text('work['.$key.'][work_start_time]', $punchRules->work_start_time ?? (old('work_start_time') ?? '[0,0,0,0,0,0]'), [
                                                             'class' => 'input-sm form-control',
                                                             'id' => 'work_start_time',
                                                             ]) !!}
-                                                            <span class="input-group-addon" style="background-color:#eeeeee;">to</span>
+
+                                                            <label>{{trans('下班时间显示:')}}</label>
+                                                            <input id="show_end_yes" name="work[{{$key}}][is_show_end]" type="radio" value="0" @if(empty($punchRules->is_show_end)) checked="checked" @endif> 是
+                                                            <input id="show_end_no" name="work[{{$key}}][is_show_end]" type="radio" value="1" @if(!empty($punchRules->is_show_end)) checked="checked" @endif> 否
                                                             {!! Form::text('work['.$key.'][work_end_time]', $punchRules->work_end_time ?? (old('work_end_time') ?? '[0,0,0,0,0,0]'), [
                                                             'class' => 'input-sm form-control',
                                                             'id' => 'work_end_time',
                                                             ]) !!}
-                                                            <span class="input-group-addon" >{!!trans('app.上下班准备时间')!!}</span>
+
+                                                            <label>{{trans('上下班准备时间:')}}</label>
                                                             {!! Form::text('work['.$key.'][ready_time]', !empty($punchRules->ready_time) ? $punchRules->ready_time : (old('ready_time') ?? '[0,0,0,0,0,0]') , [
                                                             'class' => 'input-sm form-control',
                                                             'id' => 'ready_time',
                                                              ]) !!}
-                                                            <span class="help-block m-b-none">{{ $errors->first('work_start_time') }}</span>
-                                                            <span class="help-block m-b-none">{{ $errors->first('work_end_time') }}</span>
+
+                                                            <button style="margin-left: 2em" id="remove_rule" rel="" type="button" class="btn btn-danger btn-xs">删除</button>
                                                         </div>
                                                     </div>
-                                                    <button id="remove_rule" rel="" type="button" class="btn btn-danger btn-xs">删除</button>
                                                 </div>
 
                                             <div id="collapseOne" class="panel-collapse collapse in">
@@ -178,20 +184,6 @@
 @section('scripts-last')
 <script>
     $(function() {
-
-/*        $('[name=punch_type_id]').on('ifChecked', function () {
-            if ($(this).val() == '{{ \App\Models\Sys\PunchRules::RESTDAY }}' || $(this).val() == '{{ \App\Models\Sys\PunchRules::HOLIDAY }}') {
-                $('[name=ready_time]').prop('required', false).parents('.form-group').hide();
-                $('[name=work_start_time]').prop('required', false).parents('.form-group').hide();
-                $('[name=work_end_time]').prop('required', false).parents('.form-group').hide();
-            }else {
-                $('[name=ready_time]').parents('.form-group').show();
-                $('[name=work_start_time]').parents('.form-group').show();
-                $('[name=work_end_time]').parents('.form-group').show();
-            }
-        });*/
-
-
         var i = 0;
         var key = {{$key}};
 
@@ -239,6 +231,10 @@
             clone.find("*[id=work_start_time]").attr({'name': 'work['+ key +'][work_start_time]', 'id': 'work_start_time' + key });
             clone.find("*[id=work_end_time]").attr({'name': 'work['+ key +'][work_end_time]', 'id': 'work_end_time' + key });
             clone.find("*[id=ready_time]").attr({'name': 'work['+ key +'][ready_time]', 'id': 'ready_time' + key });
+            clone.find("*[id=show_start_yes]").attr({'name': 'work['+ key +'][is_show_start]', 'id': 'show_start_yes' + key });
+            clone.find("*[id=show_start_no]").attr({'name': 'work['+ key +'][is_show_start]', 'id': 'show_start_no' + key });
+            clone.find("*[id=show_end_yes]").attr({'name': 'work['+ key +'][is_show_end]', 'id': 'show_end_yes' + key });
+            clone.find("*[id=show_end_no]").attr({'name': 'work['+ key +'][is_show_end]', 'id': 'show_end_no' + key });
             clone.find("*[id=rule_desc]").attr({'name': 'work['+ key +'][cfg]['+ i +'][rule_desc]'});
             clone.find("*[id=late_type]").attr({'name': 'work['+ key +'][cfg]['+ i +'][late_type]'});
             clone.find("*[id=start_gap]").attr({'name': 'work['+ key +'][cfg]['+ i +'][start_gap]'});
