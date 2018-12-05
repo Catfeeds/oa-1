@@ -53,9 +53,11 @@ class Change extends Operate implements AttendanceInterface
         } else {
             //加班调休获得的时间点范围ID,可查看leave模型里面配置的$workTimePoint
             //申请时间
+            if(empty($p['start_id']))  return $this->backLeaveData(false, ['start_time' => trans('未有剩余调休假期')]);
             $startTime = (string)$p['start_time'];
             $endTime =  (string)$p['start_time'];
             $numberDay = (int)$p['start_id'];
+
             $timePointChar = Leave::$workTimePointChar;
             $startId = $timePointChar[$p['start_id']]['start_time'];
             $endId = $timePointChar[$p['start_id']]['end_time'];
@@ -211,7 +213,7 @@ class Change extends Operate implements AttendanceInterface
      */
     public function getLeaveView($leaveId = '')
     {
-        $title = trans('att.调休申请');
+        $title = trans('att.加班/调休申请');
         $reviewUserId = $startId = $endId = '';
         $copyUserIds = [];
         //申请单重启

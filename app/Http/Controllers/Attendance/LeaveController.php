@@ -62,7 +62,8 @@ class LeaveController extends AttController
                 break;
         }
 
-        $data = Leave::whereRaw($scope->getWhere() . $where)
+        $data = Leave::with('holidayConfig')
+            ->whereRaw($scope->getWhere() . $where)
             ->whereHas('holidayConfig', function ($query) {
                 $query->where('is_show', HolidayConfig::STATUS_ENABLE);
             })
@@ -242,9 +243,13 @@ class LeaveController extends AttController
      */
     public function optInfo($id)
     {
+        try{
+            $leave = Leave::with('holidayConfig')->findOrFail($id);
+            if(empty($leave->leave_id)) return redirect()->route('leave.info');
+        } catch (\Exception $e) {
+            return redirect()->route('leave.info');
+        }
 
-        $leave = Leave::with('holidayConfig')->findOrFail($id);
-        if(empty($leave->leave_id)) return redirect()->route('leave.info');
         //抄送人员也可以查看
         $copyIds = json_decode($leave->copy_user, true);
         $userIds = json_decode($leave->user_list, true);
@@ -257,7 +262,7 @@ class LeaveController extends AttController
             $applyTypeId = $leave->holidayConfig->apply_type_id;
             $cypherType = $leave->holidayConfig->cypher_type;
             $users = User::getUsernameAliasAndDeptList();
-            return view('attendance.leave.info', compact('title',  'leave', 'dept', 'users', 'reviewUserId',  'logs', 'applyTypeId', 'userIds', 'deptUsers', 'cypherType'));
+            return view('attendance.leave.info', compact('title', 'copyIds', 'leave', 'dept', 'users', 'reviewUserId',  'logs', 'applyTypeId', 'userIds', 'deptUsers', 'cypherType'));
         } else {
             return redirect()->route('leave.info');
         }
@@ -269,7 +274,12 @@ class LeaveController extends AttController
      */
     public function optReviewInfo($id)
     {
-        $leave = Leave::with('holidayConfig')->findOrFail($id);
+        try{
+            $leave = Leave::with('holidayConfig')->findOrFail($id);
+            if(empty($leave->leave_id)) return redirect()->route('leave.info');
+        } catch (\Exception $e) {
+            return redirect()->route('leave.info');
+        }
 
         //操作过的人可查看
         $logUserIds = OperateLogHelper::getLogUserIdToInId($leave->leave_id);

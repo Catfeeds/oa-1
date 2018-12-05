@@ -39,9 +39,7 @@
                     <div class="form-group">
                         {!! Form::label('holiday_id', trans('att.申请类型'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-6">
-                            <span class="help-block m-b-none">
-                                {{ \App\Models\Sys\HolidayConfig::$applyType[\App\Models\Sys\HolidayConfig::getHolidayApplyList()[$leave->holiday_id]] ?? ''}}
-                            </span>
+                            {!! \App\Models\Sys\HolidayConfig::applyTypeColor($leave->holidayConfig->apply_type_id) !!}
                         </div>
                     </div>
 
@@ -158,6 +156,22 @@
                                     @foreach($users as $key => $val)
                                         <option value="{{ $key }}"
                                                 @if (in_array($key, $userIds)) selected @endif>{{ $val }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                    @endif
+
+                    {{--抄送名单显示--}}
+                    @if(!empty($leave->copy_user) && !empty($copyIds))
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            {!! Form::label('reason', trans('att.抄送名单'), ['class' => 'col-sm-2 control-label']) !!}
+                            <div class="col-sm-6">
+                                <select disabled="disabled" multiple="multiple" class="js-select2-multiple form-control">
+                                    @foreach($users as $key => $val)
+                                        <option value="{{ $key }}"
+                                                @if (in_array($key, $copyIds)) selected @endif>{{ $val }}</option>
                                     @endforeach
                                 </select>
                             </div>

@@ -242,6 +242,8 @@
                         $('#show_step').html('');
                     }
                 })
+            } else {
+                $('#show_step').html('');
             }
         }
 

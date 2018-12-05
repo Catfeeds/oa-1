@@ -15,7 +15,7 @@
                     {!! Form::open(['class' => 'form-horizontal', 'enctype' => 'multipart/form-data']) !!}
                     {{ Form::hidden('leave_id', $leave->leave_id ?? '') }}
                     <div class="form-group @if (!empty($errors->first('holiday_id'))) has-error @endif">
-                        {!! Form::label('holiday_id', trans('att.调休类型'), ['class' => 'col-sm-2 control-label']) !!}
+                        {!! Form::label('holiday_id', trans('att.申请类型'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-2">
                             <select onchange="showMemo()" id ='holiday_id' class="js-select2-single form-control" name="holiday_id" >
                                 <option value="">请选择</option>
@@ -36,7 +36,7 @@
                     <div class="hr-line-dashed"></div>
 
                     <div class="form-group @if (!empty($errors->first('start_time'))) has-error @endif">
-                        {!! Form::label('start_time', trans('att.调休开始时间'), ['class' => 'col-sm-2 control-label']) !!}
+                        {!! Form::label('start_time', trans('att.申请开始时间'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-3">
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
@@ -206,6 +206,8 @@
                         $('#show_step').html('');
                     }
                 })
+            } else {
+                $('#show_step').html('');
             }
         }
 

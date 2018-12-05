@@ -232,4 +232,5 @@ class Leave extends Model
         return '<span class="'. (self::$leaveColor[$status] ?? '') .'">'.self::$status[$status] .'</span>';
     }
 
+
 }

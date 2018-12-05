@@ -69,8 +69,15 @@ class HolidayConfig extends Model
 
     public static $applyType = [
         self::LEAVEID => '请假',
-        self::CHANGE => '加班调休',
+        self::CHANGE => '加班/调休申请',
         self::RECHECK => '补打卡',
+    ];
+
+    public static $applyTypeColor = [
+        self::LEAVEID => 'btn-primary',
+        self::CHANGE => 'btn-success',
+        self::RECHECK => 'btn-danger',
+        self::OVERTIME => 'btn-info',
     ];
 
     public static $allApplyType = [
@@ -235,5 +242,11 @@ class HolidayConfig extends Model
             ->whereIn('restrict_sex', [\Auth::user()->userExt->sex, UserExt::SEX_NO_RESTRICT])
             ->where(['is_show' => self::STATUS_ENABLE])
             ->first();
+    }
+    public static function applyTypeColor($applyId)
+    {
+        $applyType = self::$applyType + [self::OVERTIME];
+
+        return '<a class="btn '. (self::$applyTypeColor[$applyId] ?? '') .' btn-rounded btn-xs">'. ($applyType[$applyId] ?? '数据异常') .'</a>';
     }
 }
