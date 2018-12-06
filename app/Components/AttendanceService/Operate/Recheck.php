@@ -171,7 +171,7 @@ class Recheck extends Operate implements AttendanceInterface
     public function updateSwitchInLeave($dailyDetail)
     {
         $punchHelper = app(PunchHelper::class);
-        $formulaCalPunRuleConf = $punchHelper->getCalendarPunchRules($dailyDetail->day, $dailyDetail->day)['formula'];
+        $formulaCalPunRuleConf = PunchHelper::getCalendarPunchRules($dailyDetail->day, $dailyDetail->day)['formula'];
         $switch = Leave::where(['user_id' => $dailyDetail->user_id, 'start_time' => $dailyDetail->day])->whereIn('status', [
             Leave::SWITCH_REVIEW_ON, Leave::SWITCH_REVIEW_OFF,
         ])->first();

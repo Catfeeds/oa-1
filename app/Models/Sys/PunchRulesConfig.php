@@ -65,6 +65,7 @@ class PunchRulesConfig extends Model
                 'late_type' => $v['late_type'],
                 'ded_type' => $v['ded_type'],
                 'ded_num' => $v['ded_num'],
+                'holiday_id' => $v['holiday_id']
             ];
             $arr_[$sKey.'$$'.$eKey.'$$'.$rKey] = strtotime($rKey);
         }

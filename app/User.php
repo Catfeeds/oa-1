@@ -188,4 +188,9 @@ class User extends Authenticatable
     {
         return self::get(['user_id', 'alias'])->pluck('user_id', 'alias')->toArray();
     }
+
+    public static function getUserKeyByAlias()
+    {
+        return self::get(['user_id', 'alias'])->keyBy('alias');
+    }
 }

@@ -29,7 +29,7 @@ class IndexController extends Controller
     public function getCalendarByAjax(Request $request)
     {
         $year = (int)$request->input('year');$month = (int)$request->input('month');
-        $startDate = $year.'-'.$month.'-01';
+        $startDate = sprintf('%s-%02s-01', $year, $month);
         $endDate = date('Y-m-t', strtotime($startDate));
         $p = PunchHelper::getCalendarPunchRules($startDate, $endDate, true);
         $formulaCalPunRuleConf = $p['formula'];

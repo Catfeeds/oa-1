@@ -56,17 +56,17 @@
             width: 1300px;
         }
     }
-    @media (min-width: 1000px ) and (max-width: 1400px) {
+    @media (min-width: 800px ) and (max-width: 1400px) {
         #common > div.col-sm-4 {
             width: 50%;
         }
-        .container {width: 900px;}
+        .container {width: 100%;}
     }
-    @media (max-width: 1000px) {
+    @media (max-width: 800px) {
         #common > div.col-sm-4 {
             width: 100%;
         }
-        .container {width: 450px;}
+        .container {width: 100%;}
     }
 
 </style>

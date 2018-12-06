@@ -125,7 +125,7 @@ class ReviewHelper
     public function getDanger($startDate, $endDate, $dailyDetailData)
     {
         $danger = array();
-        $formulaCalPunRuleConf = app(PunchHelper::class)->getCalendarPunchRules($startDate, $endDate)['formula'];
+        $formulaCalPunRuleConf = PunchHelper::getCalendarPunchRules($startDate, $endDate)['formula'];
         foreach ($dailyDetailData as $datum) {
             $danger[$datum->day] = ['on_work' => false, 'off_work' => false];
             /*if (!empty($formulaCalPunRuleConf[$datum->day])) {

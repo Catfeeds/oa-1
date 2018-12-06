@@ -21,6 +21,7 @@ use App\Models\Sys\PunchRules;
 use App\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redis;
 
 
 class PunchRecordController extends Controller
@@ -137,27 +138,36 @@ class PunchRecordController extends Controller
         \Excel::load(storage_path($punchRecord->annex), function ($reader) use ($punchRecord, $isOK, $nightConf) {
             $reader = $reader->getSheet(0);
             $reader = $reader->toarray();
-
+            array_shift($reader);
+            $r = collect($reader)->pluck('0')->unique()->map(function ($v) {
+                list($m, $d, $y) = explode('-', $v);
+                return sprintf("20%s-%s-%s", $y, (int)$m, (int)$d);
+            });
+            $maxTs = $r->max(); $minTs = $r->min(); unset($r);
+            $YmdMaxTs = date('Y-m-d', strtotime($maxTs));
+            $YmdMinTs = date('Y-m-d', strtotime($minTs));
+            $calendarArr = Calendar::getCalendarArrWithPunchRules($minTs, $maxTs);
             $data = $msgArr = $bufferArr = [];
-            $minTs = '2300-12-31';
-            $maxTs = '2001-01-01';
-            $userIds = User::getIdListByUserName();
+            $users = User::getUserKeyByAlias();
+            $nights = Leave::where(['status' => Leave::WAIT_EFFECTIVE, 'holiday_id' => $nightConf->holiday_id])
+                ->whereBetween(DB::raw('DATE_FORMAT(start_time, \'%Y-%c-%e\')'), [$minTs, $maxTs])->get(['end_time', 'user_id', 'start_time']);
+            $formulaCalPunRuleConfArr = PunchHelper::getCalendarPunchRules($YmdMinTs, $YmdMaxTs, false, $calendarArr)['formula'];
 
             foreach ($reader as $k => $v) {
-                if ($v[0] == null || $k == 0) continue;
+                //if ($v[0] == null || $k == 0) continue;
                 //去除空值
                 $v = array_filter($v);
                 //转换成1970年以来的秒数,用来显示日期
                 //$n = intval(($v[0] - 25569) * 3600 * 24);
 
-                $endTime = end($v);
+                //$endTime = end($v);
                 //打卡记录里面的第五列是打卡开始时间
                 $startTime = $v[5];
-                if (count($v) <= 6 && (int)str_replace(':', '', $v[5]) >= 1400) {
+                /*if (count($v) <= 6 && (int)str_replace(':', '', $v[5]) >= 1400) {
                     $startTime = NULL;
                 } elseif (count($v) <= 6 && (int)str_replace(':', '', $v[5]) <= 1400) {
                     $endTime = NULL;
-                }
+                }*/
 
                 $ts = str_replace('/', '-', $v[0]);
                 //本地环境格式
@@ -170,23 +180,17 @@ class PunchRecordController extends Controller
                 $month = (int)$month;
                 //线上环境end
 
-                $calendar = Calendar::with('punchRules')
-                    ->where(['year' => $year, 'month' => $month, 'day' => $day])
-                    ->first();
+                //线上环境
+                $ts = sprintf('%d-%02d-%02d', $year, $month, $day);
 
+                $calendar = $calendarArr[$ts] ?? NULL;
                 if (empty($calendar->punch_rules_id)) {
                     $isOK = false;
                     $msgArr[] = '未匹配到[' . $year . '-' . $month . '-' . $day . ']日期考勤规则设置,导入失败!';
                     break;
                 }
 
-                //线上环境
-//                    $ts = $year . '-' . $month . '-' . $day;
-                $ts = sprintf('%d-%02d-%02d', $year, $month, $day);
-                $minTs = strtotime($ts) <= strtotime($minTs) ? $ts : $minTs;
-                $maxTs = strtotime($ts) >= strtotime($maxTs) ? $ts : $maxTs;
-
-                list($lastDayEndTime, $startTime) = $this->punchHelper->dealLastDayEnd($ts, $v, $userIds, $nightConf);
+                list($lastDayEndTime, $startTime, $endTime) = $this->punchHelper->dealLastDayEnd($ts, $v, $users, $nights);
 
                 //线上环境end
                 $row = [
@@ -204,7 +208,7 @@ class PunchRecordController extends Controller
                 $data[$ts][$v[3]] = $row;
                 ksort($data);
             }
-            $formulaCalPunRuleConfArr = PunchHelper::getCalendarPunchRules($minTs, $maxTs)['formula'];
+            unset($calendarArr, $k, $v, $reader);
 
             if (!$isOK) {
                 //信息记录
@@ -214,22 +218,22 @@ class PunchRecordController extends Controller
                 throw new \Exception('信息错误');
             }
 
+            $details = DailyDetail::whereBetween('day', [$YmdMinTs, $YmdMaxTs])->get();
             foreach ($data as $dk => $dv) {
 
-                /*$punchRuleStartTime = strtotime($dk . ' ' . $calendar->punchRules->work_start_time);
-                $punchRuleEndTime = strtotime($dk . ' ' . $calendar->punchRules->work_end_time);*/
+                $detailKeyByUser = $details->where('day', $dk)->keyBy('user_id');
 
                 foreach ($dv as $u) {
-                    
+
                     if (empty($u['ts']) || empty($u['alias'])) continue;
 
-                    $user = User::where(['alias' => $u['alias']])->first();
+                    $user = $users[$u['alias']] ?? NULL;
                     if (empty($user->alias)) {
                         $msgArr[] = '未找到[' . $u['alias'] . ']员工信息!';
                         continue;
                     }
 
-                    $detail = DailyDetail::where(['user_id' => $user->user_id, 'day' => $u['ts']])->first();
+                    $detail = $detailKeyByUser[$user->user_id] ?? NULL;
                     if (count($formulaCalPunRuleConfArr[$u['ts']]) === 0) {
                         $msgArr[] = '[' . $u['ts'] . ']这天未有上下班打卡配置,请先配置';
                         continue;
@@ -256,19 +260,12 @@ class PunchRecordController extends Controller
                         'lave_buffer_num'      => $deducts['deducts']['remain_buffer'] ?? 0,
                         'deduction_num'        => $deducts['deducts']['deduct_score']['score'] ?? 0,
                         'leave_id'             => empty($switchLeaveIds) ? NULL : json_encode($switchLeaveIds),
+                        'created_at'           => date('Y-m-d H:i:s', time()),
+                        'updated_at'           => date('Y-m-d H:i:s', time()),
                     ];
 
-                    $userDailyDetail = DailyDetail::where(['user_id' => $user->user_id, 'day' => $dk])->first();
+                    $userDailyDetail = $detailKeyByUser[$user->user_id] ?? NULL;
                     if (!empty($userDailyDetail->user_id)) {
-
-                        //更新表中的迟到分数
-                        /*$hn = $dn = 0;
-                        if (empty($userDailyDetail->punch_start_time) && !empty($userDailyDetail->punch_end_time)) {
-                            $hn = $dn = $startNum;
-                        }
-                        if (!empty($userDailyDetail->punch_start_time) && empty($userDailyDetail->punch_end_time)) {
-                            $hn = $dn = $endNum;
-                        }*/
 
                         //向审核通过时插入的数据中添加excel打卡表中正常打卡的数据
                         $userDailyDetail->update([
@@ -288,6 +285,7 @@ class PunchRecordController extends Controller
                     $msgArr[] = $u['alias'] . '员工导入[' . $dk . ']考勤记录成功!';
                 }
             }
+            /*DailyDetail::insert($dailyDetail);*/
             unset($bufferArr, $data);
             //信息记录
             $strArr = '<?php return ' . var_export($msgArr, true) . ';';
