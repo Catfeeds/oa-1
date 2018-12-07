@@ -21,11 +21,11 @@ use App\Models\Sys\Job;
 use App\Models\Sys\School;
 use App\Models\UserExt;
 use App\User;
-use EasyWeChat\Kernel\Messages\Message;
 use EasyWeChat\Kernel\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
+use Illuminate\Mail\Message;
 
 class EntryController extends AttController
 {
@@ -252,10 +252,10 @@ class EntryController extends AttController
         $url = sprintf(url('/') . '/entry/fill/%s/%s', $entry->remember_token, md5($rememberToken . self::APP_KEY));
 
         //邮箱发送信息
-        $mailContent = '新人入职邮件邀请：
-亲爱的 '.$entry->name.' 同学：
-欢迎加入诗悦网络！
-为方便您尽快融入我们，请您务必点击下方链接完成个人入职信息录入，预祝您工作顺利！
+        $mailContent = '新人入职邮件邀请：</br>
+亲爱的 '.$entry->name.' 同学：</br>
+&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp欢迎加入诗悦网络！</br>
+&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp为方便您尽快融入我们，请您务必点击下方链接完成个人入职信息录入，预祝您工作顺利！</br>
 网页地址:'.$url;
 
         try {
