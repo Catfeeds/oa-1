@@ -127,10 +127,10 @@ class EntryController extends AttController
         }
 
         $data['creater_id'] = \Auth::user()->user_id;
-        $data['copy_user'] = json_encode($data['copy_users']);
+        $data['copy_user'] = json_encode($data['copy_user']) ?? NUll;
         $data['remember_token'] = Str::random(60);
         $data['send_time'] = date('Y-m-d H:i:s', time());
-        $data['role_id'] = json_encode($data['role_id']);
+        $data['role_id'] = json_encode($data['role_id']) ?? NUll;
 
         Entry::create($data);
         flash(trans('app.添加成功', ['value' => trans('staff.待入职人员')]), 'success');
