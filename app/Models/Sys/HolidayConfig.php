@@ -125,9 +125,9 @@ class HolidayConfig extends Model
     ];
 
     public static $reliefType = [
-        self::NO_SETTING => '不设置',
-        self::RELIEF_GO_WORK => '上班',
-        self::RELIEF_OFF_WORK => '下班'
+        self::NO_SETTING => '上班+下班减免',
+        self::RELIEF_GO_WORK => '上班减免',
+        self::RELIEF_OFF_WORK => '下班减免'
     ];
 
     public static $changeType = [

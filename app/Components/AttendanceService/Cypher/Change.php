@@ -191,9 +191,9 @@ class Change extends Cypher
     public function sendWXContent($msgArr)
     {
         $content = '【'.$msgArr['applyType'].'】'.$msgArr['notice'].'
+申请事项：'.$msgArr['holiday'].'
 申请人：'.$msgArr['username'].'
 所属部门：'.$msgArr['dept'].'
-申请事项：'.$msgArr['holiday'].'
 开始时间：'.$msgArr['start_time'].'
 结束时间：'.$msgArr['end_time'].'
 折合时间：'.Leave::$workTimePoint[$msgArr['number_day']] ?? '获取异常'.'

@@ -198,7 +198,7 @@
             var startTime = $('#start_time').val();
 
             if(startTime == '' || startTime == null)
-                start_time = '{{$leave->start_time}}';
+                start_time = '{{$leave->start_time ?? ''}}';
 
             if(holidayId != '') {
                 $.get('{{ route('leave.inquire')}}', {holidayId: holidayId,startTime: startTime}, function ($data) {

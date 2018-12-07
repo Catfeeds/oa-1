@@ -51,9 +51,9 @@ class Recheck extends Cypher
     public function sendWXContent($msgArr)
     {
         $content =  '【'.$msgArr['applyType'].'】'.$msgArr['notice'].'
+申请事项：'.$msgArr['holiday'].'
 申请人：'.$msgArr['username'].'
 所属部门：'.$msgArr['dept'].'
-申请事项：'.$msgArr['holiday'].'
 打卡时间：'.$msgArr['start_time'].' 
 点击此处查看申请详情[<a href = "'.$msgArr['url'].'">点我前往</a>]';
 

@@ -236,11 +236,11 @@
             var startId = $('#start_id').val();
             var endId =  $('#end_id').val();
 
-            if(startId == '' || startId == null)
-                startId = '{{$leave->start_id}}';
+            if(startId == '' || startId == null )
+                startId = '{{$leave->start_id ?? ''}}';
 
             if(endId == '' || endId == null)
-                endId = '{{$leave->end_id}}';
+                endId = '{{$leave->end_id ?? ''}}';
 
             if (endTime >= startTime && holidayId != '' && startTime != '' && endTime != '' && startId != '' && startId != null && endId != '' && endId != null ) {
                 $.get('{{ route('leave.inquire')}}', {holidayId: holidayId,startTime: startTime, endTime: endTime, startId:startId, endId:endId}, function ($data) {
