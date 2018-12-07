@@ -138,6 +138,11 @@ class User extends Authenticatable
         return self::get(['user_id', 'alias'])->pluck('alias', 'user_id')->toArray();
     }
 
+    public static function getUsernameList()
+    {
+        return self::get(['user_id', 'username'])->pluck('username', 'user_id')->toArray();
+    }
+
     public static function getUsernameAliasList()
     {
         $users = self::where(['status' => self::STATUS_ENABLE])->get(['user_id', 'alias', 'username'])->toArray();

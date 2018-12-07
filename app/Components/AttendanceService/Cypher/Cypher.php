@@ -10,6 +10,7 @@ namespace App\Components\AttendanceService\Cypher;
 
 use App\Components\Helper\DataHelper;
 use App\Http\Components\Helpers\AttendanceHelper;
+use App\Http\Components\Helpers\OperateLogHelper;
 use App\Models\Attendance\Leave;
 use App\Models\Sys\Dept;
 use App\Models\Sys\ReviewStepFlow;
@@ -300,7 +301,11 @@ class Cypher
         return empty($leaderStepUid) ? '未设置' : implode('>>', $leaderStepUid);
     }
 
-
+    /**
+     * 获取申请天数
+     * @param $params
+     * @return int|number
+     */
     public function getLeaveNumberDay($params)
     {
         $numberDay = 0;
@@ -310,6 +315,38 @@ class Cypher
         $numberDay = DataHelper::leaveDayDiff($params['startTime'], $params['startId'], $params['endTime'], $params['endId']);
 
         return $numberDay;
+    }
+
+    /**
+     *  显示申请时间
+     * @param $params
+     * @return array
+     */
+    public function spliceLeaveTime($params)
+    {
+        return [
+            'time'=> DataHelper::dateTimeFormat($params['time'] .' '. $params['timeId'], 'Y-m-d H:i'),
+            'number_day' => $params['number_day'] . '天',
+        ];
+    }
+
+    /**
+     * 微信消息内容
+     * @param $msgArr
+     */
+    public function sendWXContent($msgArr)
+    {
+        $content =  '【'.$msgArr['applyType'].'】'.$msgArr['notice'].'
+申请人：'.$msgArr['username'].'
+所属部门：'.$msgArr['dept'].'
+申请事项：'.$msgArr['holiday'].'
+开始时间：'.$msgArr['start_time'].' '.$msgArr['start_id'].'
+结束时间：'.$msgArr['end_time'].' '.$msgArr['end_id'].'
+折合时间：'.$msgArr['number_day'].'
+点击此处查看申请详情[<a href = "'.$msgArr['url'].'">点我前往</a>]';
+
+        //企业微信通知审核人员
+        OperateLogHelper::sendWXMsg($msgArr['send_user'], $content);
     }
 
 }

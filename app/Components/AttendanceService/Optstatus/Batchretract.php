@@ -8,7 +8,6 @@
 
 namespace App\Components\AttendanceService\Optstatus;
 
-
 use App\Models\Attendance\Leave;
 use App\Models\Sys\OperateLog;
 
@@ -25,10 +24,12 @@ class Batchretract extends Opt
         $batchUserIds = json_decode($leave->user_list, true);
 
         //批量更新调休列表成员为撤回状态，排除已经撤回的人员
-        foreach ($batchUserIds as $k => $uid) {
-            Leave::where(['user_id' => $uid, 'parent_id' => $leave->leave_id])
-                ->whereNotIn('status', [Leave::RETRACT_REVIEW])
-                ->update(['status' => Leave::RETRACT_REVIEW]);
+        if($batchUserIds) {
+            foreach ($batchUserIds as $k => $uid) {
+                Leave::where(['user_id' => $uid, 'parent_id' => $leave->leave_id])
+                    ->whereNotIn('status', [Leave::RETRACT_REVIEW])
+                    ->update(['status' => Leave::RETRACT_REVIEW]);
+            }
         }
 
         $leave->update(['status' => Leave::RETRACT_REVIEW]);

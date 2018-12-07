@@ -110,7 +110,8 @@
                             <select multiple="multiple" class="js-select2-multiple form-control"
                                     name="copy_user[]">
                                 @foreach($allUsers as $key => $val)
-                                    <option value="{{ $val['user_id'] }}">{{ $val['alias'].'('.$val['username'].')' }}</option>
+                                    <option value="{{ $val['user_id'] }}"
+                                            @if (!empty($copyUserIds) && in_array($val['user_id'], $copyUserIds)) selected @endif>{{ $val['alias'].'('.$val['username'].')' }}</option>
                                 @endforeach
                             </select>
                             <span class="help-block m-b-none">{{ $errors->first('copy_user') }}</span>
@@ -172,7 +173,6 @@
             showMemo();
             inquireStartInfo();
             inquireEndInfo();
-            inquire();
         });
 
         /**
@@ -224,17 +224,25 @@
             var endTime = $('#end_time').val();
             getPunchRules(endTime, 2);
             inquire();
-
         }
 
+        /**
+         * 显示审核步骤
+         */
         function inquire() {
             var holidayId = $('#holiday_id').val();
             var startTime = $('#start_time').val();
             var endTime = $('#end_time').val();
             var startId = $('#start_id').val();
-            var endId = $('#end_id').val();
+            var endId =  $('#end_id').val();
 
-            if (endTime >= startTime && holidayId != ''  && startTime != '' && endTime != '' && startId != '' && startId != null && endId != '' && endId != null ) {
+            if(startId == '' || startId == null)
+                startId = '{{$leave->start_id}}';
+
+            if(endId == '' || endId == null)
+                endId = '{{$leave->end_id}}';
+
+            if (endTime >= startTime && holidayId != '' && startTime != '' && endTime != '' && startId != '' && startId != null && endId != '' && endId != null ) {
                 $.get('{{ route('leave.inquire')}}', {holidayId: holidayId,startTime: startTime, endTime: endTime, startId:startId, endId:endId}, function ($data) {
                     if ($data.status == 1) {
                         $('#show_step').html($data.step).find('select').select2();
@@ -254,7 +262,6 @@
          */
         function getPunchRules(time, type) {
             $.get('{{ route('leave.getPunchRules')}}', {time: time}, function ($data) {
-
                 switch (type){
                     case 1:
                         if ($data.status == 1) {
@@ -267,8 +274,8 @@
                                 data: $data.start_time //绑定数据
                             });
 
-                            @if(!empty($startId))
-                                start_id = '{{$startId}}';
+                            @if(!empty($leave->start_id))
+                                start_id = '{{$leave->start_id}}';
                             @else
                                 start_id = $data.start_time[0];
                             @endif
@@ -291,8 +298,8 @@
                                 data: $data.end_time //绑定数据
                             });
 
-                            @if(!empty($endId))
-                                end_id = '{{$endId}}';
+                            @if(!empty($leave->end_id))
+                                end_id = '{{$leave->end_id}}';
                             @else
                                 end_id = $data.end_time[0];
                             @endif
@@ -301,7 +308,6 @@
                         } else {
                             $("#end_id").select2("val", "");
                             $("#end_id").empty();
-
                         }
                 }
 

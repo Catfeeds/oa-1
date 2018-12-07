@@ -59,8 +59,8 @@
                         <div class="col-sm-3">
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                                {!! Form::text('end_time', $leave->end_time ?? old('start_time') ?? '' , [
-                                'class' => 'form-control date_time',
+                                {!! Form::text('end_time', !empty($leave->end_time) ? date('Y-m-d H:i', strtotime($leave->end_time)) : old('start_time') ?? '' , [
+                                'class' => 'form-control date_time_hi',
                                 ]) !!}
                                 <span class="help-block m-b-none">{{ $errors->first('end_time') }}</span>
                             </div>
@@ -222,14 +222,13 @@
                 $('#show_pre').html('');
                 $.get('{{ route('leave.showMemo')}}', {id: val}, function ($data) {
                     if ($data.status == 1) {
-                        if($data.show_memo){
+                        if($data.show_memo) {
                             $('#show_pre').html($data.memo);
                             $('#show_memo').show();
                         }
                         if($data.show_day) {
                             $('#show_p').show();
                             $('#show_p').html($data.msg);
-
 
                             $("#start_id").select2("val", "");
                             $("#start_id").empty();
@@ -256,8 +255,12 @@
                         if($data.show_time) {
                             $('#show_time').show();
                             $('#start_time').attr('rel', 1);
-                            $('#start_time').val($data.day);
 
+                            @if(!empty($leave->start_time))
+                                 $('#start_time').val('{{date('Y-m-d', strtotime($leave->start_time))}}');
+                            @else
+                                 $('#start_time').val($data.day);
+                            @endif
                             $("#start_id").select2({
                                 placeholder: "-请选择时间点-", //默认所有
                                 allowClear: true, //清楚选择项
@@ -265,7 +268,12 @@
                                 data: $data.start_id //绑定数据
                             });
 
-                            $('#end_time').val($data.end_day);
+                            @if(!empty($leave->end_time))
+                                 $('#end_time').val('{{date('Y-m-d H:i', strtotime($leave->end_time))}}');
+                            @else
+                                 $('#end_time').val($data.end_day);
+                            @endif
+
                             inquire();
                             $('#show_msg').html($data.msg);
                             $('#show_msg_p').show();

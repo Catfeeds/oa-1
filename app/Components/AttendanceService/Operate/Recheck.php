@@ -11,6 +11,7 @@
 namespace App\Components\AttendanceService\Operate;
 
 use App\Components\AttendanceService\AttendanceInterface;
+use App\Components\Helper\DataHelper;
 use App\Http\Components\Helpers\PunchHelper;
 use App\Models\Attendance\DailyDetail;
 use App\Models\Attendance\Leave;
@@ -33,7 +34,7 @@ class Recheck extends Operate implements AttendanceInterface
         //假期配置ID
         $holidayId = $p['holiday_id'] ?? '';
         //批量调休人员名单
-        $copyUser = $p['copy_user'] ?? '';
+        $copyUser = $p['copy_user'] ?? NULL;
 
         //补下班打卡
         if (empty($startTime)) {
@@ -42,7 +43,7 @@ class Recheck extends Operate implements AttendanceInterface
             ]), ['请选择有效的时间范围']);
         }
 
-        $startTime = $endTime = NULL;
+        $startTime = $endTime =  $startId = $endId = NULL;
 
         $config = HolidayConfig::where(['holiday_id' => $holidayId, 'apply_type_id' => HolidayConfig::RECHECK])->first();
 
@@ -52,10 +53,13 @@ class Recheck extends Operate implements AttendanceInterface
 
         if($config->punch_type === HolidayConfig::GO_WORK) {
             $startTime = $p['start_time'];
+            $startId = DataHelper::dateTimeFormat($p['start_time'], 'H:i');
+
         }
 
         if($config->punch_type === HolidayConfig::OFF_WORK) {
             $endTime = $p['start_time'];
+            $endId = DataHelper::dateTimeFormat($p['start_time'], 'H:i');
         }
 
         //批量抄送组织可查询的JSON数据
@@ -72,8 +76,8 @@ class Recheck extends Operate implements AttendanceInterface
             'holiday_id'        => (int)$holidayId,
             'number_day'        => 0,//补打卡默认天数未0
             'copy_user'         => $copyUser,
-            'start_id'          => NULL,
-            'end_id'            => NULL,
+            'start_id'          => $startId,
+            'end_id'            => $endId,
             'exceed_day'        => NULL,
             'exceed_holiday_id' => NULL,
         ];
@@ -204,6 +208,7 @@ class Recheck extends Operate implements AttendanceInterface
                 flash('请勿非法操作', 'danger');
                 return redirect()->route('leave.info');
             }
+            $copyUserIds = json_decode($leave->copy_user, true);
             $title = trans('att.重启补打卡');
         }
 
@@ -217,7 +222,7 @@ class Recheck extends Operate implements AttendanceInterface
             ->toArray();
         $daily = DailyDetail::where(['user_id' => \Auth::user()->user_id, 'day' => request()->day])->first();
 
-        return view('attendance.leave.recheck', compact('title', 'time', 'holidayList', 'leave', 'reviewUserId', 'daily', 'allUsers'));
+        return view('attendance.leave.recheck', compact('title', 'time', 'holidayList', 'leave', 'copyUserIds', 'reviewUserId', 'daily', 'allUsers'));
 
     }
 }

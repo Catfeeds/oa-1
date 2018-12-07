@@ -9,7 +9,7 @@
                 </a>
             </li>
             @if(Entrust::can(['leave', 'leave.edit', 'leave.create']))
-                <li @if (Route::is(['leave.info', 'leave.optInfo', 'leave.edit', 'leave.create']) ) class="active" @endif>
+                <li @if (Route::is(['leave.info', 'leave.optInfo', 'leave.edit', 'leave.create', 'leave.restart']) ) class="active" @endif>
                     <a href="{{ route('leave.info') }}">{{ trans('att.我的申请单') }}</a>
                 </li>
             @endif

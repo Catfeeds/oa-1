@@ -49,9 +49,9 @@
                                             -
                                         @endif
                                     </td>
-                                    <td>{{ \App\Models\Sys\HolidayConfig::$applyType[\App\Models\Sys\HolidayConfig::getHolidayApplyList()[$v['holiday_id']]] }}</td>
-                                    <td>{{ \App\Models\Sys\HolidayConfig::holidayList()[$v['holiday_id']] }}</td>
-                                    <td>{{ \App\User::getAliasList()[$v['user_id']] ?? '' }}</td>
+                                    <td>{!! \App\Models\Sys\HolidayConfig::applyTypeColor($v['holidayConfig']->apply_type_id) ?? '数据异常' !!}</td>
+                                    <td>{{ $holidayList[$v['holiday_id']] ?? '数据异常' }}</td>
+                                    <td>{{ $users[$v['user_id']] ?? '' }}</td>
                                     <td>
                                         {{\App\Http\Components\Helpers\AttendanceHelper::spliceLeaveTime($v['holiday_id'], $v['start_time'], $v['start_id'], $v['number_day'])['time']}}
                                     </td>

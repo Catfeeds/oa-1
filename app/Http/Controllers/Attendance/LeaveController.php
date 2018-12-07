@@ -161,11 +161,8 @@ class LeaveController extends AttController
             $retLeave = \AttendanceService::driver($driver)->createLeave($leave);
             //日志记录操作
             if($retLeave['success']) {
-                OperateLogHelper::createOperateLog(OperateLogHelper::LEAVE_TYPE_ID, $retLeave['data']['leave_id'], '提交申请');
+                OperateLogHelper::createOperateLog(OperateLogHelper::LEAVE_TYPE_ID, $retLeave['data']['leave']->leave_id, '提交申请');
             }
-            //微信通知审核人员
-            OperateLogHelper::sendWXMsg('sy0011', '测试下');
-
         } catch (Exception $ex) {
             //事物回滚
             DB::rollBack();
@@ -175,8 +172,52 @@ class LeaveController extends AttController
         //事物提交
         DB::commit();
 
+        $msgArr = $retLeave['data']['leave']->toArray() ?? [];
+        self::sendWXContent($msgArr);
+
         flash(trans('app.添加成功', ['value' => trans('att.假期申请')]), 'success');
         return redirect()->route('leave.info');
+    }
+
+    /**
+     * 申请单微信通知
+     * @param $msgArr
+     */
+    public function sendWXContent($msgArr)
+    {
+        if(empty($msgArr)) return;
+
+        $users = User::getUsernameList();
+        $applyType = HolidayConfig::getHolidayApplyList();
+        //通知内容
+        $msgArr = $msgArr + [
+            'applyType' => HolidayConfig::$applyType[$applyType[$msgArr['holiday_id']]] ?? '错误数据',
+            'notice' => '审批通知',
+            'username' => \Auth::user()->alias,
+            'holiday' => HolidayConfig::getHolidayList()[$msgArr['holiday_id']],
+            'dept' => \Auth::user()->dept->dept,
+            'url' => url('/').'/attendance/leave/review/optInfo/'.$msgArr['leave_id'],
+            'send_user' => $users[$msgArr['review_user_id']] ?? '',
+        ];
+
+        $cypherType = HolidayConfig::holidayListCypherType();
+        $cypherDriver = HolidayConfig::$cypherTypeChar[$cypherType[$msgArr['holiday_id']]] ?? '';
+
+        \AttendanceService::driver($cypherDriver, 'cypher')->sendWXContent($msgArr);
+
+        //抄送人员通知
+        if(!empty($msgArr['copy_user'])) {
+            $copyUser = json_decode($msgArr['copy_user'], true);
+            $msgArr['notice'] = '抄送通知';
+            $msgArr['url'] = url('/').'/attendance/leave/optInfo/'.$msgArr['leave_id'];
+            $sendUser = [];
+            foreach ($copyUser as $k => $v) {
+                $sendUser[] = $users[$v] ?? '';
+            }
+            $msgArr['send_user'] = implode('|', $sendUser);
+
+            \AttendanceService::driver($cypherDriver, 'cypher')->sendWXContent($msgArr);
+        }
     }
 
     public function update(Request $request, $applyTypeId, $id)
@@ -216,12 +257,11 @@ class LeaveController extends AttController
         try {
             //创建申请单
             $retLeave = \AttendanceService::driver($driver)->updateLeave($leave);
+
             //日志记录操作
             if($retLeave['success']) {
-                OperateLogHelper::createOperateLog(OperateLogHelper::LEAVE_TYPE_ID, $retLeave['data']['leave_id'], '重启申请单');
+                OperateLogHelper::createOperateLog(OperateLogHelper::LEAVE_TYPE_ID, $retLeave['data']['leave']['leave_id'], '重启申请单');
             }
-            //微信通知审核人员
-            //OperateLogHelper::sendWXMsg($review_user_id, '测试下');
 
         } catch (Exception $ex) {
             //事物回滚
@@ -231,6 +271,9 @@ class LeaveController extends AttController
         }
         //事物提交
         DB::commit();
+
+        $msgArr = $retLeave['data']['leave'] ?? [];
+        self::sendWXContent($msgArr);
 
         flash(trans('att.重启申请单成功'), 'success');
         return redirect()->route('leave.info');
@@ -317,8 +360,10 @@ class LeaveController extends AttController
             ->orderBy('created_at', 'desc')
             ->paginate(30);
 
+        $users = User::getUsernameAliasAndDeptList();
+        $holidayList = HolidayConfig::getHolidayList();
         $title = trans('att.申请单管理');
-        return view('attendance.leave.review', compact('title', 'data', 'scope'));
+        return view('attendance.leave.review', compact('title', 'data', 'scope', 'users', 'holidayList'));
     }
 
     /**

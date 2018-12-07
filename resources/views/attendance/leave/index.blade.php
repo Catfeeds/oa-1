@@ -103,9 +103,9 @@
 
                         @foreach($data as $k => $v)
                             <tr>
-                                <td>{!! \App\Models\Sys\HolidayConfig::applyTypeColor($v['holidayConfig']->apply_type_id) !!}</td>
+                                <td>{!! \App\Models\Sys\HolidayConfig::applyTypeColor($v['holidayConfig']->apply_type_id) ?? '数据异常' !!}</td>
                                 <td>
-                                    {{ \App\Models\Sys\HolidayConfig::getHolidayList()[$v['holiday_id']] ?? '数据异常' }}
+                                    {{ [$v['holiday_id']] ?? '数据异常' }}
                                 </td>
                                 <td>
                                     {{\App\Http\Components\Helpers\AttendanceHelper::spliceLeaveTime($v['holiday_id'], $v['start_time'], $v['start_id'], $v['number_day'])['time']}}

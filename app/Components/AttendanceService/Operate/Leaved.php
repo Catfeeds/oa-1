@@ -159,7 +159,10 @@ class Leaved extends Operate implements AttendanceInterface
     {
         if(empty($leave->remain_user)) {
             $leave->update(['status' => 3, 'review_user_id' => 0]);
-            self::setDailyDetail($leave);
+            //预生成每日考勤信息
+            $this->setDailyDetail($leave);
+            //微信通知申请人
+            $this->passWXSendContent($leave);
 
         } else {
             $remainUser = json_decode($leave->remain_user, true);
@@ -192,7 +195,7 @@ class Leaved extends Operate implements AttendanceInterface
     public function getLeaveView($leaveId = '')
     {
         $title = trans('att.请假申请');
-        $reviewUserId = $startId = $endId = '';
+        $reviewUserId  = '';
 
         //申请单重启
         if(!empty($leaveId) && \Entrust::can(['leave.restart'])) {
@@ -201,8 +204,8 @@ class Leaved extends Operate implements AttendanceInterface
                 flash('请勿非法操作', 'danger');
                 return redirect()->route('leave.info');
             }
-            $startId = $leave->start_id;
-            $endId = $leave->end_id;
+            $copyUserIds = json_decode($leave->copy_user, true);
+
             $title = trans('att.重启请假申请');
         }
 
@@ -218,7 +221,7 @@ class Leaved extends Operate implements AttendanceInterface
             ->toArray();
 
 
-        return view('attendance.leave.edit', compact('title', 'time', 'startId', 'endId', 'holidayList', 'leave', 'reviewUserId' ,  'deptUsers', 'allUsers'));
+        return view('attendance.leave.edit', compact('title', 'time', 'holidayList', 'leave', 'reviewUserId', 'copyUserIds', 'deptUsers', 'allUsers'));
 
     }
 }

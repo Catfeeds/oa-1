@@ -25,11 +25,16 @@ class Retract extends Opt
 
         if($leave->holidayConfig->cypher_type === HolidayConfig::CYPHER_OVERTIME) {
             $userList = json_decode($leave->user_list, true);
-            unset($userList['id_'.\Auth::user()->user_id]);
-            Leave::where(['user_id' => \Auth::user()->user_id, 'parent_id' => $leave->leave_id])
-                ->update(['status' => $status]);
-            //更新主申请单申请人员列表
-            $leave->update(['user_list' => json_encode($userList)]);
+            if(!empty($userList)) {
+                unset($userList['id_'.\Auth::user()->user_id]);
+                Leave::where(['user_id' => \Auth::user()->user_id, 'parent_id' => $leave->leave_id])
+                    ->update(['status' => $status]);
+                //更新主申请单申请人员列表
+                $leave->update(['user_list' => json_encode($userList)]);
+            } else {
+                $leave->update(['status' => $status]);
+            }
+
             $msg = '撤回加班申请';
         } else {
             $leave->update(['status' => $status]);

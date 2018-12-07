@@ -30,7 +30,6 @@ class Change extends Operate implements AttendanceInterface
         $this->validate($request, $this->_validateRule);
         //假期配置ID
         $holidayId = $p['holiday_id'];
-
         //批量调休人员名单
         $copyUser = $p['copy_user'] ?? NULL;
 
@@ -41,14 +40,12 @@ class Change extends Operate implements AttendanceInterface
             $startTimeS = trim($startTime .' '. $p['start_id']);
             //时间判断
             if(strtotime($startTimeS) > strtotime($endTime)) {
-                //return $this->backLeaveData(false, ['end_time' => trans('请选择有效的时间范围')]);
+                return $this->backLeaveData(false, ['end_time' => trans('请选择有效的时间范围')]);
             }
             //申请时间
             $numberDay = sprintf("%.1f", (strtotime($endTime) - strtotime($startTimeS))/3600) ;
             $startId = $p['start_id'];
             $endId = DataHelper::dateTimeFormat($p['end_time'], 'H:i');
-
-
 
         } else {
             //加班调休获得的时间点范围ID,可查看leave模型里面配置的$workTimePoint
@@ -158,7 +155,10 @@ class Change extends Operate implements AttendanceInterface
     {
         if(empty($leave->remain_user)) {
             $leave->update(['status' => Leave::WAIT_EFFECTIVE, 'review_user_id' => 0]);
-            self::setDailyDetail($leave);
+            //预生成每日考勤信息
+            $this->setDailyDetail($leave);
+            //微信通知申请人
+            $this->passWXSendContent($leave);
         } else {
             $remainUser = json_decode($leave->remain_user, true);
 
@@ -224,14 +224,13 @@ class Change extends Operate implements AttendanceInterface
                 return redirect()->route('leave.info');
             }
             $copyUserIds = json_decode($leave->copy_user, true);
-            $startId = $leave->start_id;
+            $startId = (int)$leave->number_day;
             $endId = $leave->start_id;
-
 
             $title = trans('att.重启调休申请');
         }
 
-        $allUsers = User::where(['status' => 1])->get();
+        $allUsers = User::where(['status' => User::STATUS_ENABLE])->get();
         $time = date('Y-m-d', time());
 
         $holidayList = HolidayConfig::where(['apply_type_id' => HolidayConfig::CHANGE])

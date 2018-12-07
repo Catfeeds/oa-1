@@ -10,9 +10,11 @@
 namespace App\Components\AttendanceService\Operate;
 
 use App\Components\Helper\DataHelper;
+use App\Http\Components\Helpers\OperateLogHelper;
 use App\Models\Attendance\DailyDetail;
 use App\Models\Sys\ApprovalStep;
 use App\Models\Sys\Dept;
+use App\Models\Sys\OperateLog;
 use App\Models\Sys\ReviewStepFlow;
 use App\Models\Sys\ReviewStepFlowConfig;
 use App\User;
@@ -156,9 +158,10 @@ class Operate
             'exceed_holiday_id' => $leave['exceed_holiday_id'] ?? NULL,
             'step_user' => $leave['step_user'] ?? NULL
         ];
+
         $ret = Leave::create($data);
 
-        return $this->backLeaveData(true, [], ['leave_id' => $ret->leave_id]);
+        return $this->backLeaveData(true, [], ['leave' => $ret]);
     }
 
     /**
@@ -190,7 +193,7 @@ class Operate
 
         Leave::where(['leave_id' => $leave['leave_id']])->update($data);
 
-        return $this->backLeaveData(true, [], ['leave_id' => $leave['leave_id']]);
+        return $this->backLeaveData(true, [], ['leave' => $leave]);
     }
 
     /**
@@ -378,7 +381,10 @@ class Operate
     {
         if(empty($leave->remain_user)) {
             $leave->update(['status' => Leave::PASS_REVIEW, 'review_user_id' => 0]);
+            //预生成每日考勤信息
             $this->setDailyDetail($leave);
+            //微信通知申请人
+            $this->passWXSendContent($leave);
         } else {
             $remainUser = json_decode($leave->remain_user, true);
 
@@ -394,5 +400,17 @@ class Operate
             $leave->update(['status' => Leave::ON_REVIEW, 'review_user_id' => $reviewUserId, 'remain_user' => $remainUser]);
         }
     }
+    /**
+     * 微信消息内容
+     * @param $msgArr
+     */
+    public function passWXSendContent($leave)
+    {
+        $content =  '【审批通过通知】
+点击此处查看申请详情[<a href = "'.url('/').'/attendance/leave/optInfo/'.$leave['leave_id'].'">点我前往</a>]';
 
+        $users = User::getUsernameList();
+        //企业微信通知审核人员
+        OperateLogHelper::sendWXMsg($users[$leave['user_id']] ?? '', $content);
+    }
 }

@@ -73,6 +73,7 @@ class OperateLogHelper
      */
     public static function sendWXMsg($userId, $message)
     {
+        //$userId = 'sy0011';
         $time = time();
         $pushData = [
             'userid'  => $userId,
@@ -82,9 +83,5 @@ class OperateLogHelper
         ];
         //微信通知推送消息接口
         \BackstageApi::sendWXMsg($pushData, 'push');
-    }
-
-    public static function msgContent() {
-
     }
 }

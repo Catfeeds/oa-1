@@ -211,6 +211,11 @@ class HolidayConfig extends Model
         return self::get(['holiday_id', 'holiday'])->pluck('holiday', 'holiday_id')->toArray();
     }
 
+    public static function holidayListCypherType()
+    {
+        return self::get(['holiday_id', 'cypher_type'])->pluck('cypher_type', 'holiday_id')->toArray();
+    }
+
     public static function getObjByName($name)
     {
         return self::where('holiday', 'like', "$name")->first() ?? NULL;

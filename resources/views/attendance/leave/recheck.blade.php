@@ -38,7 +38,7 @@
                         <div class="col-sm-3">
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                                {!! Form::text('start_time', $time, [
+                                {!! Form::text('start_time', !empty($leave->start_time) ? date('Y-m-d H:i', strtotime($leave->start_time)) :$time, [
                                 'class' => 'form-control date_time_hi',
                                 'id' => 'start_time'
                                 ]) !!}
@@ -84,7 +84,8 @@
                             <select multiple="multiple" class="js-select2-multiple form-control"
                                     name="copy_user[]">
                                 @foreach($allUsers as $key => $val)
-                                    <option value="{{ $val['user_id'] }}">{{ $val['alias'].'('.$val['username'].')' }}</option>
+                                    <option value="{{ $val['user_id'] }}"
+                                            @if (!empty($copyUserIds) && in_array($val['user_id'], $copyUserIds)) selected @endif>{{ $val['alias'].'('.$val['username'].')' }}</option>
                                 @endforeach
                             </select>
                             <span class="help-block m-b-none">{{ $errors->first('copy_user') }}</span>
@@ -195,6 +196,9 @@
         function inquire(hid) {
             var holidayId = hid;
             var startTime = $('#start_time').val();
+
+            if(startTime == '' || startTime == null)
+                start_time = '{{$leave->start_time}}';
 
             if(holidayId != '') {
                 $.get('{{ route('leave.inquire')}}', {holidayId: holidayId,startTime: startTime}, function ($data) {
