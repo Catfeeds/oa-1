@@ -2,7 +2,6 @@
 
 namespace App\Console;
 
-use App\Console\Commands\GeneratePunchRecordCommand;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -16,7 +15,9 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         Commands\TestCommand::class,
         Commands\ProportionCommand::class,
-        GeneratePunchRecordCommand::class,
+        Commands\GeneratePunchRecordCommand::class,
+
+        Commands\ClearCommand::class,
     ];
 
     /**
