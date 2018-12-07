@@ -105,7 +105,7 @@
                             <tr>
                                 <td>{!! \App\Models\Sys\HolidayConfig::applyTypeColor($v['holidayConfig']->apply_type_id) ?? '数据异常' !!}</td>
                                 <td>
-                                    {{ [$v['holiday_id']] ?? '数据异常' }}
+                                    {{ $holidayList[$v['holiday_id']] ?? '数据异常' }}
                                 </td>
                                 <td>
                                     {{\App\Http\Components\Helpers\AttendanceHelper::spliceLeaveTime($v['holiday_id'], $v['start_time'], $v['start_id'], $v['number_day'])['time']}}

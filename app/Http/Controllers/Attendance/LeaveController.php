@@ -81,6 +81,8 @@ class LeaveController extends AttController
         //申诉
         $appealData = Appeal::getAppealResult(Appeal::APPEAL_LEAVE);
 
+        $holidayList = HolidayConfig::getHolidayList();
+
         $title = trans('att.我的假期详情');
         return view('attendance.leave.index',
             compact('title', 'data', 'scope', 'holidayList', 'userIds', 'types', 'type', 'remainWelfare', 'appealData')
