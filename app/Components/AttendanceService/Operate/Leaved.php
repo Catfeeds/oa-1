@@ -45,11 +45,12 @@ class Leaved extends Operate implements AttendanceInterface
         $driver = HolidayConfig::$cypherTypeChar[$holidayConfig->cypher_type];
         //获取剩余假期情况
         $time = $this->driver($driver)->buildUpLeaveTime($p['start_time'], $p['end_time'], $p['start_id'], $p['end_id']);
+
         //分配时间
         $startTime = (string)$time['start_time'];
         $endTime = (string)$time['end_time'];
-        $startTimeS = $time['startTimeS'];
-        $endTimeS = $time['endTimeS'];
+        $startTimeS = $time['start_timeS'];
+        $endTimeS = $time['end_timeS'];
 
         //时间判断
         if(strtotime($startTimeS) > strtotime($endTimeS)) {
@@ -62,7 +63,7 @@ class Leaved extends Operate implements AttendanceInterface
             return $this->backLeaveData(false, ['end_time' => trans('申请失败,时间跨度异常，有疑问请联系人事')]);
         }
         //验证是否已经有再提交的请假单,排除已拒绝的请假单
-        $where =  sprintf(' and user_id =%d and status not in(%s)', \Auth::user()->user_id, implode(',', [Leave::REFUSE_REVIEW, Leave::RETRACT_REVIEW]));
+        $where =  sprintf(' and user_id =%d and status not in(%s)', \Auth::user()->user_id, implode(',', Leave::$applyList));
         $isLeaves = Leave::whereRaw("
                 `start_time` BETWEEN '{$startTime}' and '{$endTime}'
                 {$where}

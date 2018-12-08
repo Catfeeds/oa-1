@@ -338,9 +338,9 @@ class Cypher
     {
         return [
             'start_time' => $startTime,
-            'endTime' => $endTime,
-            'startTimeS' => trim($startTime .' '. $startId),
-            'endTimeS' => trim($startTime .' '. $endId),
+            'end_time' => $endTime,
+            'start_timeS' => trim($startTime .' '. $startId),
+            'end_timeS' => trim($startTime .' '. $endId),
         ];
     }
 

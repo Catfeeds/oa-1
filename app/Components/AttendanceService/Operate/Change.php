@@ -60,7 +60,7 @@ class Change extends Operate implements AttendanceInterface
             $endId = $timePointChar[$p['start_id']]['end_time'];
         }
         //验证是否已经有再提交的请假单,排除已拒绝的请假单
-        $where =  sprintf(' and user_id =%d and status not in(%s)',\Auth::user()->user_id, implode(',', [Leave::REFUSE_REVIEW, Leave::RETRACT_REVIEW]));
+        $where =  sprintf(' and user_id =%d and status not in(%s)',\Auth::user()->user_id, implode(',', Leave::$applyList));
         $isLeaves = Leave::whereRaw("
                 `start_time` BETWEEN '{$startTime}' and '{$endTime}'
                 {$where}

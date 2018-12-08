@@ -91,12 +91,19 @@ class Leave extends Model
         self::SWITCH_REVIEW_OFF => '转换假期取消',
         self::RETRACT_REVIEW => '已撤回',
     ];
+
     //查询排除已拒绝的状态
     public static $statusList = [
         self::WAIT_REVIEW ,
         self::ON_REVIEW ,
         self::PASS_REVIEW ,
         self::WAIT_EFFECTIVE ,
+    ];
+    //排除申请单可再提交的状态
+    public static $applyList = [
+        self::REFUSE_REVIEW,
+        self::CANCEL_REVIEW,
+        self::RETRACT_REVIEW,
     ];
 
     //申请单可撤回的状态
