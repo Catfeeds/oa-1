@@ -274,7 +274,7 @@
             bootbox.confirm($msg, function (result) {
                 if (result) {
                     obj.attr('disabled',"true");
-                    $.get('{{ route('leave.review.optStatus',['id' => $leave->leave_id])}}', {status: status}, function ($data) {
+                    $.get('{{ route('leave.leaveOptStatus',['id' => $leave->leave_id])}}', {status: status}, function ($data) {
                         if ($data.status == 1) {
                             //重启状态地址跳转
                             if($data.url != '') {

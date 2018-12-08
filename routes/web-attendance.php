@@ -50,7 +50,10 @@ Route::group([
         Route::get('leave/get-punch-rules', [
             'middleware' => ['permission:leave.create'],
             'uses' => 'LeaveController@getPunchRules'])->name('leave.getPunchRules');
-
+        //申请单操作
+        Route::get('leave/opt-status/{id}', [
+            'middleware' => ['permission:leave.retract|leave.cancel|leave.restart'],
+            'uses' => 'LeaveController@leaveOptStatus'])->name('leave.leaveOptStatus');
 
         #申请单管理
         Route::get('leave/review/', [
