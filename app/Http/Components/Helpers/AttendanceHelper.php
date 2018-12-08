@@ -437,52 +437,18 @@ class AttendanceHelper
         return ['number_day' => $numberDay, 'count_num' => $userLeaveLog->count_num ?? 0, 'apply_days' => $userLeaveLog->number_day ?? 0];
     }
 
-    /**
-     * 审核通过后, 上班打卡字段与下班打卡字段的设置
-     * @param $leave
-     * @param $startDay
-     * @param $endDay
-     * @return array
-     */
-    /*public static function getPunch($leave, $startDay, $endDay)
-    {
-        $ps = (int)str_replace(':', '', Leave::$startId[$leave->start_id]);
-        $pe = (int)str_replace(':', '', Leave::$endId[$leave->end_id]);
-        $arr1 = [
-            //大于13:45,意味下午请假,则上班打卡字段为空,为后面打卡记录导入的上班打卡留位置
-            'punch_start_time' => $ps >= 1345 ? NULL : Leave::$startId[$leave->start_id],
-            //不等于20点,意味晚上还要回来上班,下班打卡字段为空,为后面打卡记录导入的下班打卡留位置
-            'punch_end_time' => $pe != 2000 ? NULL : Leave::$endId[$leave->end_id]
-        ];
-
-        $arr2 = [
-            'punch_start_time_num' => empty($arr1['punch_start_time']) ?
-                NULL : strtotime(date('Y-m-d', $startDay) . ' ' . $arr1['punch_start_time']),
-            'punch_end_time_num' => empty($arr1['punch_end_time']) ?
-                NULL : strtotime(date('Y-m-d', $endDay) . ' ' . $arr1['punch_end_time']),
-        ];
-        return array_merge($arr1, $arr2);
-    }*/
-/*
-    public static function addLeaveId($leaveId, $idArr = NULL)
-    {
-        $a = json_decode($idArr);
-        $a[] = $leaveId;
-        return json_encode($a);
-    }*/
-
     public static function showLeaveIds($leaveIds)
     {
-        if (empty($leaveIds) || !json_decode($leaveIds)) return '--';
+        if (empty($leaveIds) || empty(json_decode($leaveIds))) return '--';
 
-        $show = '';
-        $idList = Leave::getHolidayIdList(true);
-        $list = HolidayConfig::getHolidayList(true);
-
-        foreach (json_decode($leaveIds) ?? [] as $leaveId) {
-            $sep = empty($show) ? '' : ", $show";
-            $show = ($list[$idList[$leaveId] ?? ''] ?? '') . $sep;
+        $name = [];
+        $leaveIds = json_decode($leaveIds);
+        $leaves = Leave::where('status', '<>', Leave::SWITCH_REVIEW_OFF)->whereIn('leave_id', $leaveIds)
+            ->with('holidayConfig')->get();
+        foreach ($leaves as $leaf) {
+             $name[] = $leaf->holidayConfig->holiday.'('.Leave::$switchCar[$leaf->is_switch].')';
         }
+        $show = join('//', $name);
         return $show;
     }
 

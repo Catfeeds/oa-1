@@ -122,10 +122,6 @@ class PunchRecordController extends Controller
             flash('生成失败，未找到打卡记录文件!', 'danger');
             return redirect()->route('daily-detail.review.info');
         }
-        if (empty(HolidayConfig::where('cypher_type', HolidayConfig::CYPHER_SWITCH)->first())) {
-            flash('未在假期配置中配置转换假', 'danger');
-            return redirect()->route('daily-detail.review.info');
-        }
         if (empty($nightConf = HolidayConfig::where('cypher_type', HolidayConfig::CYPHER_NIGHT)->first())) {
             flash('未在假期配置中配置夜班加班调休假', 'danger');
             return redirect()->route('daily-detail.review.info');
@@ -141,17 +137,18 @@ class PunchRecordController extends Controller
             array_shift($reader);
             $r = collect($reader)->pluck('0')->unique()->map(function ($v) {
                 list($m, $d, $y) = explode('-', $v);
-                return sprintf("20%s-%s-%s", $y, (int)$m, (int)$d);
+                return strtotime(sprintf("20%s-%s-%s", $y, (int)$m, (int)$d));
             });
             $maxTs = $r->max(); $minTs = $r->min(); unset($r);
-            $YmdMaxTs = date('Y-m-d', strtotime($maxTs));
-            $YmdMinTs = date('Y-m-d', strtotime($minTs));
-            $calendarArr = Calendar::getCalendarArrWithPunchRules($minTs, $maxTs);
+            $YmdMaxTs = date('Y-m-d', $maxTs);
+            $YmdMinTs = date('Y-m-d', $minTs);
+            $calendarArr = Calendar::getCalendarArrWithPunchRules($YmdMinTs, $YmdMaxTs);
             $data = $msgArr = $bufferArr = [];
             $users = User::getUserKeyByAlias();
             $nights = Leave::where(['status' => Leave::WAIT_EFFECTIVE, 'holiday_id' => $nightConf->holiday_id])
-                ->whereBetween(DB::raw('DATE_FORMAT(start_time, \'%Y-%c-%e\')'), [$minTs, $maxTs])->get(['end_time', 'user_id', 'start_time']);
+                ->whereBetween(DB::raw('DATE_FORMAT(start_time, \'%Y-%m-%d\')'), [$YmdMinTs, $YmdMaxTs])->get(['end_time', 'user_id', 'start_time']);
             $formulaCalPunRuleConfArr = PunchHelper::getCalendarPunchRules($YmdMinTs, $YmdMaxTs, false, $calendarArr)['formula'];
+            $this->punchHelper->setFormulaCalPunRuleConfArr('', '', $formulaCalPunRuleConfArr);
 
             foreach ($reader as $k => $v) {
                 //if ($v[0] == null || $k == 0) continue;
@@ -162,7 +159,7 @@ class PunchRecordController extends Controller
 
                 //$endTime = end($v);
                 //打卡记录里面的第五列是打卡开始时间
-                $startTime = $v[5];
+//                $startTime = $v[5];
                 /*if (count($v) <= 6 && (int)str_replace(':', '', $v[5]) >= 1400) {
                     $startTime = NULL;
                 } elseif (count($v) <= 6 && (int)str_replace(':', '', $v[5]) <= 1400) {
@@ -239,7 +236,7 @@ class PunchRecordController extends Controller
                         continue;
                     }
 
-                    $deducts = $this->punchHelper->fun_($bufferArr, $u, $formulaCalPunRuleConfArr, $detail);
+                    $deducts = $this->punchHelper->fun_($bufferArr, $u, $detail);
                     $bufferArr = $deducts['bufferArr'];
                     $switchLeaveIds = $this->punchHelper->storeDeductInLeave($deducts['deducts'], $user->user_id, $u['ts']);
 

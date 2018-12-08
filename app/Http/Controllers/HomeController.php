@@ -33,20 +33,6 @@ class HomeController extends Controller
         $countRecheck = $this->countRecheck($start);
         $apply = $this->apply($start, [Leave::ON_REVIEW, Leave::PASS_REVIEW]);
         $approve = $this->approve($start, [Leave::ON_REVIEW, Leave::PASS_REVIEW,Leave::WAIT_REVIEW]);
-        /*$formulaCalPunRuleConf = PunchHelper::getCalendarPunchRules('2018-10-01', '2018-10-01')['formula'];
-        dd(collect($formulaCalPunRuleConf['2018-10-01']['cfg']['9:00$$12:00$$9:15']['ded_num'])->where('holiday_id', 1)->first());*/
-        /*$formulaCalPunRuleConf = PunchHelper::getCalendarPunchRules('2018-10-01', '2018-10-31')['formula']['2018-10-11'];
-        $a = [
-            ['start' => '19:45', 'end' => '20:00'],
-            ['start' => '10:00', 'end' => '10:45'],
-            ['start' => '10:00', 'end' => '12:00'],
-            ['start' => '10:25', 'end' => '14:45'],
-            ['start' => '19:00', 'end' => '20:10'],
-        ];
-        dump(PunchHelper::combine($a));
-        dd(PunchHelper::getFormulaCombine(PunchHelper::combine($a), $formulaCalPunRuleConf));*/
-        /*dd(PunchHelper::getFormulaDelayConf(['go' => ['start' => '9:15', 'end' => '9:40'], 'off' => ['start' => '19:25', 'end' => '20:00']], $formulaCalPunRuleConf));*/
-        /*dd(PunchHelper::getFormulaNightConf(['start' => '9:15', 'end' => '15:15'], $formulaCalPunRuleConf));*/
         return view('home', compact('bullets', 'remainWelfare', 'countRecheck', 'apply', 'approve'));
     }
 

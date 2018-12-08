@@ -116,69 +116,51 @@ class ReviewHelper
 
 
     /**
-     * 获取上下班时间早退或迟到时的标记,用于在前端显示红色标明
-     * @param $startDate
-     * @param $endDate
-     * @param array $dailyDetailData 打卡明细数组
-     * @return array e.g: $danger['2018-10-10']['on_work' => true, 'off_work' => false]
-     */
-    public function getDanger($startDate, $endDate, $dailyDetailData)
-    {
-        $danger = array();
-        $formulaCalPunRuleConf = PunchHelper::getCalendarPunchRules($startDate, $endDate)['formula'];
-        foreach ($dailyDetailData as $datum) {
-            $danger[$datum->day] = ['on_work' => false, 'off_work' => false];
-            /*if (!empty($formulaCalPunRuleConf[$datum->day])) {
-                $danger[$datum->day] = $this->getPrDanger($datum->punch_start_time, $datum->punch_end_time, $formulaCalPunRuleConf[$datum->day]);
-            }
-            $leaveArr = json_decode($datum->leave_id, true);
-            if (!empty($leaveArr)) {
-                //这天若打卡在请假区间,false不显示红色
-                $leaves = Leave::whereIn('leave_id', $leaveArr)->with('holidayConfig')->get();
-                foreach ($leaves as $leaf) {
-                    if ($leaf->holidayConfig->cypher_type != HolidayConfig::CYPHER_SWITCH) {
-                        $leafStart = strtotime(date('Y-m-d', strtotime($leaf->start_time)).' '.$leaf->start_id);
-                        $leafEnd = strtotime(date('Y-m-d', strtotime($leaf->end_time)).' '.$leaf->end_id);
-                        $datumStart = strtotime($datum->day.' '.$datum->punch_start_time);
-                        $datumEnd = strtotime($datum->day.' '.$datum->punch_end_time);
-
-                        if (DataHelper::ifBetween($leafStart, $leafEnd, $datumStart)) {
-                            $danger[$datum->day]['on_work'] = false; break;
-                        }
-                        if (DataHelper::ifBetween($leafStart, $leafEnd, $datumEnd)) {
-                            $danger[$datum->day]['off_work'] = false; break;
-                        }
-                    }
-                }
-            }*/
-        }
-        return $danger;
-    }
-
-    /**
      * 在前端显示迟到早退标红
      * @param $punch_start
      * @param $punch_end
      * @param $punchRuleConfigs
      * @return array
      */
-    public function getPrDanger($punch_start, $punch_end, $formulaCalPunRuleConf)
+    public function getDanger($startDate, $endDate, $dailyDetailData)
     {
-        $isDanger = ['on_work' => false, 'off_work' => false];
+        $punchHelper = app(PunchHelper::class);
+        $punchHelper->setFormulaCalPunRuleConfArr($startDate, $endDate);
+        $danger = [];
 
-        if (isset($formulaCalPunRuleConf['if_rest'])) return $isDanger;
+        foreach ($dailyDetailData as $daily) {
+            $isDanger = ['on_work' => false, 'off_work' => false];
+            if ($punchHelper->setFormulaCalPunRuleConf($daily->day)) {
+                $leaveArr = json_decode($daily->leave_id, true);
+                if (!empty($leaveArr)) {
+                    $leaves = Leave::whereIn('leave_id', $leaveArr)->with('holidayConfig')->get();
+                    $overtime = $leaves->map(function ($v) {
+                        if ($v->holidayConfig->cypher_type == HolidayConfig::CYPHER_OVERTIME)
+                            return $v->holidayConfig;
+                        return NUll;
+                    })->filter()->toArray();
 
-        foreach ($formulaCalPunRuleConf['sort'] as $key => $value) {//时间段
-            list($startWorkTime, $endWorkTime, $readyTime) = explode('$$', $key);
-            list($rt, $et) = DataHelper::timesToNum($readyTime, $endWorkTime);
-
-            if (!empty($punch_start) && DataHelper::ifBetween($rt, $et, (int)str_replace(':', '', $punch_start))) {
-                $isDanger['on_work'] = true;
+                    if (isset($punchHelper->formulaCalPunRuleConf['if_rest']) && empty($overtime)) {
+                        $danger[$daily->day] = $isDanger;continue;
+                    }
+                    if ($leaves->where('is_switch', '<>', Leave::NO_SWITCH)->count() != 0) {
+                        foreach ($leaves as $leaf) {
+                            if ($leaf->is_switch == Leave::LATE || $leaf->is_switch == Leave::LATE_ABSENTEEISM || $leaf->is_switch == Leave::ALLDAY_ABSENTEEISM) {
+                                $isDanger['on_work'] = true;
+                            }
+                            if ($leaf->is_switch == Leave::EARLY || $leaf->is_switch == Leave::EARLY_ABSENTEEISM || $leaf->is_switch == Leave::ALLDAY_ABSENTEEISM) {
+                                $isDanger['off_work'] = true;
+                            }
+                        }
+                    }
+                    if ($daily->deduction_num != 0) {
+                        $isDanger['on_work'] = true;
+                    }
+                }
             }
-            if (!empty($punch_end) && DataHelper::ifBetween($rt, $et, (int)str_replace(':', '', $punch_end)))
-                $isDanger['off_work'] = true;
+            $danger[$daily->day] = $isDanger;
         }
-        return $isDanger;
+        return $danger;
     }
 
 }

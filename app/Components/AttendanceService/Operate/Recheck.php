@@ -176,8 +176,8 @@ class Recheck extends Operate implements AttendanceInterface
             Leave::SWITCH_REVIEW_ON, Leave::SWITCH_REVIEW_OFF,
         ])->first();
         if (empty($switch)) return;
-        $deduct = $punchHelper->countDeduct($dailyDetail->punch_start_time, $dailyDetail->punch_end_time,
-            $formulaCalPunRuleConf[$dailyDetail->day], $dailyDetail);
+        $punchHelper->setFormulaPunRuleConf($formulaCalPunRuleConf, $dailyDetail->day);
+        $deduct = $punchHelper->countDeduct($dailyDetail->punch_start_time, $dailyDetail->punch_end_time, $dailyDetail);
 
         if ($deduct['deduct_day'] <= 0) {
             $switch->status = Leave::SWITCH_REVIEW_OFF;

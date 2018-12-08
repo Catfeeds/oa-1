@@ -18,7 +18,7 @@
                 <thead>
                 <tr>
                     <th colspan="4" style="text-align: center">{{ trans('att.基础信息') }}</th>
-                    <th colspan="15" style="text-align: center">{{ trans('att.考勤天数') }}</th>
+                    <th colspan="{{ 13 + $monthInfo[1][Auth::user()->user_id]['paid_unpaid_conf_count'] }}" style="text-align: center">{{ trans('att.考勤天数') }}</th>
                     <th colspan="3" style="text-align: center">{{ trans('att.扣分统计') }}</th>
                     <th colspan="7" style="text-align: center">{{ trans('att.剩余假期') }}</th>
                     <th colspan="1" style="text-align: center">{{ trans('att.操作') }}</th>
@@ -32,8 +32,11 @@
                     <th rowspan="2">{{ trans('att.实到天数') }}</th>
                     <th colspan="5" style="text-align: center; width: 5%">加班次数</th>
                     <th colspan="5" style="text-align: center; width: 5%">调休次数</th>
-                    <th rowspan="2">{{ trans('att.无薪假') }}</th>
-                    <th rowspan="2">{{ trans('att.带薪假') }}</th>
+                    @foreach($monthInfo[1][Auth::user()->user_id]['paid_unpaid_conf'] as $items)
+                        @foreach($items as $item)
+                            <th rowspan="2">{{ $item['holiday'] }}</th>
+                        @endforeach
+                    @endforeach
                     <th rowspan="2">{{ trans('att.全勤') }}</th>
                     <th rowspan="2">{{ trans('att.迟到总分钟') }}</th>
                     <th rowspan="2">{{ trans('att.其他') }}</th>

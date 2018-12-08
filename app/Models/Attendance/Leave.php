@@ -54,6 +54,23 @@ class Leave extends Model
     const WORK_TIME_POINT_4 = 4;
     const WORK_TIME_POINT_5 = 5;
 
+    //转换假期原因
+    const NO_SWITCH = 0;
+    const LATE_ABSENTEEISM = 1;
+    const EARLY_ABSENTEEISM = 2;
+    const ALLDAY_ABSENTEEISM = 3;
+    const LATE = 4;
+    const EARLY = 5;
+
+    public static $switchCar = [
+        self::NO_SWITCH => '已申请',
+        self::LATE_ABSENTEEISM => '旷工转换',
+        self::ALLDAY_ABSENTEEISM => '旷工转换',
+        self::EARLY_ABSENTEEISM => '旷工转换',
+        self::LATE => '迟到转换',
+        self::EARLY => '早退转换',
+    ];
+
     public static $workTimePoint = [
         self::WORK_TIME_POINT_1 => '9点~20点',
         self::WORK_TIME_POINT_2 => '9点~18点',
@@ -171,6 +188,7 @@ class Leave extends Model
 
         'parent_id',
         'is_stat',
+        'is_switch',
 
     ];
 

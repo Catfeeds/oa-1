@@ -11,6 +11,7 @@ namespace App\Components\AttendanceService\Cypher;
 
 
 use App\Http\Components\Helpers\AttendanceHelper;
+use App\Models\Attendance\Leave;
 use App\Models\Sys\HolidayConfig;
 
 class Paid extends Cypher
@@ -75,4 +76,11 @@ class Paid extends Cypher
     {
         return parent::getDaysByScope($scope, $userId, $holidays);
     }
+
+    /*public function getKindDaysByScope($scope, $userId, $holidays)
+    {
+        $holidayIds = collect($holidays)->map(function ($v) {
+            return $v->holiday_id;
+        })->toArray();
+    }*/
 }

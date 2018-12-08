@@ -91,6 +91,9 @@ class ReviewController extends AttController
         $confirmList = ConfirmAttendance::getConfirmList($year, $month);
         $userIds = '';
 
+        //获取带薪假和无薪假的各个配置
+        $paidWithUnpaidConf = HolidayConfig::getHolidayConfigsByCypherType([HolidayConfig::CYPHER_PAID, HolidayConfig::CYPHER_UNPAID]);
+
         if(!empty($confirmStates)) $userIds = ' and user_id in(' . implode(',' , array_keys($confirmStates)) . ')';
         if(empty($confirmStates) && in_array($scope->status, [ConfirmAttendance::SENT, ConfirmAttendance::CONFIRM])) $userIds = ' and user_id=""';
 
@@ -140,6 +143,8 @@ class ReviewController extends AttController
                 'remain_visit'        => $remainWelfare['visit']['number_day'] ?? 0,
                 'remain_change'       => $leaveInfo['userLeaveInfo'],
                 'send'                => $confirmList[$user->user_id] ?? 0,
+                'paid_unpaid_conf'    => $paidWithUnpaidConf,
+                'paid_unpaid_conf_count' => collect($paidWithUnpaidConf)->flatten(1)->count(),
             ];
         }
         return ['success', $info];
