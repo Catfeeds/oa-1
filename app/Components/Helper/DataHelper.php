@@ -142,6 +142,8 @@ class DataHelper
 
         if(($endId - $startId) > 800) {
             $days[] = 1;
+        } elseif($endId - $startId <= 100) {
+            $days[] = 0.1;
         } else {
             $days[] = 0.5;
         }

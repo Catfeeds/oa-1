@@ -102,9 +102,9 @@ class Change extends Cypher
         $overTimeId = HolidayConfig::where(['cypher_type' => HolidayConfig::CYPHER_OVERTIME])->first();
         if (empty($overTimeId)) return $userLeaveInfo;
         //获取加班剩余次数
-        $overTimeLeaveLog = self::selectLeave($startDay, $endDay, $userId, $overTimeId->holiday_id, [Leave::PASS_REVIEW]);
+        $overTimeLeaveLog = $this->selectLeave($startDay, $endDay, $userId, $overTimeId->holiday_id, [Leave::PASS_REVIEW]);
         //申请调休的申请单次数
-        $changeLeaveLog = self::selectLeave($startDay, $endDay, $userId, $holiday->holiday_id, Leave::$statusList);
+        $changeLeaveLog = $this->selectLeave($startDay, $endDay, $userId, $holiday->holiday_id, Leave::$statusList);
 
         if(!empty($overTimeLeaveLog)) {
             foreach ($overTimeLeaveLog as $lk => $lv) {

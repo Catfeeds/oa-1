@@ -49,16 +49,18 @@ class Leaved extends Operate implements AttendanceInterface
         //分配时间
         $startTime = (string)$time['start_time'];
         $endTime = (string)$time['end_time'];
+        $startId = $time['start_id'];
+        $endId = $time['end_id'];
         $startTimeS = $time['start_timeS'];
         $endTimeS = $time['end_timeS'];
-
+        print_r($time);
         //时间判断
         if(strtotime($startTimeS) > strtotime($endTimeS)) {
             return $this->backLeaveData(false, ['end_time' => trans('请选择有效的时间范围')]);
         }
 
         //时间天数分配
-        $numberDay = DataHelper::leaveDayDiff($startTimeS, $p['start_id'], $endTimeS, $p['end_id']);
+        $numberDay = DataHelper::leaveDayDiff($startTimeS, $startId, $endTimeS, $endId);
         if(empty($numberDay)) {
             return $this->backLeaveData(false, ['end_time' => trans('申请失败,时间跨度异常，有疑问请联系人事')]);
         }
@@ -123,8 +125,8 @@ class Leaved extends Operate implements AttendanceInterface
             'holiday_id' => $holidayId,
             'number_day' => $numberDay,
             'copy_user' => $copyUser,
-            'start_id' => $p['start_id'],
-            'end_id' => $p['end_id'],
+            'start_id' => $startId,
+            'end_id' => $endId,
             'exceed_day' => $userHoliday['data']['exceed_day'] ?? NULL,
             'exceed_holiday_id' => $userHoliday['data']['exceed_holiday_id'] ?? NULL
         ];
