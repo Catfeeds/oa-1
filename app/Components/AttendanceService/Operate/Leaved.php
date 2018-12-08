@@ -35,17 +35,22 @@ class Leaved extends Operate implements AttendanceInterface
             'start_id' => 'required',
             'end_id' => 'required',
         ]));
+
         //假期配置ID
         $holidayId = $p['holiday_id'];
-
         //抄送人员名单
         $copyUser = $p['copy_user'] ?? NULL;
-        //申请时间
-        $startTime = (string)$p['start_time'];
-        $endTime = (string)$p['end_time'];
-        //拼接有效时间戳
-        $startTimeS = trim($startTime .' '. $p['start_id']);
-        $endTimeS = trim($endTime .' '. $p['end_id']);
+        //获取计算驱动类型
+        $holidayConfig = HolidayConfig::where(['holiday_id' => $holidayId])->first();
+        $driver = HolidayConfig::$cypherTypeChar[$holidayConfig->cypher_type];
+        //获取剩余假期情况
+        $time = $this->driver($driver)->buildUpLeaveTime($p['start_time'], $p['end_time'], $p['start_id'], $p['end_id']);
+        //分配时间
+        $startTime = (string)$time['start_time'];
+        $endTime = (string)$time['end_time'];
+        $startTimeS = $time['startTimeS'];
+        $endTimeS = $time['endTimeS'];
+
         //时间判断
         if(strtotime($startTimeS) > strtotime($endTimeS)) {
             return $this->backLeaveData(false, ['end_time' => trans('请选择有效的时间范围')]);
@@ -57,7 +62,7 @@ class Leaved extends Operate implements AttendanceInterface
             return $this->backLeaveData(false, ['end_time' => trans('申请失败,时间跨度异常，有疑问请联系人事')]);
         }
         //验证是否已经有再提交的请假单,排除已拒绝的请假单
-        $where =  sprintf(' and user_id =%d and status not in(%s)',\Auth::user()->user_id, implode(',', [Leave::REFUSE_REVIEW, Leave::RETRACT_REVIEW]));
+        $where =  sprintf(' and user_id =%d and status not in(%s)', \Auth::user()->user_id, implode(',', [Leave::REFUSE_REVIEW, Leave::RETRACT_REVIEW]));
         $isLeaves = Leave::whereRaw("
                 `start_time` BETWEEN '{$startTime}' and '{$endTime}'
                 {$where}
@@ -71,9 +76,7 @@ class Leaved extends Operate implements AttendanceInterface
                 return $this->backLeaveData(false, ['end_time' => trans('已经有该时间段申请单')]);
             }
         }
-        //申请配置计算类型配置判断
-        $holidayConfig = HolidayConfig::where(['holiday_id' => $holidayId])->first();
-        $driver = HolidayConfig::$cypherTypeChar[$holidayConfig->cypher_type];
+        //获取剩余假期情况
         $userHoliday = $this->driver($driver)->check($holidayConfig, $numberDay);
 
         //验证是否要上次附件
@@ -82,8 +85,8 @@ class Leaved extends Operate implements AttendanceInterface
         }
         //验证是否允许再节日前后申请
         if($holidayConfig->is_before_after === HolidayConfig::STATUS_ENABLE ) {
-            $st =  strtotime(date('Y-m-d', strtotime('-1day', strtotime($startTimeS))));
-            $et =  strtotime(date('Y-m-d', strtotime('+1day', strtotime($endTimeS))));
+            $st = strtotime(date('Y-m-d', strtotime('-1day', strtotime($startTimeS))));
+            $et = strtotime(date('Y-m-d', strtotime('+1day', strtotime($endTimeS))));
             $st = date('Y', $st) .'-'. (int)date('m', $st) .'-'. (int)date('d', $st);
             $et = date('Y', $et) .'-'. (int)date('m', $et) .'-'. (int)date('d', $et);
 
@@ -219,7 +222,6 @@ class Leaved extends Operate implements AttendanceInterface
             ->get(['holiday_id', 'show_name'])
             ->pluck('show_name', 'holiday_id')
             ->toArray();
-
 
         return view('attendance.leave.edit', compact('title', 'time', 'holidayList', 'leave', 'reviewUserId', 'copyUserIds', 'deptUsers', 'allUsers'));
 

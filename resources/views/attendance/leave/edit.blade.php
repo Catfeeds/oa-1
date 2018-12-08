@@ -48,14 +48,14 @@
                                 <span class="help-block m-b-none">{{ $errors->first('start_time') }}</span>
                             </div>
                         </div>
-                        <div class="col-sm-2">
+                        <div id="div_start_id" class="col-sm-2">
                             <select onchange="inquire()" class="js-select2-single form-control" id="start_id" name="start_id" > </select>
                         </div>
                     </div>
 
-                    <div class="hr-line-dashed"></div>
+                    <div id="div_end_time_line" class="hr-line-dashed"></div>
 
-                    <div class="form-group @if (!empty($errors->first('end_time')) || !empty($errors->first('end_id'))) has-error @endif">
+                    <div id="div_end_time" class="form-group @if (!empty($errors->first('end_time')) || !empty($errors->first('end_id'))) has-error @endif">
                         {!! Form::label('end_time', trans('att.请假结束时间'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-3">
                             <div class="input-group">
@@ -196,10 +196,19 @@
                         } else {
                             $('#show_p').hide();
                         }
+                        /*针对小时假类型控制显示时间*/
+                        if($data.close_time) {
+                            $('#div_start_id').hide();
+                            $('#div_end_time').hide();
+                            $('#div_end_time_line').hide();
+                        } else {
+                            $('#div_start_id').show();
+                            $('#div_end_time').show();
+                            $('#div_end_time_line').show();
+                        }
+                        /*显示申请步骤*/
                         var html = $data.step;
-
                         $('#show_step').html(html).find('select').select2();
-                        //$('#show_step').html($data.step)
                         inquire();
 
                     } else {

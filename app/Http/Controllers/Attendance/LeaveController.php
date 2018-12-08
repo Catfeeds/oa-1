@@ -173,7 +173,7 @@ class LeaveController extends AttController
         }
         //事物提交
         DB::commit();
-
+        //企业微信通知
         $msgArr = $retLeave['data']['leave']->toArray() ?? [];
         self::sendWXContent($msgArr);
 
@@ -273,7 +273,7 @@ class LeaveController extends AttController
         }
         //事物提交
         DB::commit();
-
+        //企业微信通知
         $msgArr = $retLeave['data']['leave'] ?? [];
         self::sendWXContent($msgArr);
 

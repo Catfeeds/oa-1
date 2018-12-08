@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class UpdateFieldEntryTable extends Migration
+class UpdateField1EntryTable extends Migration
 {
     /**
      * Run the migrations.

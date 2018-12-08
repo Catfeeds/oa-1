@@ -331,6 +331,20 @@ class Cypher
     }
 
     /**
+     * 重新组装时间
+     * @return array
+     */
+    public function buildUpLeaveTime($startTime, $endTime, $startId, $endId)
+    {
+        return [
+            'start_time' => $startTime,
+            'endTime' => $endTime,
+            'startTimeS' => trim($startTime .' '. $startId),
+            'endTimeS' => trim($startTime .' '. $endId),
+        ];
+    }
+
+    /**
      * 微信消息内容
      * @param $msgArr
      */
