@@ -10,7 +10,9 @@ namespace App\Components\AttendanceService\Cypher;
 
 use App\Components\Helper\DataHelper;
 use App\Http\Components\Helpers\AttendanceHelper;
+use App\Http\Components\Helpers\OperateLogHelper;
 use App\Models\Attendance\Leave;
+use App\Models\Sys\Dept;
 use App\Models\Sys\ReviewStepFlow;
 use App\User;
 
@@ -260,17 +262,20 @@ class Cypher
             foreach ($step['config'] as $lk => $lv) {
                 //指定人类型
                 if((int)$lv['assign_type'] === 0) {
-                    $leaderStepUid[$lv['step_order_id']] = (User::getUsernameAliasList()[$lv['assign_uid']] ?? '无')
+                    $leaderStepUid[$lv['step_order_id']] = (User::getUsernameAliasList()[$lv['assign_uid']] ?? '')
                         .' <input type="hidden" name="step_user['.$lv['step_order_id'].']" value="'.$lv['assign_uid'].'">';
                 }
-
-                //指定角色类型
-                $dept = ' and dept_id ='.\Auth::user()->dept_id ;
+                //查询部门,如果有存在2级部门时，主部门也成员要查询
+                $checkDept = Dept::where(['dept_id' => \Auth::user()->dept_id])->first();
+                if(empty($checkDept->dept_id)) continue;
+                $deptIds = [\Auth::user()->dept_id];
+                if(!empty($checkDept->parent_id)) $deptIds = [\Auth::user()->dept_id, $checkDept->parent_id];
+                $dept =  sprintf(' and dept_id in (%s)', implode(',', $deptIds));
                 if((int)$lv['group_type_id'] === 1) $dept = '';
-
+                //指定角色类型
                 $roleId = sprintf('JSON_EXTRACT(role_id, "$.id_%d") = "%d"', $lv['assign_role_id'], $lv['assign_role_id']);
-                $userLeader = User::whereRaw($roleId . $dept)->get()->toArray();
-                if((int)$lv['assign_type'] === 1 && empty($userLeader)) $leaderStepUid[$lv['step_order_id']]  = '无';
+                $userLeader = User::where(['status' => User::STATUS_ENABLE])->whereRaw($roleId . $dept)->get()->toArray();
+                if((int)$lv['assign_type'] === 1 && empty($userLeader)) $leaderStepUid[$lv['step_order_id']]  = '';
                 if((int)$lv['assign_type'] === 1 && !empty($userLeader)) {
                     //是否可以修改审批人 角色分配大于等于2人
                     if((int)$step['is_modify'] === ReviewStepFlow::MODIFY_YES && count($userLeader) >= 2) {
@@ -284,18 +289,23 @@ class Cypher
                             .'</select> <input type="hidden" name="is_edit_step" value="'.ReviewStepFlow::MODIFY_YES.'">
                             <input type="hidden" name="step_id" value="'.$step['step_id'].'">';
                     } else {
-                        $leaderStepUid[$lv['step_order_id']] = (User::getUsernameAliasList()[$userLeader[0]['user_id']] ?? '无')
+                        $leaderStepUid[$lv['step_order_id']] = (User::getUsernameAliasList()[$userLeader[0]['user_id']] ?? '')
                             .' <input type="hidden" name="step_user['.$lv['step_order_id'].']" value="'.$lv['assign_uid'].'">';;
                     }
                 }
             }
         }
 
+        $leaderStepUid = array_filter($leaderStepUid);
         ksort($leaderStepUid);
         return empty($leaderStepUid) ? '未设置' : implode('>>', $leaderStepUid);
     }
 
-
+    /**
+     * 获取申请天数
+     * @param $params
+     * @return int|number
+     */
     public function getLeaveNumberDay($params)
     {
         $numberDay = 0;
@@ -305,6 +315,54 @@ class Cypher
         $numberDay = DataHelper::leaveDayDiff($params['startTime'], $params['startId'], $params['endTime'], $params['endId']);
 
         return $numberDay;
+    }
+
+    /**
+     *  显示申请时间
+     * @param $params
+     * @return array
+     */
+    public function spliceLeaveTime($params)
+    {
+        return [
+            'time'=> DataHelper::dateTimeFormat($params['time'] .' '. $params['timeId'], 'Y-m-d H:i'),
+            'number_day' => $params['number_day'] . '天',
+        ];
+    }
+
+    /**
+     * 重新组装时间
+     * @return array
+     */
+    public function buildUpLeaveTime($startTime, $endTime, $startId, $endId)
+    {
+        return [
+            'start_time' => $startTime,
+            'end_time' => $endTime,
+            'start_id' => $startId,
+            'end_id' => $endId,
+            'start_timeS' => trim($startTime .' '. $startId),
+            'end_timeS' => trim($startTime .' '. $endId),
+        ];
+    }
+
+    /**
+     * 微信消息内容
+     * @param $msgArr
+     */
+    public function sendWXContent($msgArr)
+    {
+        $content =  '【'.$msgArr['applyType'].'】'.$msgArr['notice'].'
+申请事项：'.$msgArr['holiday'].'
+申请人：'.$msgArr['username'].'
+所属部门：'.$msgArr['dept'].'
+开始时间：'.$msgArr['start_time'].' '.$msgArr['start_id'].'
+结束时间：'.$msgArr['end_time'].' '.$msgArr['end_id'].'
+折合时间：'.$msgArr['number_day'].'
+点击此处查看申请详情[<a href = "'.$msgArr['url'].'">点我前往</a>]';
+
+        //企业微信通知审核人员
+        OperateLogHelper::sendWXMsg($msgArr['send_user'], $content);
     }
 
 }

@@ -41,6 +41,8 @@ class PunchRulesConfig extends Model
         'ded_type',
         'holiday_id',
         'ded_num',
+        'is_show_start',
+        'is_show_end',
     ];
 
     public static function getPunchRulesCfgToId($id)
@@ -51,14 +53,20 @@ class PunchRulesConfig extends Model
 
     public static function getPunchRules($config)
     {
-        $list = $arr = $arr_ = [];
+        $list = $list_ = $arr = $arr_ = [];
         foreach ($config as $k => $v) {
+
             $sKey = self::resolveFormula($v['work_start_time']);
             $eKey = self::resolveFormula($v['work_end_time']);
             $rKey = self::resolveFormula($v['ready_time']);
 
-            $list['start_time'][$sKey] = $sKey;
-            $list['end_time'][$eKey] = $eKey;
+            //申请单前端显示
+            if(empty($v['is_show_start']))  $list_['start_time'][$sKey] =  $sKey;
+            if(empty($v['is_show_end']))  $list_['end_time'][$eKey] =  $eKey;
+
+            $list['start_time'][$sKey] =  $sKey;
+            $list['end_time'][$eKey] =  $eKey;
+
             $arr[$sKey.'$$'.$eKey.'$$'.$rKey]['ded_num'][] = [
                 'start_gap' => self::resolveGapFormula($v['start_gap']),
                 'end_gap' => self::resolveGapFormula($v['end_gap']),
@@ -71,8 +79,14 @@ class PunchRulesConfig extends Model
         }
 
         asort($arr_);
-        return ['start_time' => array_values($list['start_time'] ?? []), 'end_time' => array_values($list['end_time'] ?? []),
-                'cfg' => $arr, 'sort' => $arr_];
+        return [
+            'start_time' => array_values($list['start_time'] ?? []),
+            'end_time' => array_values($list['end_time'] ?? []),
+            'show_start_time' => array_values($list_['start_time'] ?? []),
+            'show_end_time' => array_values($list_['end_time'] ?? []),
+            'cfg' => $arr,
+            'sort' => $arr_,
+        ];
     }
 
     public static function resolveFormula($formula)

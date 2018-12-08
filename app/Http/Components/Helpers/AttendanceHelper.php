@@ -94,38 +94,30 @@ class AttendanceHelper
         return ['leave_ids' => $leaveIds, 'user_ids' => $users];
     }
 
+    /**
+     * 显示日期
+     * @param $holidayId
+     * @param $time
+     * @param $timeId
+     * @param int $numberDay
+     * @return string
+     */
     public static function spliceLeaveTime($holidayId, $time, $timeId, $numberDay = 0)
     {
-        $holidayCfg =  HolidayConfig::getHolidayApplyList();
 
-        $day = DataHelper::dateTimeFormat($time, 'Y-m-d');
+        $cypherType =  HolidayConfig::holidayListCypherType();
 
-        $msg = '天';
-        switch ($holidayCfg[$holidayId]) {
-            case HolidayConfig::LEAVEID:
-                return [
-                    'time'=> DataHelper::dateTimeFormat($day .' '. $timeId, 'Y-m-d H:i'),
-                    'number_day' => $numberDay . $msg
-                ];
-                break;
-            case HolidayConfig::CHANGE:
-                return [
-                    'time'=> $day,
-                    'number_day' => Leave::$workTimePoint[(int)$numberDay] ?? '数据异常',
-                ];
-                break;
-            case HolidayConfig::RECHECK:
-                return [
-                    'time'=> $day,
-                    'number_day' => DataHelper::dateTimeFormat($time, 'H:i')
-                ];
-                break;
-            default:
-                return [
-                    'time'=> '',
-                    'number_day' => ''
-                ];
-        }
+        $driver = HolidayConfig::$cypherTypeChar[$cypherType[$holidayId]] ?? '';
+
+        if(empty($driver)) return '';
+
+        $data = [
+            'time'=> DataHelper::dateTimeFormat($time, 'Y-m-d'),
+            'timeId' => $timeId,
+            'number_day' => $numberDay,
+        ];
+
+        return \AttendanceService::driver($driver, 'cypher')->spliceLeaveTime($data);
     }
 
     /**

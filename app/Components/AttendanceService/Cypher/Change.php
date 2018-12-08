@@ -10,6 +10,7 @@
 namespace App\Components\AttendanceService\Cypher;
 
 use App\Components\Helper\DataHelper;
+use App\Http\Components\Helpers\OperateLogHelper;
 use App\Models\Attendance\Leave;
 use App\Models\Sys\HolidayConfig;
 
@@ -101,9 +102,9 @@ class Change extends Cypher
         $overTimeId = HolidayConfig::where(['cypher_type' => HolidayConfig::CYPHER_OVERTIME])->first();
         if (empty($overTimeId)) return $userLeaveInfo;
         //获取加班剩余次数
-        $overTimeLeaveLog = self::selectLeave($startDay, $endDay, $userId, $overTimeId->holiday_id, [Leave::PASS_REVIEW]);
+        $overTimeLeaveLog = $this->selectLeave($startDay, $endDay, $userId, $overTimeId->holiday_id, [Leave::PASS_REVIEW]);
         //申请调休的申请单次数
-        $changeLeaveLog = self::selectLeave($startDay, $endDay, $userId, $holiday->holiday_id, Leave::$statusList);
+        $changeLeaveLog = $this->selectLeave($startDay, $endDay, $userId, $holiday->holiday_id, Leave::$statusList);
 
         if(!empty($overTimeLeaveLog)) {
             foreach ($overTimeLeaveLog as $lk => $lv) {
@@ -160,7 +161,6 @@ class Change extends Cypher
      */
     public function getLeaveNumberDay($params)
     {
-
         $numberDay = 0;
         if(empty($params['startId'])) return $numberDay;
 
@@ -169,5 +169,37 @@ class Change extends Cypher
         $numberDay = DataHelper::leaveDayDiff($params['startTime'], $startId, $params['startTime'], $endId);
 
         return $numberDay;
+    }
+
+    /**
+     * 显示时间
+     * @param $params
+     * @return array
+     */
+    public function spliceLeaveTime($params)
+    {
+        return [
+            'time'=> $params['time'],
+            'number_day' => Leave::$workTimePoint[(int)$params['number_day']] ?? '数据异常',
+        ];
+    }
+
+    /**
+     * 微信消息内容
+     * @param $msgArr
+     */
+    public function sendWXContent($msgArr)
+    {
+        $content = '【'.$msgArr['applyType'].'】'.$msgArr['notice'].'
+申请事项：'.$msgArr['holiday'].'
+申请人：'.$msgArr['username'].'
+所属部门：'.$msgArr['dept'].'
+开始时间：'.$msgArr['start_time'].'
+结束时间：'.$msgArr['end_time'].'
+折合时间：'.Leave::$workTimePoint[$msgArr['number_day']] ?? '获取异常'.'
+点击此处查看申请详情[<a href = "'.$msgArr['url'].'">点我前往</a>]';
+
+        //企业微信通知审核人员
+        OperateLogHelper::sendWXMsg($msgArr['send_user'], $content);
     }
 }

@@ -72,15 +72,31 @@ class Paid extends Cypher
         ];
     }
 
+    /**
+     * @param $scope
+     * @param $userId
+     * @param $holidays
+     * @return int
+     */
     public function getDaysByScope($scope, $userId, $holidays)
     {
         return parent::getDaysByScope($scope, $userId, $holidays);
     }
 
-    /*public function getKindDaysByScope($scope, $userId, $holidays)
+    public function getKindDaysByScope($scope, $userId, $holidays)
     {
         $holidayIds = collect($holidays)->map(function ($v) {
             return $v->holiday_id;
         })->toArray();
-    }*/
+    }
+
+    /**
+     * @param $holidayId
+     * @param float $numberDay
+     * @return string
+     */
+    public function showLeaveStep($holidayId, $numberDay = 0.5)
+    {
+        return parent::showLeaveStep($holidayId, $numberDay);
+    }
 }

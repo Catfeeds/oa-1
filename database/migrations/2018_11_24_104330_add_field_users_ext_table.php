@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddFieldUsersExtTable extends Migration
+class AddField1UsersExtTable extends Migration
 {
     /**
      * Run the migrations.

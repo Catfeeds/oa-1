@@ -42,6 +42,8 @@
                                                 <th>{{ trans('app.限制最小条件') }}</th>
                                                 <th>{{ trans('app.限制最大条件') }}</th>
                                                 <th>{{ trans('app.是否允许修改审批人') }}</th>
+                                                <th>{{ trans('app.审核流程') }}</th>
+                                                <th>{{ trans('app.提交时间') }}</th>
                                                 <th>{{ trans('app.操作') }}</th>
                                             </tr>
                                             </thead>
@@ -54,6 +56,8 @@
                                                     <td>{{ $v['min_num'] ?? '暂无' }}</td>
                                                     <td>{{ $v['max_num'] ?? '暂无'}}</td>
                                                     <td>{{ \App\Models\Sys\ReviewStepFlow::$modifyType[$v['is_modify']] ?? '数据异常' }}</td>
+
+                                                    <td>{{ implode('>>', $step[$v['step_id']] ?? []) }}</td>
                                                     <td>{{$v['created_at'] }}</td>
                                                     <td>
                                                         @if(Entrust::can(['approval-step.edit']))

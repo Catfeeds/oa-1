@@ -10,9 +10,13 @@
 namespace App\Components\AttendanceService\Operate;
 
 use App\Components\Helper\DataHelper;
+use App\Http\Components\Helpers\OperateLogHelper;
 use App\Models\Attendance\DailyDetail;
 use App\Models\Sys\ApprovalStep;
+use App\Models\Sys\Dept;
+use App\Models\Sys\OperateLog;
 use App\Models\Sys\ReviewStepFlow;
+use App\Models\Sys\ReviewStepFlowConfig;
 use App\User;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use App\Models\Attendance\Leave;
@@ -44,7 +48,7 @@ class Operate
     {
         $holidayId = $request['holiday_id'];
 
-        //可编辑审核人的情况下,请求数据，在渠道Cypher->showLeaveStep 方法生成
+        //可编辑审核人的情况下,请求数据，在计算类型Cypher->showLeaveStep 方法生成
         if(!empty($request['step_id']) && !empty($request['step_user']) && !empty($request['is_edit_step']) && (int)$request['is_edit_step'] === ReviewStepFlow::MODIFY_YES) {
             $stepId = $request['step_id'];
 
@@ -63,6 +67,7 @@ class Operate
             $remainUser = json_encode($leaderStepUid);
 
         } else {
+            //获取系统配置审核步骤
             $steps = ReviewStepFlow::with('config')->where(['child_id' => $holidayId])->get()->toArray();
             $step = [];
             foreach ($steps as $sk => $sv) {
@@ -76,20 +81,31 @@ class Operate
 
             $leaderStepUid = [];
             foreach ($step['config'] as $lk => $lv) {
-
-                if((int)$lv['assign_type'] === 0) {
+                //指定人
+                if((int)$lv['assign_type'] === ReviewStepFlowConfig::ASSIGN_USER) {
                     $leaderStepUid[$lv['step_order_id']] = $lv['assign_uid'];
                 }
-
-                if((int)$lv['assign_type'] === 1) {
+                //指定组 角色权限
+                if((int)$lv['assign_type'] === ReviewStepFlowConfig::ASSIGN_ROLE) {
                     $roleId = sprintf('JSON_EXTRACT(role_id, "$.id_%d") = "%d"', $lv['assign_role_id'], $lv['assign_role_id']);
-                    $dept = ' and dept_id ='. \Auth::user()->dept_id ;
-                    if((int)$lv['group_type_id'] === 1 || empty(\Auth::user()->dept_id)) $dept = '';
-                    $userLeader = User::whereRaw( $roleId . $dept )->first();
-                    if(empty($userLeader->user_id)) return self::backLeaveData(false, ['holiday_id' => trans('申请失败，未设置部门审核人员,有疑问请联系人事')]);
+                    //查询部门,如果有存在2级部门时，主部门也成员要查询
+                    $checkDept = Dept::where(['dept_id' => \Auth::user()->dept_id])->first();
+                    if(empty($checkDept->dept_id)) continue;
+                    $deptIds = [\Auth::user()->dept_id];
+                    if(!empty($checkDept->parent_id)) $deptIds = [\Auth::user()->dept_id, $checkDept->parent_id];
+                    $dept =  sprintf(' and dept_id in (%s)', implode(',', $deptIds));
+
+                    if((int)$lv['group_type_id'] === ReviewStepFlow::GROUP_UN) $dept = '';
+                    $userLeader = User::whereRaw($roleId . $dept)->first();
+                    //中间未配置审核人，跳过该审核步骤
+                    //if(empty($userLeader->user_id)) return self::backLeaveData(false, ['holiday_id' => trans('申请失败，未设置部门审核人员,有疑问请联系人事')]);
+                    if(empty($userLeader->user_id)) continue;
                     $leaderStepUid[$lv['step_order_id']] = $userLeader->user_id;
                 }
             }
+
+            //申请单都未配置一个审核人，拒绝通过
+            if(empty($leaderStepUid)) return self::backLeaveData(false, ['holiday_id' => trans('申请失败，未设置部门审核人员,有疑问请联系人事')]);
 
             ksort($leaderStepUid);
             $stepUser = json_encode($leaderStepUid);
@@ -142,9 +158,10 @@ class Operate
             'exceed_holiday_id' => $leave['exceed_holiday_id'] ?? NULL,
             'step_user' => $leave['step_user'] ?? NULL
         ];
+
         $ret = Leave::create($data);
 
-        return $this->backLeaveData(true, [], ['leave_id' => $ret->leave_id]);
+        return $this->backLeaveData(true, [], ['leave' => $ret]);
     }
 
     /**
@@ -176,7 +193,7 @@ class Operate
 
         Leave::where(['leave_id' => $leave['leave_id']])->update($data);
 
-        return $this->backLeaveData(true, [], ['leave_id' => $leave['leave_id']]);
+        return $this->backLeaveData(true, [], ['leave' => $leave]);
     }
 
     /**
@@ -364,7 +381,10 @@ class Operate
     {
         if(empty($leave->remain_user)) {
             $leave->update(['status' => Leave::PASS_REVIEW, 'review_user_id' => 0]);
+            //预生成每日考勤信息
             $this->setDailyDetail($leave);
+            //微信通知申请人
+            $this->passWXSendContent($leave);
         } else {
             $remainUser = json_decode($leave->remain_user, true);
 
@@ -380,5 +400,17 @@ class Operate
             $leave->update(['status' => Leave::ON_REVIEW, 'review_user_id' => $reviewUserId, 'remain_user' => $remainUser]);
         }
     }
+    /**
+     * 微信消息内容
+     * @param $msgArr
+     */
+    public function passWXSendContent($leave)
+    {
+        $content =  '【审批通过通知】
+点击此处查看申请详情[<a href = "'.url('/').'/attendance/leave/optInfo/'.$leave['leave_id'].'">点我前往</a>]';
 
+        $users = User::getUsernameList();
+        //企业微信通知审核人员
+        OperateLogHelper::sendWXMsg($users[$leave['user_id']] ?? '', $content);
+    }
 }

@@ -10,6 +10,7 @@
 namespace App\Components\AttendanceService\Cypher;
 
 use App\Components\Helper\DataHelper;
+use App\Http\Components\Helpers\OperateLogHelper;
 use App\Models\Attendance\Leave;
 use App\Models\Sys\HolidayConfig;
 
@@ -57,6 +58,37 @@ class Overtime extends Cypher
         $numberDay = DataHelper::leaveDayDiff($params['startTime'], $startId, $params['startTime'], $endId);
 
         return $numberDay;
+    }
+
+    /**
+     * @param $params
+     * @return array
+     */
+    public function spliceLeaveTime($params)
+    {
+        return [
+            'time'=> $params['time'],
+            'number_day' => Leave::$workTimePoint[(int)$params['number_day']] ?? '数据异常',
+        ];
+    }
+
+    /**
+     * 微信消息内容
+     * @param $msgArr
+     */
+    public function sendWXContent($msgArr)
+    {
+        $content = '【'.$msgArr['applyType'].'】'.$msgArr['notice'].'
+申请人：'.$msgArr['username'].'
+所属部门：'.$msgArr['dept'].'
+申请事项：'.$msgArr['holiday'].'
+开始时间：'.$msgArr['start_time'].'
+结束时间：'.$msgArr['end_time'].'
+折合天数：'.Leave::$workTimePoint[$msgArr['number_day']] ?? '获取异常'.'
+点击此处查看申请详情[<a href = "'.$msgArr['url'].'">点我前往</a>]';
+
+        //企业微信通知审核人员
+        OperateLogHelper::sendWXMsg($msgArr['send_user'], $content);
     }
 
 }

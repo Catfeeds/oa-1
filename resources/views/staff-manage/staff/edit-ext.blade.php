@@ -675,7 +675,6 @@
 
                     <div class="hr-line-dashed"></div>
 
-
                     <div class="form-group">
                         <div class="col-sm-4 col-sm-offset-5">
                             {!! Form::submit(trans('app.提交'), ['class' => 'btn btn-primary']) !!}

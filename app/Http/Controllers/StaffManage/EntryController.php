@@ -25,6 +25,7 @@ use EasyWeChat\Kernel\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
+use Illuminate\Mail\Message;
 
 class EntryController extends AttController
 {
@@ -126,10 +127,10 @@ class EntryController extends AttController
         }
 
         $data['creater_id'] = \Auth::user()->user_id;
-        $data['copy_user'] = json_encode($data['copy_users']);
+        $data['copy_user'] = json_encode($data['copy_user']) ?? NUll;
         $data['remember_token'] = Str::random(60);
         $data['send_time'] = date('Y-m-d H:i:s', time());
-        $data['role_id'] = json_encode($data['role_id']);
+        $data['role_id'] = json_encode($data['role_id']) ?? NUll;
 
         Entry::create($data);
         flash(trans('app.添加成功', ['value' => trans('staff.待入职人员')]), 'success');
@@ -241,16 +242,6 @@ class EntryController extends AttController
     {
         $entry = Entry::findOrFail($id);
 
-        //邮箱发送信息
-/*        try {
-            \Mail::send('emails.entry', ['content' => $content, 'entry' => $entry], function (Message $m) use ($entry) {
-                $m->to($entry->email)->subject('诗悦OA系统-入职信息填写邮件');
-            });
-        } catch (\Swift_TransportException $e) {
-            flash(trans('staff.发送员工入职邮件失败'), 'danger');
-            \Log::error('发送员工入职邮件失败:' . $e->getMessage());
-            return redirect()->route('entry.list');
-        }*/
         $rememberToken = $entry->remember_token;
 
         if($entry->status === Entry::FILL_END) {
@@ -260,14 +251,29 @@ class EntryController extends AttController
 
         $url = sprintf(url('/') . '/entry/fill/%s/%s', $entry->remember_token, md5($rememberToken . self::APP_KEY));
 
-        //$content = '请用google浏览器打开链接，个人入职信息填写请再2个小时之内完成，否则请联系人事: ' . $url;
-        //企业微信通知信息
-        $content = '【'.$entry->name.'】 填写完入职资料通知
-                请用google浏览器打开链接，个人入职信息填写请再2个小时之内完成，否则过期无效,有疑问请联系人事
-                链接地址: [<a href = "'.$url.'">点我前往</a>]';
+        //邮箱发送信息
+        $mailContent = '亲爱的  '.$entry->name.' 同学：</br>
+&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp欢迎加入诗悦网络！</br>
+&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp为方便您尽快融入我们，请您务必点击下方链接完成个人入职信息录入，预祝您工作顺利！</br>
+网页地址:'.$url;
 
-        $userId = \Auth::user()->username;
-        OperateLogHelper::sendWXMsg($userId, $content);
+        try {
+            \Mail::send('emails.entry', ['content' => $mailContent, 'entry' => $entry], function (Message $m) use ($entry) {
+                $m->to($entry->email)->subject('诗悦OA系统-入职信息填写邮件');
+            });
+        } catch (\Swift_TransportException $e) {
+            flash(trans('staff.发送员工入职邮件失败'), 'danger');
+            \Log::error('发送员工入职邮件失败:' . $e->getMessage());
+
+            //企业微信通知信息
+            $content = '【'.$entry->name.'】 发送填写完入职资料通知失败
+如多次发送失败，可复制链接提供给入职员工
+链接地址:'.$url;
+            $userId = \Auth::user()->username;
+            OperateLogHelper::sendWXMsg($userId, $content);
+
+            return redirect()->route('entry.list');
+        }
 
         flash(trans('staff.发送员工入职邮件成功'), 'success');
         return redirect()->route('entry.list');

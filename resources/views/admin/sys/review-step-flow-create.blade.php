@@ -88,14 +88,14 @@
                                                         <option value="{{ $k }}" @if($k === ($step->step_order_id ?? old('step_order_id') ?? '')) selected="selected" @endif>{{ $v }}</option>
                                                     @endforeach
                                                 </select>
-                                                <input id="assign_type" name="step[1][assign_type]" type="radio" value="0" checked="checked" > {{trans('app.指定人')}}
+                                                <input id="assign_type" name="step[1][assign_type]" type="radio" value="{{\App\Models\Sys\ReviewStepFlowConfig::ASSIGN_USER}}" checked="checked" > {{trans('app.指定人')}}
                                                 <select id="assign_uid" name="step[1][assign_uid]" >
                                                     <option value="">{{trans('app.未选择')}}</option>
                                                     @foreach($userList as $k => $v)
                                                         <option value="{{ $k }}" @if($k === ($step->assign_uid ?? old('assign_uid') ?? '')) selected="selected" @endif>{{ $v }}</option>
                                                     @endforeach
                                                 </select>
-                                                <input id="assign_type"  name="step[1][assign_type]" type="radio" value="1" > {{trans('app.指定组')}}
+                                                <input id="assign_type"  name="step[1][assign_type]" type="radio" value="{{\App\Models\Sys\ReviewStepFlowConfig::ASSIGN_ROLE}}" > {{trans('app.指定组')}}
 
                                                 <select id="group_type_id"  name="step[1][group_type_id]" >
                                                     @foreach(\App\Models\Sys\ApprovalStep::$groupType as $k => $v)

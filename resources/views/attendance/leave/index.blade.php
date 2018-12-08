@@ -32,7 +32,7 @@
         <div class="title-action">
             @if(Entrust::can(['leave.create']))
                 <a href="{{ route('leave.create', ['id' => \App\Models\Sys\HolidayConfig::LEAVEID]) }}" class="btn btn-primary btn-sm">{{ trans('请假申请') }}</a>
-                <a href="{{ route('leave.create', ['id' => \App\Models\Sys\HolidayConfig::CHANGE]) }}" class="btn btn-success btn-sm">{{ trans('调休申请') }}</a>
+                <a href="{{ route('leave.create', ['id' => \App\Models\Sys\HolidayConfig::CHANGE]) }}" class="btn btn-success btn-sm">{{ trans('加班/调休申请') }}</a>
                 <a href="{{ route('leave.create', ['id' => \App\Models\Sys\HolidayConfig::RECHECK]) }}" class="btn btn-danger btn-sm">{{ trans('补打卡') }}</a>
             @endif
             @if(Entrust::can(['leave.batchOvertime']))
@@ -103,9 +103,9 @@
 
                         @foreach($data as $k => $v)
                             <tr>
-                                <td>{{ \App\Models\Sys\HolidayConfig::$applyType[\App\Models\Sys\HolidayConfig::getHolidayApplyList()[$v['holiday_id']]] ?? '未识别' }}</td>
+                                <td>{!! \App\Models\Sys\HolidayConfig::applyTypeColor($v['holidayConfig']->apply_type_id) ?? '数据异常' !!}</td>
                                 <td>
-                                    {{ \App\Models\Sys\HolidayConfig::getHolidayList()[$v['holiday_id']] ?? '数据异常' }}
+                                    {{ $holidayList[$v['holiday_id']] ?? '数据异常' }}
                                 </td>
                                 <td>
                                     {{\App\Http\Components\Helpers\AttendanceHelper::spliceLeaveTime($v['holiday_id'], $v['start_time'], $v['start_id'], $v['number_day'])['time']}}

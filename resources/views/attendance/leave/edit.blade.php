@@ -48,14 +48,14 @@
                                 <span class="help-block m-b-none">{{ $errors->first('start_time') }}</span>
                             </div>
                         </div>
-                        <div class="col-sm-2">
-                            <select onchange="startChange()" class="js-select2-single form-control" id="start_id" name="start_id" > </select>
+                        <div id="div_start_id" class="col-sm-2">
+                            <select onchange="inquire()" class="js-select2-single form-control" id="start_id" name="start_id" > </select>
                         </div>
                     </div>
 
-                    <div class="hr-line-dashed"></div>
+                    <div id="div_end_time_line" class="hr-line-dashed"></div>
 
-                    <div class="form-group @if (!empty($errors->first('end_time')) || !empty($errors->first('end_id'))) has-error @endif">
+                    <div id="div_end_time" class="form-group @if (!empty($errors->first('end_time')) || !empty($errors->first('end_id'))) has-error @endif">
                         {!! Form::label('end_time', trans('att.请假结束时间'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-3">
                             <div class="input-group">
@@ -69,7 +69,7 @@
                             </div>
                         </div>
                         <div class="col-sm-2">
-                            <select onchange="endChange()" class="js-select2-single form-control" id="end_id" name="end_id" ></select>
+                            <select onchange="inquire()" class="js-select2-single form-control" id="end_id" name="end_id" ></select>
                         </div>
                     </div>
 
@@ -110,7 +110,8 @@
                             <select multiple="multiple" class="js-select2-multiple form-control"
                                     name="copy_user[]">
                                 @foreach($allUsers as $key => $val)
-                                    <option value="{{ $val['user_id'] }}">{{ $val['alias'].'('.$val['username'].')' }}</option>
+                                    <option value="{{ $val['user_id'] }}"
+                                            @if (!empty($copyUserIds) && in_array($val['user_id'], $copyUserIds)) selected @endif>{{ $val['alias'].'('.$val['username'].')' }}</option>
                                 @endforeach
                             </select>
                             <span class="help-block m-b-none">{{ $errors->first('copy_user') }}</span>
@@ -163,6 +164,7 @@
 
             $("#start_time").change(function(){
                 inquireStartInfo();
+
             });
             $("#end_time").change(function(){
                 inquireEndInfo();
@@ -171,25 +173,14 @@
             showMemo();
             inquireStartInfo();
             inquireEndInfo();
-            startChange();
-            endChange();
-
         });
-
-        function startChange() {
-            inquire();
-        }
-
-        function endChange() {
-            inquire();
-        }
 
         /**
          * 显示剩余假期和描述
          */
         function showMemo() {
             var val = $('#holiday_id').children('option:selected').val();
-            if(val != "") {
+            if(val != "" && val != null  ) {
                 $('#show_pre').html('');
                 $.get('{{ route('leave.showMemo')}}', {id: val}, function ($data) {
                     if ($data.status == 1) {
@@ -205,10 +196,19 @@
                         } else {
                             $('#show_p').hide();
                         }
+                        /*针对小时假类型控制显示时间*/
+                        if($data.close_time) {
+                            $('#div_start_id').hide();
+                            $('#div_end_time').hide();
+                            $('#div_end_time_line').hide();
+                        } else {
+                            $('#div_start_id').show();
+                            $('#div_end_time').show();
+                            $('#div_end_time_line').show();
+                        }
+                        /*显示申请步骤*/
                         var html = $data.step;
-
                         $('#show_step').html(html).find('select').select2();
-                        //$('#show_step').html($data.step)
                         inquire();
 
                     } else {
@@ -233,23 +233,35 @@
             var endTime = $('#end_time').val();
             getPunchRules(endTime, 2);
             inquire();
-
         }
 
+        /**
+         * 显示审核步骤
+         */
         function inquire() {
             var holidayId = $('#holiday_id').val();
             var startTime = $('#start_time').val();
             var endTime = $('#end_time').val();
             var startId = $('#start_id').val();
-            var endId = $('#end_id').val();
-            if (holidayId != '' && startTime != '' && endTime != '' && startId != '' && endId != '' )
-            $.get('{{ route('leave.inquire')}}', {holidayId: holidayId,startTime: startTime, endTime: endTime, startId:startId, endId:endId}, function ($data) {
-                if ($data.status == 1) {
-                    $('#show_step').html($data.step).find('select').select2();
-                } else {
-                    $('#show_step').html('');
-                }
-            })
+            var endId =  $('#end_id').val();
+
+            if(startId == '' || startId == null )
+                startId = '{{$leave->start_id ?? ''}}';
+
+            if(endId == '' || endId == null)
+                endId = '{{$leave->end_id ?? ''}}';
+
+            if (endTime >= startTime && holidayId != '' && startTime != '' && endTime != '' && startId != '' && startId != null && endId != '' && endId != null ) {
+                $.get('{{ route('leave.inquire')}}', {holidayId: holidayId,startTime: startTime, endTime: endTime, startId:startId, endId:endId}, function ($data) {
+                    if ($data.status == 1) {
+                        $('#show_step').html($data.step).find('select').select2();
+                    } else {
+                        $('#show_step').html('');
+                    }
+                })
+            } else {
+                $('#show_step').html('');
+            }
         }
 
         /**
@@ -259,7 +271,6 @@
          */
         function getPunchRules(time, type) {
             $.get('{{ route('leave.getPunchRules')}}', {time: time}, function ($data) {
-
                 switch (type){
                     case 1:
                         if ($data.status == 1) {
@@ -272,9 +283,8 @@
                                 data: $data.start_time //绑定数据
                             });
 
-
-                            @if(!empty($startId))
-                                start_id = '{{$startId}}';
+                            @if(!empty($leave->start_id))
+                                start_id = '{{$leave->start_id}}';
                             @else
                                 start_id = $data.start_time[0];
                             @endif
@@ -297,8 +307,8 @@
                                 data: $data.end_time //绑定数据
                             });
 
-                            @if(!empty($endId))
-                                end_id = '{{$endId}}';
+                            @if(!empty($leave->end_id))
+                                end_id = '{{$leave->end_id}}';
                             @else
                                 end_id = $data.end_time[0];
                             @endif
@@ -307,7 +317,6 @@
                         } else {
                             $("#end_id").select2("val", "");
                             $("#end_id").empty();
-
                         }
                 }
 

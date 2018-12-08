@@ -50,6 +50,8 @@ class PunchRulesController extends Controller
             $arr[$key]['ready_time'] = $v['ready_time'];
             $arr[$key]['work_start_time'] = $v['work_start_time'];
             $arr[$key]['work_end_time'] = $v['work_end_time'];
+            $arr[$key]['is_show_start'] = $v['is_show_start'];
+            $arr[$key]['is_show_end'] = $v['is_show_end'];
             $arr[$key]['cfg'][] = [
                 "rule_desc" => $v['rule_desc'],
                 "late_type" => $v['late_type'],
@@ -58,6 +60,7 @@ class PunchRulesController extends Controller
                 "ded_type" => $v['ded_type'],
                 "holiday_id" => $v['holiday_id'],
                 "ded_num" => $v['ded_num'],
+
             ];
         }
         $punchRules['config'] = $arr;
@@ -87,6 +90,8 @@ class PunchRulesController extends Controller
                             'work_start_time' => $v['work_start_time'],
                             'work_end_time' => $v['work_end_time'],
                             'ready_time' => $v['ready_time'],
+                            'is_show_start' => $v['is_show_start'],
+                            'is_show_end' => $v['is_show_end'],
                             'rule_desc' => $cv['rule_desc'],
                             'late_type' => $cv['late_type'],
                             'start_gap' => $cv['start_gap'],
@@ -123,6 +128,7 @@ class PunchRulesController extends Controller
             'punch_type_id' => $p['punch_type_id'],
             'name' => $p['name'],
         ];
+
         DB::beginTransaction();
         try{
             $punchRules->update($rules);
@@ -135,6 +141,8 @@ class PunchRulesController extends Controller
                             'work_start_time' => $v['work_start_time'],
                             'work_end_time' => $v['work_end_time'],
                             'ready_time' => $v['ready_time'],
+                            'is_show_start' => $v['is_show_start'],
+                            'is_show_end' => $v['is_show_end'],
                             'rule_desc' => $cv['rule_desc'],
                             'late_type' => $cv['late_type'],
                             'start_gap' => $cv['start_gap'],

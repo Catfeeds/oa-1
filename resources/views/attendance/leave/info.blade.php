@@ -39,9 +39,7 @@
                     <div class="form-group">
                         {!! Form::label('holiday_id', trans('att.申请类型'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-6">
-                            <span class="help-block m-b-none">
-                                {{ \App\Models\Sys\HolidayConfig::$applyType[\App\Models\Sys\HolidayConfig::getHolidayApplyList()[$leave->holiday_id]] ?? ''}}
-                            </span>
+                            {!! \App\Models\Sys\HolidayConfig::applyTypeColor($leave->holidayConfig->apply_type_id) !!}
                         </div>
                     </div>
 
@@ -164,6 +162,22 @@
                         </div>
                     @endif
 
+                    {{--抄送名单显示--}}
+                    @if(!empty($leave->copy_user) && !empty($copyIds))
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            {!! Form::label('reason', trans('att.抄送名单'), ['class' => 'col-sm-2 control-label']) !!}
+                            <div class="col-sm-6">
+                                <select disabled="disabled" multiple="multiple" class="js-select2-multiple form-control">
+                                    @foreach($users as $key => $val)
+                                        <option value="{{ $key }}"
+                                                @if (in_array($key, $copyIds)) selected @endif>{{ $val }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                    @endif
+
                     <div class="hr-line-dashed"></div>
 
                     <div style="height: 20em;" class="form-group">
@@ -188,24 +202,24 @@
                     <div class="form-group">
                         <div class="col-sm-4 col-sm-offset-5">
 
-                        @if(in_array($leave->status, \App\Models\Attendance\Leave::$retractList) && $cypherType !== \App\Models\Sys\HolidayConfig::CYPHER_OVERTIME && $leave->user_id == Auth::user()->user_id && Entrust::can(['leave.retract']) )
+                        @if(in_array($leave->status, \App\Models\Attendance\Leave::$retractList)  && $leave->user_id === Auth::user()->user_id && Entrust::can(['leave.retract']) )
                             <a id="retract_status" data-id='{{\App\Models\Attendance\Leave::RETRACT_REVIEW}}' class="btn btn-danger">{{ trans('att.撤回申请') }}</a>
                         @endif
 
-                        @if(in_array($leave->status, \App\Models\Attendance\Leave::$restartList) && $cypherType !== \App\Models\Sys\HolidayConfig::CYPHER_OVERTIME && $leave->user_id == Auth::user()->user_id && Entrust::can(['leave.restart']) )
+                        @if(in_array($leave->status, \App\Models\Attendance\Leave::$restartList) && $leave->user_id === Auth::user()->user_id && Entrust::can(['leave.restart']) )
                             <a id="restart_status" data-id='{{\App\Models\Attendance\Leave::RESTART_REVIEW}}' class="btn btn-success">{{ trans('att.重启申请') }}</a>
                         @endif
 
                         {{--针对批量申请单操作--}}
-                        @if(in_array($leave->status, \App\Models\Attendance\Leave::$retractList) && $cypherType === \App\Models\Sys\HolidayConfig::CYPHER_OVERTIME && $leave->user_id == Auth::user()->user_id && Entrust::can(['leave.retract']) )
+                        @if(in_array($leave->status, \App\Models\Attendance\Leave::$retractList) && $cypherType === \App\Models\Sys\HolidayConfig::CYPHER_OVERTIME && $leave->user_id === Auth::user()->user_id && !empty($leave->user_list) && Entrust::can(['leave.retract']) )
                             <a id="batch_retract_status" data-id='{{\App\Models\Attendance\Leave::BATCH_RETRACT_REVIEW}}' class="btn btn-danger">{{ trans('att.批量撤回申请') }}</a>
                         @endif
                         {{--针对批量申请单个人操作--}}
-                        @if(in_array($leave->status, \App\Models\Attendance\Leave::$retractList) && $cypherType === \App\Models\Sys\HolidayConfig::CYPHER_OVERTIME && (!empty($userIds) &&in_array(Auth::user()->user_id, $userIds)) && Entrust::can(['leave.retract']) )
+                        @if(in_array($leave->status, \App\Models\Attendance\Leave::$retractList) && $cypherType === \App\Models\Sys\HolidayConfig::CYPHER_OVERTIME && (!empty($userIds) && !empty($leave->user_list) && in_array(Auth::user()->user_id, $userIds)) && Entrust::can(['leave.retract']) )
                             <a id="retract_status" data-id='{{\App\Models\Attendance\Leave::RETRACT_REVIEW}}' class="btn btn-danger">{{ trans('att.个人撤回申请') }}</a>
                         @endif
 
-                        @if(in_array($leave->status, \App\Models\Attendance\Leave::$restartList) && $cypherType === \App\Models\Sys\HolidayConfig::CYPHER_OVERTIME && $leave->user_id == Auth::user()->user_id && Entrust::can(['leave.restart']) )
+                        @if(in_array($leave->status, \App\Models\Attendance\Leave::$restartList) && $cypherType === \App\Models\Sys\HolidayConfig::CYPHER_OVERTIME && !empty($leave->user_list) && $leave->user_id === Auth::user()->user_id && Entrust::can(['leave.restart']) )
                             <a id="batch_restart_status" data-id='{{\App\Models\Attendance\Leave::BATCH_RESTART_REVIEW}}' class="btn btn-success">{{ trans('att.批量重启申请') }}</a>
                         @endif
 

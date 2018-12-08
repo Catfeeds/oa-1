@@ -62,7 +62,8 @@ class LeaveController extends AttController
                 break;
         }
 
-        $data = Leave::whereRaw($scope->getWhere() . $where)
+        $data = Leave::with('holidayConfig')
+            ->whereRaw($scope->getWhere() . $where)
             ->whereHas('holidayConfig', function ($query) {
                 $query->where('is_show', HolidayConfig::STATUS_ENABLE);
             })
@@ -79,6 +80,8 @@ class LeaveController extends AttController
 
         //申诉
         $appealData = Appeal::getAppealResult(Appeal::APPEAL_LEAVE);
+
+        $holidayList = HolidayConfig::getHolidayList();
 
         $title = trans('att.我的假期详情');
         return view('attendance.leave.index',
@@ -160,11 +163,8 @@ class LeaveController extends AttController
             $retLeave = \AttendanceService::driver($driver)->createLeave($leave);
             //日志记录操作
             if($retLeave['success']) {
-                OperateLogHelper::createOperateLog(OperateLogHelper::LEAVE_TYPE_ID, $retLeave['data']['leave_id'], '提交申请');
+                OperateLogHelper::createOperateLog(OperateLogHelper::LEAVE_TYPE_ID, $retLeave['data']['leave']->leave_id, '提交申请');
             }
-            //微信通知审核人员
-            OperateLogHelper::sendWXMsg('sy0011', '测试下');
-
         } catch (Exception $ex) {
             //事物回滚
             DB::rollBack();
@@ -173,9 +173,53 @@ class LeaveController extends AttController
         }
         //事物提交
         DB::commit();
+        //企业微信通知
+        $msgArr = $retLeave['data']['leave']->toArray() ?? [];
+        self::sendWXContent($msgArr);
 
         flash(trans('app.添加成功', ['value' => trans('att.假期申请')]), 'success');
         return redirect()->route('leave.info');
+    }
+
+    /**
+     * 申请单微信通知
+     * @param $msgArr
+     */
+    public function sendWXContent($msgArr)
+    {
+        if(empty($msgArr)) return;
+
+        $users = User::getUsernameList();
+        $applyType = HolidayConfig::getHolidayApplyList();
+        //通知内容
+        $msgArr = $msgArr + [
+            'applyType' => HolidayConfig::$applyType[$applyType[$msgArr['holiday_id']]] ?? '错误数据',
+            'notice' => '审批通知',
+            'username' => \Auth::user()->alias,
+            'holiday' => HolidayConfig::getHolidayList()[$msgArr['holiday_id']],
+            'dept' => \Auth::user()->dept->dept,
+            'url' => url('/').'/attendance/leave/review/optInfo/'.$msgArr['leave_id'],
+            'send_user' => $users[$msgArr['review_user_id']] ?? '',
+        ];
+
+        $cypherType = HolidayConfig::holidayListCypherType();
+        $cypherDriver = HolidayConfig::$cypherTypeChar[$cypherType[$msgArr['holiday_id']]] ?? '';
+
+        \AttendanceService::driver($cypherDriver, 'cypher')->sendWXContent($msgArr);
+
+        //抄送人员通知
+        if(!empty($msgArr['copy_user'])) {
+            $copyUser = json_decode($msgArr['copy_user'], true);
+            $msgArr['notice'] = '抄送通知';
+            $msgArr['url'] = url('/').'/attendance/leave/optInfo/'.$msgArr['leave_id'];
+            $sendUser = [];
+            foreach ($copyUser as $k => $v) {
+                $sendUser[] = $users[$v] ?? '';
+            }
+            $msgArr['send_user'] = implode('|', $sendUser);
+
+            \AttendanceService::driver($cypherDriver, 'cypher')->sendWXContent($msgArr);
+        }
     }
 
     public function update(Request $request, $applyTypeId, $id)
@@ -215,12 +259,11 @@ class LeaveController extends AttController
         try {
             //创建申请单
             $retLeave = \AttendanceService::driver($driver)->updateLeave($leave);
+
             //日志记录操作
             if($retLeave['success']) {
-                OperateLogHelper::createOperateLog(OperateLogHelper::LEAVE_TYPE_ID, $retLeave['data']['leave_id'], '重启申请单');
+                OperateLogHelper::createOperateLog(OperateLogHelper::LEAVE_TYPE_ID, $retLeave['data']['leave']['leave_id'], '重启申请单');
             }
-            //微信通知审核人员
-            //OperateLogHelper::sendWXMsg($review_user_id, '测试下');
 
         } catch (Exception $ex) {
             //事物回滚
@@ -230,6 +273,9 @@ class LeaveController extends AttController
         }
         //事物提交
         DB::commit();
+        //企业微信通知
+        $msgArr = $retLeave['data']['leave'] ?? [];
+        self::sendWXContent($msgArr);
 
         flash(trans('att.重启申请单成功'), 'success');
         return redirect()->route('leave.info');
@@ -242,9 +288,13 @@ class LeaveController extends AttController
      */
     public function optInfo($id)
     {
+        try{
+            $leave = Leave::with('holidayConfig')->findOrFail($id);
+            if(empty($leave->leave_id)) return redirect()->route('leave.info');
+        } catch (\Exception $e) {
+            return redirect()->route('leave.info');
+        }
 
-        $leave = Leave::with('holidayConfig')->findOrFail($id);
-        if(empty($leave->leave_id)) return redirect()->route('leave.info');
         //抄送人员也可以查看
         $copyIds = json_decode($leave->copy_user, true);
         $userIds = json_decode($leave->user_list, true);
@@ -257,7 +307,7 @@ class LeaveController extends AttController
             $applyTypeId = $leave->holidayConfig->apply_type_id;
             $cypherType = $leave->holidayConfig->cypher_type;
             $users = User::getUsernameAliasAndDeptList();
-            return view('attendance.leave.info', compact('title',  'leave', 'dept', 'users', 'reviewUserId',  'logs', 'applyTypeId', 'userIds', 'deptUsers', 'cypherType'));
+            return view('attendance.leave.info', compact('title', 'copyIds', 'leave', 'dept', 'users', 'reviewUserId',  'logs', 'applyTypeId', 'userIds', 'deptUsers', 'cypherType'));
         } else {
             return redirect()->route('leave.info');
         }
@@ -269,7 +319,12 @@ class LeaveController extends AttController
      */
     public function optReviewInfo($id)
     {
-        $leave = Leave::with('holidayConfig')->findOrFail($id);
+        try{
+            $leave = Leave::with('holidayConfig')->findOrFail($id);
+            if(empty($leave->leave_id)) return redirect()->route('leave.info');
+        } catch (\Exception $e) {
+            return redirect()->route('leave.info');
+        }
 
         //操作过的人可查看
         $logUserIds = OperateLogHelper::getLogUserIdToInId($leave->leave_id);
@@ -307,8 +362,10 @@ class LeaveController extends AttController
             ->orderBy('created_at', 'desc')
             ->paginate(30);
 
+        $users = User::getUsernameAliasAndDeptList();
+        $holidayList = HolidayConfig::getHolidayList();
         $title = trans('att.申请单管理');
-        return view('attendance.leave.review', compact('title', 'data', 'scope'));
+        return view('attendance.leave.review', compact('title', 'data', 'scope', 'users', 'holidayList'));
     }
 
     /**
@@ -395,6 +452,8 @@ class LeaveController extends AttController
     public function showMemo(Request $request)
     {
         $p = $request->all();
+        if(empty($p['id'])) return response()->json(['status' => -1, 'memo' => '', 'day' => 0]);
+
         $holidayConfig = HolidayConfig::checkHolidayToId($p['id']);
         if(empty($holidayConfig->holiday_id))  return response()->json(['status' => -1, 'memo' => '', 'day' => 0]);
 
@@ -442,7 +501,7 @@ HTML;
         $config = PunchRulesConfig::getPunchRulesCfgToId($punchRules->punch_rules_id);
 
         if(!empty($config)) {
-            return response()->json(['status' => 1, 'start_time' => $config['start_time'], 'end_time' => $config['end_time'], 'last_time' => [ end($config['end_time'])] ]);
+            return response()->json(['status' => 1, 'start_time' => $config['show_start_time'], 'end_time' => $config['show_end_time'], 'last_time' => [ end($config['end_time'])] ]);
         } else {
             return response()->json(['status' => -1, 'start_time' => '', 'end_time' => '']);
         }
