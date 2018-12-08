@@ -73,7 +73,7 @@ class OperateLogHelper
      */
     public static function sendWXMsg($userId, $message)
     {
-        //$userId = 'sy0011';
+
         $time = time();
         $pushData = [
             'userid'  => $userId,

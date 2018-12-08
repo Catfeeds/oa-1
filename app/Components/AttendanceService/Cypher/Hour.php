@@ -21,6 +21,7 @@ class Hour extends Cypher
             'status' => 1,
             'show_memo' => true,
             'memo' => $holidayConfig->memo,
+            'start_id' => '9:00',
             'close_time' => true,
         ];
     }

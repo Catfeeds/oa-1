@@ -180,7 +180,7 @@
 
                     <div class="hr-line-dashed"></div>
 
-                    <div style="height: 20em;" class="form-group">
+                    <div class="form-group">
                         {!! Form::label('assign_uid', trans('att.处理详情'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-10">
                             @foreach($logs as $lk => $lv)
@@ -251,28 +251,29 @@
 
             $('#retract_status').click(function () {
                 var status = $(this).data('id');
-                edit_status(status, '确认撤回申请单?')
+                edit_status(status, '确认撤回申请单?', $(this))
             });
             $('#batch_retract_status').click(function () {
                 var status = $(this).data('id');
-                edit_status(status, '确认批量撤回申请单?')
+                edit_status(status, '确认批量撤回申请单?', $(this))
             });
 
             $('#restart_status').click(function () {
                 var status = $(this).data('id');
-                edit_status(status, '确认重启申请单?')
+                edit_status(status, '确认重启申请单?', $(this))
             });
             $('#batch_restart_status').click(function () {
                 var status = $(this).data('id');
-                edit_status(status, '确认批量重启申请单?')
+                edit_status(status, '确认批量重启申请单?', $(this))
             });
         });
 
 
 
-        function edit_status(status, $msg){
+        function edit_status(status, $msg, obj) {
             bootbox.confirm($msg, function (result) {
                 if (result) {
+                    obj.attr('disabled',"true");
                     $.get('{{ route('leave.review.optStatus',['id' => $leave->leave_id])}}', {status: status}, function ($data) {
                         if ($data.status == 1) {
                             //重启状态地址跳转

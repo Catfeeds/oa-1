@@ -12,7 +12,6 @@ namespace App\Components\AttendanceService\Operate;
 use App\Components\AttendanceService\AttendanceInterface;
 use App\Components\Helper\DataHelper;
 use App\Http\Components\Helpers\AttendanceHelper;
-use App\Models\Attendance\DailyDetail;
 use App\Models\Attendance\Leave;
 use App\Models\Sys\Calendar;
 use App\Models\Sys\HolidayConfig;
@@ -31,6 +30,8 @@ class Leaved extends Operate implements AttendanceInterface
     public function checkLeave($request) : array
     {
         $p = $request->all();
+
+
         $this->validate($request, array_merge($this->_validateRule,[
             'start_id' => 'required',
             'end_id' => 'required',
@@ -53,17 +54,17 @@ class Leaved extends Operate implements AttendanceInterface
         $endId = $time['end_id'];
         $startTimeS = $time['start_timeS'];
         $endTimeS = $time['end_timeS'];
-        print_r($time);
         //时间判断
         if(strtotime($startTimeS) > strtotime($endTimeS)) {
-            return $this->backLeaveData(false, ['end_time' => trans('请选择有效的时间范围')]);
+            return $this->backLeaveData(false, ['start_time' => trans('请选择有效的时间范围')]);
         }
 
         //时间天数分配
         $numberDay = DataHelper::leaveDayDiff($startTimeS, $startId, $endTimeS, $endId);
         if(empty($numberDay)) {
-            return $this->backLeaveData(false, ['end_time' => trans('申请失败,时间跨度异常，有疑问请联系人事')]);
+            return $this->backLeaveData(false, ['start_time' => trans('申请失败,时间跨度异常，有疑问请联系人事')]);
         }
+
         //验证是否已经有再提交的请假单,排除已拒绝的请假单
         $where =  sprintf(' and user_id =%d and status not in(%s)', \Auth::user()->user_id, implode(',', Leave::$applyList));
         $isLeaves = Leave::whereRaw("
@@ -76,7 +77,8 @@ class Leaved extends Operate implements AttendanceInterface
             if(empty($lv->user_id)) continue;
             $diffEndTime = strtotime(AttendanceHelper::spliceLeaveTime($lv->holiday_id, $lv->end_time, $lv->end_id)['time']);
             if($diffEndTime >= strtotime($startTimeS)) {
-                return $this->backLeaveData(false, ['end_time' => trans('已经有该时间段申请单')]);
+
+                return $this->backLeaveData(false, ['start_time' => trans('已经有该时间段申请单')]);
             }
         }
         //获取剩余假期情况
@@ -99,7 +101,7 @@ class Leaved extends Operate implements AttendanceInterface
 
             foreach ($calendar as $ck => $cv) {
                 if($cv->punchRules->punch_type_id === PunchRules::HOLIDAY) {
-                    return $this->backLeaveData(false, ['end_time' => trans($cv->year.'-'.$cv->month.'-'.$cv->day.'有节假日，不允许连休!')]);
+                    return $this->backLeaveData(false, ['start_time' => trans($cv->year.'-'.$cv->month.'-'.$cv->day.'有节假日，不允许连休!')]);
                 }
             }
         }
@@ -215,7 +217,7 @@ class Leaved extends Operate implements AttendanceInterface
             $title = trans('att.重启请假申请');
         }
 
-        $allUsers = User::where(['status' => 1])->get();
+        $allUsers = User::getUsernameAliasAndDeptList();
         $time = date('Y-m-d', time());
 
         $holidayList = HolidayConfig::where(['apply_type_id' => HolidayConfig::LEAVEID])
