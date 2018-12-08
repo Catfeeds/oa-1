@@ -355,7 +355,7 @@ class LeaveController extends AttController
     {
         $status = $request->get('status');
 
-        if(!in_array($status, Leave::$optStatus) || empty($id)) return response()->json(['status' => -1, 'msg' => '操作失败']);
+        if(!in_array($status, Leave::$leaveOptStatus) || empty($id)) return response()->json(['status' => -1, 'msg' => '操作失败']);
 
         $res = self::OptStatus($id, $status);
 
