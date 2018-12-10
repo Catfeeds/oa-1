@@ -6,7 +6,7 @@
  * Time: 15:56
  * 部门管理控制
  */
-namespace App\Http\Controllers\Admin\Sys;
+namespace App\Http\Controllers\Sys;
 
 use App\Http\Controllers\Controller;
 use App\Models\Sys\Dept;
@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\DB;
 
 class DeptController extends Controller
 {
-    protected $redirectTo = '/admin/sys/dept';
+    protected $redirectTo = '/sys/dept';
 
     private $_validateRule = [
         'dept' => 'required|unique:users_dept,dept|max:50',

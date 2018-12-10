@@ -18,7 +18,7 @@ class Calendar extends Model
 {
     use LogsActivity;
 
-    protected $table = 'calendar';
+    protected $table = 'sys_attendance_calendar';
 
     protected $primaryKey = 'id';
 

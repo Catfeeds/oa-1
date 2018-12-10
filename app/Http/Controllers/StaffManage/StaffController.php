@@ -11,7 +11,7 @@ namespace App\Http\Controllers\StaffManage;
 
 use App\Http\Components\ScopeStaff\StaffScope;
 use App\Http\Controllers\Attendance\AttController;
-use App\Models\StaffManage\Firm;
+use App\Models\Sys\Firm;
 use App\Models\Sys\Dept;
 use App\Models\Sys\Ethnic;
 use App\Models\Sys\Job;

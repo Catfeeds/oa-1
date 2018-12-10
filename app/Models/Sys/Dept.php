@@ -18,7 +18,7 @@ class Dept extends Model
 {
     use LogsActivity;
 
-    protected $table = 'users_dept';
+    protected $table = 'sys_users_dept';
 
     protected $primaryKey = 'dept_id';
 

@@ -7,7 +7,7 @@
  * 上下班时间规则列表控制
  */
 
-namespace App\Http\Controllers\Admin\Sys;
+namespace App\Http\Controllers\Sys;
 
 use App\Http\Controllers\Controller;
 use App\Models\Sys\PunchRules;
@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\DB;
 class PunchRulesController extends Controller
 {
 
-    protected $redirectTo = '/admin/sys/punch-rules';
+    protected $redirectTo = '/sys/punch-rules';
 
     private $_validateRule = [
         'name' => 'required|unique:punch_rules,name|max:32',

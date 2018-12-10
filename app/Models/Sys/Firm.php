@@ -8,8 +8,9 @@
  * 公司配置数据库模型
  */
 
-namespace App\Models\StaffManage;
+namespace App\Models\Sys;
 
+use App\Models\StaffManage\Entry;
 use App\Models\UserExt;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -18,7 +19,7 @@ class Firm extends Model
 {
     use LogsActivity;
 
-    protected $table = 'firm';
+    protected $table = 'sys_users_firm';
 
     protected $primaryKey = 'firm_id';
 
@@ -39,6 +40,7 @@ class Firm extends Model
 
     public function entry()
     {
+
         return $this->hasMany(Entry::class, 'firm_id', 'firm_id');
     }
 }

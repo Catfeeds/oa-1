@@ -60,6 +60,7 @@ class RouteServiceProvider extends ServiceProvider
                  require base_path('routes/web-crm.php');
                  require base_path('routes/web-staff.php');
                  require base_path('routes/web-material.php');
+                 require base_path('routes/sys.php');
              });
     }
 

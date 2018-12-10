@@ -6,7 +6,7 @@
  * Time: 17:25
  */
 
-namespace App\Http\Controllers\Admin\Sys;
+namespace App\Http\Controllers\Sys;
 
 use App\Http\Controllers\Controller;
 use App\Models\Role;
@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\DB;
 
 class ReviewStepFlowController extends Controller
 {
-    protected $redirectTo = '/admin/sys/review-step-flow';
+    protected $redirectTo = '/sys/review-step-flow';
 
     private $_validateRule = [
         'step' => 'required',

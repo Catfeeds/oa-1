@@ -16,7 +16,7 @@ class PunchRules extends Model
 {
     use LogsActivity;
 
-    protected $table = 'punch_rules';
+    protected $table = 'sys_attendance_punch_rules';
 
     protected $primaryKey = 'id';
 

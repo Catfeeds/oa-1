@@ -17,7 +17,7 @@ class School extends Model
 {
     use LogsActivity;
 
-    protected $table = 'users_school';
+    protected $table = 'sys_users_school';
 
     protected $primaryKey = 'school_id';
 

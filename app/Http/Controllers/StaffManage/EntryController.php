@@ -13,7 +13,7 @@ use App\Http\Components\Helpers\OperateLogHelper;
 use App\Http\Components\ScopeStaff\EntryScope;
 use App\Http\Controllers\Attendance\AttController;
 use App\Models\Role;
-use App\Models\StaffManage\Firm;
+use App\Models\Sys\Firm;
 use App\Models\StaffManage\Entry;
 use App\Models\Sys\Dept;
 use App\Models\Sys\Ethnic;

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Appeal extends Model
 {
-    protected $table = "appeal";
+    protected $table = "attendance_appeal";
     protected $fillable = [
         'appeal_id', 'user_id', 'reason', 'result', 'remark', 'operate_user_id', 'appeal_type',
     ];

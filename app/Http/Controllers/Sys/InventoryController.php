@@ -1,10 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\Admin\Sys;
+namespace App\Http\Controllers\Sys;
 
 use App\Components\Helper\FileHelper;
 use App\Models\Sys\Inventory;
-use EasyWeChat\Kernel\Exceptions\Exception;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 

@@ -6,8 +6,7 @@
  * Time: 16:49
  * 假期管理配置控制
  */
-
-namespace App\Http\Controllers\Admin\Sys;
+namespace App\Http\Controllers\Sys;
 
 use App\Http\Controllers\Controller;
 use App\Models\Sys\HolidayConfig;
@@ -18,7 +17,7 @@ use Illuminate\Http\Request;
 
 class HolidayConfigController extends Controller
 {
-    protected $redirectTo = '/admin/sys/holiday-config';
+    protected $redirectTo = '/sys/holiday-config';
 
     private $_validateRule = [
         'holiday' => 'required|unique:users_holiday_config,holiday|max:20',

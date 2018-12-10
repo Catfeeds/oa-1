@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Inventory extends Model
 {
-    protected $table = 'material_inventory';
+    protected $table = 'sys_material_inventory';
     const STATUS_DISABLE = 0;
     const STATUS_ENABLE = 1;
 

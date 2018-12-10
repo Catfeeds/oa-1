@@ -17,7 +17,7 @@ class Job extends Model
 {
     use LogsActivity;
 
-    protected $table = 'users_job';
+    protected $table = 'sys_users_job';
 
     protected $primaryKey = 'job_id';
 

@@ -16,7 +16,7 @@ class PunchRecord extends Model
 {
     use LogsActivity;
 
-    protected $table = 'punch_record';
+    protected $table = 'attendance_punch_record';
 
     protected $primaryKey = 'id';
 

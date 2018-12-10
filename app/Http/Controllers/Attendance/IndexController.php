@@ -10,8 +10,6 @@ namespace App\Http\Controllers\Attendance;
 
 use App\Http\Components\Helpers\PunchHelper;
 use App\Http\Controllers\Controller;
-use App\Models\Sys\Calendar;
-use App\Models\Sys\HolidayConfig;
 use App\Models\Sys\PunchRules;
 use App\Models\UserHoliday;
 use Illuminate\Http\Request;
@@ -50,16 +48,7 @@ class IndexController extends Controller
 
     //返回剩余天数与福利假期详情
     public function getRemainDay(){
-        $datas = UserHoliday::with('holidayConfig')->where(['user_id' => \Auth::user()->user_id])->get();
         $info = [];
-        foreach ($datas as $data){
-            $info[] = [
-                'id' => $data->user_id,
-                'holiday' => $data->holidayConfig->holiday,
-                'memo' => $data->holidayConfig->memo,
-                'num' => $data->num
-            ];
-        }
         return $info;
     }
 }

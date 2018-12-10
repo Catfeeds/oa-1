@@ -7,7 +7,7 @@
  * 岗位管理控制
  */
 
-namespace App\Http\Controllers\Admin\Sys;
+namespace App\Http\Controllers\Sys;
 
 use App\Http\Controllers\Controller;
 use App\Models\Sys\Job;
@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\DB;
 
 class JobController extends Controller
 {
-    protected $redirectTo = '/admin/sys/job';
+    protected $redirectTo = '/sys/job';
 
     private $_validateRule = [
         'job' => 'required|unique:users_job,job|max:50',
