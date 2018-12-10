@@ -3,11 +3,11 @@
         <a href="#"><i class="fa fa-newspaper-o"></i> <span class="nav-label">{{ trans('att.考勤功能') }}</span><span
                     class="fa arrow"></span></a>
         <ul class="nav nav-second-level">
-            <li @if (Route::is(['attIndex'])) class="active" @endif>
+            {{--<li @if (Route::is(['attIndex'])) class="active" @endif>
                 <a href="{{ route('attIndex') }}">
                     <span class="nav-label">{{ trans('app.考勤系统首页') }}</span>
                 </a>
-            </li>
+            </li>--}}
             @if(Entrust::can(['leave', 'leave.edit', 'leave.create']))
                 <li @if (Route::is(['leave.info', 'leave.optInfo', 'leave.edit', 'leave.create', 'leave.restart']) ) class="active" @endif>
                     <a href="{{ route('leave.info') }}">{{ trans('att.我的申请单') }}</a>
@@ -45,11 +45,11 @@
         <a href="#"><i class="fa fa-users"></i> <span class="nav-label">{{ trans('staff.员工管理') }}</span><span
                     class="fa arrow"></span></a>
         <ul class="nav nav-second-level">
-            @if(Entrust::can(['manage.index']))
+            {{--@if(Entrust::can(['manage.index']))
                 <li @if (Route::is(['manage.index']) ) class="active" @endif>
                     <a href="{{ route('manage.index') }}">{{ trans('staff.员工工作台') }}</a>
                 </li>
-            @endif
+            @endif--}}
 
             @if(Entrust::can(['staff*']))
                 <li @if (Route::is(['staff*']) ) class="active" @endif>
@@ -85,9 +85,9 @@
             @endif
 
             {{--@if(Entrust::can(['entry*']))--}}
-            <li @if (Route::is(['entry*']) ) class="active" @endif>
+            {{--<li @if (Route::is(['entry*']) ) class="active" @endif>
                 <a href="#">{{ trans('material.会议室租用管理') }}</a>
-            </li>
+            </li>--}}
             {{--@endif--}}
         </ul>
     </li>
