@@ -131,8 +131,8 @@ class Recheck extends Operate implements AttendanceInterface
             $daily->punch_end_time = date('H:i', $endDay);
             $daily->punch_end_time_num = $endDay;
 
-            $this->updateSwitchInLeave($daily);
             $daily->save();
+            $this->updateSwitchInLeave($daily);
             return;
         }
         //上班补打卡
@@ -147,8 +147,8 @@ class Recheck extends Operate implements AttendanceInterface
             $daily->punch_start_time = date('H:i', $startDay);
             $daily->punch_start_time_num = $startDay;
 
-            $this->updateSwitchInLeave($daily);
             $daily->save();
+            $this->updateSwitchInLeave($daily, $leave->holidayConfig->punch_type);
         }
 
         //下班补打卡
@@ -163,24 +163,25 @@ class Recheck extends Operate implements AttendanceInterface
             $daily->punch_end_time = date('H:i', $endDay);
             $daily->punch_end_time_num = $endDay;
 
-            $this->updateSwitchInLeave($daily);
             $daily->save();
+            $this->updateSwitchInLeave($daily, $leave->holidayConfig->punch_type);
         }
-
     }
 
-    /**
-     * @param $dailyDetail
-     */
-    public function updateSwitchInLeave($dailyDetail)
+    public function updateSwitchInLeave($dailyDetail, $punch_type = '')
     {
-        $punchHelper = app(PunchHelper::class);
-        $formulaCalPunRuleConf = PunchHelper::getCalendarPunchRules($dailyDetail->day, $dailyDetail->day)['formula'];
-        $switch = Leave::where(['user_id' => $dailyDetail->user_id, 'start_time' => $dailyDetail->day])->whereIn('status', [
-            Leave::SWITCH_REVIEW_ON, Leave::SWITCH_REVIEW_OFF,
-        ])->first();
-        if (empty($switch)) return;
-        $punchHelper->setFormulaPunRuleConf($formulaCalPunRuleConf, $dailyDetail->day);
+        switch ($punch_type) {
+            case 1: $is = Leave::LATE_ABSENTEEISM;break;
+            case 2: $is = Leave::EARLY_ABSENTEEISM;break;
+            default: $is = Leave::ALLDAY_ABSENTEEISM;break;
+        }
+        $switch = Leave::where(['user_id' => $dailyDetail->user_id, \DB::raw('UNIX_TIMESTAMP(start_time)') => strtotime($dailyDetail->day)])
+            ->whereIn('status', [Leave::SWITCH_REVIEW_ON])->where('is_switch', $is)->first();
+        if ($switch->count() == 0) return;
+
+        $startDate = $dailyDetail->day;
+        $punchHelper = app(PunchHelper::class)->setFormulaCalPunRuleConfArr($startDate, $startDate);
+        $punchHelper->setFormulaCalPunRuleConf($dailyDetail->day);
         $deduct = $punchHelper->countDeduct($dailyDetail->punch_start_time, $dailyDetail->punch_end_time, $dailyDetail);
 
         if ($deduct['deduct_day'] <= 0) {

@@ -117,10 +117,6 @@ class ReviewHelper
 
     /**
      * 在前端显示迟到早退标红
-     * @param $punch_start
-     * @param $punch_end
-     * @param $punchRuleConfigs
-     * @return array
      */
     public function getDanger($startDate, $endDate, $dailyDetailData)
     {
@@ -163,4 +159,22 @@ class ReviewHelper
         return $danger;
     }
 
+    /**
+     * @param $scopeArr
+     * @return
+     */
+    public function getLeaves($scopeArr)
+    {
+        return Leave::where('start_time', '>=', date('Y-m-01', strtotime($scopeArr['start_time'])))
+            ->where('end_time', '<=', date('Y-m-t', strtotime($scopeArr['end_time'])))
+            ->whereIn('status', [Leave::PASS_REVIEW, Leave::WAIT_REVIEW, Leave::ON_REVIEW, Leave::WAIT_EFFECTIVE])->get();
+    }
+
+    public function filterLeaves($leaves, array $holidayIds, $user)
+    {
+        return $leaves->whereIn('holiday_id', $holidayIds)->where('user_id', $user->user_id)
+            ->groupBy('holiday_id')->map(function ($value) {
+                return $value->sum('number_day');
+            })->toArray();
+    }
 }

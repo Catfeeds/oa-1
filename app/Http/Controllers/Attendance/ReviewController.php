@@ -91,23 +91,24 @@ class ReviewController extends AttController
         $confirmList = ConfirmAttendance::getConfirmList($year, $month);
         $userIds = '';
 
-        //获取带薪假和无薪假的各个配置
-        $paidWithUnpaidConf = HolidayConfig::getHolidayConfigsByCypherType([HolidayConfig::CYPHER_PAID, HolidayConfig::CYPHER_UNPAID]);
-
         if(!empty($confirmStates)) $userIds = ' and user_id in(' . implode(',' , array_keys($confirmStates)) . ')';
         if(empty($confirmStates) && in_array($scope->status, [ConfirmAttendance::SENT, ConfirmAttendance::CONFIRM])) $userIds = ' and user_id=""';
 
         $users = User::whereRaw($scope->getwhere() . $userIds)->get();
         $info = [];
 
-        foreach ($users as $user) {
-            //计算带薪假,返回数组
-            $hasSalary = empty($holidayConfigArr[HolidayConfig::CYPHER_PAID]) ? 0 : \AttendanceService::driver('paid', 'cypher')
-                ->getDaysByScope($scopeArr, $user->user_id, $holidayConfigArr[HolidayConfig::CYPHER_PAID]);
+        //获取带薪假和无薪假的各个配置
+        $paidWithUnpaidConf = HolidayConfig::getHolidayConfigsByCypherType([HolidayConfig::CYPHER_PAID, HolidayConfig::CYPHER_UNPAID]);
+        $leaves = $this->reviewHelper->getLeaves($scopeArr);
 
-            //计算无薪假,返回数组
-            $hasNoSalary = empty($holidayConfigArr[HolidayConfig::CYPHER_UNPAID]) ? 0 : \AttendanceService::driver('unpaid', 'cypher')
-                ->getDaysByScope($scopeArr, $user->user_id, $holidayConfigArr[HolidayConfig::CYPHER_UNPAID]);
+        foreach ($users as $user) {
+            //计算多种带薪假,返回天数数组
+            $hasSalary = $this->reviewHelper->filterLeaves($leaves,
+                collect($paidWithUnpaidConf[HolidayConfig::CYPHER_PAID])->pluck('holiday_id')->toArray(), $user);
+
+            //计算多种无薪假,返回数组
+            $hasNoSalary = $this->reviewHelper->filterLeaves($leaves,
+                collect($paidWithUnpaidConf[HolidayConfig::CYPHER_PAID])->pluck('holiday_id')->toArray(), $user);
 
             //返回[剩余调休, 已加班, 已调休]
             $leaveInfo = empty($holidayConfigArr[HolidayConfig::CYPHER_CHANGE][0]) ? 0 : \AttendanceService::driver('change', 'cypher')
@@ -208,14 +209,15 @@ class ReviewController extends AttController
     }
 
     //明细
-    public function reviewDetail($id)
+    public function reviewDetail($id, Request $request)
     {
-        $data = DailyDetail::where('user_id', $id)->orderBy('day', 'desc')->paginate(30);
+        $startDate = date('Y-m-01', $request->input('start_date'));
+        $endDate = date('Y-m-t', strtotime($startDate));
+        $data = DailyDetail::where('user_id', $id)->whereBetween('day', [$startDate, $endDate])->orderBy('day', 'desc')->paginate(30);
         $userInfo['username'] = User::where('user_id', $id)->first()->username;
         $userInfo['alias'] = User::where('user_id', $id)->first()->alias;
         $title = "{$userInfo['username']}的考勤详情";
-        $danger = $this->reviewHelper->getDanger(date('Y-m-01', strtotime($this->scope->startDate)),
-            date('Y-m-t', strtotime($this->scope->startDate)), $data);
+        $danger = $this->reviewHelper->getDanger($startDate, $endDate, $data);
         return view('attendance.review.review-detail', compact('title', 'data', 'userInfo', 'danger'));
     }
 }

@@ -373,17 +373,17 @@ class PunchHelper
      * 计算扣分的入口
      * @param array $bufferArr 保存剩余缓冲分钟数的数组
      * @param array $u 导入excel之后的数据
-     * @param array $formulaCalPunRuleConfArr 格式化之后的打卡规则数组
      * @param DailyDetail $detail 这一天的打卡情况
+     * @param $todayBuffer
      * @return array
      */
-    public function fun_($bufferArr, $u, $detail)
+    public function fun_($bufferArr, $u, $detail, $todayBuffer = DailyDetail::LEAVE_BUFFER)
     {
         $index = 'buffer_' . date('Y$$n', strtotime($u['ts'])) . $u['alias'];
         if (isset($bufferArr[$index])) {
             $remain_buffer = $bufferArr[$index];
         } else {
-            $remain_buffer = DailyDetail::LEAVE_BUFFER;
+            $remain_buffer = $todayBuffer;
             $bufferArr[$index] = $remain_buffer;
         }
         if ($this->setFormulaCalPunRuleConf($u['ts'])) {

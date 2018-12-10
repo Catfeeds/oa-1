@@ -30,8 +30,8 @@
                     <th rowspan="2">{{ trans('att.部门') }}</th>
                     <th rowspan="2">{{ trans('att.应到天数') }}</th>
                     <th rowspan="2">{{ trans('att.实到天数') }}</th>
-                    <th colspan="5" style="text-align: center; width: 5%">加班次数</th>
-                    <th colspan="5" style="text-align: center; width: 5%">调休次数</th>
+                    <th colspan="5" style="text-align: center;">加班次数</th>
+                    <th colspan="5" style="text-align: center;">调休次数</th>
                     @foreach($monthInfo[1][Auth::user()->user_id]['paid_unpaid_conf'] as $items)
                         @foreach($items as $item)
                             <th rowspan="2">{{ $item['holiday'] }}</th>
@@ -47,23 +47,23 @@
                     <th rowspan="2">{{ trans('att.确认通知') }}</th>
                 </tr>
                 <tr>
-                    <th>9~12</th>
-                    <th>9~18</th>
-                    <th>9~20</th>
-                    <th>14~20</th>
-                    <th>14~18</th>
+                    <th>9<br>~<br>12</th>
+                    <th>9<br>~<br>18</th>
+                    <th>9<br>~<br>20</th>
+                    <th>14<br>~<br>20</th>
+                    <th>14<br>~<br>18</th>
 
-                    <th>9~12</th>
-                    <th>9~18</th>
-                    <th>9~20</th>
-                    <th>14~20</th>
-                    <th>14~18</th>
+                    <th>9<br>~<br>12</th>
+                    <th>9<br>~<br>18</th>
+                    <th>9<br>~<br>20</th>
+                    <th>14<br>~<br>20</th>
+                    <th>14<br>~<br>18</th>
 
-                    <th>9~12</th>
-                    <th>9~18</th>
-                    <th>9~20</th>
-                    <th>14~20</th>
-                    <th>14~18</th>
+                    <th>9<br>~<br>12</th>
+                    <th>9<br>~<br>18</th>
+                    <th>9<br>~<br>20</th>
+                    <th>14<br>~<br>20</th>
+                    <th>14<br>~<br>18</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -85,8 +85,16 @@
                             <td>{{ $v['change_time'][$i] ?? 0 }}</td>
                         @endfor
 
-                        <td>{{ $v['no_salary_leave'] }}</td>
-                        <td>{{ $v['has_salary_leave'] }}</td>
+                        {{--<td>{{ $v['no_salary_leave'] }}</td>
+                        <td>{{ $v['has_salary_leave'] }}</td>--}}
+
+                        @foreach($monthInfo[1][Auth::user()->user_id]['paid_unpaid_conf'][\App\Models\Sys\HolidayConfig::CYPHER_PAID] as $item)
+                            <td>{{ $v['has_salary_leave'][$item['holiday_id']] ?? 0 }}</td>
+                        @endforeach
+                        @foreach($monthInfo[1][Auth::user()->user_id]['paid_unpaid_conf'][\App\Models\Sys\HolidayConfig::CYPHER_UNPAID] as $item)
+                            <td>{{ $v['has_salary_leave'][$item['holiday_id']] ?? 0 }}</td>
+                        @endforeach
+
                         <td>{{ $v['is_full_work'] }}</td>
                         <td>{{ $v['late_num'] }}</td>
                         <td>{{ $v['other'] }}</td>
