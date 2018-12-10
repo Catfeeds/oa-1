@@ -110,8 +110,8 @@
                             <select multiple="multiple" class="js-select2-multiple form-control"
                                     name="copy_user[]">
                                 @foreach($allUsers as $key => $val)
-                                    <option value="{{ $val['user_id'] }}"
-                                            @if (!empty($copyUserIds) && in_array($val['user_id'], $copyUserIds)) selected @endif>{{ $val['alias'].'('.$val['username'].')' }}</option>
+                                    <option value="{{ $key }}"
+                                            @if (!empty($copyUserIds) && in_array($key, $copyUserIds)) selected @endif>{{ $val }}</option>
                                 @endforeach
                             </select>
                             <span class="help-block m-b-none">{{ $errors->first('copy_user') }}</span>
@@ -201,6 +201,9 @@
                             $('#div_start_id').hide();
                             $('#div_end_time').hide();
                             $('#div_end_time_line').hide();
+                            //默认小时假给一个选中时间
+                            $("#start_id").val($data.start_id).select2();
+
                         } else {
                             $('#div_start_id').show();
                             $('#div_end_time').show();

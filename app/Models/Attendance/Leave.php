@@ -140,7 +140,15 @@ class Leave extends Model
         self::RETRACT_REVIEW,
     ];
 
-    //可操作的状态列表
+    //员工可操作的状态列表
+    public static $leaveOptStatus = [
+        self::RETRACT_REVIEW,
+        self::RESTART_REVIEW,
+        self::BATCH_RETRACT_REVIEW,
+        self::BATCH_RESTART_REVIEW,
+    ];
+
+    //审核人员可操作的状态列表
     public static $optStatus = [
         self::REFUSE_REVIEW,
         self::PASS_REVIEW,
@@ -149,7 +157,6 @@ class Leave extends Model
         self::RESTART_REVIEW,
         self::BATCH_RETRACT_REVIEW,
         self::BATCH_RESTART_REVIEW,
-
     ];
 
     public static $leaveColor = [

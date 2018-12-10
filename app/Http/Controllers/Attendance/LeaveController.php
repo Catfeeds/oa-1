@@ -346,6 +346,27 @@ class LeaveController extends AttController
     }
 
     /**
+     * 申请单操作
+     * @param Request $request
+     * @param $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function leaveOptStatus(Request $request, $id)
+    {
+        $status = $request->get('status');
+
+        if(!in_array($status, Leave::$leaveOptStatus) || empty($id)) return response()->json(['status' => -1, 'msg' => '操作失败']);
+
+        $res = self::OptStatus($id, $status);
+
+        if($res['success']) {
+            return response()->json(['status' => 1, 'msg' => '操作成功', 'url' => $res['url'] ?? '']);
+        } else {
+            return response()->json(['status' => -1, 'msg' => '操作失败,请勿频繁操作或记录已处理!']);
+        }
+    }
+
+    /**
      * 审核管理页面
      */
     public function reviewIndex()
