@@ -8,6 +8,8 @@
  */
 namespace App\Components\AttendanceService\Cypher;
 
+use App\Components\Helper\DataHelper;
+
 class Hour extends Cypher
 {
     public function check($holidayConfig, $numberDay)
@@ -44,6 +46,19 @@ class Hour extends Cypher
             'end_id' => $endId,
             'start_timeS' => trim($startTime .' '. $startId),
             'end_timeS' => trim($startTime .' '. $endId),
+        ];
+    }
+
+    /**
+     *  显示申请时间
+     * @param $params
+     * @return array
+     */
+    public function spliceLeaveTime($params)
+    {
+        return [
+            'time'=> DataHelper::dateTimeFormat($params['time'] .' '. $params['timeId'], 'Y-m-d H:i'),
+            'number_day' => '1小时',
         ];
     }
 }
