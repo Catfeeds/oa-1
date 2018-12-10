@@ -21,7 +21,7 @@ class PunchRulesController extends Controller
     protected $redirectTo = '/sys/punch-rules';
 
     private $_validateRule = [
-        'name' => 'required|unique:punch_rules,name|max:32',
+        'name' => 'required|unique:sys_attendance_punch_rules,name|max:32',
     ];
 
     public function index()
@@ -121,7 +121,7 @@ class PunchRulesController extends Controller
         $punchRules = PunchRules::findOrFail($id);
 
         $this->validate($request, array_merge($this->_validateRule, [
-            'name' => 'required|max:32|unique:punch_rules,name,' . $punchRules->id .',id',
+            'name' => 'required|max:32|unique:sys_attendance_punch_rules,name,' . $punchRules->id .',id',
         ]));
         $p = $request->all();
         $rules = [

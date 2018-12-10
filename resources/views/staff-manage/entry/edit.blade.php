@@ -240,7 +240,7 @@
                         <div class="col-sm-3">
                             {!! Form::select('friend_id', $users, isset($entry->friend_id) ? $entry->friend_id: old('friend_id'), [
                             'class' => 'form-control js-select2-single',
-                            'placeholder' => trans('app.请选择', ['value' => trans('staff.基友')]),
+                            'placeholder' => trans('staff.基友选择'),
                             ]) !!}
                             <span class="help-block m-b-none">{{ $errors->first('friend_id') }}</span>
                         </div>
@@ -261,7 +261,7 @@
                         {!! Form::label('copy_user', trans('staff.抄送人员'), ['class' => 'col-sm-4 control-label']) !!}
 
                         <div class="col-sm-3">
-                            <select required="required" multiple="multiple" name="copy_user[]" id="copy_users" class="js-select2-multiple form-control js-select2-single">
+                            <select multiple="multiple" name="copy_user[]" id="copy_users" class="js-select2-multiple form-control js-select2-single">
                                 @foreach($users as $key => $val)
                                     <option value="{{ $key }}"
                                             @if (in_array($key, $userIds ?: old('copy_user') ?? [])) selected @endif>{{ $val }}</option>
@@ -269,7 +269,7 @@
                             </select>
                             <span class="help-block m-b-none">{{ $errors->first('copy_user') }}</span>
                         </div>
-                        <i style="color: red">*</i>
+
                     </div>
 
                     <div class="hr-line-dashed"></div>

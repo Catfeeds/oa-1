@@ -47,7 +47,7 @@ class EntryController extends AttController
         'leader_id' => 'required|integer',
         'tutor_id' => 'required|integer',
         'friend_id' => 'nullable|integer',
-        'copy_user' => 'required|array',
+        'copy_user' => 'nullable|array',
         'role_id'  => 'required|array',
         'sex' => 'required|in:' . UserExt::SEX_BOY . ',' . UserExt::SEX_GIRL,
     ];
@@ -127,10 +127,10 @@ class EntryController extends AttController
         }
 
         $data['creater_id'] = \Auth::user()->user_id;
-        $data['copy_user'] = json_encode($data['copy_user']) ?? NUll;
+        $data['copy_user'] = !empty($data['copy_user']) ? json_encode($data['copy_user']) : NUll;
         $data['remember_token'] = Str::random(60);
         $data['send_time'] = date('Y-m-d H:i:s', time());
-        $data['role_id'] = json_encode($data['role_id']) ?? NUll;
+        $data['role_id'] = !empty($data['role_id']) ? json_encode($data['role_id']) : NUll;;
 
         Entry::create($data);
         flash(trans('app.添加成功', ['value' => trans('staff.待入职人员')]), 'success');
@@ -160,13 +160,13 @@ class EntryController extends AttController
     public function update(Request $request, $id)
     {
         $this->validate($request, array_merge($this->_validateRule, [
-            'email' => 'required|email|unique:entry,email,'. $id .',entry_id|max:32',
-            'username' => 'required|unique:entry,username,'. $id .',entry_id|max:20',
+            'email' => 'required|email|unique:users_entry,email,'. $id .',entry_id|max:32',
+            'username' => 'required|unique:users_entry,username,'. $id .',entry_id|max:20',
         ]));
 
         $data = $request->all();
-        $data['role_id'] = json_encode($data['role_id']);
-        $data['copy_user'] = json_encode($data['copy_user']);
+        $data['role_id'] =  !empty($data['role_id']) ? json_encode($data['role_id']) : NULL;
+        $data['copy_user'] = !empty($data['copy_user']) ?  json_encode($data['copy_user']) : NULL;
 
         $entry = Entry::findOrFail($id);
 
@@ -198,7 +198,7 @@ class EntryController extends AttController
     public function updateInfo(Request $request, $id)
     {
         $this->validate($request, array_merge($this->_validateRule, $this->_validateRuleExt, [
-            'email' => 'required|email|unique:entry,email,'. $id .',entry_id|max:32',
+            'email' => 'required|email|unique:users_entry,email,'. $id .',entry_id|max:32',
         ]));
 
         $data = $request->all();

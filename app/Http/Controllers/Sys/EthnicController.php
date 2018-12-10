@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\DB;
 class EthnicController extends Controller
 {
     private $_validateRule = [
-        'ethnic' => 'required|unique:users_ethnic,ethnic|max:50',
+        'ethnic' => 'required|unique:sys_users_ethnic,ethnic|max:50',
     ];
 
     public function index()
@@ -56,7 +56,7 @@ class EthnicController extends Controller
         $ethnic = Ethnic::findOrFail($id);
 
         $this->validate($request, array_merge($this->_validateRule, [
-            'ethnic' => 'required|max:50|unique:users_ethnic,ethnic,' . $ethnic->ethnic_id.',ethnic_id',
+            'ethnic' => 'required|max:50|unique:sys_users_ethnic,ethnic,' . $ethnic->ethnic_id.',ethnic_id',
         ]));
 
         $ethnic->update($request->all());

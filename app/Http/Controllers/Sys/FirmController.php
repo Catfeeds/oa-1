@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\DB;
 class FirmController extends Controller
 {
     private $_validateRule = [
-        'firm' => 'required|unique:firm,firm|max:50',
+        'firm' => 'required|unique:sys_users_firm,firm|max:50',
     ];
 
     public function index()
@@ -56,7 +56,7 @@ class FirmController extends Controller
         $firm = Firm::findOrFail($id);
 
         $this->validate($request, array_merge($this->_validateRule, [
-            'firm' => 'required|max:50|unique:firm,firm,' . $firm->firm_id.',firm_id',
+            'firm' => 'required|max:50|unique:sys_users_firm,firm,' . $firm->firm_id.',firm_id',
         ]));
 
         $firm->update($request->all());

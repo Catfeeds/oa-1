@@ -81,7 +81,7 @@ class PunchRecordController extends Controller
         $punchRecord = PunchRecord::findOrFail($id);
 
         $this->validate($request, array_merge($this->_validateRule, [
-            'memo' => 'required|max:255|unique:punch_record,memo,' . $punchRecord->id,
+            'memo' => 'required|max:255|unique:attendance_punch_record,memo,' . $punchRecord->id,
         ]));
 
         $p = $request->all();

@@ -18,7 +18,7 @@ class DeptController extends Controller
     protected $redirectTo = '/sys/dept';
 
     private $_validateRule = [
-        'dept' => 'required|unique:users_dept,dept|max:50',
+        'dept' => 'required|unique:sys_users_dept,dept|max:50',
     ];
 
     public function index()
@@ -95,7 +95,7 @@ class DeptController extends Controller
         $dept = Dept::findOrFail($id);
 
         $this->validate($request, array_merge($this->_validateRule, [
-            'dept' => 'required|max:50|unique:users_dept,dept,' . $dept->dept_id.',dept_id',
+            'dept' => 'required|max:50|unique:sys_users_dept,dept,' . $dept->dept_id.',dept_id',
         ]));
 
         $data = [
