@@ -20,7 +20,7 @@ class HolidayConfigController extends Controller
     protected $redirectTo = '/sys/holiday-config';
 
     private $_validateRule = [
-        'holiday' => 'required|unique:users_holiday_config,holiday|max:20',
+        'holiday' => 'required|unique:sys_attendance_holiday_config,holiday|max:20',
         'memo' => 'required',
         'add_pop' => 'nullable',
         'up_day' => 'nullable',
@@ -78,7 +78,7 @@ class HolidayConfigController extends Controller
         $holidayConfig = HolidayConfig::findOrFail($id);
 
         $this->validate($request, array_merge($this->_validateRule, [
-            'holiday' => 'required|max:50|unique:users_holiday_config,holiday,' . $holidayConfig->holiday.',holiday',
+            'holiday' => 'required|max:50|unique:sys_attendance_holiday_config,holiday,' . $holidayConfig->holiday.',holiday',
         ]));
         $p = $request->all();
         $holidayConfig->update($p);

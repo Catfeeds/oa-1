@@ -19,7 +19,7 @@ class JobController extends Controller
     protected $redirectTo = '/sys/job';
 
     private $_validateRule = [
-        'job' => 'required|unique:users_job,job|max:50',
+        'job' => 'required|unique:sys_users_job,job|max:50',
     ];
 
     public function index()
@@ -58,7 +58,7 @@ class JobController extends Controller
         $job = Job::findOrFail($id);
 
         $this->validate($request, array_merge($this->_validateRule, [
-            'job' => 'required|max:50|unique:users_job,job,' . $job->job_id.',job_id',
+            'job' => 'required|max:50|unique:sys_users_job,job,' . $job->job_id.',job_id',
         ]));
 
         $job->update($request->all());

@@ -19,7 +19,7 @@ class SchoolController extends Controller
     protected $redirectTo = '/sys/school';
 
     private $_validateRule = [
-        'school' => 'required|unique:users_school,school|max:50',
+        'school' => 'required|unique:sys_users_school,school|max:50',
     ];
 
     public function index()
@@ -58,7 +58,7 @@ class SchoolController extends Controller
         $school = School::findOrFail($id);
 
         $this->validate($request, array_merge($this->_validateRule, [
-            'school' => 'required|max:50|unique:users_school,school,' . $school->school.',school_id',
+            'school' => 'required|max:50|unique:sys_users_school,school,' . $school->school_id.',school_id',
         ]));
 
         $school->update($request->all());
