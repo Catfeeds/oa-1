@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\StaffManage;
 
 use App\Http\Controllers\Controller;
 use App\Models\Role;
@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Redis;
 
 class ProfileController extends Controller
 {
-    protected $redirectTo = '/admin/profile';
+    protected $redirectTo = '/staff/profile';
 
     private $_validateRuleExt = [
         'school_id' => 'required|numeric',
@@ -111,7 +111,7 @@ class ProfileController extends Controller
             'marital_status' => $request->get('marital_status'),
         ]);
 
-        flash(trans('app.编辑成功', ['value' => trans('app.账号')]), 'success');
+        flash(trans('app.编辑成功', ['value' => trans('app.个人信息')]), 'success');
 
         return redirect($this->redirectTo);
     }

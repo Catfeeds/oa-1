@@ -20,7 +20,7 @@ class ReviewStepFlowConfig extends Model
 {
     use LogsActivity;
 
-    protected $table = 'review_step_flow_config';
+    protected $table = 'sys_attendance_review_step_flow_config';
 
     protected $primaryKey = 'id';
 

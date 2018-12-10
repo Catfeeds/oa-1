@@ -7,7 +7,7 @@
  * I民族配置信息控制器
  */
 
-namespace App\Http\Controllers\Admin\Sys;
+namespace App\Http\Controllers\Sys;
 
 use App\Http\Controllers\Controller;
 use App\Models\Sys\Ethnic;

@@ -17,7 +17,7 @@ class Ethnic extends Model
 {
     use LogsActivity;
 
-    protected $table = 'users_ethnic';
+    protected $table = 'sys_users_ethnic';
 
     protected $primaryKey = 'ethnic_id';
 

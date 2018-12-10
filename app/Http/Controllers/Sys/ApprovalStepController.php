@@ -6,8 +6,7 @@
  * Time: 20:03
  */
 
-namespace App\Http\Controllers\Admin\Sys;
-
+namespace App\Http\Controllers\Sys;
 
 use App\Http\Controllers\Controller;
 use App\Models\Role;
@@ -18,7 +17,7 @@ use Illuminate\Http\Request;
 
 class ApprovalStepController extends Controller
 {
-    protected $redirectTo = '/admin/sys/approval-step';
+    protected $redirectTo = '/sys/approval-step';
 
     private $_validateRule = [
         'step' => 'required',

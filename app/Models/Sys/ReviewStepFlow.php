@@ -16,7 +16,7 @@ class ReviewStepFlow extends Model
 {
     use LogsActivity;
 
-    protected $table = 'review_step_flow';
+    protected $table = 'sys_attendance_review_step_flow';
 
     protected $primaryKey = 'step_id';
 

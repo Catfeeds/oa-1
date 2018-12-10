@@ -24,7 +24,7 @@ class ConfirmAttendance extends Model
         self::CONFIRM => '确认成功',
     ];
 
-    public $table = "confirm_attendances";
+    public $table = "attendance_confirm";
 
     public $fillable = [
         'id', 'user_id', 'year', 'month', 'confirm',

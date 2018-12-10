@@ -18,7 +18,7 @@ class HolidayConfig extends Model
 {
     use LogsActivity;
 
-    protected $table = 'users_holiday_config';
+    protected $table = 'sys_attendance_holiday_config';
 
     protected $primaryKey = 'holiday_id';
 

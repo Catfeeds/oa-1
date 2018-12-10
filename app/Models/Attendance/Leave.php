@@ -16,7 +16,7 @@ class Leave extends Model
 {
     use LogsActivity;
 
-    protected $table = 'users_leave';
+    protected $table = 'attendance_users_leave';
 
     protected $primaryKey = 'leave_id';
 

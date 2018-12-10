@@ -17,7 +17,7 @@ class Entry extends Model
 {
     use LogsActivity;
 
-    protected $table = 'entry';
+    protected $table = 'users_entry';
 
     protected $primaryKey = 'entry_id';
 

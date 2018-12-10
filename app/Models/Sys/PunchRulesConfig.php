@@ -25,7 +25,7 @@ class PunchRulesConfig extends Model
         self::DEDUCT_DAY => '扣天',
     ];
 
-    protected $table = 'punch_rules_config';
+    protected $table = 'sys_attendance_punch_rules_config';
 
     protected $primaryKey = 'id';
 

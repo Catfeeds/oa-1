@@ -4,10 +4,10 @@
  * User: weiming Email: 329403630@qq.com
  * Date: 2018/8/18
  * Time: 16:48
+ * 日历表 管理控制
  */
 
-namespace App\Http\Controllers\Admin\Sys;
-
+namespace App\Http\Controllers\Sys;
 
 use App\Http\Components\ScopeAtt\CalendarScope;
 use App\Http\Controllers\Attendance\AttController;
@@ -20,7 +20,7 @@ use App\Http\Controllers\Controller;
 
 class CalendarController extends AttController
 {
-    protected $redirectTo = '/admin/sys/calendar';
+    protected $redirectTo = '/sys/calendar';
     protected $scopeClass = CalendarScope::class;
 
     private $_validateRule = [

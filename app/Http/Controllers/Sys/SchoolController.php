@@ -7,7 +7,7 @@
  *  学校管理配置控制
  */
 
-namespace App\Http\Controllers\Admin\Sys;
+namespace App\Http\Controllers\Sys;
 
 use App\Http\Controllers\Controller;
 use App\Models\Sys\School;
@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\DB;
 
 class SchoolController extends Controller
 {
-    protected $redirectTo = '/admin/sys/school';
+    protected $redirectTo = '/sys/school';
 
     private $_validateRule = [
         'school' => 'required|unique:users_school,school|max:50',

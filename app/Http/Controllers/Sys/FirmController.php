@@ -4,11 +4,12 @@
  * User: weiming Email: 329403630@qq.com
  * Date: 2018/9/14
  * Time: 9:48
+ * 公司配置 管理控制
  */
 
-namespace App\Http\Controllers\Admin\Sys;
+namespace App\Http\Controllers\Sys;
 
-use App\Models\StaffManage\Firm;
+use App\Models\Sys\Firm;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;

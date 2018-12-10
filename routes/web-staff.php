@@ -16,6 +16,22 @@ Route::group([
 ], function () {
     # 员工管理路由模块
     Route::group(['namespace' => 'StaffManage', 'prefix' => 'staff'], function () {
+
+        // 我的账号
+        Route::get('profile', 'ProfileController@index')->name('profile');
+        Route::get('profile/edit', 'ProfileController@edit')->name('profile.edit');
+        Route::get('profile/confirm-edit', 'ProfileController@confirmEdit')->name('profile.confirmEdit');
+        Route::post('profile/confirm-edit', 'ProfileController@confirmUpdate');
+        Route::post('profile/edit', 'ProfileController@update');
+
+        Route::get('profile/reset-password', [
+            'middleware' => ['permission:profile.password'],
+            'uses' => 'ProfileController@resetPassword'])->name('profile.reset-password');
+
+        Route::post('profile/reset-password', 'ProfileController@resetPasswordUpdate');
+        Route::get('profile/mail', 'ProfileController@mail')->name('profile.mail');
+
+
         #员工首页
         Route::get('index', [
             'middleware' => ['permission:manage.index'],
