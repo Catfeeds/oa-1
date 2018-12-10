@@ -148,7 +148,7 @@
         ajaxGetDayInfo('{{ date('Y-m-d', time()) }}');
         @endif
 
-        $('td.fc-day:not(.fc-other-month), .fc-day-top:not(.fc-other-month)').mouseover(function () {
+        $('/*td.fc-day:not(.fc-other-month), */.fc-day-top:not(.fc-other-month)').mouseover(function () {
             hoverDate = $(this).attr('data-date');
             $('a.fc-event[day=' + hoverDate + ']').popover('show');
         }).mouseleave(function () {

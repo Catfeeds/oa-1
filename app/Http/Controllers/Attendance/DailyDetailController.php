@@ -49,7 +49,10 @@ class DailyDetailController extends AttController
             date('Y-m-t', strtotime($scope->startDate)), $data);
 
         $title = trans('att.我的每日考勤详情');
-        return view('attendance.daily-detail.index', compact('title', 'data', 'scope', 'userInfo', 'monthInfo', 'scope', 'appealData', 'danger'));
+        $paidUnpaidConf = $this->review->paidWithUnpaidConf;
+        $paidUnpaidConfCount = collect($this->review->paidWithUnpaidConf)->flatten(1)->count();
+        return view('attendance.daily-detail.index', compact('title', 'data', 'scope', 'userInfo', 'monthInfo', 'scope', 'appealData', 'danger',
+            'paidUnpaidConf', 'paidUnpaidConfCount'));
     }
 
     //重新初始化scope,调用review控制器的方法

@@ -94,20 +94,36 @@
 @endif
 
 @if(Entrust::can(['holiday-config', 'approval-step', 'punch-rules', 'calendar', 'dept',
-                'job', 'school', 'firm', 'bulletin', 'ethnic']))
+                'job', 'school', 'firm', 'bulletin', 'ethnic', 'material.inventory*']))
     <li @if (Route::is(['holiday-config*', 'review-step-flow*', 'punch-rules*', 'calendar*', 'dept*',
                 'job*', 'school*', 'firm*', 'bulletin*', 'inventory*', 'ethnic*'])) class="active" @endif >
         <a href="#"><i class="fa fa-cogs"></i> <span class="nav-label">{{ trans('staff.系统配置') }}</span><span
                     class="fa arrow"></span></a>
         <ul class="nav nav-second-level">
 
+            @if(Entrust::can(['holiday-config*', 'approval-step*', 'punch-rules*', 'calendar*']))
             <li @if (Route::is(['holiday-config*', 'review-step-flow*', 'punch-rules*', 'calendar*']) ) class="active" @endif>
-                <a href="{{ route('holiday-config') }}">{{ trans('staff.考勤信息配置') }}</a>
+                <a href="
+                    @if(Entrust::can('holiday-config*'))
+                    {{ route('holiday-config') }}
+                    @elseif(Entrust::can('approval-step*'))
+                    {{ route('review-step-flow') }}
+                    @elseif(Entrust::can('punch-rules*'))
+                    {{ route('punch-rules') }}
+                    @elseif(Entrust::can('calendar*'))
+                    {{ route('calendar') }}
+                    @endif
+                        ">
+                    {{ trans('staff.考勤信息配置') }}
+                </a>
             </li>
+            @endif
 
+            @if(Entrust::can(['firm*', 'school*', 'dept*', 'job*']))
             <li @if (Route::is(['dept*', 'job*', 'school*', 'firm*', 'ethnic*']) ) class="active" @endif>
                 <a href="{{ route('dept') }}">{{ trans('staff.员工信息配置') }}</a>
             </li>
+            @endif
 
             @if(Entrust::can('bulletin.index'))
                 <li @if (Route::is(['bulletin*']) ) class="active" @endif>
