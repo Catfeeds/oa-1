@@ -101,7 +101,7 @@ class UserExt extends Model
 
     //政治面貌
     public static $political = [
-        1 => '普通居民',
+        1 => '普通居民(群众)',
         2 => '中共预备党员',
         3 => '共青团员',
         4 => '民革党员',
