@@ -598,22 +598,6 @@ class EntryController extends AttController
                 Redis::set(md5($userRedsKey), $userRedsValue, 'EX', 36000);
             }
 
-            //企业微信通知管理员
-            //$msg = '【'.$user->alias.'】 办理入职成功，前往邮箱查看OA系统分配给你的帐号和密码';
-            $msg = '【'.$user->alias.'】 办理入职成功，可登陆系统查看个人资料是否正确
-            帐号: ' .$user->username . ' 密码 : '. $pwd . '  登录地址: '.url('/') . '
-            请妥善保管帐号密码，登录系统,修改密码';
-            //调试先默认通知给自己
-            $userId = \Auth::user()->username;
-            OperateLogHelper::sendWXMsg($userId, $msg);
-
-/*          //邮箱发送帐号密码
-            $content = '帐号: ' .$user->username . ' 密码 : '. $pwd . ' 登录地址:'.url('/') . '请妥善保管帐号密码，登录系统,修改密码';
-
-            \Mail::send('emails.entry', ['content' => $content, 'entry' => $entry], function (Message $m) use ($entry) {
-                $m->to($entry->email)->subject('诗悦OA系统-帐号信息');
-            });*/
-
         } catch (\Exception $e) {
             //事务回滚
             DB::rollBack();
@@ -621,6 +605,21 @@ class EntryController extends AttController
         }
         //事务提交
         DB::commit();
+
+        //企业微信通知管理员
+        //$msg = '【'.$user->alias.'】 办理入职成功，前往邮箱查看OA系统分配给你的帐号和密码';
+        $msg = '【'.$user->alias.'】 办理入职成功，可登陆系统查看个人资料是否正确
+            帐号: ' .$user->username . ' 密码 : '. $pwd . '  登录地址: '.url('/') . '
+            请妥善保管帐号密码，登录系统,修改密码';
+        //调试先默认通知给自己
+        /*           $userId = \Auth::user()->username;
+                   OperateLogHelper::sendWXMsg($userId, $msg);*/
+
+        //邮箱发送帐号密码
+        \Mail::send('emails.entry', ['content' => $msg, 'entry' => $entry], function (Message $m) use ($entry) {
+            $m->to($entry->email)->subject('诗悦OA系统-帐号信息');
+        });
+
         return response()->json(['status' => 1, 'msg' => '办理入职成功']);
     }
 
