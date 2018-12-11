@@ -133,6 +133,7 @@ class EntryController extends AttController
         $data['remember_token'] = Str::random(60);
         $data['send_time'] = date('Y-m-d H:i:s', time());
         $data['role_id'] = !empty($data['role_id']) ? json_encode($data['role_id']) : NUll;
+        $data['entry_time'] = $data['entry_time'] . ' 09:00:00';
 
         $entry = Entry::create($data);
 
@@ -166,7 +167,7 @@ class EntryController extends AttController
 所属部门：'.Dept::getDeptList()[$entry->dept_id].'
 岗位类型：'.Job::getJobList()[$entry->job_id].'
 岗位名称：'.$entry->job_name.'
-入职时间：'.$entry->entry_time . ' 09:00';
+入职时间：'.$entry->entry_time;
 
         //企业微信通知审核人员
         OperateLogHelper::sendWXMsg($sendUser, $content);
@@ -204,7 +205,7 @@ class EntryController extends AttController
 
         $data['role_id'] =  !empty($data['role_id']) ? json_encode($data['role_id']) : NULL;
         $data['copy_user'] = !empty($data['copy_user']) ?  json_encode($data['copy_user']) : NULL;
-
+        $data['entry_time'] = $data['entry_time'] . ' 09:00:00';
         $entry = Entry::findOrFail($id);
         $entryOld = $entry->toArray();
 

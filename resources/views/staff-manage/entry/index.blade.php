@@ -46,7 +46,7 @@
                                     <td>{{ $v['name'] }}</td>
                                     <td>{{ $dept[$v['dept_id']] ?? '--' }}</td>
                                     <td>{{ $job[$v['job_id']] ?? '--' }}</td>
-                                    <td>{{ $v['entry_time'] .  ' 09:00' }}</td>
+                                    <td>{{ $v['entry_time']}}</td>
                                     <td>{{ \App\Models\StaffManage\Entry::$status[$v['status']] ?? '--' }}</td>
                                     <td>
                                         @if(Entrust::can(['entry.review']))
