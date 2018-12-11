@@ -186,7 +186,7 @@ class EntryController extends AttController
 
         $maxUsername = self::getMaxUserName()[0] ?? '';
         $username = '';
-        $operateLog = OperateLog::where(['type_id' => OperateLog::ENTRY, 'info_id' => $entry->entry_id])->get();
+        $operateLog = OperateLog::where(['type_id' => OperateLog::ENTRY, 'info_id' => $entry->entry_id])->get()->toArray();
 
         $btnDesc = trans('app.修改');
 

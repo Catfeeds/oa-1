@@ -282,11 +282,11 @@
                             <div class="col-sm-8">
                                 @foreach($operateLog as $lk => $lv)
                                     <span class="help-block m-b-none">
-                                        <a class="btn btn-xs btn-primary">{{ $lv->created_at }}</a>
-                                        <a class="btn btn-xs btn-rounded">{{ $users[$lv->opt_uid] ?? '错误数据'}}</a>
-                                        <a class="btn btn-xs btn-default btn-rounded btn-outline">{{ $lv->opt_name }} </a>
-                                        @if(!empty($lv->memo))
-                                            <span style="color: #039"> {!! $lv->memo !!}</span>
+                                        <a class="btn btn-xs btn-primary">{{ $lv['created_at'] }}</a>
+                                        <a class="btn btn-xs btn-rounded">{{ $users[$lv['opt_uid']] ?? '错误数据'}}</a>
+                                        <a class="btn btn-xs btn-default btn-rounded btn-outline">{{ $lv['opt_name'] }} </a>
+                                        @if(!empty($lv['memo']))
+                                            <span style="color: #039"> {!! $lv['memo'] !!}</span>
                                         @endif
                                     </span>
                                 @endforeach
