@@ -1,4 +1,4 @@
-@extends('admin.profile.profile')
+@extends('staff-manage.profile.profile')
 
 @section('content-profile')
 

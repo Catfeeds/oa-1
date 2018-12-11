@@ -19,7 +19,7 @@
                             <div class="panel-heading">
                                 <div class="panel blank-panel">
 
-                                    @include('admin.profile._link-tabs')
+                                    @include('staff-manage.profile._link-tabs')
 
                                 </div>
                             </div>

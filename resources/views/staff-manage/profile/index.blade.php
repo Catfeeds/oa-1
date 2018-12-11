@@ -1,4 +1,4 @@
-@extends('admin.profile.profile')
+@extends('staff-manage.profile.profile')
 
 @section('content-profile')
     <div class="col-sm-6 b-r">
@@ -8,7 +8,8 @@
         <p><i class="fa fa-tag"></i> {{ trans('app.岗位') }} ：{{  $job[$user->job_id] ?? ''  }}</p>
         <p><i class="fa fa-tag"></i> {{ trans('app.邮箱') . '： ' . $user->email }}</p>
         <p><i class="fa fa-tag"></i> {{ trans('app.性别') }} ：{{ isset($userExt->userExt->sex) ?  \App\Models\UserExt::$sex[$userExt->userExt->sex] : '' }}</p>
-        <p><i class="fa fa-tag"></i> {{ trans('app.年龄') }} ：{{ isset($userExt->userExt->age) ? $userExt->userExt->age : '' }}</p>
+        <p><i class="fa fa-tag"></i> {{ trans('app.出生日期') }} ：{{ isset($userExt->userExt->card_id) ? \App\Components\Helper\DataHelper::getBirthdayToIdCard($userExt->userExt->card_id) : '' }}</p>
+        <p><i class="fa fa-tag"></i> {{ trans('app.年龄') }} ：{{ isset($userExt->userExt->age) ? \App\Components\Helper\DataHelper::getAgeToIdCard($userExt->userExt->card_id) : '' }}</p>
         <p><i class="fa fa-tag"></i> {{ trans('app.学历') }} ：{{ empty($userExt->userExt->education_id) ? '' : \App\Models\UserExt::$education[$userExt->userExt->education_id]  }}</p>
         <p><i class="fa fa-tag"></i> {{ trans('app.血型') }} ：{{ empty($userExt->userExt->blood_type) ? '' : \App\Models\UserExt::$blood[$userExt->userExt->blood_type] }}</p>
         <p><i class="fa fa-tag"></i> {{ trans('app.星座') }} ：{{ isset($userExt->userExt->constellation_id) ? \App\Models\UserExt::$constellation[$userExt->userExt->constellation_id] : '' }}</p>
