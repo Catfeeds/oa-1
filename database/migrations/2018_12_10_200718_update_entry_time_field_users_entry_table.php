@@ -14,7 +14,7 @@ class UpdateEntryTimeFieldUsersEntryTable extends Migration
     public function up()
     {
         Schema::table('users_entry', function (Blueprint $table) {
-            $table->date('entry_time')->change()->comment = '预入职时间';
+            $table->date('entry_time')->default('0000-00-00')->change()->comment = '预入职时间';
         });
     }
 
