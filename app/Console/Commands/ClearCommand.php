@@ -38,19 +38,33 @@ class ClearCommand extends BaseCommand
      */
     public function handle2()
     {
-        $table = ['activity_log', 'approval_step', 'calendar', 'cmr_exchange_rate', 'cmr_product', 'cmr_reconciliation', 'cmr_reconciliation_difference_type', 'cmr_reconciliation_edit_logs', 'cmr_reconciliation_principal', 'cmr_reconciliation_proportion', 'migrations', 'permission_role', 'permissions', 'role_user', 'roles', 'users_dept', 'users_ethnic', 'users_holiday_config', 'users_job', 'users_school'];
+        if ($this->confirm('你确定要清档吗？')) {
+            //不删除表
+            $unDelTable = ['activity_log', 'migrations', 'permission_role', 'permissions', 'role_user', 'roles'];
+            //不删除表列表：以xxx开头的表
+            $unDelTableList = ['cmr_', 'sys_'];
 
-        $tableInDb = \DB::select('show tables');
-        $tables = [];
-        $db = "Tables_in_".env('DB_DATABASE');
-        foreach ($tableInDb as $tab) {
-            $tables[] = $tab->{$db};
-        }
-        $delTable = array_diff($tables, $table);
 
-        foreach ($delTable as $del) {
-            //\DB::table($del)->truncate();
+            $tableInDb = \DB::select('show tables');
+            $delTable = [];
+            $db = "Tables_in_" . env('DB_DATABASE');
+            foreach ($tableInDb as $tab) {
+                $table = $tab->{$db};
+                if (in_array($table, $unDelTable)) continue;
+                if (in_array(substr($table, 0, 4), $unDelTableList)) continue;
+
+                $delTable[] = $tab->{$db};
+            }
+
+            //关闭外键限制
+            \DB::statement('SET FOREIGN_KEY_CHECKS = 0');
+            foreach ($delTable as $del) {
+                \DB::table($del)->truncate();
+            }
+            \DB::statement('SET FOREIGN_KEY_CHECKS = 1');
+            $this->info2('清档成功');
+        } else {
+            $this->info2('放弃档');
         }
-        \Log::info('清档成功');
     }
 }
