@@ -86,7 +86,7 @@
                             <span class="help-block m-b-none">
                                 {{ empty($leave->number_day) ? trans('att.补打卡') : \App\Http\Components\Helpers\AttendanceHelper::spliceLeaveTime($leave->holiday_id, $leave->start_time, $leave->start_id, $leave->number_day)['number_day']}}
                                        @if(!empty($leave->exceed_day))
-                                    <h4 style="color: red">{!! '自动转换类型为:' . \App\Models\Sys\HolidayConfig::holidayList()[$leave->exceed_holiday_id] . $leave->exceed_day . '天' ?? '数据异常'  !!}</h4>
+                                    <h4 style="color: red">{!! '自动转换类型为:' . (\App\Models\Sys\HolidayConfig::holidayList()[$leave->exceed_holiday_id] ?? '数据异常') . $leave->exceed_day . '天' ?? '数据异常'  !!}</h4>
                                     @endif
                             </span>
                         </div>

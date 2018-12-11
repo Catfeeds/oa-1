@@ -67,6 +67,9 @@
                                 ]) !!}
                                 <span class="help-block m-b-none">{{ $errors->first('end_time') }}</span>
                             </div>
+                            <span id="show_exceed" style="display: none">
+                                <p style="color: red" id="show_exceed_p"></p>
+                            </span>
                         </div>
                         <div class="col-sm-2">
                             <select onchange="inquire()" class="js-select2-single form-control" id="end_id" name="end_id" ></select>
@@ -258,6 +261,15 @@
                 $.get('{{ route('leave.inquire')}}', {holidayId: holidayId,startTime: startTime, endTime: endTime, startId:startId, endId:endId}, function ($data) {
                     if ($data.status == 1) {
                         $('#show_step').html($data.step).find('select').select2();
+
+                        //超出福利假之后的转换假显示
+                        if($data.exceed) {
+                            $('#show_exceed').show();
+                            $('#show_exceed_p').html($data.exceed);
+                        } else {
+                            $('#show_exceed').hide();
+                        }
+
                     } else {
                         $('#show_step').html('');
                     }
