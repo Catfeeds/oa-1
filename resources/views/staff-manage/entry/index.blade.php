@@ -7,7 +7,7 @@
 
     <div class="col-sm-8">
         <div class="title-action">
-            @if(Entrust::can(['entry-all', 'entry.edit', 'entry.create']))
+            @if(Entrust::can(['entry.create']))
                 <a href="{{ route('entry.create') }}" class="btn btn-primary btn-sm">{{ trans('staff.添加待入职') }}</a>
             @endif
         </div>
@@ -46,7 +46,7 @@
                                     <td>{{ $v['name'] }}</td>
                                     <td>{{ $dept[$v['dept_id']] ?? '--' }}</td>
                                     <td>{{ $job[$v['job_id']] ?? '--' }}</td>
-                                    <td>{{ $v['entry_time'] }}</td>
+                                    <td>{{ $v['entry_time'] .  ' 09:00' }}</td>
                                     <td>{{ \App\Models\StaffManage\Entry::$status[$v['status']] ?? '--' }}</td>
                                     <td>
                                         @if(Entrust::can(['entry.review']))

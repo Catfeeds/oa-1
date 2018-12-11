@@ -18,6 +18,7 @@ use App\Models\StaffManage\Entry;
 use App\Models\Sys\Dept;
 use App\Models\Sys\Ethnic;
 use App\Models\Sys\Job;
+use App\Models\Sys\OperateLog;
 use App\Models\Sys\School;
 use App\Models\UserExt;
 use App\User;
@@ -100,11 +101,12 @@ class EntryController extends AttController
         $ethnic = Ethnic::getEthnicList();
         $roleList = Role::getRoleTextList();
         $title = trans('staff.添加待入职');
+        $btnDesc = trans('app.提交');
 
         $maxUsername = self::getMaxUserName()[0];
         $username = sprintf('sy%04d', (int)str_replace('sy', '', $maxUsername) + 1);
 
-        return view('staff-manage.entry.edit', compact('title', 'roleList', 'ethnic', 'users', 'job', 'dept', 'firm', 'userIds', 'username', 'maxUsername'));
+        return view('staff-manage.entry.edit', compact('title', 'btnDesc', 'roleList', 'ethnic', 'users', 'job', 'dept', 'firm', 'userIds', 'username', 'maxUsername'));
     }
 
     public function store(Request $request)
@@ -130,12 +132,44 @@ class EntryController extends AttController
         $data['copy_user'] = !empty($data['copy_user']) ? json_encode($data['copy_user']) : NUll;
         $data['remember_token'] = Str::random(60);
         $data['send_time'] = date('Y-m-d H:i:s', time());
-        $data['role_id'] = !empty($data['role_id']) ? json_encode($data['role_id']) : NUll;;
+        $data['role_id'] = !empty($data['role_id']) ? json_encode($data['role_id']) : NUll;
 
-        Entry::create($data);
+        $entry = Entry::create($data);
+
+        //员工列表
+        $users = User::getUsernameList();
+        $sendUser  = [];
+        if(!empty($entry->copy_user)) {
+            $copyUser = json_decode($entry->copy_user, true);
+            foreach ($copyUser as $ck => $cv) {
+                $sendUser[] = $users[$cv] ?? '';
+            }
+        }
+        $tutorId = !empty($entry->tutor_id) ? [$users[$entry->tutor_id]] : [];
+        $friendId = !empty($entry->friend_id) ? [$users[$entry->friend_id]] : [];
+        $sendUser = array_unique(array_merge($sendUser , $tutorId ,$friendId));
+
+        if($sendUser) {
+            self::sendWXEntryContent($entry, implode('|', $sendUser), '入职', '新员工待入职通知');
+        }
+
         flash(trans('app.添加成功', ['value' => trans('staff.待入职人员')]), 'success');
 
         return redirect()->route('entry.list');
+    }
+
+    public function sendWXEntryContent($entry, $sendUser, $type, $notice)
+    {
+        $content =  '【'.$type.'】'.$notice.'
+入职人：'.$entry->name.'
+性别：'.UserExt::$sex[$entry->sex].'
+所属部门：'.Dept::getDeptList()[$entry->dept_id].'
+岗位类型：'.Job::getJobList()[$entry->job_id].'
+岗位名称：'.$entry->job_name.'
+入职时间：'.$entry->entry_time . ' 09:00';
+
+        //企业微信通知审核人员
+        OperateLogHelper::sendWXMsg($sendUser, $content);
     }
 
     public function edit($id)
@@ -143,18 +177,20 @@ class EntryController extends AttController
         $entry = Entry::findOrFail($id);
         $job = Job::getJobList();
         $dept = Dept::getDeptList();
-        $users = User::getUsernameAliasList();
+        $users = User::getUsernameAliasAndDeptList();
         $firm = Firm::getFirmList();
         $ethnic = Ethnic::getEthnicList();
         $roleList = Role::getRoleTextList();
-
         $userIds = json_decode($entry->copy_user);
 
-        $maxUsername = self::getMaxUserName()[0];
+        $maxUsername = self::getMaxUserName()[0] ?? '';
         $username = '';
+        $operateLog = OperateLog::where(['type_id' => OperateLog::ENTRY, 'info_id' => $entry->entry_id])->get();
+
+        $btnDesc = trans('app.修改');
 
         $title = trans('app.编辑', ['value' => trans('staff.待入职人员')]);
-        return view('staff-manage.entry.edit', compact('title', 'ethnic', 'roleList', 'users', 'job', 'dept', 'firm', 'entry', 'userIds', 'username', 'maxUsername'));
+        return view('staff-manage.entry.edit', compact('title', 'operateLog', 'btnDesc', 'ethnic', 'roleList', 'users', 'job', 'dept', 'firm', 'entry', 'userIds', 'username', 'maxUsername'));
     }
 
     public function update(Request $request, $id)
@@ -165,12 +201,58 @@ class EntryController extends AttController
         ]));
 
         $data = $request->all();
+
         $data['role_id'] =  !empty($data['role_id']) ? json_encode($data['role_id']) : NULL;
         $data['copy_user'] = !empty($data['copy_user']) ?  json_encode($data['copy_user']) : NULL;
 
         $entry = Entry::findOrFail($id);
+        $entryOld = $entry->toArray();
 
         $entry->update($data);
+        $entryChanges = $entry->getChanges();
+
+        //编辑内容有调整时操作
+        if(!empty($entryChanges)) {
+            $firm = Firm::getFirmList();
+            $dept = Dept::getDeptList();
+            $job = Job::getJobList();
+            $changeFiled = [
+                'entry_time' => sprintf('入职时间由:%s->变更为:%s', $entryOld['entry_time'], $entryChanges['entry_time'] ?? ''),
+                'nature_id' => sprintf('工作性质由:%s->变更为:%s',  Entry::$nature[$entryOld['nature_id']] ?? '未知信息', Entry::$nature[$entryChanges['nature_id'] ?? ''] ?? ''),
+                'hire_id' => sprintf('招聘类型由:%s->变更为:%s',  Entry::$hireTYpe[$entryOld['hire_id']] ?? '未知信息', Entry::$hireTYpe[$entryChanges['hire_id'] ?? ''] ?? ''),
+                'firm_id' => sprintf('所属公司由:%s->变更为:%s',  $firm[$entryOld['firm_id']] ?? '', $firm[$entryChanges['firm_id'] ?? ''] ?? ''),
+                'dept_id' => sprintf('部门由:%s->变更为:%s',  $dept[$entryOld['dept_id']] ?? '', $dept[$entryChanges['dept_id'] ?? ''] ?? ''),
+                'job_id' => sprintf('岗位类型由:%s->变更为:%s',  $job[$entryOld['job_id']] ?? '', $job[$entryChanges['job_id'] ?? ''] ?? ''),
+                'job_name' => sprintf('岗位名称由:%s->变更为:%s',  $entryOld['job_name'], $entryChanges['job_name'] ?? ''),
+            ];
+
+            $msg = [];
+            foreach ($entryChanges as $k => $v) {
+                if(in_array($k, array_keys($changeFiled))) $msg [] = $changeFiled[$k] ?? '';
+            }
+
+            if(!empty($msg)) {
+                OperateLogHelper::createOperateLog(OperateLog::ENTRY, $entry->entry_id, '调整入职信息',  implode(';', $msg));
+                //员工列表
+                $users = User::getUsernameList();
+                //抄送人员, 导师，基友企业微信通知
+                $sendUser = [];
+                if(!empty($entry->copy_user)) {
+                    $copyUser = json_decode($entry->copy_user, true);
+                    foreach ($copyUser as $ck => $cv) {
+                        $sendUser[] = $users[$cv] ?? '';
+                    }
+                }
+                $tutorId = !empty($entry->tutor_id) ? [$users[$entry->tutor_id]] : [];
+                $friendId = !empty($entry->friend_id) ? [$users[$entry->friend_id]] : [];
+                $sendUser = array_unique(array_merge($sendUser , $tutorId ,$friendId));
+
+                if($sendUser) {
+                    self::sendWXEntryContent($entry, implode('|', $sendUser), '入职调整', '新员工待入职通知');
+                }
+            }
+        }
+
         flash(trans('app.编辑成功', ['value' => trans('staff.待入职人员')]), 'success');
 
         return redirect()->route('entry.list');
@@ -274,6 +356,8 @@ class EntryController extends AttController
 
             return redirect()->route('entry.list');
         }
+
+        $entry->update(['status' => Entry::HAS_SEND, 'send_time' => date('Y-m-d H:i:s', time())]);
 
         flash(trans('staff.发送员工入职邮件成功'), 'success');
         return redirect()->route('entry.list');

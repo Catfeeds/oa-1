@@ -101,8 +101,8 @@
                         <div class="col-sm-3">
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                                {!! Form::text('entry_time', $entry->entry_time ?? old('entry_time'), [
-                                'class' => 'form-control date_time',
+                                {!! Form::text('entry_time', !empty($entry->entry_time) ? date('Y-m-d', strtotime($entry->entry_time)) : old('entry_time'), [
+                                'class' => 'form-control date',
                                 'placeholder' => trans('app.请输入', ['value' => trans('app.入职时间')]),
                                 'required' => true,
                                 ]) !!}

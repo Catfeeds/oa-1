@@ -21,9 +21,11 @@ class OperateLog extends Model
 
     //申请单
     const LEAVED = 1;
+    const ENTRY = 2;
 
     public static $appId = [
-        self::LEAVED
+        self::LEAVED,
+        self::ENTRY,
     ];
 
     protected $fillable = [

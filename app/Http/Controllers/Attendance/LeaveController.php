@@ -163,7 +163,7 @@ class LeaveController extends AttController
             $retLeave = \AttendanceService::driver($driver)->createLeave($leave);
             //日志记录操作
             if($retLeave['success']) {
-                OperateLogHelper::createOperateLog(OperateLogHelper::LEAVE_TYPE_ID, $retLeave['data']['leave']->leave_id, '提交申请');
+                OperateLogHelper::createOperateLog(OperateLog::LEAVED, $retLeave['data']['leave']->leave_id, '提交申请');
             }
         } catch (Exception $ex) {
             //事物回滚

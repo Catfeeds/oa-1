@@ -16,7 +16,7 @@ class OperateLogHelper
     const MATERIAL = 5;
     /**
      * 操作日志
-     * @param int $typeId 操作类型ID 1:请假模块 5:物料模块
+     * @param int $typeId 操作类型ID 1:请假模块 2:入职模块 5:物料模块
      * @param int $infoId 操作记录ID
      * @param string $opt_name 操作内容
      * @param string $memo 备注

@@ -114,8 +114,8 @@
                         <div class="col-sm-3">
                             <div class="input-group">
                                 <span class="input-group-addon" style="color: red"><i class="fa fa-calendar"></i></span>
-                                {!! Form::text('entry_time', $entry->entry_time ?? old('entry_time'), [
-                                'class' => 'form-control date_time',
+                                {!! Form::text('entry_time', !empty($entry->entry_time) ? date('Y-m-d', strtotime($entry->entry_time)) : old('entry_time'), [
+                                'class' => 'form-control date',
                                 'placeholder' => trans('app.请输入', ['value' => trans('app.入职时间')]),
                                 'required' => true,
                                 ]) !!}
@@ -151,7 +151,7 @@
                         </div>
                         <i style="color: red">*</i>
                     </div>
-                    <div class="form-group @if (!empty($errors->first('dept_id'))) has-error @endif">
+                    <div class="form-group @if (!empty($errors->first('firm_id'))) has-error @endif">
                         {!! Form::label('firm_id', trans('staff.所属公司'), ['class' => 'col-sm-4 control-label']) !!}
                         <div class="col-sm-3">
                             {!! Form::select('firm_id', $firm, isset($entry->firm_id) ? $entry->firm_id: old('firm_id'), [
@@ -159,7 +159,7 @@
                             'placeholder' => trans('app.请选择', ['value' => trans('staff.所属公司')]),
                             'required' => true,
                             ]) !!}
-                            <span class="help-block m-b-none">{{ $errors->first('status') }}</span>
+                            <span class="help-block m-b-none">{{ $errors->first('firm_id') }}</span>
                         </div>
                         <i style="color: red">*</i>
                     </div>
@@ -269,14 +269,37 @@
                             </select>
                             <span class="help-block m-b-none">{{ $errors->first('copy_user') }}</span>
                         </div>
-
                     </div>
+
+                    @if(!empty($operateLog))
+                        {{--操作日志信息--}}
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label text-navy"><h2>{{trans('staff.操作日志信息')}}</h2</label>
+                        </div>
+
+                        <div class="form-group">
+                            {!! Form::label('copy_user', trans('staff.操作信息'), ['class' => 'col-sm-4 control-label']) !!}
+                            <div class="col-sm-8">
+                                @foreach($operateLog as $lk => $lv)
+                                    <span class="help-block m-b-none">
+                                        <a class="btn btn-xs btn-primary">{{ $lv->created_at }}</a>
+                                        <a class="btn btn-xs btn-rounded">{{ $users[$lv->opt_uid] ?? '错误数据'}}</a>
+                                        <a class="btn btn-xs btn-default btn-rounded btn-outline">{{ $lv->opt_name }} </a>
+                                        @if(!empty($lv->memo))
+                                            <span style="color: #039"> {!! $lv->memo !!}</span>
+                                        @endif
+                                    </span>
+                                @endforeach
+
+                            </div>
+                        </div>
+                    @endif
 
                     <div class="hr-line-dashed"></div>
 
                     <div class="form-group">
                         <div class="col-sm-4 col-sm-offset-5">
-                            {!! Form::submit(trans('app.提交'), ['class' => 'btn btn-primary']) !!}
+                            {!! Form::submit($btnDesc, ['class' => 'btn btn-primary']) !!}
                             <a href="{{ route('entry.list') }}"
                                class="btn btn-info">{{ trans('att.返回列表') }}</a>
                         </div>
