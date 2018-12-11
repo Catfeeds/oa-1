@@ -21,7 +21,7 @@
                         </li>
                         @if(Entrust::can(['leave*', 'staff*']))
                         <li>
-                            <a aria-expanded="false" role="button" href="{{route('attIndex')}}">{{ trans('app.考勤系统') }}</a>
+                            <a aria-expanded="false" role="button" href="{{route('leave.info')}}">{{ trans('app.考勤系统') }}</a>
                         </li>
                         @endif
 

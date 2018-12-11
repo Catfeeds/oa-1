@@ -35,10 +35,13 @@ class ReviewController extends AttController
 {
     protected $scopeClass = DailyScope::class;
     public $reviewHelper;
+    public $paidWithUnpaidConf;
 
     public function __construct(ReviewHelper $reviewHelper)
     {
         $this->reviewHelper = $reviewHelper;
+        //获取带薪假和无薪假的各个配置
+        $this->paidWithUnpaidConf = HolidayConfig::getHolidayConfigsByCypherType([HolidayConfig::CYPHER_PAID, HolidayConfig::CYPHER_UNPAID]);
     }
 
     public function index()
@@ -50,7 +53,9 @@ class ReviewController extends AttController
         if ($this->reviewHelper->errorRedirect($monthInfo)) return redirect()->route('holiday-config');
 
         $title = trans('att.考勤管理');
-        return view('attendance.daily-detail.review', compact('title', 'monthInfo', 'scope', 'paidNames'));
+        $paidUnpaidConf = $this->paidWithUnpaidConf;
+        $paidUnpaidConfCount = collect($this->paidWithUnpaidConf)->flatten(1)->count();
+        return view('attendance.daily-detail.review', compact('title', 'monthInfo', 'scope', 'paidNames', 'paidUnpaidConf', 'paidUnpaidConfCount'));
     }
 
     /**
@@ -97,18 +102,17 @@ class ReviewController extends AttController
         $users = User::whereRaw($scope->getwhere() . $userIds)->get();
         $info = [];
 
-        //获取带薪假和无薪假的各个配置
-        $paidWithUnpaidConf = HolidayConfig::getHolidayConfigsByCypherType([HolidayConfig::CYPHER_PAID, HolidayConfig::CYPHER_UNPAID]);
         $leaves = $this->reviewHelper->getLeaves($scopeArr);
 
         foreach ($users as $user) {
             //计算多种带薪假,返回天数数组
             $hasSalary = $this->reviewHelper->filterLeaves($leaves,
-                collect($paidWithUnpaidConf[HolidayConfig::CYPHER_PAID])->pluck('holiday_id')->toArray(), $user);
+                collect($this->paidWithUnpaidConf[HolidayConfig::CYPHER_PAID])->pluck('holiday_id')->toArray(), $user);
+//            dd($hasSalary);
 
             //计算多种无薪假,返回数组
             $hasNoSalary = $this->reviewHelper->filterLeaves($leaves,
-                collect($paidWithUnpaidConf[HolidayConfig::CYPHER_PAID])->pluck('holiday_id')->toArray(), $user);
+                collect($this->paidWithUnpaidConf[HolidayConfig::CYPHER_PAID])->pluck('holiday_id')->toArray(), $user);
 
             //返回[剩余调休, 已加班, 已调休]
             $leaveInfo = empty($holidayConfigArr[HolidayConfig::CYPHER_CHANGE][0]) ? 0 : \AttendanceService::driver('change', 'cypher')
@@ -134,18 +138,16 @@ class ReviewController extends AttController
                 'actually_come'       => $actuallyCome,
                 'overtime'            => $leaveInfo['overTimeLeaveLog'],
                 'change_time'         => $leaveInfo['changeLeaveLog'],
-                'no_salary_leave'     => $hasNoSalary,
-                'has_salary_leave'    => $hasSalary,
+                'no_salary_leave'     => $hasNoSalary ?? [],
+                'has_salary_leave'    => $hasSalary ?? [],
                 'is_full_work'        => $isFullWork,
                 'late_num'            => $beLateNum[$user->user_id] ?? 0,
                 'other'               => '--',
                 'deduct_num'          => $deductNum[$user->user_id] ?? 0,
                 'remain_year_holiday' => $remainWelfare['year']['number_day'] ?? 0,
                 'remain_visit'        => $remainWelfare['visit']['number_day'] ?? 0,
-                'remain_change'       => $leaveInfo['userLeaveInfo'],
+                'remain_change'       => $leaveInfo['userLeaveInfo'] ?? [],
                 'send'                => $confirmList[$user->user_id] ?? 0,
-                'paid_unpaid_conf'    => $paidWithUnpaidConf,
-                'paid_unpaid_conf_count' => collect($paidWithUnpaidConf)->flatten(1)->count(),
             ];
         }
         return ['success', $info];

@@ -55,6 +55,7 @@
 <script type="text/javascript">
     $("[data-toggle='popover']").popover();
     var selectDate = 1;
+    var hoverDate = 0;
 
     function ajaxGetDayInfo(selectDate) {
         var selectDay = new Date(selectDate);
@@ -104,6 +105,7 @@
                                 content: n.content,
                                 id: 'event_' + i,
                                 pop_title: n.event,
+                                day: n.date
                             });
 
                         });
@@ -112,7 +114,7 @@
                 });
             },
             eventRender: function (event, element) {
-                element.attr('id', event.id).popover({
+                element.attr({'id': event.id, 'day': event.day}).popover({
                     html: true,
                     title: event.pop_title,
                     placement: 'top',
@@ -145,6 +147,14 @@
         $('#calendar').find('.fc-body').attr('title', '可选中日期查看').css('cursor', 'pointer');
         ajaxGetDayInfo('{{ date('Y-m-d', time()) }}');
         @endif
+
+        $('/*td.fc-day:not(.fc-other-month), */.fc-day-top:not(.fc-other-month)').mouseover(function () {
+            hoverDate = $(this).attr('data-date');
+            $('a.fc-event[day=' + hoverDate + ']').popover('show');
+        }).mouseleave(function () {
+            $('a.fc-event[day=' + hoverDate + ']').popover('hide');
+            hoverDate = 0;
+        })
     });
 </script>
 @endpush

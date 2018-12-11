@@ -17,6 +17,14 @@
                         </a>
                     </li>
 
+                    @if(Entrust::can(['holiday-config*', 'approval-step*', 'punch-rule*', 'calendar*']))
+                    <li>
+                        <a href="{{ route('holiday-config') }}">
+                            <i class="glyphicon glyphicon-cog"></i> <span class="nav-label">{{ trans('app.系统配置') }}</span>
+                        </a>
+                    </li>
+                    @endif
+
                     <li class="dropdown">
                         <a aria-expanded="false" role="button" href="#" class="dropdown-toggle" data-toggle="dropdown">
                             <i class="fa fa-user"></i> {{ Auth::user()->alias }}
