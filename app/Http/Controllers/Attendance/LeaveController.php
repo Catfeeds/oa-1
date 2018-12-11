@@ -499,8 +499,14 @@ class LeaveController extends AttController
         $html = <<<HTML
             $ret
 HTML;
+        $exceed = '';
+        $exceedDay = \AttendanceService::driver($driver, 'cypher')->check($holidayConfig, $numberDay);
 
-        return response()->json(['status' => 1, 'step' => $html]);
+        if(!empty($exceedDay['data'])) {
+            $exceed = sprintf('剩余假期不足,自动换算假期:%s%s天', HolidayConfig::holidayList()[$exceedDay['data']['exceed_holiday_id']], $exceedDay['data']['exceed_day']);
+        }
+
+        return response()->json(['status' => 1, 'step' => $html, 'exceed' => $exceed]);
     }
 
     /**

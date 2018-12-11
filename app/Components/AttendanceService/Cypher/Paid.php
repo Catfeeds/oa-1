@@ -9,9 +9,6 @@
 
 namespace App\Components\AttendanceService\Cypher;
 
-
-use App\Http\Components\Helpers\AttendanceHelper;
-use App\Models\Attendance\Leave;
 use App\Models\Sys\HolidayConfig;
 
 class Paid extends Cypher
@@ -32,7 +29,7 @@ class Paid extends Cypher
         }
 
         $data = [];
-        if((int)$leaveInfo['number_day'] === 0 || (int)$leaveInfo['number_day'] < $numberDay ) {
+        if((int)$leaveInfo['number_day'] === 0 || (int)$leaveInfo['number_day'] < $numberDay) {
             $data['exceed_day'] = $numberDay - (int)$leaveInfo['number_day'];
             $data['exceed_holiday_id'] = $holidayConfig->exceed_change_id;
         }
