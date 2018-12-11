@@ -1,15 +1,16 @@
-@extends('admin.sys.sys')
+@extends('sys.sys')
 
 @section('content')
+
     <div class="row">
         <div class="col-lg-12">
             <div class="ibox float-e-margins">
                 <div class="ibox-title">
                     <h5>{{ $title ?? trans('app.系统设置') }}</h5>
                     <div class="ibox-tools">
-                        @if(Entrust::can(['punch-rules.create']))
-                            <a class="btn btn-xs btn-primary" href="{{ route('punch-rules.create') }}">
-                                {{ trans('app.添加', ['value' => trans('app.上下班时间规则配置')]) }}
+                        @if(Entrust::can(['holiday-config.create']))
+                            <a class="btn btn-xs btn-primary" href="{{ route('holiday-config.create') }}">
+                                {{ trans('app.添加', ['value' => trans('app.申请配置')]) }}
                             </a>
                         @endif
                     </div>
@@ -22,7 +23,7 @@
                         <div class="panel blank-panel">
                             <div class="panel-options">
                                 <ul class="nav nav-tabs">
-                                    @include('admin.sys._link-tabs')
+                                    @include('sys._link-tabs')
                                 </ul>
                             </div>
                         </div>
@@ -36,9 +37,14 @@
                                         <table class="table table-hover table-striped tooltip-demo">
                                             <thead>
                                             <tr>
-                                                <th>{{ trans('app.规则ID') }}</th>
-                                                <th>{{ trans('app.规则类型') }}</th>
-                                                <th>{{ trans('app.规则名称') }}</th>
+                                                <th>{{ trans('app.配置ID') }}</th>
+                                                <th>{{ trans('app.排序值') }}</th>
+                                                <th>{{ trans('app.配置类型') }}</th>
+                                                <th>{{ trans('app.配置名称') }}</th>
+                                                <th>{{ trans('app.是否显示') }}</th>
+                                                <th>{{ trans('app.请假下限天数') }}</th>
+                                                <th>{{ trans('app.请假计薪上限天数') }}</th>
+                                                <th>{{ trans('app.配置描述') }}</th>
                                                 <th>{{ trans('app.提交时间') }}</th>
                                                 <th>{{ trans('app.操作') }}</th>
                                             </tr>
@@ -46,14 +52,19 @@
                                             <tbody>
                                             @foreach($data as $v)
                                                 <tr>
-                                                    <td>{{ $v['id'] }}</td>
-                                                    <td>{{ \App\Models\Sys\PunchRules::$punchType[$v['punch_type_id']] ?? '' }}</td>
-                                                    <td>{{ $v['name'] }}</td>
+                                                    <td>{{ $v['holiday_id'] }}</td>
+                                                    <td>{{ $v['sort'] }}</td>
+                                                    <td>{{ \App\Models\Sys\HolidayConfig::$applyType[$v['apply_type_id']] ?? '' }}</td>
+                                                    <td>{{ $v['holiday'] }}</td>
+                                                    <td>{{ \App\Models\Sys\HolidayConfig::$isShow[$v['is_show']] ?? '' }}</td>
+                                                    <td>{{ $v['under_day'] }}</td>
+                                                    <td>{{ $v['up_day'] }}</td>
+                                                    <td><pre style="width: 15em; height: 10em" >{{ $v['memo'] }}</pre></td>
                                                     <td>{{ $v['created_at'] }}</td>
                                                     <td>
-                                                        @if(Entrust::can(['punch-rules.edit']))
+                                                        @if(Entrust::can(['holiday-config.edit']))
                                                             {!!
-                                                                BaseHtml::tooltip(trans('app.设置'), route('punch-rules.edit', ['id' => $v['id']]))
+                                                                BaseHtml::tooltip(trans('app.设置'), route('holiday-config.edit', ['id' => $v['holiday_id']]))
                                                             !!}
                                                         @endif
                                                     </td>

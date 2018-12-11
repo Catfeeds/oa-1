@@ -25,20 +25,20 @@ class EthnicController extends Controller
         $form['ethnic'] = \Request::get('ethnic');
         $data = Ethnic::where('ethnic', 'LIKE', "%{$form['ethnic']}%")->orderBy('sort', 'asc')->paginate();
         $title = trans('staff.民族列表');
-        return view('admin.sys.ethnic', compact('title', 'data', 'form'));
+        return view('sys.ethnic', compact('title', 'data', 'form'));
     }
 
     public function create()
     {
         $title = trans('app.添加', ['value' => trans('staff.民族')]);
-        return view('admin.sys.ethnic-edit', compact('title'));
+        return view('sys.ethnic-edit', compact('title'));
     }
 
     public function edit($id)
     {
         $ethnic = Ethnic::findOrFail($id);
         $title = trans('app.编辑', ['value' => trans('staff.民族配置')]);
-        return view('admin.sys.ethnic-edit', compact('title', 'ethnic'));
+        return view('sys.ethnic-edit', compact('title', 'ethnic'));
     }
 
     public function store(Request $request)

@@ -1,4 +1,4 @@
-@extends('admin.sys.sys')
+@extends('sys.sys')
 
 @section('content')
     <div class="row">
@@ -35,7 +35,7 @@
                         <div class="panel blank-panel">
                             <div class="panel-options">
                                 <ul class="nav nav-tabs">
-                                    @include('admin.sys._link-staff-tabs')
+                                    @include('sys._link-staff-tabs')
                                 </ul>
                             </div>
                         </div>

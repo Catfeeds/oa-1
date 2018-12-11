@@ -17,13 +17,13 @@ class InventoryController extends Controller
     {
         $title = '资质库存列表';
         $data = Inventory::get();
-        return view('admin.sys.inventory-list', compact('title', 'data'));
+        return view('sys.inventory-list', compact('title', 'data'));
     }
 
     public function create()
     {
         $title = '添加资质借用';
-        return view('admin.sys.inventory-edit', compact('title'));
+        return view('sys.inventory-edit', compact('title'));
     }
 
     public function store(Request $request)
@@ -39,7 +39,7 @@ class InventoryController extends Controller
     {
         $title = '修改资质借用';
         $data = $id;
-        return view('admin.sys.inventory-edit', compact('title', 'data'));
+        return view('sys.inventory-edit', compact('title', 'data'));
     }
 
     public function update(Inventory $id, Request $request)
@@ -55,7 +55,7 @@ class InventoryController extends Controller
     public function upload()
     {
         $title = '批量添加';
-        return view('admin.sys.inventory-upload', compact('title'));
+        return view('sys.inventory-upload', compact('title'));
     }
 
     public function excel(Request $request)

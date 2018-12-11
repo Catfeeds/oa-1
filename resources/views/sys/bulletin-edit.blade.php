@@ -1,4 +1,4 @@
-@extends('admin.sys.sys')
+@extends('sys.sys')
 
 @push('css')
 <link rel="stylesheet" href="{{ asset('ueditor/dialogs/xiumi-ue-v5.css') }}">

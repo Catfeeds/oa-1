@@ -37,7 +37,7 @@ class CalendarController extends AttController
         $scope = $this->scope;
         $startMonth = date('m', strtotime($scope->startDate));
         $endMonth = date('m', strtotime($scope->endDate));
-        return view('admin.sys.calendar', compact('title', 'data', 'scope', 'startMonth', 'endMonth'));
+        return view('sys.calendar', compact('title', 'data', 'scope', 'startMonth', 'endMonth'));
     }
 
     public function list(Request $request)
@@ -52,21 +52,21 @@ class CalendarController extends AttController
             ->orderBy('month', 'asc')
             ->orderBy('day', 'asc')
             ->get();
-        return view('admin.sys.calendar-list', compact('title', 'data', 'scope', 'startMonth', 'endMonth'));
+        return view('sys.calendar-list', compact('title', 'data', 'scope', 'startMonth', 'endMonth'));
     }
 
     public function create()
     {
         $calendar = (object)['punch_rules_id' => '', 'week' => ''];
         $title = trans('app.添加日历表');
-        return view('admin.sys.calendar-edit', compact('title', 'calendar'));
+        return view('sys.calendar-edit', compact('title', 'calendar'));
     }
 
     public function edit($id)
     {
         $calendar = Calendar::findOrFail($id);
         $title = trans('app.编辑', ['value' => trans('app.日历表')]);
-        return view('admin.sys.calendar-edit', compact('title', 'calendar'));
+        return view('sys.calendar-edit', compact('title', 'calendar'));
     }
 
     public function store(Request $request)

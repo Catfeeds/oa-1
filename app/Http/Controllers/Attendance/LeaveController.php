@@ -89,6 +89,25 @@ class LeaveController extends AttController
         );
     }
 
+    public function getHolidayApplyList(Request $request)
+    {
+        $applyTypeId = $request->get('id');
+        if(empty($applyTypeId) || !in_array((int)$applyTypeId, HolidayConfig::$driverTypeId)) {
+            flash('请勿非法操作', 'danger');
+            return redirect()->route('leave.info');
+        }
+
+        $holiday = HolidayConfig::getUserShowHolidayList($applyTypeId);
+
+        $res = [];
+        if(!empty($holiday)) {
+            foreach ($holiday as $k => $v) {
+                $res[] = ['id' => $k, 'text' => $v];
+            }
+        }
+        return response()->json(['status' => 1, 'data' => $res]);
+    }
+
     /**
      * 创建申请单
      * @param $applyTypeId

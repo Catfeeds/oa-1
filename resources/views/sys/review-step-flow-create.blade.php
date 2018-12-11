@@ -1,4 +1,4 @@
-@extends('admin.sys.sys')
+@extends('sys.sys')
 
 @section('content')
     <div class="row">
@@ -15,7 +15,7 @@
                         <div class="panel blank-panel">
                             <div class="panel-options">
                                 <ul class="nav nav-tabs">
-                                    @include('admin.sys._link-tabs')
+                                    @include('sys._link-tabs')
                                 </ul>
                             </div>
                         </div>
@@ -182,7 +182,6 @@
                 $('#child_id, input[name=min_num], input[name=max_num]').prop('disabled', false);
                 $.get("{{ route('review-step-flow.getHoliday') }}", {id: applyTypeId}, function (result) {
                     if (result.status == 1) {
-                        console.log(result.data);
                         $(".child_id").select2({
                             placeholder: "-请选择子项目类型-", //默认所有
                             allowClear: true, //清楚选择项

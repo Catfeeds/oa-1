@@ -1,4 +1,4 @@
-@extends('admin.sys.sys')
+@extends('sys.sys')
 
 @section('content')
     <div class="row">
@@ -7,9 +7,9 @@
                 <div class="ibox-title">
                     <h5>{{ $title ?? trans('app.系统设置') }}</h5>
                     <div class="ibox-tools">
-                        @if(Entrust::can(['approval-step.create']))
-                            <a class="btn btn-xs btn-primary" href="{{ route('approval-step.create') }}">
-                                {{ trans('app.添加', ['value' => trans('app.审核流程配置')]) }}
+                        @if(Entrust::can(['punch-rules.create']))
+                            <a class="btn btn-xs btn-primary" href="{{ route('punch-rules.create') }}">
+                                {{ trans('app.添加', ['value' => trans('app.上下班时间规则配置')]) }}
                             </a>
                         @endif
                     </div>
@@ -22,7 +22,7 @@
                         <div class="panel blank-panel">
                             <div class="panel-options">
                                 <ul class="nav nav-tabs">
-                                    @include('admin.sys._link-tabs')
+                                    @include('sys._link-tabs')
                                 </ul>
                             </div>
                         </div>
@@ -36,10 +36,9 @@
                                         <table class="table table-hover table-striped tooltip-demo">
                                             <thead>
                                             <tr>
-                                                <th>{{ trans('app.步骤ID') }}</th>
-                                                <th>{{ trans('app.部门') }}</th>
-                                                <th>{{ trans('app.假期时间范围') }}</th>
-                                                <th>{{ trans('app.步骤流程') }}</th>
+                                                <th>{{ trans('app.规则ID') }}</th>
+                                                <th>{{ trans('app.规则类型') }}</th>
+                                                <th>{{ trans('app.规则名称') }}</th>
                                                 <th>{{ trans('app.提交时间') }}</th>
                                                 <th>{{ trans('app.操作') }}</th>
                                             </tr>
@@ -47,15 +46,14 @@
                                             <tbody>
                                             @foreach($data as $v)
                                                 <tr>
-                                                    <td>{{ $v['step_id'] }}</td>
-                                                    <td>{{ \App\Models\Sys\Dept::getDeptList()[$v['dept_id']] ?? '---' }}</td>
-                                                    <td>{{ \App\Models\Sys\ApprovalStep::$timeType[$v['time_range_id']] ?? '---'}}</td>
-                                                    <td>{{ \App\Http\Components\Helpers\AttendanceHelper::showApprovalStep($v['step_id']) }}</td>
+                                                    <td>{{ $v['id'] }}</td>
+                                                    <td>{{ \App\Models\Sys\PunchRules::$punchType[$v['punch_type_id']] ?? '' }}</td>
+                                                    <td>{{ $v['name'] }}</td>
                                                     <td>{{ $v['created_at'] }}</td>
                                                     <td>
-                                                        @if(Entrust::can(['approval-step.edit']))
+                                                        @if(Entrust::can(['punch-rules.edit']))
                                                             {!!
-                                                                BaseHtml::tooltip(trans('app.设置'), route('approval-step.edit', ['id' => $v['step_id']]))
+                                                                BaseHtml::tooltip(trans('app.设置'), route('punch-rules.edit', ['id' => $v['id']]))
                                                             !!}
                                                         @endif
                                                     </td>

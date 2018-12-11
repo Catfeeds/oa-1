@@ -163,7 +163,7 @@
     <script>
         $(function() {
             {{--{!! BaseChart::nativeDataTable('example')!!}--}}
-                $('#example').dataTable({
+            $('#example').dataTable({
                 language: {
                     url: '{{ asset('js/plugins/dataTables/i18n/Chinese.json') }}'
                 },
@@ -182,6 +182,38 @@
                     {extend: 'excel'}
                 ]
             });
+            showHoliday();
         });
+
+        function showHoliday() {
+            var applyTypeId = $('#scope_apply_type_id').children('option:selected').val();
+            if(applyTypeId != "" && applyTypeId != null  ) {
+                var arr = JSON.parse('{{ json_encode(array_keys(\App\Models\Sys\HolidayConfig::$applyType)) }}');
+                if ($.inArray(Number(applyTypeId), arr) !== -1) {
+                    $.get("{{ route('leave.getHolidayApplyList') }}", {id: applyTypeId}, function (result) {
+                        if (result.status == 1) {
+                            $("#scope_holiday_id").select2("val", "");
+                            $("#scope_holiday_id").empty();
+                            $("#scope_holiday_id").select2({
+                                placeholder: "-请选择明细类型-", //默认所有
+                                allowClear: true, //清楚选择项
+                                multiple: false,// 多选
+                                data: result.data, //绑定数据
+                                minimumResultsForSearch: "1"
+                            });
+
+                            @if(!empty($scope->holidayId))
+                                var holiday_id= '{{$scope->holidayId}}';
+                                $("#scope_holiday_id").val(holiday_id).select2();
+                            @endif
+                        }
+                    });
+                }
+            } else {
+                $("#scope_holiday_id").select2("val", "");
+                $("#scope_holiday_id").empty();
+            }
+        }
+
     </script>
 @endsection

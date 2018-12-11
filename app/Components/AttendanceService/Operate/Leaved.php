@@ -220,13 +220,7 @@ class Leaved extends Operate implements AttendanceInterface
         $allUsers = User::getUsernameAliasAndDeptList();
         $time = date('Y-m-d', time());
 
-        $holidayList = HolidayConfig::where(['apply_type_id' => HolidayConfig::LEAVEID])
-            ->whereIn('restrict_sex', [\Auth::user()->userExt->sex, UserExt::SEX_NO_RESTRICT])
-            ->where(['is_show' => HolidayConfig::STATUS_ENABLE])
-            ->orderBy('sort', 'asc')
-            ->get(['holiday_id', 'show_name'])
-            ->pluck('show_name', 'holiday_id')
-            ->toArray();
+        $holidayList = HolidayConfig::getUserShowHolidayList();
 
         return view('attendance.leave.edit', compact('title', 'time', 'holidayList', 'leave', 'reviewUserId', 'copyUserIds', 'deptUsers', 'allUsers'));
 

@@ -1,4 +1,4 @@
-@extends('admin.sys.sys')
+@extends('sys.sys')
 
 @push('css')
 <link rel="stylesheet" href="{{ asset('css/plugins/switchery/switchery-0.8/switchery.css') }}" />

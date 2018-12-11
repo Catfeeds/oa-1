@@ -1,4 +1,4 @@
-@extends('admin.sys.sys')
+@extends('sys.sys')
 
 @section('content')
     <div class="row">
@@ -15,7 +15,7 @@
                         <div class="panel blank-panel">
                             <div class="panel-options">
                                 <ul class="nav nav-tabs">
-                                    @include('admin.sys._link-staff-tabs')
+                                    @include('sys._link-staff-tabs')
                                 </ul>
                             </div>
                         </div>
@@ -27,34 +27,17 @@
                                 <div class="ibox-content profile-content">
                                     {!! Form::open(['class' => 'form-horizontal']) !!}
 
-                                    <div class="form-group @if (!empty($errors->first('ethnic'))) has-error @endif">
-                                        {!! Form::label('ethnic', trans('staff.民族名称'), ['class' => 'col-sm-3 control-label']) !!}
+                                    <div class="form-group @if (!empty($errors->first('job'))) has-error @endif">
+                                        {!! Form::label('dept', trans('app.岗位类型名称'), ['class' => 'col-sm-4 control-label']) !!}
                                         <div class="col-sm-3">
-                                            {!! Form::text('ethnic', isset($ethnic->ethnic) ? $ethnic->ethnic: old('ethnic'), [
+                                            {!! Form::text('job', isset($job->job) ? $job->job: old('job'), [
                                             'class' => 'form-control',
-                                            'placeholder' => trans('app.请输入', ['value' => trans('staff.民族名称')]),
+                                            'placeholder' => trans('app.请输入', ['value' => trans('app.岗位类型名称')]),
                                             'required' => true,
                                             ]) !!}
-                                            <span class="help-block m-b-none">{{ $errors->first('ethnic') }}</span>
+                                            <span class="help-block m-b-none">{{ $errors->first('job') }}</span>
                                         </div>
                                     </div>
-
-                                    <div class="hr-line-dashed"></div>
-
-                                    <div class="form-group @if (!empty($errors->first('sort'))) has-error @endif">
-                                        {!! Form::label('sort', trans('staff.排序'), ['class' => 'col-sm-3 control-label']) !!}
-                                        <div class="col-sm-3">
-                                            {!! Form::number('sort', isset($ethnic->sort) ? $ethnic->sort: old('sort'), [
-                                            'class' => 'form-control',
-                                            'placeholder' => trans('app.请输入', ['value' => trans('staff.排序')]),
-                                            'required' => true,
-                                            'step' => 1
-                                            ]) !!}
-                                            <span class="help-block m-b-none">{{ $errors->first('sort') }}</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="hr-line-dashed"></div>
 
                                     <div class="form-group">
                                         <div class="col-sm-3 col-sm-offset-4">
@@ -70,4 +53,5 @@
             </div>
         </div>
     </div>
+
 @endsection
