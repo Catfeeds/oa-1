@@ -389,10 +389,11 @@
                             {!! Form::text('salary_card', !empty($user->userExt->salary_card) ? $user->userExt->salary_card : old('salary_card'), [
                             'class' => 'form-control',
                             'placeholder' => trans('app.请输入', ['value' => trans('app.工资卡')]),
-                            'data-mask' => '9999 9999 9999 9999'
+                            'data-mask' => '9999 9999 9999 9999',
+                            'id' => 'bank_card',
 
                             ]) !!}
-                            <span class="help-block m-b-none">{{ $errors->first('salary_card') }}</span>
+                            <span class="help-block m-b-none error_bank_card">{{ $errors->first('salary_card') }}</span>
                         </div>
                         <div class="row">
                             <i style="color: red">*</i>
@@ -647,8 +648,10 @@
                             'class' => 'form-control',
                             'placeholder' => trans('app.请输入', ['value' => trans('staff.身份证号码')]),
                             'required' => true,
+                            'data-mask' => '99999999999999999*',
+                            'id' => 'card_id'
                             ]) !!}
-                            <span class="help-block m-b-none">{{ $errors->first('card_id') }}</span>
+                            <span class="help-block m-b-none error_card">{{ $errors->first('card_id') }}</span>
                         </div>
                     </div>
 
@@ -709,11 +712,11 @@
 @include('widget.icheck')
 @include('widget.select2')
 @include('widget.datepicker')
+@include('widget.check-bank-card')
+@include('widget.check-card-id')
 @section('scripts-last')
     <script>
-        $(function() {
-
-        });
+        $(function() {});
     </script>
 @endsection
 

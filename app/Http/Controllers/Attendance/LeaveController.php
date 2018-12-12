@@ -89,6 +89,11 @@ class LeaveController extends AttController
         );
     }
 
+    /**
+     * 申请单收索
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
+     */
     public function getHolidayApplyList(Request $request)
     {
         $applyTypeId = $request->get('id');

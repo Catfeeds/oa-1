@@ -233,7 +233,7 @@ class EntryController extends AttController
             }
 
             if(!empty($msg)) {
-                OperateLogHelper::createOperateLog(OperateLog::ENTRY, $entry->entry_id, '调整入职信息',  implode(';', $msg));
+                OperateLogHelper::createOperateLog(OperateLog::ENTRY, $entry->entry_id, '调整岗位信息',  implode(';', $msg));
                 //员工列表
                 $users = User::getUsernameList();
                 //抄送人员, 导师，基友企业微信通知
@@ -278,6 +278,12 @@ class EntryController extends AttController
         return view('staff-manage.entry.edit-info', compact('title', 'workHistory', 'familyNum', 'school', 'ethnic', 'roleList', 'users', 'job', 'dept', 'firm', 'entry', 'userIds', 'maxUsername'));
     }
 
+    /**
+     * 更新员工入职信息
+     * @param Request $request
+     * @param $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function updateInfo(Request $request, $id)
     {
         $this->validate($request, array_merge($this->_validateRule, $this->_validateRuleExt, [
@@ -397,6 +403,11 @@ class EntryController extends AttController
         return view('staff-manage.entry.fill', compact('title', 'ethnic', 'users', 'school', 'entry', 'entryS', 'dept', 'sign', 'cache'));
     }
 
+    /**
+     * 删除入职信息
+     * @param $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function del($id)
     {
         try {
@@ -465,6 +476,7 @@ class EntryController extends AttController
 
     public function save(Request $request)
     {
+
         $data = $request->all()['entry'] ?? [];
         if(empty($data)) {
             return response()->json(['status' => -1, 'msg' => '保存失败']);
