@@ -92,7 +92,7 @@
                             <td>{{ $v['has_salary_leave'][$item['holiday_id']] ?? 0 }}</td>
                         @endforeach
                         @foreach($paidUnpaidConf[\App\Models\Sys\HolidayConfig::CYPHER_UNPAID] as $item)
-                            <td>{{ $v['has_salary_leave'][$item['holiday_id']] ?? 0 }}</td>
+                            <td>{{ $v['no_salary_leave'][$item['holiday_id']] ?? 0 }}</td>
                         @endforeach
 
                         <td>{{ $v['is_full_work'] }}</td>

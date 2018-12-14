@@ -45,14 +45,16 @@ class DailyDetailController extends AttController
 
         $appealData = Appeal::getAppealResult(Appeal::APPEAL_DAILY);
 
-        $danger = $this->review->reviewHelper->getDanger(date('Y-m-01', strtotime($scope->startDate)),
+        $ret = $this->review->reviewHelper->getDanger(date('Y-m-01', strtotime($scope->startDate)),
             date('Y-m-t', strtotime($scope->startDate)), $data);
+        $danger = $ret['danger'];
+        $event = $ret['event'];
 
         $title = trans('att.我的每日考勤详情');
         $paidUnpaidConf = $this->review->paidWithUnpaidConf;
         $paidUnpaidConfCount = collect($this->review->paidWithUnpaidConf)->flatten(1)->count();
         return view('attendance.daily-detail.index', compact('title', 'data', 'scope', 'userInfo', 'monthInfo', 'scope', 'appealData', 'danger',
-            'paidUnpaidConf', 'paidUnpaidConfCount'));
+            'paidUnpaidConf', 'paidUnpaidConfCount', 'event'));
     }
 
     //重新初始化scope,调用review控制器的方法

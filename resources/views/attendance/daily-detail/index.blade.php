@@ -43,19 +43,21 @@
                             <tbody>
                             @foreach($data as $v)
                                 <tr>
-                                    <td>{{ $v['day'] }}</td>
+                                    <td>{{ $v['day'].'('.mb_substr( "日一二三四五六",date("w", strtotime($v['day'])),1).')' }}
+                                        <span style="color:white; background-color: {{ \App\Models\Sys\PunchRules::$punchTypeColor[$event[$v['day']]->punch_type_id] }}; padding:0 2px" class="b-r-sm">{{ \App\Models\Sys\PunchRules::$punchTypeChar[$event[$v['day']]->punch_type_id] }}</span>
+                                    </td>
                                     <td>{{ $userInfo['username'] }}</td>
                                     <td>{{ $userInfo['alias'] }}</td>
                                     @if(empty($v['punch_start_time']))
-                                        <td style="color: red">--</td>
+                                        <td style="color: {{ ($event[$v['day']]->punch_type_id === \App\Models\Sys\PunchRules::NORMALWORK || $event[$v['day']]->punch_type_id === \App\Models\Sys\PunchRules::HOLIDAY_WORK) ? 'red' : 'black'}}">--</td>
                                     @else
-                                        <td @if($danger[$v['day']]['on_work'] === true) style="color: red" @endif>{{ $v['punch_start_time'] }}</td>
+                                        <td @if(!empty($danger[$v['day']]['on_work']) && $danger[$v['day']]['on_work'] === true) style="color: red" @endif>{{ $v['punch_start_time'] }}</td>
                                     @endif
 
                                     @if(empty($v['punch_end_time']))
-                                        <td style="color: red">--</td>
+                                        <td style="color: {{ ($event[$v['day']]->punch_type_id === \App\Models\Sys\PunchRules::NORMALWORK || $event[$v['day']]->punch_type_id === \App\Models\Sys\PunchRules::HOLIDAY_WORK) ? 'red' : 'black'}}">--</td>
                                     @else
-                                        <td @if($danger[$v['day']]['off_work'] === true) style="color: red" @endif>{{ $v['punch_end_time'] }}</td>
+                                        <td @if(!empty($danger[$v['day']]['off_work']) && $danger[$v['day']]['off_work'] === true) style="color: red" @endif>{{ $v['punch_end_time'] }}</td>
                                     @endif
 
                                     <td>{{ $v['heap_late_num'] ?? '--' }}</td>
@@ -68,7 +70,7 @@
                                     <td>
                                         {{--节日加班不需要补打卡与补假操作--}}
 
-                                        @if((empty($v['punch_start_time']) || empty($v['punch_end_time'])))
+                                        {{--@if((empty($v['punch_start_time']) || empty($v['punch_end_time'])))--}}
 
                                             <a href="{{route('leave.create', [
                                                 'id' => \App\Models\Sys\HolidayConfig::RECHECK,
@@ -80,7 +82,7 @@
                                             <a href="{{route('leave.create', ['id' => \App\Models\Sys\HolidayConfig::LEAVEID])}}">
                                                 {{ trans('att.补假') }}
                                             </a>
-                                        @endif
+                                        {{--@endif--}}
                                     </td>
                                     @if(Entrust::can('appeal.store'))
                                         <td>

@@ -97,7 +97,7 @@ class InventoryController extends Controller
                     }
                 }, $columnArr);
                 $cv = array_filter($cv);
-                \DB::select(sprintf('%s', sprintf('INSERT INTO material_inventory (%s) VALUES %s ON DUPLICATE KEY UPDATE %s',
+                \DB::select(sprintf('%s', sprintf('INSERT INTO sys_material_inventory (%s) VALUES %s ON DUPLICATE KEY UPDATE %s',
                     implode(',', $columnArr), implode(',', $data), implode(',', $cv))));
             });
         } catch (\Exception $exception) {

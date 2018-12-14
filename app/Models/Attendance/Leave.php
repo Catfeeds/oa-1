@@ -222,7 +222,7 @@ class Leave extends Model
     //提取统计条件
     public static function leaveBuilder($year, $month)
     {
-        return self::where('status', self::PASS_REVIEW)
+        return self::whereIn('status', [self::PASS_REVIEW, self::SWITCH_REVIEW_ON])
             ->whereYear('start_time', $year)
             ->whereMonth('start_time', $month);
     }

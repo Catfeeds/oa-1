@@ -30,13 +30,6 @@ class PunchRecordController extends Controller
         'memo' => 'max:32',
     ];
 
-    public $punchHelper;
-
-    public function __construct(PunchHelper $punchHelper)
-    {
-        $this->punchHelper = $punchHelper;
-    }
-
     public function index()
     {
         $data = PunchRecord::paginate(30);
@@ -142,13 +135,8 @@ class PunchRecordController extends Controller
             $maxTs = $r->max(); $minTs = $r->min(); unset($r);
             $YmdMaxTs = date('Y-m-d', $maxTs);
             $YmdMinTs = date('Y-m-d', $minTs);
-            $calendarArr = Calendar::getCalendarArrWithPunchRules($YmdMinTs, $YmdMaxTs);
-            $data = $msgArr = $bufferArr = [];
-            $users = User::getUserKeyByAlias();
-            $nights = Leave::where(['status' => Leave::WAIT_EFFECTIVE, 'holiday_id' => $nightConf->holiday_id])
-                ->whereBetween(DB::raw('DATE_FORMAT(start_time, \'%Y-%m-%d\')'), [$YmdMinTs, $YmdMaxTs])->get(['end_time', 'user_id', 'start_time']);
-            $formulaCalPunRuleConfArr = PunchHelper::getCalendarPunchRules($YmdMinTs, $YmdMaxTs, false, $calendarArr)['formula'];
-            $this->punchHelper->setFormulaCalPunRuleConfArr('', '', $formulaCalPunRuleConfArr);
+            $data = $msgArr = $bufferArr = $dailyUpdate = [];
+            $punchHelper = new PunchHelper($YmdMinTs, $YmdMaxTs);
 
             foreach ($reader as $k => $v) {
                 //if ($v[0] == null || $k == 0) continue;
@@ -180,14 +168,14 @@ class PunchRecordController extends Controller
                 //线上环境
                 $ts = sprintf('%d-%02d-%02d', $year, $month, $day);
 
-                $calendar = $calendarArr[$ts] ?? NULL;
+                $calendar = $punchHelper->calendarArr[$ts] ?? NULL;
                 if (empty($calendar->punch_rules_id)) {
                     $isOK = false;
                     $msgArr[] = '未匹配到[' . $year . '-' . $month . '-' . $day . ']日期考勤规则设置,导入失败!';
                     break;
                 }
 
-                list($lastDayEndTime, $startTime, $endTime) = $this->punchHelper->dealLastDayEnd($ts, $v, $users, $nights);
+                list($lastDayEndTime, $startTime, $endTime) = $punchHelper->dealLastDayEnd($ts, $v);
 
                 //线上环境end
                 $row = [
@@ -199,10 +187,14 @@ class PunchRecordController extends Controller
 
                 //修改指定用户上一天的下班时间
                 if (isset($lastDayEndTime)) {
-                    $data[date('Y-m-d', strtotime("-1 day $ts"))][$v[3]]['end_time'] = $lastDayEndTime;
+                    $t = date('Y-m-d', strtotime("-1 day $ts"));
+                    if (empty($data[$v[3]][$t]))
+                        $data[$v[3]][$t] = ['ts' => $t, 'alias' => $v[3], 'start_time' => NULL, 'end_time' => $lastDayEndTime];
+                    else
+                        $data[$v[3]][$t]['end_time'] = $lastDayEndTime;
                     unset($lastDayEndTime);
                 }
-                $data[$ts][$v[3]] = $row;
+                $data[$v[3]][$ts] = $row;
                 ksort($data);
             }
             unset($calendarArr, $k, $v, $reader);
@@ -215,8 +207,48 @@ class PunchRecordController extends Controller
                 throw new \Exception('信息错误');
             }
 
-            $details = DailyDetail::whereBetween('day', [$YmdMinTs, $YmdMaxTs])->get();
-            foreach ($data as $dk => $dv) {
+            $details = DailyDetail::whereBetween('day', [$YmdMinTs, $YmdMaxTs])->get()->groupBy('user_id');
+
+            foreach ($punchHelper->users as $userAlias => $user) {
+
+                if (empty($data[$userAlias])) {
+                    $msgArr[] = '未找到[' . $userAlias . ']员工信息!';
+                    continue;
+                }
+
+                for ($date = $YmdMinTs; $date <= $YmdMaxTs; $date = date('Y-m-d', strtotime("+1 day $date"))) {
+                    $datum = $data[$userAlias][$date] ?? ['ts' => $date, 'alias' => $userAlias, 'start_time' => NULL, 'end_time' => NULL];
+                    if (count($punchHelper->formulaCalPunRuleConfArr[$date]) === 0) {
+                        $msgArr[] = '[' . $date . ']这天未有上下班打卡配置,请先配置';
+                        continue;
+                    }
+                    $userDetail = empty($details[$user->user_id]) ? NULL : $details[$user->user_id]->keyBy('day');
+                    //if (empty($userDetail[$date])) continue;
+                    $deducts = $punchHelper->fun_($bufferArr, $datum, $userDetail[$date] ?? NULL);
+                    $bufferArr = $deducts['bufferArr'];
+                    $switchLeaveIds = $punchHelper->storeDeductInLeave($deducts['deducts'], $user->user_id, $date);
+
+                    $startTimeNum = empty($datum['start_time']) ? 0 : strtotime(DataHelper::convertTime($date, $datum['start_time']));
+                    $endTimeNum = empty($datum['end_time']) ? 0 : strtotime(DataHelper::convertTime($date, $datum['end_time']));
+
+                    $dailyUpdate[] = [
+                        'day'                  => $date,
+                        'user_id'              => $user->user_id,
+                        'punch_start_time'     => $datum['start_time'],
+                        'punch_start_time_num' => $startTimeNum ?? 0,
+                        'punch_end_time'       => $datum['end_time'],
+                        'punch_end_time_num'   => $endTimeNum ?? 0,
+                        'heap_late_num'        => $deducts['deducts']['deduct']['minute'] ?? 0,
+                        'lave_buffer_num'      => $deducts['deducts']['remain_buffer'],
+                        'deduction_num'        => $deducts['deducts']['deduct']['score'] ?? 0,
+                        'leave_id'             => json_encode($switchLeaveIds ?? ''),//\AttendanceService::driver('operate')->addLeaveId($switchLeaveIds, $userDetail[$date]->leave_id),
+                        'status'               => DailyDetail::GENERATE_FINISH,
+                        'updated_at'           => date('Y-m-d H:i:s'),
+                    ];
+                }
+            }
+            PunchHelper::batchUpdate('attendance_daily_detail', $dailyUpdate);
+            /*foreach ($data as $dk => $dv) {
 
                 $detailKeyByUser = $details->where('day', $dk)->keyBy('user_id');
 
@@ -224,27 +256,25 @@ class PunchRecordController extends Controller
 
                     if (empty($u['ts']) || empty($u['alias'])) continue;
 
-                    $user = $users[$u['alias']] ?? NULL;
+                    $user = $punchHelper->users[$u['alias']] ?? NULL;
                     if (empty($user->alias)) {
                         $msgArr[] = '未找到[' . $u['alias'] . ']员工信息!';
                         continue;
                     }
 
                     $detail = $detailKeyByUser[$user->user_id] ?? NULL;
-                    if (count($formulaCalPunRuleConfArr[$u['ts']]) === 0) {
+                    if (count($punchHelper->formulaCalPunRuleConfArr[$u['ts']]) === 0) {
                         $msgArr[] = '[' . $u['ts'] . ']这天未有上下班打卡配置,请先配置';
                         continue;
                     }
 
-                    $deducts = $this->punchHelper->fun_($bufferArr, $u, $detail);
+                    $deducts = $punchHelper->fun_($bufferArr, $u, $detail);
                     $bufferArr = $deducts['bufferArr'];
-                    $switchLeaveIds = $this->punchHelper->storeDeductInLeave($deducts['deducts'], $user->user_id, $u['ts']);
+                    $switchLeaveIds = $punchHelper->storeDeductInLeave($deducts['deducts'], $user->user_id, $u['ts']);
 
                     //迟到分数计算
                     $startTimeNum = empty($u['start_time']) ? 0 : strtotime($dk . ' ' . $u['start_time']);
                     $endTimeNum = empty($u['end_time']) ? 0 : strtotime($dk . ' ' . $u['end_time']);
-                    /*$startNum = !empty($startTimeNum) && $startTimeNum > $punchRuleStartTime ? ($startTimeNum - $punchRuleStartTime) / 60 : 0;
-                    $endNum = !empty($endTimeNum) && $endTimeNum < $punchRuleEndTime ? ($punchRuleEndTime - $endTimeNum) / 60 : 0;*/
 
                     $dailyDetail = [
                         'user_id'              => $user->user_id,
@@ -253,9 +283,9 @@ class PunchRecordController extends Controller
                         'punch_start_time_num' => $startTimeNum,
                         'punch_end_time'       => $u['end_time'],
                         'punch_end_time_num'   => $endTimeNum,
-                        'heap_late_num'        => $deducts['deducts']['deduct_score']['minute'] ?? 0,
+                        'heap_late_num'        => $deducts['deducts']['deduct']['minute'] ?? 0,
                         'lave_buffer_num'      => $deducts['deducts']['remain_buffer'] ?? 0,
-                        'deduction_num'        => $deducts['deducts']['deduct_score']['score'] ?? 0,
+                        'deduction_num'        => $deducts['deducts']['deduct']['score'] ?? 0,
                         'leave_id'             => empty($switchLeaveIds) ? NULL : json_encode($switchLeaveIds),
                         'created_at'           => date('Y-m-d H:i:s', time()),
                         'updated_at'           => date('Y-m-d H:i:s', time()),
@@ -270,9 +300,9 @@ class PunchRecordController extends Controller
                             'punch_start_time_num' => $startTimeNum,
                             'punch_end_time'       => $u['end_time'],
                             'punch_end_time_num'   => $endTimeNum,
-                            'heap_late_num'        => $deducts['deducts']['deduct_score']['minute'] ?? 0,
+                            'heap_late_num'        => $deducts['deducts']['deduct']['minute'] ?? 0,
                             'lave_buffer_num'      => $deducts['deducts']['remain_buffer'],
-                            'deduction_num'        => $deducts['deducts']['deduct_score']['score'] ?? 0,
+                            'deduction_num'        => $deducts['deducts']['deduct']['score'] ?? 0,
                             'leave_id'             => \AttendanceService::driver('operate')->addLeaveId($switchLeaveIds, $userDailyDetail->leave_id),
                         ]);
                         $msgArr[] = $u['alias'] . '员工已导入[' . $dk . ']考勤记录!';
@@ -281,9 +311,9 @@ class PunchRecordController extends Controller
                     DailyDetail::create($dailyDetail);
                     $msgArr[] = $u['alias'] . '员工导入[' . $dk . ']考勤记录成功!';
                 }
-            }
-            /*DailyDetail::insert($dailyDetail);*/
-            unset($bufferArr, $data);
+            }*/
+            unset($bufferArr, $data, $dailyUpdate);
+            dd('stop');
             //信息记录
             $strArr = '<?php return ' . var_export($msgArr, true) . ';';
             $logFile = storage_path('app/punch-record/' . date('Ymd', time()) . '/' . $punchRecord->id . '_punch_log.txt');

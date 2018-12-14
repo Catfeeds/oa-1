@@ -280,4 +280,21 @@ class DataHelper
         return (int)$day->format('%h').'小时前';
     }
 
+    public static function getThisMonthDays($date)
+    {
+        return [date('Y-m-01', strtotime($date)), date('Y-m-t', strtotime($date))];
+    }
+
+    public static function convertTime($day, $time)
+    {
+        if ($time > '24:00') {
+            $t = explode(':', $time);
+            $n = $t[0] / 24;
+            $r = $t[0] % 24;
+            $time = $r . ':' . $t[1];
+            $day = date('Y-m-d', strtotime(sprintf('+%d days %s', $n, $day)));
+        }
+        return $day . ' ' . $time;
+    }
+
 }

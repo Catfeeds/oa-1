@@ -81,7 +81,7 @@ class ReviewController extends AttController
         $endDate = date('Y-m-t', strtotime($scope->startDate));
 
         //该月应到天数:关联查找类型为正常工作的该月日历
-        $shouldCome = Calendar::getShouldComeDays($year, $month);
+        $shouldCome = 24; //Calendar::getShouldComeDays($year, $month);
 
         //迟到总分钟数
         $beLateNum = DailyDetail::getBeLateNum($year, $month);
@@ -108,11 +108,10 @@ class ReviewController extends AttController
             //计算多种带薪假,返回天数数组
             $hasSalary = $this->reviewHelper->filterLeaves($leaves,
                 collect($this->paidWithUnpaidConf[HolidayConfig::CYPHER_PAID])->pluck('holiday_id')->toArray(), $user);
-//            dd($hasSalary);
 
             //计算多种无薪假,返回数组
             $hasNoSalary = $this->reviewHelper->filterLeaves($leaves,
-                collect($this->paidWithUnpaidConf[HolidayConfig::CYPHER_PAID])->pluck('holiday_id')->toArray(), $user);
+                collect($this->paidWithUnpaidConf[HolidayConfig::CYPHER_UNPAID])->pluck('holiday_id')->toArray(), $user);
 
             //返回[剩余调休, 已加班, 已调休]
             $leaveInfo = empty($holidayConfigArr[HolidayConfig::CYPHER_CHANGE][0]) ? 0 : \AttendanceService::driver('change', 'cypher')
@@ -219,7 +218,9 @@ class ReviewController extends AttController
         $userInfo['username'] = User::where('user_id', $id)->first()->username;
         $userInfo['alias'] = User::where('user_id', $id)->first()->alias;
         $title = "{$userInfo['username']}的考勤详情";
-        $danger = $this->reviewHelper->getDanger($startDate, $endDate, $data);
-        return view('attendance.review.review-detail', compact('title', 'data', 'userInfo', 'danger'));
+        $ret = $this->reviewHelper->getDanger($startDate, $endDate, $data);
+        $danger = $ret['danger'];
+        $event = $ret['event'];
+        return view('attendance.review.review-detail', compact('title', 'data', 'userInfo', 'danger', 'event'));
     }
 }

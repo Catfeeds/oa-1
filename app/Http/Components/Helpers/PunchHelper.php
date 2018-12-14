@@ -16,13 +16,35 @@ use App\Models\Sys\Calendar;
 use App\Models\Sys\HolidayConfig;
 use App\Models\Sys\PunchRules;
 use App\Models\Sys\PunchRulesConfig;
+use App\User;
 use Illuminate\Database\Eloquent\Collection;
 
 class PunchHelper
 {
     protected $cypherHolidays;
+    public $calendarArr;
     public $formulaCalPunRuleConfArr;
     public $formulaCalPunRuleConf;
+    public $nightLeaves;
+    public $users;
+    public $events;
+
+    public function __construct($YmdMinTs, $YmdMaxTs, $calendar = false)
+    {
+        $this->users = User::getUserKeyByAlias();
+        $nightConf = $this->getCypherHolidaysByType(HolidayConfig::CYPHER_NIGHT);
+        $this->setNightLeaves($nightConf, $YmdMinTs, $YmdMaxTs);
+        $ret = self::getCalendarPunchRules($YmdMinTs, $YmdMaxTs, $calendar);
+        $this->formulaCalPunRuleConfArr = $ret['formula'];
+        $this->calendarArr = $ret['calendarArr'];
+        $this->events = $ret['event'];
+        unset($ret);
+    }
+
+    public static function getInstance($YmdMinTs, $YmdMaxTs, $calendar = false)
+    {
+        return new self($YmdMinTs, $YmdMaxTs, $calendar);
+    }
 
     public function setCypherHolidays(array $objects)
     {
@@ -53,11 +75,10 @@ class PunchHelper
      * @param $maxDate
      * @return array
      */
-    public static function getCalendarPunchRules($minDate, $maxDate, $calendar = false, $calendarArr = NULL)
+    public static function getCalendarPunchRules($minDate, $maxDate, $calendar = false)
     {
         $calPunchRuleConfArr = $formulaPunRuleConfArr = $eventArr = $cal = [];
-        if (empty($calendarArr))
-            $calendarArr = Calendar::getCalendarArrWithPunchRules($minDate, $maxDate);
+        $calendarArr = Calendar::getCalendarArrWithPunchRules($minDate, $maxDate);
         foreach ($calendarArr as $item) {
             $key = sprintf("%d-%02d-%02d", $item->year, $item->month, $item->day);
             $calPunchRuleConfArr[$key] = $item->punchRules->config;
@@ -72,14 +93,7 @@ class PunchHelper
             }
         }
         return [/*'calPunRuleConf' => $calPunchRuleConfArr, */
-            'formula' => $formulaPunRuleConfArr, 'event' => $eventArr, 'calendar' => $cal];
-    }
-
-    public function setFormulaCalPunRuleConfArr($minDate, $maxDate, $formulaCalPunRuleConfArr = NULL) {
-        if (empty($formulaCalPunRuleConfArr))
-            $this->formulaCalPunRuleConfArr = self::getCalendarPunchRules($minDate, $maxDate)['formula'];
-        else
-            $this->formulaCalPunRuleConfArr = $formulaCalPunRuleConfArr;
+            'formula' => $formulaPunRuleConfArr, 'event' => $eventArr, 'calendar' => $cal, 'calendarArr' => $calendarArr];
     }
 
     public function setFormulaCalPunRuleConf($day) {
@@ -88,6 +102,14 @@ class PunchHelper
             return true;
         }
         return false;
+    }
+
+    public function setNightLeaves($nightConf, $YmdMinTs, $YmdMaxTs)
+    {
+        $this->nightLeaves = Leave::where(['status' => Leave::WAIT_EFFECTIVE, 'holiday_id' => $nightConf->holiday_id])
+            ->whereBetween(\DB::raw('DATE_FORMAT(start_time, \'%Y-%m-%d\')'), [$YmdMinTs, $YmdMaxTs])
+            ->get(['end_time', 'user_id', 'start_time']);
+        return $this->nightLeaves;
     }
 
     /**
@@ -102,34 +124,31 @@ class PunchHelper
      */
     public function prPunchTime($punch_start, $punch_end)
     {
+        $punchStart = $punchEnd = $punch = '';
         if (!empty($punch_start) && !empty($punch_end)) return [$punch_start, $punch_end];
+        if (empty($punch_start) && !empty($punch_end)) $punch = $punch_end;
+        if (!empty($punch_start) && empty($punch_end)) $punch = $punch_start;
 
-        $punchStart = $punch_start;
-        $punchEnd = $punch_end;
-
-        if (empty($punch_end) && !empty($punch_start)) {
-            //不含小时假的配置时间段中最大的开始时间点
-            $maxStartNoHour = '';
-            foreach ($this->formulaCalPunRuleConf['sort'] as $key => $value) {
-                list($start, $end) = explode('$$', $key);
-                $arrTimes = DataHelper::timesToNum($punch_start, $start, $end);
-                $hourDuration = collect($this->formulaCalPunRuleConf['cfg'][$key]['ded_num'])
-                    ->where('holiday_id', $this->getCypherHolidaysByType(HolidayConfig::CYPHER_HOUR)->holiday_id ?? '0')->first();
-                if (empty($hourDuration)) {
-                    if ($arrTimes[0] <= $arrTimes[2]) {
-                        $punchEnd = $end;break;
-                    }
-                    $maxStartNoHour = empty($maxStartNoHour) || strtotime($maxStartNoHour) < strtotime($start) ? $start : $maxStartNoHour;
-                }else {
-                    if ($arrTimes[0] <= $arrTimes[2]) {
-                        $punchStart = $maxStartNoHour;
-                        $punchEnd = $punch_start;break;
-                    }else {
-                        $punchEnd = $punch_start;
-                        $punchStart = $maxStartNoHour;break;
-                    }
+        //上班时间段中最大的开始时间点
+        $maxStartNoHour = $s = '';
+        foreach ($this->formulaCalPunRuleConf['sort'] as $key => $value) {
+            list($start, $end) = explode('$$', $key);
+            $arrTimes = DataHelper::timesToNum($punch, $start, $end);
+            //检查是否这个循环是那1小时的时间段
+            $hourDuration = collect($this->formulaCalPunRuleConf['cfg'][$key]['ded_num'])
+                ->where('holiday_id', $this->getCypherHolidaysByType(HolidayConfig::CYPHER_HOUR)->holiday_id ?? '0')->first();
+            if (empty($hourDuration)) {
+                if ($arrTimes[0] <= $arrTimes[2]) {
+                    $punchStart = $punch; $punchEnd = $end; $s = 1; break;
                 }
+                $maxStartNoHour = empty($maxStartNoHour) || strtotime($maxStartNoHour) < strtotime($start) ? $start : $maxStartNoHour;
+            }else {
+                $punchStart = $maxStartNoHour; $punchEnd = $punch; $s = 1; break;
             }
+        }
+        //若这天的时间段没有1小时的加班
+        if (empty($hourDuration) && $maxStartNoHour < $punch && empty($s)) {
+            $punchStart = $maxStartNoHour; $punchEnd = $punch;
         }
         return [$punchStart, $punchEnd];
     }
@@ -155,13 +174,13 @@ class PunchHelper
                 //上班时间对比各个时间段,若开始时间在该时间段之后或结束时间在该时间段之前都证明不在该段内,扣掉该段的时间差
                 if (empty($ps) || empty($pe) || $compare[0] >= $compare[2] || $compare[1] <= $compare[3]) {
                     $d = 0.5;
-                    if ($compare[0] >= $compare[2]) $absenteeism['late'] = 1;
-                    if ($compare[1] <= $compare[3]) $absenteeism['early'] = 1;
+                    if ($compare[0] >= $compare[2]) $absenteeism['late'] ++;
+                    if ($compare[1] <= $compare[3]) $absenteeism['early'] ++;
                     //标记小时假,不扣天数
                     if ($compare[2] > 1800 && $d > 0) {
                         $deduct['if_hour'] = 1;
                         $d = 0;
-                        $absenteeism['early'] = 0;
+                        $absenteeism['early'] -- ;
                     }
                     $absenteeism['day'] = $absenteeism['day'] + $d;
                     continue;
@@ -224,7 +243,7 @@ class PunchHelper
      */
     public function countDeduct($punch_start, $punch_end, $dailyDetail, $buffer)
     {
-        $default = ['absenteeism' => 0, 'deduct_score' => [], 'remain_buffer' => $buffer];
+        $default = ['absenteeism' => 0, 'deduct' => [], 'remain_buffer' => $buffer];
 
         if (!empty($dailyDetail->leave_id)) {
             //请假情况的扣除规则
@@ -248,10 +267,12 @@ class PunchHelper
                 $leaveTime = $this->getApplyTimes($dailyDetail, $leaveObjects, $punch_start);
                 //这一整天请假,直接返回默认
                 if (isset($leaveTime['leave_time']['unnecessary'])) return $default;
-                //延迟假或夜班加班, 修改打卡规则
-                $this->formulaCalPunRuleConf = self::getFormulaCombineConf(
-                    $this->combine(collect($leaveTime)->flatten(1)->toArray()), $this->formulaCalPunRuleConf);
-                if (empty($this->formulaCalPunRuleConf)) return $default;
+                if (collect($leaveTime)->flatten()->count() != 0) {
+                    //延迟假或夜班加班, 修改打卡规则
+                    $this->formulaCalPunRuleConf = self::getFormulaCombineConf(
+                        $this->combine(collect($leaveTime)->flatten(1)->toArray()), $this->formulaCalPunRuleConf);
+                    if (empty($this->formulaCalPunRuleConf)) return $default;
+                }
                 $deducts = $this->dealBuffer($buffer, $punch_start, $punch_end);
             }
         } else {
@@ -311,9 +332,9 @@ class PunchHelper
             $switchData['number_day'] = $deduct['absenteeism']['day'];
             if ($deduct['absenteeism']['day'] == 1) {
                 $switchData['is_switch'] = Leave::ALLDAY_ABSENTEEISM;
-            }elseif($deduct['absenteeism']['late'] == 1 && $deduct['absenteeism']['early'] == 0) {
+            }elseif($deduct['absenteeism']['late'] != 0 && $deduct['absenteeism']['early'] == 0) {
                 $switchData['is_switch'] = Leave::LATE_ABSENTEEISM;
-            }elseif($deduct['absenteeism']['late'] == 0 && $deduct['absenteeism']['early'] == 1) {
+            }elseif($deduct['absenteeism']['late'] == 0 && $deduct['absenteeism']['early'] != 0) {
                 $switchData['is_switch'] = Leave::EARLY_ABSENTEEISM;
             }
             $switchLeaveId[] = Leave::create($switchData)->leave_id;
@@ -330,6 +351,8 @@ class PunchHelper
                 $switchLeaveId[] = Leave::create($switchData)->leave_id;
             }
         }
+
+
         return array_merge($switchLeaveId, $hourLeaveId);
     }
 
@@ -377,13 +400,24 @@ class PunchHelper
      * @param $todayBuffer
      * @return array
      */
-    public function fun_($bufferArr, $u, $detail, $todayBuffer = DailyDetail::LEAVE_BUFFER)
+    public function fun_($bufferArr, $u, $detail, $todayBuffer = '')
     {
         $index = 'buffer_' . date('Y$$n', strtotime($u['ts'])) . $u['alias'];
         if (isset($bufferArr[$index])) {
             $remain_buffer = $bufferArr[$index];
         } else {
-            $remain_buffer = $todayBuffer;
+            if (empty($todayBuffer)) {
+                //为1号,则缓冲时间为30分钟
+                if (date('j', strtotime($u['ts'])) == 1)
+                    $remain_buffer = DailyDetail::LEAVE_BUFFER;
+                else
+                    //否则,获取该日期的月份中剩余的缓冲时间
+                    $remain_buffer = DailyDetail::where('user_id', $this->users[$u['alias']]->user_id)
+                        ->whereBetween('day', DataHelper::getThisMonthDays($u['ts']))
+                        ->min('lave_buffer_num') ?? 0;
+            }else {
+                $remain_buffer = $todayBuffer;
+            }
             $bufferArr[$index] = $remain_buffer;
         }
         if ($this->setFormulaCalPunRuleConf($u['ts'])) {
@@ -652,11 +686,11 @@ class PunchHelper
         return [$lastDayEndTime, $startTime, $endTime];
     }
 
-    public function dealLastDayEnd($ts, $v, $users, Collection $nights)
+    public function dealLastDayEnd($ts, $v)
     {
         $lastDay = DataHelper::dateTimeAdd($ts, '1D', 'Y-m-d 00:00:00', 'sub');
-        if (!empty($users[$v[3]])) {
-            $nights->where('user_id', $users[$v[3]]->user_id)->where('start_time', $lastDay)->first();
+        if (!empty($this->users[$v[3]])) {
+            $this->nightLeaves->where('user_id', $this->users[$v[3]]->user_id)->where('start_time', $lastDay)->first();
         }
 
         if (!empty($night)) {
@@ -701,5 +735,20 @@ class PunchHelper
             'start' => explode('$$', collect($formulaCalPunRuleConf['sort'])->keys()->first())[$ready === false ? 2 : 0],
             'end' => explode('$$', collect($formulaCalPunRuleConf['sort'])->keys()->last())[1]
         ];
+    }
+
+    public static function batchUpdate($table, $dataS)
+    {
+        if (empty($dataS) || empty($dataS[0])) return false;
+        $columnArr = array_keys($dataS[0]);
+        $columnStr = join(',', $columnArr);
+        $columnsValues = collect($columnArr)->map(function ($val) {
+            return sprintf('%s=VALUES(%s)', $val, $val);
+        })->implode(',');
+        $valuesStr = collect($dataS)->map(function ($val) {
+            return sprintf('(%s)', "'" . implode("','", $val) . "'");
+        })->implode(',');
+        $sql = sprintf('INSERT INTO %s (%s) VALUES %s ON DUPLICATE KEY UPDATE %s', $table, $columnStr, $valuesStr, $columnsValues);
+        return \DB::select($sql);
     }
 }

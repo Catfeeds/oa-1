@@ -110,6 +110,14 @@
 
                         });
                         callback(events);
+                        $('.fc-day-top:not(.fc-other-month)').mouseover(function () {
+                            hoverDate = $(this).attr('data-date');
+                            $('a.fc-event[day=' + hoverDate + ']').popover('show');
+                        }).mouseleave(function () {
+                            $('a.fc-event[day=' + hoverDate + ']').popover('hide');
+                            hoverDate = 0;
+                        });
+                        //$('.fc-day-cnDate, .fc-day-cnTerm').css('height', $('div.fc-row').last().height() * 0.93);
                     }
                 });
             },
@@ -147,14 +155,6 @@
         $('#calendar').find('.fc-body').attr('title', '可选中日期查看').css('cursor', 'pointer');
         ajaxGetDayInfo('{{ date('Y-m-d', time()) }}');
         @endif
-
-        $('/*td.fc-day:not(.fc-other-month), */.fc-day-top:not(.fc-other-month)').mouseover(function () {
-            hoverDate = $(this).attr('data-date');
-            $('a.fc-event[day=' + hoverDate + ']').popover('show');
-        }).mouseleave(function () {
-            $('a.fc-event[day=' + hoverDate + ']').popover('hide');
-            hoverDate = 0;
-        })
     });
 </script>
 @endpush

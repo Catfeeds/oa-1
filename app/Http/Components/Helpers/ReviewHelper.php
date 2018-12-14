@@ -12,6 +12,7 @@ use App\Models\Attendance\Leave;
 use App\Models\Sys\Calendar;
 use App\Models\Sys\HolidayConfig;
 use App\Models\Sys\PunchRulesConfig;
+use App\Models\UserExt;
 
 class ReviewHelper
 {
@@ -51,9 +52,9 @@ class ReviewHelper
     //是否全勤:应到天数等于实到 无影响全勤 迟到分钟数合计为0
     public function ifPresentAllDay($shouldCome, $actuallyCome, $affectFull, $user, $beLateNum)
     {
-        $isFullWork = ($shouldCome <= $actuallyCome &&
-            !isset($affectFull[$user->user_id]) &&
-            ($beLateNum[$user->user_id] ?? '') === '0') ? '是' : '否';
+        $isFullWork = ( /*$shouldCome <= $actuallyCome&&*/
+            empty($affectFull[$user->user_id]) &&
+            (empty($beLateNum[$user->user_id]) || $beLateNum[$user->user_id] == 0)) ? '是' : '否';
         return $isFullWork;
     }
 
@@ -96,22 +97,39 @@ class ReviewHelper
         return $holCon;
     }
 
+    /**
+     * 获取实到天数
+     * @param $startDate
+     * @param $endDate
+     * @param $user
+     * @return int
+     */
     public function countActuallyDays($startDate, $endDate, $user)
     {
-        $dailies = DailyDetail::whereBetween('day', [$startDate, $endDate])->where('user_id', $user->user_id)->count();
-        $overDays = Leave::whereBetween('end_time', [$startDate, $endDate])->where('user_id', $user->user_id)
+        $userComeDay = UserExt::where('user_id', $user->user_id)->first(['entry_time'])->entry_time ?? NULL;
+        $dailies = 0;
+        if (!empty($userComeDay)) {
+            $YmdUserComeDay = date('Y-m-d', strtotime($userComeDay));
+            //月中入职的话,天数按实际出勤天数获取,否则默认出勤天数为24
+            if (DataHelper::ifBetween(date('Y-m-01'), date('Y-m-t'), $YmdUserComeDay, 'r=')) {
+                $dailies = DailyDetail::whereBetween('day', [$startDate, $endDate])->where('user_id', $user->user_id)->count();
+            }elseif($YmdUserComeDay <= date('Y-m-01')) {
+                $dailies = 24;
+            }
+        }
+        /*$overDays = Leave::whereBetween('end_time', [$startDate, $endDate])->where('user_id', $user->user_id)
             ->whereIn('status', [Leave::PASS_REVIEW, Leave::SWITCH_REVIEW_ON])
             ->whereHas('holidayConfig', function ($query) {
                 $query->where('cypher_type', HolidayConfig::CYPHER_OVERTIME);
-            })->count();
+            })->count();*/
 
         $leaves = Leave::whereBetween('end_time', [$startDate, $endDate])->where('user_id', $user->user_id)
             ->whereIn('status', [Leave::PASS_REVIEW, Leave::SWITCH_REVIEW_ON])
             ->whereHas('holidayConfig', function ($query) {
-                $query->whereNotIn('cypher_type', [HolidayConfig::CYPHER_OVERTIME]);
+                $query->whereNotIn('cypher_type', [HolidayConfig::CYPHER_OVERTIME, HolidayConfig::CYPHER_NIGHT, HolidayConfig::CYPHER_HOUR]);
             })
             ->sum('number_day');
-        return $dailies - $overDays - $leaves;
+        return $dailies - $leaves < 0 ? 0 : $dailies - $leaves;
     }
 
 
@@ -120,8 +138,7 @@ class ReviewHelper
      */
     public function getDanger($startDate, $endDate, $dailyDetailData)
     {
-        $punchHelper = app(PunchHelper::class);
-        $punchHelper->setFormulaCalPunRuleConfArr($startDate, $endDate);
+        $punchHelper = PunchHelper::getInstance($startDate, $endDate, true);
         $danger = [];
 
         foreach ($dailyDetailData as $daily) {
@@ -156,7 +173,7 @@ class ReviewHelper
             }
             $danger[$daily->day] = $isDanger;
         }
-        return $danger;
+        return ['danger' => $danger, 'event' => $punchHelper->events];
     }
 
     /**
@@ -167,7 +184,7 @@ class ReviewHelper
     {
         return Leave::where('start_time', '>=', date('Y-m-01', strtotime($scopeArr['start_time'])))
             ->where('end_time', '<=', date('Y-m-t', strtotime($scopeArr['end_time'])))
-            ->whereIn('status', [Leave::PASS_REVIEW, Leave::WAIT_REVIEW, Leave::ON_REVIEW, Leave::WAIT_EFFECTIVE])->get();
+            ->whereIn('status', [Leave::PASS_REVIEW, Leave::WAIT_REVIEW, Leave::ON_REVIEW, Leave::WAIT_EFFECTIVE, Leave::SWITCH_REVIEW_ON])->get();
     }
 
     public function filterLeaves($leaves, array $holidayIds, $user)
