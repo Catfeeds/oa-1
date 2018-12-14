@@ -72,18 +72,18 @@ class Leave extends Model
     ];
 
     public static $workTimePoint = [
-        self::WORK_TIME_POINT_1 => '9点~20点',
+        /*self::WORK_TIME_POINT_1 => '9点~20点',*/
         self::WORK_TIME_POINT_2 => '9点~18点',
         self::WORK_TIME_POINT_3 => '9点~12点',
-        self::WORK_TIME_POINT_4 => '14点~20点',
+        /*self::WORK_TIME_POINT_4 => '14点~20点',*/
         self::WORK_TIME_POINT_5 => '14点~18点',
     ];
 
     public static $workTimePointChar = [
-        self::WORK_TIME_POINT_1 => ['start_time' => '9:00', 'end_time' => '20:00'],
+        /*self::WORK_TIME_POINT_1 => ['start_time' => '9:00', 'end_time' => '20:00'],*/
         self::WORK_TIME_POINT_2 => ['start_time' => '9:00', 'end_time' => '18:00'],
         self::WORK_TIME_POINT_3 => ['start_time' => '9:00', 'end_time' => '12:00'],
-        self::WORK_TIME_POINT_4 => ['start_time' => '14:00', 'end_time' => '20:00'],
+        /*self::WORK_TIME_POINT_4 => ['start_time' => '14:00', 'end_time' => '20:00'],*/
         self::WORK_TIME_POINT_5 => ['start_time' => '14:00', 'end_time' => '18:00'],
     ];
 

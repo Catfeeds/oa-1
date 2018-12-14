@@ -28,9 +28,9 @@ class Change extends Cypher
 
     public function getUserHoliday($entryTime, $userId, $holidayConfig)
     {
-        $leaveInfo = $this->getUserPayableDayToNaturalCycleTime($entryTime, $userId, $holidayConfig)['userLeaveInfo'];
+        $leaveInfo = $this->getUserPayableDayToNaturalCycleTime($entryTime, $userId, $holidayConfig)['userLeaveInfo'] ?? NULL;
 
-        $msgArr = $pointList = [];
+        /*$msgArr = $pointList = [];
 
         foreach (Leave::$workTimePoint as $k => $v) {
             $num = $leaveInfo[$k] ?? 0;
@@ -41,11 +41,15 @@ class Change extends Cypher
             $msgArr[$k] = $v .' 剩余调休次数: ' . $num ;
         };
 
-        $msg = '<i class="fa fa-info-circle"></i>调休剩余列表<br>' . implode('<br>', $msgArr);
+        $msg = '<i class="fa fa-info-circle"></i>调休剩余列表<br>' . implode('<br>', $msgArr);*/
+        $pointList = collect(Leave::$workTimePoint)->map(function ($val, $key) {
+            return ['id' => $key, 'text' => $val];
+        })->values()->toArray();
+        $msg = '<i class="fa fa-info-circle"></i>调休剩余天数:'.($leaveInfo ?? 0);
 
         return [
             'status' => 1,
-            'show_day' => true,
+            'show_change' => true,
             'show_memo' => true,
             'memo' => $holidayConfig->memo,
             'number_day' => $leaveInfo,
@@ -95,7 +99,7 @@ class Change extends Cypher
      * @param $holiday
      * @return array number_day 申请天数 count_num申请次数
      */
-    public function selectLeaveInfo($startDay, $endDay, $userId, $holiday)
+    /*public function selectLeaveInfo($startDay, $endDay, $userId, $holiday)
     {
         $userLeaveInfo  = $overTimeLeave = $changeLeave = [];
         //加班类型ID
@@ -121,6 +125,21 @@ class Change extends Cypher
         }
         //dd($overTimeId, $overTimeLeaveLog, $changeLeaveLog, $userLeaveInfo);
         //dd($userLeaveInfo);
+        return ['userLeaveInfo' => $userLeaveInfo,
+                'overTimeLeaveLog' => $overTimeLeave,
+                'changeLeaveLog' => $changeLeave];
+    }*/
+
+    public function selectLeaveInfo($startDay, $endDay, $userId, $holiday)
+    {
+        //加班类型ID
+        $overTimeId = HolidayConfig::where(['cypher_type' => HolidayConfig::CYPHER_OVERTIME])->first();
+        if (empty($overTimeId)) return [];
+        //获取加班剩余天数
+        $overTimeLeave = $this->selectLeave_($startDay, $endDay, $userId, $overTimeId->holiday_id, [Leave::PASS_REVIEW]);
+        //申请调休的天数
+        $changeLeave = $this->selectLeave_($startDay, $endDay, $userId, $holiday->holiday_id, Leave::$statusList);
+        $userLeaveInfo = $overTimeLeave - $changeLeave;
         return ['userLeaveInfo' => $userLeaveInfo,
                 'overTimeLeaveLog' => $overTimeLeave,
                 'changeLeaveLog' => $changeLeave];
@@ -152,6 +171,18 @@ class Change extends Cypher
             ->get(['number_day', 'count_num'])
             ->pluck('count_num', 'number_day')
             ->toArray();
+    }
+
+    public function selectLeave_($startDay, $endDay, $userId, $holidayId, $status)
+    {
+        return Leave::where('start_time', '>=', $startDay)
+            ->where('end_time', '<=', $endDay)
+            ->whereIn('status', $status)
+            ->where([
+                'user_id' => $userId,
+                'holiday_id' => $holidayId,
+            ])
+            ->sum('number_day');
     }
 
     /**

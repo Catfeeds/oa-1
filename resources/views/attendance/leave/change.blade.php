@@ -35,7 +35,7 @@
 
                     <div class="hr-line-dashed"></div>
 
-                    <div class="form-group @if (!empty($errors->first('start_time'))) has-error @endif">
+                    <div id="show_day" class="form-group @if (!empty($errors->first('start_time'))) has-error @endif">
                         {!! Form::label('start_time', trans('att.申请开始时间'), ['class' => 'col-sm-2 control-label']) !!}
                         <div class="col-sm-3">
                             <div class="input-group">
@@ -70,6 +70,45 @@
                             <span id="show_msg_p" style="display: none" class="help-block m-b-none">
                                 <p style=";color: red" id="show_msg"></p>
                             </span>
+                        </div>
+                    </div>
+
+                    <div style="display: none" id="change_div_start_time" class="form-group @if (!empty($errors->first('start_time')) || !empty($errors->first('end_id'))) has-error @endif">
+                        {!! Form::label('start_time', trans('att.调休开始时间'), ['class' => 'col-sm-2 control-label']) !!}
+                        <div class="col-sm-3">
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                {!! Form::text('start_time', !empty($leave->start_time) ? date('Y-m-d', strtotime($leave->start_time)) : $time , [
+                                'class' => 'form-control date',
+                                'id' => 'change_start_time',
+                                'required' => true,
+                                ]) !!}
+                                <span class="help-block m-b-none">{{ $errors->first('start_time') }}</span>
+                            </div>
+                        </div>
+                        <div id="div_start_id" class="col-sm-2">
+                            <select onchange="inquire()" class="js-select2-single form-control" id="change_start_id" name="start_id" > </select>
+                        </div>
+                    </div>
+
+                    <div style="display: none" id="change_div_end_time" class="form-group @if (!empty($errors->first('end_time')) || !empty($errors->first('end_id'))) has-error @endif">
+                        {!! Form::label('end_time', trans('att.调休结束时间'), ['class' => 'col-sm-2 control-label']) !!}
+                        <div class="col-sm-3">
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                {!! Form::text('end_time', !empty($leave->end_time) ? date('Y-m-d', strtotime($leave->end_time)) : $time  , [
+                                'class' => 'form-control date',
+                                'id' => 'change_end_time',
+                                'required' => true,
+                                ]) !!}
+                                <span class="help-block m-b-none">{{ $errors->first('end_time') }}</span>
+                            </div>
+                            <span id="show_exceed" style="display: none">
+                                <p style="color: red" id="show_exceed_p"></p>
+                            </span>
+                        </div>
+                        <div class="col-sm-2">
+                            <select onchange="inquire()" class="js-select2-single form-control" id="change_end_id" name="end_id" ></select>
                         </div>
                     </div>
 
@@ -227,6 +266,10 @@
                             $('#show_memo').show();
                         }
                         if($data.show_day) {
+                            $('#change_div_start_time').hide();
+                            $('#change_div_end_time').hide();
+                            $('#show_day').show();
+                            $('#show_time').hide();
                             $('#show_p').show();
                             $('#show_p').html($data.msg);
 
@@ -253,7 +296,10 @@
                         }
 
                         if($data.show_time) {
+                            $('#show_day').show();
                             $('#show_time').show();
+                            $('#change_div_start_time').hide();
+                            $('#change_div_end_time').hide();
                             $('#start_time').attr('rel', 1);
 
                             @if(!empty($leave->start_time))
@@ -280,6 +326,15 @@
 
                         } else {
                             $('#show_time').hide();
+                        }
+
+                        if($data.show_change) {
+                            $('#change_div_start_time').show();
+                            $('#change_div_end_time').show();
+                            $('#show_time').hide();
+                            $('#show_day').hide();
+                            $('#show_p').show();
+                            $('#show_p').html($data.msg);
                         }
 
                     } else {
@@ -311,20 +366,26 @@
          * @param time
          * @param type
          */
-        function getPunchRules(time) {
+        function getPunchRules(time, type) {
             $.get('{{ route('leave.getPunchRules')}}', {time: time}, function ($data) {
-                if ($data.status == 1) {
-                    $("#start_id").select2("val", "");
-                    $("#start_id").empty();
-                    $("#start_id").select2({
-                        placeholder: "-请选择时间点-", //默认所有
-                        allowClear: true, //清楚选择项
-                        multiple: false,// 多选
-                        data: $data.last_time //绑定数据
-                    });
-                } else {
-                    $("#start_id").select2("val", "");
-                    $("#start_id").empty();
+                switch (type) {
+                    case 1:
+                        if ($data.status == 1) {
+                            $("#start_id").select2("val", "");
+                            $("#start_id").empty();
+                            $("#start_id").select2({
+                                placeholder: "-请选择时间点-", //默认所有
+                                allowClear: true, //清楚选择项
+                                multiple: false,// 多选
+                                data: $data.last_time //绑定数据
+                            });
+                        } else {
+                            $("#start_id").select2("val", "");
+                            $("#start_id").empty();
+                        }
+                        break;
+                    case 2:
+                        break;
                 }
             })
         }
