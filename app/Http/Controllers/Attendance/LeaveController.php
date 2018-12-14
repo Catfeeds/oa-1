@@ -90,6 +90,30 @@ class LeaveController extends AttController
     }
 
     /**
+     * 申请单收索
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
+     */
+    public function getHolidayApplyList(Request $request)
+    {
+        $applyTypeId = $request->get('id');
+        if(empty($applyTypeId) || !in_array((int)$applyTypeId, HolidayConfig::$driverTypeId)) {
+            flash('请勿非法操作', 'danger');
+            return redirect()->route('leave.info');
+        }
+
+        $holiday = HolidayConfig::getUserShowHolidayList($applyTypeId);
+
+        $res = [];
+        if(!empty($holiday)) {
+            foreach ($holiday as $k => $v) {
+                $res[] = ['id' => $k, 'text' => $v];
+            }
+        }
+        return response()->json(['status' => 1, 'data' => $res]);
+    }
+
+    /**
      * 创建申请单
      * @param $applyTypeId
      * @return \Illuminate\Http\RedirectResponse
@@ -163,7 +187,7 @@ class LeaveController extends AttController
             $retLeave = \AttendanceService::driver($driver)->createLeave($leave);
             //日志记录操作
             if($retLeave['success']) {
-                OperateLogHelper::createOperateLog(OperateLogHelper::LEAVE_TYPE_ID, $retLeave['data']['leave']->leave_id, '提交申请');
+                OperateLogHelper::createOperateLog(OperateLog::LEAVED, $retLeave['data']['leave']->leave_id, '提交申请');
             }
         } catch (Exception $ex) {
             //事物回滚
@@ -499,8 +523,14 @@ class LeaveController extends AttController
         $html = <<<HTML
             $ret
 HTML;
+        $exceed = '';
+        $exceedDay = \AttendanceService::driver($driver, 'cypher')->check($holidayConfig, $numberDay);
 
-        return response()->json(['status' => 1, 'step' => $html]);
+        if(!empty($exceedDay['data'])) {
+            $exceed = sprintf('剩余假期不足,自动换算假期:%s%s天', HolidayConfig::holidayList()[$exceedDay['data']['exceed_holiday_id']], $exceedDay['data']['exceed_day']);
+        }
+
+        return response()->json(['status' => 1, 'step' => $html, 'exceed' => $exceed]);
     }
 
     /**

@@ -38,6 +38,20 @@
                         </div>
                     </div>
 
+                    <div class="form-group">
+                        {!! Form::label('username', trans('app.年龄'), ['class' => 'col-sm-4 control-label']) !!}
+                        <div class="col-sm-3">
+                            {!! Form::text('card_id', \App\Components\Helper\DataHelper::getAgeToIdCard($user->userExt->card_id)  ,['class' => 'form-control', 'disabled']) !!}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        {!! Form::label('username', trans('app.出生日期'), ['class' => 'col-sm-4 control-label']) !!}
+                        <div class="col-sm-3">
+                            {!! Form::text('birthday', \App\Components\Helper\DataHelper::getBirthdayToIdCard($user->userExt->card_id)  ,['class' => 'form-control', 'disabled']) !!}
+                        </div>
+                    </div>
+
                     <div class="form-group @if (!empty($errors->first('sex'))) has-error @endif">
                         {!! Form::label('sex', trans('app.性别'), ['class' => 'col-sm-4 control-label']) !!}
                         <div class="col-sm-3">
@@ -88,7 +102,7 @@
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
                                 {!! Form::text('entry_time', $user->userExt->entry_time ?? old('entry_time'), [
-                                'class' => 'form-control date_time',
+                                'class' => 'form-control date_time_hi',
                                 'placeholder' => trans('app.请输入', ['value' => trans('app.入职时间')]),
                                 'required' => true,
                                 ]) !!}
@@ -375,10 +389,11 @@
                             {!! Form::text('salary_card', !empty($user->userExt->salary_card) ? $user->userExt->salary_card : old('salary_card'), [
                             'class' => 'form-control',
                             'placeholder' => trans('app.请输入', ['value' => trans('app.工资卡')]),
-                            'data-mask' => '9999 9999 9999 9999'
+                            'data-mask' => '9999 9999 9999 9999',
+                            'id' => 'bank_card',
 
                             ]) !!}
-                            <span class="help-block m-b-none">{{ $errors->first('salary_card') }}</span>
+                            <span class="help-block m-b-none error_bank_card">{{ $errors->first('salary_card') }}</span>
                         </div>
                         <div class="row">
                             <i style="color: red">*</i>
@@ -633,8 +648,10 @@
                             'class' => 'form-control',
                             'placeholder' => trans('app.请输入', ['value' => trans('staff.身份证号码')]),
                             'required' => true,
+                            'data-mask' => '99999999999999999*',
+                            'id' => 'card_id'
                             ]) !!}
-                            <span class="help-block m-b-none">{{ $errors->first('card_id') }}</span>
+                            <span class="help-block m-b-none error_card">{{ $errors->first('card_id') }}</span>
                         </div>
                     </div>
 
@@ -695,11 +712,11 @@
 @include('widget.icheck')
 @include('widget.select2')
 @include('widget.datepicker')
+@include('widget.check-bank-card')
+@include('widget.check-card-id')
 @section('scripts-last')
     <script>
-        $(function() {
-
-        });
+        $(function() {});
     </script>
 @endsection
 

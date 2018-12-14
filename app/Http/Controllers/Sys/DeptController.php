@@ -33,13 +33,13 @@ class DeptController extends Controller
             ->toArray();
 
         $title = trans('app.部门列表');
-        return view('admin.sys.dept', compact('title', 'data', 'form', 'parent'));
+        return view('sys.dept', compact('title', 'data', 'form', 'parent'));
     }
 
     public function create()
     {
         $title = trans('att.添加部门');
-        return view('admin.sys.dept-edit', compact('title'));
+        return view('sys.dept-edit', compact('title'));
     }
 
     public function edit($id)
@@ -49,7 +49,7 @@ class DeptController extends Controller
         $parent = Dept::where(['parent_id' => $dept->dept_id])->get();
 
         $title = trans('app.编辑', ['value' => trans('app.部门')]);
-        return view('admin.sys.dept-edit', compact('title', 'dept', 'parent'));
+        return view('sys.dept-edit', compact('title', 'dept', 'parent'));
     }
 
     public function store(Request $request)

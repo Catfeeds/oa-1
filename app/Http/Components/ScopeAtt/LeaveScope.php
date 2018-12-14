@@ -46,7 +46,7 @@ class LeaveScope extends GeneralScope
         }
 
         if(!empty($this->applyTypeId)) {
-            $where[] = sprintf("holiday_id in (select holiday_id from users_holiday_config where apply_type_id = %d)", $this->applyTypeId);
+            $where[] = sprintf("holiday_id in (select holiday_id from sys_attendance_holiday_config where apply_type_id = %d)", $this->applyTypeId);
         }
 
         if(!empty($this->holidayId)) {

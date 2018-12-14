@@ -280,11 +280,22 @@ class DataHelper
         return (int)$day->format('%h').'小时前';
     }
 
+    /**
+     * 通过某个日期获取月头与月尾的范围
+     * @param $date
+     * @return array
+     */
     public static function getThisMonthDays($date)
     {
         return [date('Y-m-01', strtotime($date)), date('Y-m-t', strtotime($date))];
     }
 
+    /**
+     * 转化超过24点的日期
+     * @param $day
+     * @param $time
+     * @return string
+     */
     public static function convertTime($day, $time)
     {
         if ($time > '24:00') {
@@ -297,4 +308,37 @@ class DataHelper
         return $day . ' ' . $time;
     }
 
+    /**
+     *  根据身份证号码获取生日
+     *  @param string $idCard 身份证号码
+     *  @return $birthday
+     */
+    public static function getBirthdayToIdCard($idCard)
+    {
+        if(empty($idCard)) return null;
+        $bir = substr($idCard, 6, 8);
+        $year = (int)substr($bir, 0, 4);
+        $month = substr($bir, 4, 2);
+        $day = substr($bir, 6, 2);
+        return $year . "-" . $month . "-" . $day;
+    }
+
+    /**
+     *  根据身份证号码计算年龄
+     *  @param string $idCard 身份证号码
+     *  @return int $age
+     */
+    public static function getAgeToIdCard($idCard)
+    {
+        if(empty($idCard)) return null;
+        #  获得出生年月日的时间戳
+        $date = strtotime(substr($idCard, 6, 8));
+        #  获得今日的时间戳
+        $today = strtotime('today');
+        #  得到两个日期相差的大体年数
+        $diff = floor(($today-$date)/86400/365);
+        #  strtotime加上这个年数后得到那日的时间戳后与今日的时间戳相比
+        $age = strtotime(substr($idCard, 6, 8).' +'.$diff.'years') > $today ? ($diff+1) : $diff;
+        return $age;
+    }
 }

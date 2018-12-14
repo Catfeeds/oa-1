@@ -16,20 +16,20 @@ class BulletinController extends Controller
     {
         $title = '公告栏';
         $data = Bulletin::orderBy('created_at', 'desc')->paginate(30);
-        return view('admin.sys.bulletin', compact('title', 'data'));
+        return view('sys.bulletin', compact('title', 'data'));
     }
 
     public function edit($id)
     {
         $title = '公告栏编辑';
         $data = Bulletin::find($id);
-        return view('admin.sys.bulletin-edit', compact('title', 'data'));
+        return view('sys.bulletin-edit', compact('title', 'data'));
     }
 
     public function create()
     {
         $title = '公告栏创建';
-        return view('admin.sys.bulletin-edit', compact('title'));
+        return view('sys.bulletin-edit', compact('title'));
     }
 
     public function store(Request $request)
@@ -65,6 +65,6 @@ class BulletinController extends Controller
         $b = Bulletin::find($id);
         $content = $b->content;
         $title = $b->title;
-        return view('admin.sys.show-bulletin', compact('content', 'title'));
+        return view('sys.show-bulletin', compact('content', 'title'));
     }
 }

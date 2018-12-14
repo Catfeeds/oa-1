@@ -28,14 +28,14 @@ class PunchRulesController extends Controller
     {
         $data = PunchRules::paginate();
         $title = trans('app.上下班时间规则列表');
-        return view('admin.sys.punch-rules', compact('title', 'data'));
+        return view('sys.punch-rules', compact('title', 'data'));
     }
 
     public function create()
     {
         $key = 0;
         $title = trans('app.添加上下班时间规则');
-        return view('admin.sys.punch-rules-create', compact('title', 'key'));
+        return view('sys.punch-rules-create', compact('title', 'key'));
     }
 
     public function edit($id)
@@ -67,7 +67,7 @@ class PunchRulesController extends Controller
         $div = $copyDiv[0];
         $title = trans('app.编辑', ['value' => trans('app.上下班时间规则')]);
 
-        return view('admin.sys.punch-rules-edit', compact('title', 'punchRules', 'div'));
+        return view('sys.punch-rules-edit', compact('title', 'punchRules', 'div'));
     }
 
     public function store(Request $request)

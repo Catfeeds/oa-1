@@ -29,7 +29,7 @@ class ApprovalStepController extends Controller
     {
         $data = ApprovalStep::paginate();
         $title = trans('app.审核流程配置列表');
-        return view('admin.sys.approval-step', compact('title', 'data'));
+        return view('sys.approval-step', compact('title', 'data'));
     }
 
     public function create()
@@ -37,7 +37,7 @@ class ApprovalStepController extends Controller
         $roleList = Role::getRoleTextList();
         $userList = User::getUsernameAliasList();
         $title = trans('app.添加审核流程配置');
-        return view('admin.sys.approval-step-create', compact('title', 'roleList', 'userList'));
+        return view('sys.approval-step-create', compact('title', 'roleList', 'userList'));
     }
 
     public function edit($id)
@@ -57,7 +57,7 @@ class ApprovalStepController extends Controller
         $maxStep = end($checkId);
         $dept= Dept::getDeptList();
         $title = trans('app.编辑', ['value' => trans('app.审核流程配置')]);
-        return view('admin.sys.approval-step-edit', compact('title', 'step', 'roleList', 'roleId', 'stepId', 'maxStep', 'checkStep', 'dept'));
+        return view('sys.approval-step-edit', compact('title', 'step', 'roleList', 'roleId', 'stepId', 'maxStep', 'checkStep', 'dept'));
     }
 
     public function store(Request $request)

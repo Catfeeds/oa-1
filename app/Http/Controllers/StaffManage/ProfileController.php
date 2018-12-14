@@ -53,13 +53,13 @@ class ProfileController extends Controller
         $school = School::getSchoolList();
         $roleList = Role::getRoleTextList();
 
-        return view('admin.profile.index', compact('user', 'userExt', 'job', 'dept', 'school', 'roleList'));
+        return view('staff-manage.profile.index', compact('user', 'userExt', 'job', 'dept', 'school', 'roleList'));
     }
 
     public function edit()
     {
         $user = Auth::user();
-        return view('admin.profile.edit', compact('user'));
+        return view('staff-manage.profile.edit', compact('user'));
     }
 
     public function confirmEdit()
@@ -70,7 +70,7 @@ class ProfileController extends Controller
         $job = Job::getJobList();
         $dept = Dept::getDeptList();
         $school = School::getSchoolList();
-        return view('admin.profile.confirm-edit', compact('user', 'userExt', 'job', 'dept', 'school'));
+        return view('staff-manage.profile.confirm-edit', compact('user', 'userExt', 'job', 'dept', 'school'));
     }
 
     public function confirmUpdate(Request $request)
@@ -119,7 +119,7 @@ class ProfileController extends Controller
     public function resetPassword()
     {
         $user = Auth::user();
-        return view('admin.profile.reset-password', compact('user'));
+        return view('staff-manage.profile.reset-password', compact('user'));
     }
 
     public function resetPasswordUpdate(Request $request)

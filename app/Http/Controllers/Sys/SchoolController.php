@@ -27,20 +27,20 @@ class SchoolController extends Controller
         $form['school'] = \Request::get('school');
         $data = School::where('school', 'LIKE', "%{$form['school']}%")->paginate();
         $title = trans('app.学校列表');
-        return view('admin.sys.school', compact('title', 'data', 'form'));
+        return view('sys.school', compact('title', 'data', 'form'));
     }
 
     public function create()
     {
         $title = trans('app.添加学校');
-        return view('admin.sys.school-edit', compact('title'));
+        return view('sys.school-edit', compact('title'));
     }
 
     public function edit($id)
     {
         $school = School::findOrFail($id);
         $title = trans('app.编辑', ['value' => trans('app.学校')]);
-        return view('admin.sys.school-edit', compact('title', 'school'));
+        return view('sys.school-edit', compact('title', 'school'));
     }
 
     public function store(Request $request)

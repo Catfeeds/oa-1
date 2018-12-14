@@ -38,6 +38,20 @@
                         </div>
                     </div>
 
+                    <div class="form-group">
+                        {!! Form::label('username', trans('app.年龄'), ['class' => 'col-sm-4 control-label']) !!}
+                        <div class="col-sm-3">
+                            {!! Form::text('card_id', isset($user->userExt->card_id)  ? \App\Components\Helper\DataHelper::getAgeToIdCard($user->userExt->card_id)  : old('card_id')  ,['class' => 'form-control', 'disabled']) !!}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        {!! Form::label('username', trans('app.出生日期'), ['class' => 'col-sm-4 control-label']) !!}
+                        <div class="col-sm-3">
+                            {!! Form::text('birthday', isset($user->userExt->card_id)  ? \App\Components\Helper\DataHelper::getBirthdayToIdCard($user->userExt->card_id) : old('birthday')  ,['class' => 'form-control', 'disabled']) !!}
+                        </div>
+                    </div>
+
                     <div class="form-group @if (!empty($errors->first('sex'))) has-error @endif">
                         {!! Form::label('sex', trans('app.性别'), ['class' => 'col-sm-4 control-label']) !!}
                         <div class="col-sm-3">
@@ -88,7 +102,7 @@
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
                                 {!! Form::text('entry_time', $user->userExt->entry_time ?? old('entry_time'), [
-                                'class' => 'form-control date_time',
+                                'class' => 'form-control date_time_hi',
                                 'placeholder' => trans('app.请输入', ['value' => trans('app.入职时间')]),
                                 'disabled' => true,
                                 ]) !!}

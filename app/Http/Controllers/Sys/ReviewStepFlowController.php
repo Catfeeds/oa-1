@@ -35,7 +35,7 @@ class ReviewStepFlowController extends Controller
 
         $step = ReviewStepFlowConfig::showReviewUser();
         $title = trans('app.审核流程配置列表');
-        return view('admin.sys.review-step-flow', compact('title', 'data', 'step'));
+        return view('sys.review-step-flow', compact('title', 'data', 'step'));
     }
 
     public function create()
@@ -43,7 +43,7 @@ class ReviewStepFlowController extends Controller
         $roleList = Role::getRoleTextList();
         $userList = User::getUsernameAliasList();
         $title = trans('app.添加审核流程配置');
-        return view('admin.sys.review-step-flow-create', compact('title', 'roleList', 'userList'));
+        return view('sys.review-step-flow-create', compact('title', 'roleList', 'userList'));
     }
 
     public function edit($id)
@@ -54,7 +54,7 @@ class ReviewStepFlowController extends Controller
         $userList = User::getUsernameAliasList();
 
         $title = trans('app.编辑', ['value' => trans('app.审核流程配置')]);
-        return view('admin.sys.review-step-flow-edit', compact('title', 'step', 'roleList', 'userList', 'i'));
+        return view('sys.review-step-flow-edit', compact('title', 'step', 'roleList', 'userList', 'i'));
     }
 
     public function store(Request $request)
@@ -169,10 +169,9 @@ class ReviewStepFlowController extends Controller
         $res = [];
         if(!empty($holiday)) {
             foreach ($holiday as $k => $v) {
-                $res[] = ['id' => $v['holiday_id'], 'text' => $v['holiday']];
+                $res[] = ['id' => $v['holiday_id'], 'text' => $v['show_name']];
             }
         }
-
         return response()->json(['status' => 1, 'data' => $res]);
     }
 

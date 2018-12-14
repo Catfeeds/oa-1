@@ -246,4 +246,15 @@ class HolidayConfig extends Model
 
         return '<a class="btn '. (self::$applyTypeColor[$applyId] ?? '') .' btn-rounded btn-xs">'. ($applyType[$applyId] ?? '数据异常') .'</a>';
     }
+
+    public static function getUserShowHolidayList($applyTypeId = self::LEAVEID)
+    {
+        return self::where(['apply_type_id' => $applyTypeId])
+            ->whereIn('restrict_sex', [\Auth::user()->userExt->sex, UserExt::SEX_NO_RESTRICT])
+            ->where(['is_show' => HolidayConfig::STATUS_ENABLE])
+            ->orderBy('sort', 'asc')
+            ->get(['holiday_id', 'show_name'])
+            ->pluck('show_name', 'holiday_id')
+            ->toArray();
+    }
 }

@@ -25,20 +25,20 @@ class FirmController extends Controller
         $form['firm'] = \Request::get('firm');
         $data = Firm::where('firm', 'LIKE', "%{$form['firm']}%")->paginate();
         $title = trans('staff.公司列表');
-        return view('admin.sys.firm', compact('title', 'data', 'form'));
+        return view('sys.firm', compact('title', 'data', 'form'));
     }
 
     public function create()
     {
         $title = trans('app.添加', ['value' => trans('staff.公司')]);
-        return view('admin.sys.firm-edit', compact('title'));
+        return view('sys.firm-edit', compact('title'));
     }
 
     public function edit($id)
     {
         $firm = Firm::findOrFail($id);
         $title = trans('app.编辑', ['value' => trans('staff.公司配置')]);
-        return view('admin.sys.firm-edit', compact('title', 'firm'));
+        return view('sys.firm-edit', compact('title', 'firm'));
     }
 
     public function store(Request $request)

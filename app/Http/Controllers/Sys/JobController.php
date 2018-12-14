@@ -27,20 +27,20 @@ class JobController extends Controller
         $form['job'] = \Request::get('job');
         $data = Job::where('job', 'LIKE', "%{$form['job']}%")->paginate();
         $title = trans('app.岗位列表');
-        return view('admin.sys.job', compact('title', 'data', 'form'));
+        return view('sys.job', compact('title', 'data', 'form'));
     }
 
     public function create()
     {
         $title = trans('app.添加岗位');
-        return view('admin.sys.job-edit', compact('title'));
+        return view('sys.job-edit', compact('title'));
     }
 
     public function edit($id)
     {
         $job = Job::findOrFail($id);
         $title = trans('app.编辑', ['value' => trans('app.岗位')]);
-        return view('admin.sys.job-edit', compact('title', 'job'));
+        return view('sys.job-edit', compact('title', 'job'));
     }
 
     public function store(Request $request)
